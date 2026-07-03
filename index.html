@@ -7,7 +7,6 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/leaflet-image@0.4.0/leaflet-image.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
@@ -150,7 +149,7 @@ async function rpc(fn,args){ setBusy(true); try{
     const {data,error}=await sb.rpc(fn,args); if(error) throw error; return data;
   }catch(e){ toast('Erro ao carregar: '+(e.message||e),true); return null; } finally{ setBusy(false); } }
 
-const map = L.map('map',{zoomControl:true,attributionControl:false}).setView([-22.905,-43.075],12);
+const map = L.map('map',{zoomControl:true,attributionControl:false,preferCanvas:true}).setView([-22.905,-43.075],12);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',crossOrigin:true}).addTo(map);
 state.layer = L.layerGroup().addTo(map);
 
@@ -475,13 +474,30 @@ async function exportBairros(){ const d=await rpc('ip_por_bairro'); if(!d)return
 async function exportSerie(){ const d=await rpc('ip_serie_metricas'); if(!d)return;
   if(!d.length){ toast('Sem série ainda (o cron grava diariamente)',true); return; }
   baixar(`serie_metricas_${stamp()}.csv`,'\uFEFF'+toCSV(d),'text/csv;charset=utf-8'); toast('Série exportada'); }
-function comMapa(cb){
-  if(!window.leafletImage){ toast('Componente de imagem não carregou',true); return; }
-  setBusy(true);
-  try{ leafletImage(map,(err,canvas)=>{ setBusy(false); if(err){ toast('Falha ao capturar o mapa',true); return; } cb(canvas); }); }
-  catch(e){ setBusy(false); toast('Falha ao capturar o mapa',true); }
+async function capturarMapa(){
+  const c=map.getContainer(), rect=c.getBoundingClientRect();
+  const out=document.createElement('canvas'); out.width=Math.round(rect.width); out.height=Math.round(rect.height);
+  const ctx=out.getContext('2d'); ctx.fillStyle='#0b0f14'; ctx.fillRect(0,0,out.width,out.height);
+  c.querySelectorAll('img.leaflet-tile').forEach(img=>{
+    if(!img.complete || !img.naturalWidth) return;
+    const r=img.getBoundingClientRect();
+    try{ ctx.drawImage(img, r.left-rect.left, r.top-rect.top, r.width, r.height); }catch(e){}
+  });
+  c.querySelectorAll('canvas').forEach(cv=>{
+    const r=cv.getBoundingClientRect();
+    try{ ctx.drawImage(cv, r.left-rect.left, r.top-rect.top, r.width, r.height); }catch(e){}
+  });
+  return out;
 }
-function exportPNG(){ comMapa(canvas=>{ canvas.toBlob(b=>baixar(`mapa_ip_${stamp()}.png`,b,'image/png'),'image/png'); toast('Mapa exportado'); }); }
+async function comMapa(cb){
+  setBusy(true);
+  try{ const canvas=await capturarMapa(); await cb(canvas); }
+  catch(e){ toast('Falha ao capturar o mapa: '+(e.message||e),true); }
+  finally{ setBusy(false); }
+}
+function exportPNG(){ comMapa(canvas=>{ try{
+    canvas.toBlob(b=>{ if(b){ baixar(`mapa_ip_${stamp()}.png`,b,'image/png'); toast('Mapa exportado'); } else toast('Não foi possível gerar o PNG',true); },'image/png');
+  }catch(e){ toast('Mapa protegido por CORS; imagem indisponível',true); } }); }
 async function exportPDF(){
   const jsPDF=(window.jspdf||{}).jsPDF; if(!jsPDF){ toast('Gerador de PDF não carregou',true); return; }
   const [s,porBairro]=await Promise.all([ rpc('ip_estatisticas',{p_bairro:state.bairro||null}), rpc('ip_por_bairro') ]);
