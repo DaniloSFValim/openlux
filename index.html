@@ -21,6 +21,7 @@
   button{cursor:pointer}
   .btn{border:1px solid #24303d;background:#111a24;border-radius:6px;padding:6px 12px;font-size:13px;color:#e5e7eb}
   .btn:hover{border-color:#3b82f6}
+  .btn.on{border-color:#3b82f6;background:#16233a}
   .btn-accent{background:#1d4ed8;border-color:#1d4ed8;color:#fff}
   .btn-accent:hover{background:#2563eb}
   ::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:#24303d;border-radius:4px}
@@ -28,48 +29,47 @@
   table{font-size:12.5px}th,td{padding:6px 8px;text-align:left;border-bottom:1px solid #1a232e}
   th{color:#9ca3af;font-weight:600;position:sticky;top:0;background:#0f151c}
   tr:hover td{background:#111a24}
+  #toast{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:2000;display:none;padding:10px 16px;border-radius:8px;font-size:13px;max-width:80vw}
+  .spin{width:12px;height:12px;border:2px solid #24303d;border-top-color:#3b82f6;border-radius:50%;display:inline-block;animation:sp .7s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
 <div id="map"></div>
 
-<!-- Top bar -->
-<div class="panel" style="position:absolute;top:10px;left:10px;right:10px;z-index:1000;border-radius:10px;display:flex;align-items:center;gap:12px;padding:8px 12px;flex-wrap:wrap">
+<div class="panel" style="position:absolute;top:10px;left:10px;right:10px;z-index:1000;border-radius:10px;display:flex;align-items:center;gap:10px;padding:8px 12px;flex-wrap:wrap">
   <div style="font-weight:700;letter-spacing:.3px">Iluminação Pública · <span style="color:#93c5fd">Niterói</span> <span style="color:#6b7280;font-weight:400">· SECONSER</span></div>
+  <span id="loading" style="display:none"><span class="spin"></span></span>
   <div id="chips" style="display:flex;gap:8px;flex-wrap:wrap;flex:1"></div>
-  <select id="fBairro" style="width:180px"><option value="">Todos os bairros</option></select>
+  <select id="fBairro" style="width:150px"><option value="">Todos os bairros</option></select>
+  <select id="fTipo" style="width:120px"><option value="">Tipo: todos</option></select>
+  <select id="fEstado" style="width:120px"><option value="">Estado: todos</option><option value="led">LED</option><option value="pendente">Pendente</option></select>
+  <select id="fPot" style="width:110px"><option value="">Potência</option><option value="150">≥ 150 W</option><option value="250">≥ 250 W</option><option value="400">≥ 400 W</option></select>
+  <button class="btn" id="btnChoro" title="Colorir bairros por % LED">Coroplético</button>
   <button class="btn" id="btnTabela">Tabela</button>
-  <button class="btn" id="btnStats">Passivo por bairro</button>
+  <button class="btn" id="btnStats">Indicadores</button>
   <button class="btn btn-accent" id="btnNovo" style="display:none">+ Ponto</button>
   <button class="btn" id="btnLogin">Entrar</button>
 </div>
 
-<!-- Legend -->
-<div class="panel" style="position:absolute;bottom:14px;left:10px;z-index:1000;border-radius:10px;padding:8px 10px;font-size:12px">
+<div class="panel" id="legend" style="position:absolute;bottom:14px;left:10px;z-index:1000;border-radius:10px;padding:8px 10px;font-size:12px">
   <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span style="width:10px;height:10px;border-radius:50%;background:#22c55e;display:inline-block"></span> LED</div>
   <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:inline-block"></span> Pendente de troca</div>
   <div style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#6b7280;display:inline-block"></span> Sem lâmpada</div>
   <div id="modeHint" style="color:#6b7280;margin-top:5px"></div>
 </div>
 
-<!-- Detail panel -->
 <div id="detail" class="panel" style="position:absolute;top:64px;right:10px;width:300px;z-index:1000;border-radius:10px;padding:12px;display:none;max-height:calc(100% - 90px);overflow:auto"></div>
+<div id="stats" class="panel" style="position:absolute;top:64px;left:10px;width:360px;z-index:1000;border-radius:10px;padding:12px;display:none;max-height:calc(100% - 90px);overflow:auto"></div>
+<div id="toast"></div>
 
-<!-- Stats (por bairro) -->
-<div id="stats" class="panel" style="position:absolute;top:64px;left:10px;width:340px;z-index:1000;border-radius:10px;padding:12px;display:none;max-height:calc(100% - 90px);overflow:auto"></div>
-
-<!-- Table modal -->
 <div id="tableModal" style="position:absolute;inset:0;z-index:1100;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center">
   <div class="panel" style="width:min(1050px,95vw);height:min(80vh,760px);border-radius:12px;display:flex;flex-direction:column;overflow:hidden">
     <div style="display:flex;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid #1f2a37;flex-wrap:wrap">
       <b>Registro de luminárias</b>
       <input id="tSearch" placeholder="Endereço ou patrimônio…" style="width:220px"/>
       <select id="tBairro" style="width:160px"><option value="">Bairro: todos</option></select>
-      <select id="tStatus" style="width:150px">
-        <option value="">Estado: todos</option>
-        <option value="led">LED</option>
-        <option value="pendente">Pendente</option>
-      </select>
+      <select id="tStatus" style="width:150px"><option value="">Estado: todos</option><option value="led">LED</option><option value="pendente">Pendente</option></select>
       <span id="tCount" style="color:#9ca3af;font-size:12px;margin-left:auto"></span>
       <button class="btn" id="tClose">Fechar</button>
     </div>
@@ -85,7 +85,6 @@
   </div>
 </div>
 
-<!-- Login modal -->
 <div id="loginModal" style="position:absolute;inset:0;z-index:1200;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center">
   <div class="panel" style="width:320px;border-radius:12px;padding:18px">
     <b>Entrar para editar</b>
@@ -106,9 +105,21 @@ const URL_SB = "https://lrnmydrwzxxajylsmoih.supabase.co";
 const ANON = "sb_publishable_w3UmLsmcDtT81S3MDdDJjw_rEWckoVl";
 const sb = window.supabase.createClient(URL_SB, ANON);
 
-const state = { user:null, bairro:"", layer:null, mode:"", tPage:0, tSize:50, addMode:false, bairroLayer:null };
+const state = { user:null, bairro:"", tipo:"", estado:"", pot:"", layer:null, mode:"", tPage:0, tSize:50,
+  addMode:false, bairroLayer:null, choropleth:false, choroLayer:null, choroData:null, current:null, tCache:{} };
 const TIPOS = ["led","vapor_sodio","metalico","vapor_mercurio","fluorescente","sem_lampada","desconhecido"];
 const STATUS = ["led_instalado","pendente_troca","a_verificar"];
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+let busy=0;
+function setBusy(b){ busy+=b?1:-1; document.getElementById('loading').style.display = busy>0?'inline':'none'; }
+function toast(msg,err){ const t=document.getElementById('toast'); t.textContent=msg;
+  t.style.background=err?'#3b1113':'#0d2a1a'; t.style.color=err?'#fca5a5':'#86efac';
+  t.style.border='1px solid '+(err?'#7f1d1d':'#14532d'); t.style.display='block';
+  clearTimeout(t._t); t._t=setTimeout(()=>t.style.display='none',3500); }
+async function rpc(fn,args){ setBusy(true); try{
+    const {data,error}=await sb.rpc(fn,args); if(error) throw error; return data;
+  }catch(e){ toast('Erro ao carregar: '+(e.message||e),true); return null; } finally{ setBusy(false); } }
 
 const map = L.map('map',{zoomControl:true,attributionControl:false}).setView([-22.905,-43.075],12);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd'}).addTo(map);
@@ -117,19 +128,21 @@ state.layer = L.layerGroup().addTo(map);
 const POINT_ZOOM = 16;
 function gridForZoom(z){ return Math.max(0.0015, 0.05/Math.pow(2, z-11)); }
 function colorFor(p){ if(p.modernizado_led) return '#22c55e'; if(p.tipo_lampada==='sem_lampada') return '#6b7280'; return '#f59e0b'; }
-function mix(pct){ // 0..1 amber->green
-  const a=[245,158,11], b=[34,197,94]; return `rgb(${a.map((x,i)=>Math.round(x+(b[i]-x)*pct)).join(',')})`;
-}
+function mix(pct){ const a=[245,158,11], b=[34,197,94]; return `rgb(${a.map((x,i)=>Math.round(x+(b[i]-x)*pct)).join(',')})`; }
+function filtros(){ return { p_bairro: state.bairro||null, p_tipo: state.tipo||null,
+  p_modernizado: state.estado===''?null:(state.estado==='led'), p_pot_min: state.pot?parseInt(state.pot):null }; }
 
 function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
+
 async function _refresh(){
+  if(state.choropleth){ renderChoropleth(); return; }
+  if(state.choroLayer){ map.removeLayer(state.choroLayer); state.choroLayer=null; }
   const b = map.getBounds(), z = map.getZoom();
-  const args = { min_lng:b.getWest(), min_lat:b.getSouth(), max_lng:b.getEast(), max_lat:b.getNorth(), p_bairro: state.bairro||null };
+  const box = { min_lng:b.getWest(), min_lat:b.getSouth(), max_lng:b.getEast(), max_lat:b.getNorth() };
   state.layer.clearLayers();
   if(z >= POINT_ZOOM){
     state.mode="pontos";
-    const { data, error } = await sb.rpc('ip_pontos_bbox', {...args, limite:4000});
-    if(error){ console.error(error); return; }
+    const data = await rpc('ip_pontos_bbox', {...box, limite:4000, ...filtros()});
     (data||[]).forEach(p=>{
       const rad = z>=18?9:(z>=17?7:6);
       L.circleMarker([p.lat,p.lon],{radius:rad,weight:1,color:'#0b0f14',fillColor:colorFor(p),fillOpacity:.95,bubblingMouseEvents:false})
@@ -138,13 +151,12 @@ async function _refresh(){
     document.getElementById('modeHint').textContent = `${(data||[]).length} pontos nesta área`;
   } else {
     state.mode="clusters";
-    const { data, error } = await sb.rpc('ip_clusters_grid', {...args, grid_deg:gridForZoom(z)});
-    if(error){ console.error(error); return; }
+    const data = await rpc('ip_clusters_grid', {...box, grid_deg:gridForZoom(z), ...filtros()});
     (data||[]).forEach(c=>{
       const r = Math.min(30, 8+Math.sqrt(c.n)*1.4), pct=c.led/c.n;
-      const m = L.circleMarker([c.lat,c.lon],{radius:r,weight:1.5,color:'#0b0f14',fillColor:mix(pct),fillOpacity:.82}).addTo(state.layer);
+      L.circleMarker([c.lat,c.lon],{radius:r,weight:1.5,color:'#0b0f14',fillColor:mix(pct),fillOpacity:.82})
+        .on('click',()=>map.setView([c.lat,c.lon], Math.min(POINT_ZOOM, z+2))).addTo(state.layer);
       L.marker([c.lat,c.lon],{interactive:false,icon:L.divIcon({className:'',html:`<div class="cluster-label" style="width:${r*2}px;transform:translate(-50%,-50%)">${c.n}</div>`})}).addTo(state.layer);
-      m.on('click',()=>map.setView([c.lat,c.lon], Math.min(POINT_ZOOM, z+2)));
     });
     document.getElementById('modeHint').textContent = 'Aproxime para ver luminárias individuais';
   }
@@ -152,112 +164,129 @@ async function _refresh(){
 const refresh = debounce(_refresh, 120);
 map.on('moveend', refresh);
 
+// ---------- Coroplético ----------
+async function renderChoropleth(){
+  state.layer.clearLayers();
+  if(!state.choroData){ state.choroData = await rpc('ip_bairros_choropleth', {}); }
+  if(state.choroLayer){ map.removeLayer(state.choroLayer); }
+  if(!state.choroData) return;
+  state.choroLayer = L.geoJSON(state.choroData,{
+    style: f=>{ const p=f.properties.pct_led; return {color:'#0b0f14',weight:1,
+      fillColor: p==null?'#3a3a3a':mix(p/100), fillOpacity:.6}; },
+    onEachFeature:(f,layer)=>{ const pr=f.properties;
+      layer.bindTooltip(`${esc(pr.bairro)} · ${pr.pct_led??0}% LED · ${pr.pendente} pendentes`,{sticky:true});
+      layer.on('click',()=>{ document.getElementById('fBairro').value=pr.bairro; state.bairro=pr.bairro; loadStatsChips(); });
+    }
+  }).addTo(map);
+  document.getElementById('modeHint').textContent = 'Coroplético: cor = % LED do bairro';
+}
+document.getElementById('btnChoro').onclick = ()=>{
+  state.choropleth=!state.choropleth;
+  document.getElementById('btnChoro').classList.toggle('on',state.choropleth);
+  document.getElementById('legend').style.display = state.choropleth?'none':'block';
+  refresh();
+};
+
 // ---------- Realce do bairro ----------
 async function highlightBairro(name){
   if(state.bairroLayer){ map.removeLayer(state.bairroLayer); state.bairroLayer=null; }
   if(!name){ refresh(); return; }
-  const { data } = await sb.rpc('ip_bairro_geojson', { p_bairro:name });
+  const data = await rpc('ip_bairro_geojson', { p_bairro:name });
   if(data){
-    state.bairroLayer = L.geoJSON(data, {style:{color:'#60a5fa',weight:2,fillColor:'#3b82f6',fillOpacity:.14,interactive:false}}).addTo(map);
-    try{ map.fitBounds(state.bairroLayer.getBounds(), {padding:[30,30]}); }catch(e){}
+    state.bairroLayer = L.geoJSON(data,{style:{color:'#60a5fa',weight:2,fillColor:'#3b82f6',fillOpacity:.14,interactive:false}}).addTo(map);
+    try{ map.fitBounds(state.bairroLayer.getBounds(),{padding:[30,30]}); }catch(e){}
   }
   refresh();
 }
 
-// ---------- Detail ----------
-function fld(label,val){ return `<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid #161f29"><span style="color:#9ca3af">${label}</span><span style="text-align:right">${val??'—'}</span></div>`; }
+// ---------- Detalhe ----------
+function fld(label,val){ return `<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid #161f29"><span style="color:#9ca3af">${label}</span><span style="text-align:right">${esc(val)||'—'}</span></div>`; }
 function openDetail(p){
-  state.current = p;
-  const d = document.getElementById('detail'); d.style.display='block';
-  const badge = p.modernizado_led ? `<span class="badge" style="background:#0d3d24;color:#4ade80">LED</span>` : `<span class="badge" style="background:#3d2f0d;color:#fbbf24">Pendente</span>`;
-  const origem = p.fonte_modernizacao==='censo_enel'?'Censo ENEL':p.fonte_modernizacao==='seconser_pos_censo'?'SECONSER (pós-censo)':p.fonte_modernizacao==='campo'?'Campo':'—';
+  state.current=p;
+  const d=document.getElementById('detail'); d.style.display='block';
+  const badge=p.modernizado_led?`<span class="badge" style="background:#0d3d24;color:#4ade80">LED</span>`:`<span class="badge" style="background:#3d2f0d;color:#fbbf24">Pendente</span>`;
+  const origem=p.fonte_modernizacao==='censo_enel'?'Censo ENEL':p.fonte_modernizacao==='seconser_pos_censo'?'SECONSER (pós-censo)':p.fonte_modernizacao==='campo'?'Campo':'—';
   d.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <b style="font-size:13px">${p.numero_patrimonio||'Luminária'}</b> ${badge}
-    </div>
-    ${fld('Endereço', p.endereco)}
-    ${fld('Bairro', p.bairro_nome)}
-    ${fld('Tipo atual', p.tipo_lampada)}
-    ${fld('Potência', p.potencia_w? p.potencia_w+' W':null)}
-    ${fld('Estado', p.status)}
-    ${fld('Origem modernização', origem)}
-    ${fld('Tipo no censo', p.censo_tipo_original)}
-    ${fld('Fonte do ponto', p.fonte)}
+      <b style="font-size:13px">${esc(p.numero_patrimonio)||'Luminária'}</b> ${badge}</div>
+    ${fld('Endereço', p.endereco)}${fld('Bairro', p.bairro_nome)}${fld('Tipo atual', p.tipo_lampada)}
+    ${fld('Potência', p.potencia_w? p.potencia_w+' W':null)}${fld('Estado', p.status)}
+    ${fld('Origem modernização', origem)}${fld('Tipo no censo', p.censo_tipo_original)}${fld('Fonte do ponto', p.fonte)}
     ${p.flag_revisao_censo?`<div style="color:#fbbf24;font-size:11px;margin-top:4px">⚑ marcado para revisão (linha idêntica no censo)</div>`:''}
-    ${p.observacoes?`<div style="color:#9ca3af;font-size:11px;margin-top:6px">${p.observacoes}</div>`:''}
+    ${p.observacoes?`<div style="color:#9ca3af;font-size:11px;margin-top:6px">${esc(p.observacoes)}</div>`:''}
     <div style="margin-top:10px;display:flex;gap:8px">
       ${state.user?`<button class="btn btn-accent" style="flex:1" onclick="window._edit()">Editar</button>`:''}
-      <button class="btn" onclick="document.getElementById('detail').style.display='none'">Fechar</button>
-    </div>`;
+      <button class="btn" onclick="document.getElementById('detail').style.display='none'">Fechar</button></div>`;
 }
 window._edit = function(){
-  const p = state.current; if(!p) return;
-  const d = document.getElementById('detail');
+  const p=state.current; if(!p) return;
+  const d=document.getElementById('detail');
   d.innerHTML = `
-    <b style="font-size:13px">Editar · ${p.numero_patrimonio||''}</b>
+    <b style="font-size:13px">Editar · ${esc(p.numero_patrimonio)}</b>
     <div style="margin-top:8px;display:flex;flex-direction:column;gap:7px">
       <label style="font-size:11px;color:#9ca3af">Tipo<select id="eTipo">${TIPOS.map(t=>`<option ${t===p.tipo_lampada?'selected':''}>${t}</option>`).join('')}</select></label>
       <label style="font-size:11px;color:#9ca3af">Potência (W)<input id="ePot" type="number" value="${p.potencia_w||''}"/></label>
       <label style="font-size:11px;color:#9ca3af">Estado<select id="eStatus">${STATUS.map(s=>`<option ${s===p.status?'selected':''}>${s}</option>`).join('')}</select></label>
       <label style="font-size:12px;display:flex;gap:8px;align-items:center;color:#e5e7eb"><input type="checkbox" id="eMod" ${p.modernizado_led?'checked':''} style="width:auto"/> Modernizado para LED</label>
-      <label style="font-size:11px;color:#9ca3af">Observações<textarea id="eObs" rows="2">${p.observacoes||''}</textarea></label>
-      <div id="eErr" style="color:#f87171;font-size:11px;display:none"></div>
+      <label style="font-size:11px;color:#9ca3af">Observações<textarea id="eObs" rows="2">${esc(p.observacoes)}</textarea></label>
       <div style="display:flex;gap:8px"><button class="btn btn-accent" style="flex:1" id="eSave">Salvar</button><button class="btn" onclick="window._reopen()">Cancelar</button></div>
     </div>`;
   document.getElementById('eSave').onclick = async ()=>{
-    const payload = { p_id:p.id, p_tipo:document.getElementById('eTipo').value,
-      p_potencia: parseInt(document.getElementById('ePot').value)||null,
-      p_status: document.getElementById('eStatus').value,
-      p_modernizado: document.getElementById('eMod').checked,
-      p_obs: document.getElementById('eObs').value||null };
-    const { error } = await sb.rpc('ip_atualizar_ponto', payload);
-    if(error){ const e=document.getElementById('eErr'); e.style.display='block'; e.textContent=error.message; return; }
-    document.getElementById('detail').style.display='none'; refresh(); loadStatsChips();
+    const pot=parseInt(document.getElementById('ePot').value);
+    if(!isNaN(pot) && (pot<0||pot>2000)){ toast('Potência fora da faixa (0–2000 W)',true); return; }
+    setBusy(true);
+    const {error}=await sb.rpc('ip_atualizar_ponto',{ p_id:p.id, p_tipo:document.getElementById('eTipo').value,
+      p_potencia:isNaN(pot)?null:pot, p_status:document.getElementById('eStatus').value,
+      p_modernizado:document.getElementById('eMod').checked, p_obs:document.getElementById('eObs').value||null });
+    setBusy(false);
+    if(error){ toast('Falha ao salvar: '+error.message,true); return; }
+    toast('Ponto atualizado'); document.getElementById('detail').style.display='none';
+    state.choroData=null; refresh(); loadStatsChips();
   };
 };
 window._reopen = ()=>openDetail(state.current);
 
-// ---------- Add point ----------
+// ---------- Novo ponto ----------
 document.getElementById('btnNovo').onclick = ()=>{
-  state.addMode = !state.addMode;
-  document.getElementById('btnNovo').textContent = state.addMode ? '⨯ Cancelar' : '+ Ponto';
-  map.getContainer().style.cursor = state.addMode ? 'crosshair' : '';
+  state.addMode=!state.addMode;
+  document.getElementById('btnNovo').textContent = state.addMode?'⨯ Cancelar':'+ Ponto';
+  map.getContainer().style.cursor = state.addMode?'crosshair':'';
+  if(state.addMode) toast('Clique no mapa para posicionar o novo ponto');
 };
 map.on('click', e=>{
   if(!state.addMode || !state.user) return;
-  const d = document.getElementById('detail'); d.style.display='block';
+  const d=document.getElementById('detail'); d.style.display='block';
   d.innerHTML = `
     <b style="font-size:13px">Novo ponto</b>
     <div style="font-size:11px;color:#9ca3af;margin:4px 0">${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}</div>
     <div style="display:flex;flex-direction:column;gap:7px">
-      <input id="nPatr" placeholder="Nº patrimônio"/>
-      <input id="nEnd" placeholder="Endereço"/>
+      <input id="nPatr" placeholder="Nº patrimônio"/><input id="nEnd" placeholder="Endereço"/>
       <select id="nTipo">${TIPOS.map(t=>`<option>${t}</option>`).join('')}</select>
       <input id="nPot" type="number" placeholder="Potência (W)"/>
       <select id="nStatus">${STATUS.map(s=>`<option>${s}</option>`).join('')}</select>
       <label style="font-size:12px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="nMod" style="width:auto"/> LED</label>
-      <div id="nErr" style="color:#f87171;font-size:11px;display:none"></div>
-      <button class="btn btn-accent" id="nSave">Cadastrar</button>
-    </div>`;
+      <button class="btn btn-accent" id="nSave">Cadastrar</button></div>`;
   document.getElementById('nSave').onclick = async ()=>{
-    const { error } = await sb.rpc('ip_inserir_ponto', {
-      p_lat:e.latlng.lat, p_lng:e.latlng.lng, p_tipo:document.getElementById('nTipo').value,
-      p_potencia: parseInt(document.getElementById('nPot').value)||null,
-      p_status: document.getElementById('nStatus').value, p_modernizado: document.getElementById('nMod').checked,
-      p_endereco: document.getElementById('nEnd').value||null, p_patrimonio: document.getElementById('nPatr').value||null,
-      p_obs:'cadastro manual' });
-    if(error){ const el=document.getElementById('nErr'); el.style.display='block'; el.textContent=error.message; return; }
-    d.style.display='none'; state.addMode=false; document.getElementById('btnNovo').textContent='+ Ponto';
-    map.getContainer().style.cursor=''; refresh(); loadStatsChips();
+    const pot=parseInt(document.getElementById('nPot').value);
+    if(!isNaN(pot) && (pot<0||pot>2000)){ toast('Potência fora da faixa (0–2000 W)',true); return; }
+    setBusy(true);
+    const {error}=await sb.rpc('ip_inserir_ponto',{ p_lat:e.latlng.lat, p_lng:e.latlng.lng,
+      p_tipo:document.getElementById('nTipo').value, p_potencia:isNaN(pot)?null:pot,
+      p_status:document.getElementById('nStatus').value, p_modernizado:document.getElementById('nMod').checked,
+      p_endereco:document.getElementById('nEnd').value||null, p_patrimonio:document.getElementById('nPatr').value||null, p_obs:'cadastro manual' });
+    setBusy(false);
+    if(error){ toast('Falha ao cadastrar: '+error.message,true); return; }
+    toast('Ponto cadastrado'); d.style.display='none'; state.addMode=false;
+    document.getElementById('btnNovo').textContent='+ Ponto'; map.getContainer().style.cursor='';
+    state.choroData=null; refresh(); loadStatsChips();
   };
 });
 
-// ---------- Stats chips + bairro panel ----------
+// ---------- Estatísticas ----------
 async function loadStatsChips(){
-  const { data } = await sb.rpc('ip_estatisticas', { p_bairro: state.bairro||null });
+  const data = await rpc('ip_estatisticas',{ p_bairro: state.bairro||null });
   if(!data) return;
-  const c = document.getElementById('chips');
-  c.innerHTML = [
+  document.getElementById('chips').innerHTML = [
     ['Luminárias', data.total.toLocaleString('pt-BR')],
     ['LED', `${data.led.toLocaleString('pt-BR')} · ${data.pct_led}%`],
     ['— censo', data.led_censo.toLocaleString('pt-BR')],
@@ -266,32 +295,49 @@ async function loadStatsChips(){
     ['Pot. LED', `${data.potencia_kw} kW`],
   ].map(([k,v])=>`<span class="chip" style="border-radius:8px;padding:4px 9px;font-size:12px"><span style="color:#9ca3af">${k}</span> <b>${v}</b></span>`).join('');
 }
-async function loadBairroPanel(){
-  const { data } = await sb.rpc('ip_por_bairro');
-  const s = document.getElementById('stats');
-  const rows = (data||[]).map(b=>`<tr style="cursor:pointer" onclick="window._zoomBairro('${b.bairro_nome.replace(/'/g,"\\'")}')">
-    <td>${b.bairro_nome}</td><td style="text-align:right">${b.total}</td>
-    <td style="text-align:right;color:#4ade80">${b.led}</td>
-    <td style="text-align:right;color:#fbbf24">${b.pendente}</td>
+function sparkline(serie){
+  if(!serie||serie.length<1) return '';
+  const w=320,h=54,pad=6, xs=serie.map((_,i)=>i), ys=serie.map(d=>Number(d.pct_led)||0);
+  const maxi=Math.max(1,xs.length-1), mn=Math.min(...ys,0), mx=Math.max(...ys,100);
+  const px=i=>pad+(w-2*pad)*(maxi?i/maxi:0.5), py=v=>h-pad-(h-2*pad)*((v-mn)/((mx-mn)||1));
+  const pts=serie.map((d,i)=>`${px(i)},${py(ys[i])}`).join(' ');
+  const dots=serie.map((d,i)=>`<circle cx="${px(i)}" cy="${py(ys[i])}" r="2.5" fill="#22c55e"/>`).join('');
+  const last=serie[serie.length-1];
+  return `<div style="margin-top:4px"><svg width="${w}" height="${h}" style="max-width:100%">
+    <polyline points="${pts}" fill="none" stroke="#22c55e" stroke-width="2"/>${dots}</svg>
+    <div style="font-size:11px;color:#9ca3af">Evolução do % LED — ${serie.length} ponto(s), atual ${last.pct_led}%</div></div>`;
+}
+async function loadStatsPanel(){
+  const [porBairro, serie] = await Promise.all([ rpc('ip_por_bairro'), rpc('ip_serie_metricas') ]);
+  const rows=(porBairro||[]).map(b=>`<tr style="cursor:pointer" onclick="window._zoomBairro('${esc(b.bairro_nome).replace(/'/g,"\\'")}')">
+    <td>${esc(b.bairro_nome)}</td><td style="text-align:right">${b.total}</td>
+    <td style="text-align:right;color:#4ade80">${b.led}</td><td style="text-align:right;color:#fbbf24">${b.pendente}</td>
     <td style="text-align:right">${b.pct_led}%</td></tr>`).join('');
-  s.innerHTML = `<div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>Passivo de troca por bairro</b><button class="btn" onclick="document.getElementById('stats').style.display='none'">✕</button></div>
+  document.getElementById('stats').innerHTML = `
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px"><b>Indicadores</b><button class="btn" onclick="document.getElementById('stats').style.display='none'">✕</button></div>
+    ${sparkline(serie)}
+    <div style="margin:8px 0 4px;color:#9ca3af;font-size:12px">Passivo de troca por bairro</div>
     <table style="width:100%;border-collapse:collapse"><thead><tr><th>Bairro</th><th style="text-align:right">Total</th><th style="text-align:right">LED</th><th style="text-align:right">Pend.</th><th style="text-align:right">%</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 window._zoomBairro = (b)=>{ document.getElementById('fBairro').value=b; state.bairro=b; loadStatsChips(); highlightBairro(b); };
 
-// bairro filter dropdown
 async function loadBairroOptions(){
-  const { data } = await sb.rpc('ip_por_bairro');
-  const names = (data||[]).map(b=>b.bairro_nome).sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  const data = await rpc('ip_por_bairro');
+  const names=(data||[]).map(b=>b.bairro_nome).sort((a,b)=>a.localeCompare(b,'pt-BR'));
   const f=document.getElementById('fBairro'), t=document.getElementById('tBairro');
-  names.forEach(n=>{ f.insertAdjacentHTML('beforeend',`<option>${n}</option>`); t.insertAdjacentHTML('beforeend',`<option>${n}</option>`); });
+  names.forEach(n=>{ f.insertAdjacentHTML('beforeend',`<option>${esc(n)}</option>`); t.insertAdjacentHTML('beforeend',`<option>${esc(n)}</option>`); });
+  TIPOS.forEach(tp=>document.getElementById('fTipo').insertAdjacentHTML('beforeend',`<option value="${tp}">${tp}</option>`));
 }
 document.getElementById('fBairro').onchange = e=>{ state.bairro=e.target.value; loadStatsChips(); highlightBairro(e.target.value); };
-document.getElementById('btnStats').onclick = ()=>{ const s=document.getElementById('stats'); if(s.style.display==='block'){s.style.display='none';} else {s.style.display='block'; loadBairroPanel();} };
+document.getElementById('fTipo').onchange = e=>{ state.tipo=e.target.value; state.choroData=null; refresh(); };
+document.getElementById('fEstado').onchange = e=>{ state.estado=e.target.value; refresh(); };
+document.getElementById('fPot').onchange = e=>{ state.pot=e.target.value; refresh(); };
+document.getElementById('btnStats').onclick = ()=>{ const s=document.getElementById('stats'); if(s.style.display==='block'){s.style.display='none';} else {s.style.display='block'; loadStatsPanel();} };
 
-// ---------- Table ----------
+// ---------- Tabela ----------
 async function loadTable(){
-  let q = sb.from('pontos_luminaria').select('id,numero_patrimonio,endereco,bairro_nome,tipo_lampada,potencia_w,modernizado_led,fonte_modernizacao,status,observacoes',{count:'exact'});
+  setBusy(true);
+  let q=sb.from('pontos_luminaria').select('id,numero_patrimonio,endereco,bairro_nome,tipo_lampada,potencia_w,modernizado_led,fonte_modernizacao,status,observacoes',{count:'exact'});
   const s=document.getElementById('tSearch').value.trim();
   const bb=document.getElementById('tBairro').value, st=document.getElementById('tStatus').value;
   if(s) q=q.or(`endereco.ilike.%${s}%,numero_patrimonio.ilike.%${s}%`);
@@ -299,45 +345,40 @@ async function loadTable(){
   if(st==='led') q=q.eq('modernizado_led',true);
   if(st==='pendente') q=q.eq('modernizado_led',false);
   const from=state.tPage*state.tSize;
-  q=q.order('bairro_nome').range(from, from+state.tSize-1);
-  const { data, count, error } = await q;
-  if(error){ console.error(error); return; }
-  document.getElementById('tCount').textContent = `${(count||0).toLocaleString('pt-BR')} registros`;
-  document.getElementById('tPage').textContent = `Página ${state.tPage+1} de ${Math.max(1,Math.ceil((count||0)/state.tSize))}`;
-  state.tCache = {};
-  (data||[]).forEach(p=>state.tCache[p.id]=p);
-  document.getElementById('tBody').innerHTML = (data||[]).map(p=>{
-    const origem = p.fonte_modernizacao==='censo_enel'?'censo':p.fonte_modernizacao==='seconser_pos_censo'?'SECONSER':p.fonte_modernizacao==='campo'?'campo':'—';
-    const est = p.modernizado_led?`<span class="badge" style="background:#0d3d24;color:#4ade80">LED</span>`:`<span class="badge" style="background:#3d2f0d;color:#fbbf24">Pend.</span>`;
-    return `<tr><td>${p.numero_patrimonio||'—'}</td><td>${p.endereco||'—'}</td><td>${p.bairro_nome||'—'}</td><td>${p.tipo_lampada}</td><td>${p.potencia_w||'—'}</td><td>${est}</td><td style="color:#9ca3af">${origem}</td>
+  const {data,count,error}=await q.order('bairro_nome').range(from,from+state.tSize-1);
+  setBusy(false);
+  if(error){ toast('Erro na tabela: '+error.message,true); return; }
+  document.getElementById('tCount').textContent=`${(count||0).toLocaleString('pt-BR')} registros`;
+  document.getElementById('tPage').textContent=`Página ${state.tPage+1} de ${Math.max(1,Math.ceil((count||0)/state.tSize))}`;
+  state.tCache={}; (data||[]).forEach(p=>state.tCache[p.id]=p);
+  document.getElementById('tBody').innerHTML=(data||[]).map(p=>{
+    const origem=p.fonte_modernizacao==='censo_enel'?'censo':p.fonte_modernizacao==='seconser_pos_censo'?'SECONSER':p.fonte_modernizacao==='campo'?'campo':'—';
+    const est=p.modernizado_led?`<span class="badge" style="background:#0d3d24;color:#4ade80">LED</span>`:`<span class="badge" style="background:#3d2f0d;color:#fbbf24">Pend.</span>`;
+    return `<tr><td>${esc(p.numero_patrimonio)||'—'}</td><td>${esc(p.endereco)||'—'}</td><td>${esc(p.bairro_nome)||'—'}</td><td>${p.tipo_lampada}</td><td>${p.potencia_w||'—'}</td><td>${est}</td><td style="color:#9ca3af">${origem}</td>
       <td>${state.user?`<button class="btn" style="padding:2px 8px" onclick="window._editId('${p.id}')">editar</button>`:''}</td></tr>`;
   }).join('');
 }
-window._editId = (id)=>{ const p=state.tCache[id]; if(!p) return; state.current=p; document.getElementById('tableModal').style.display='none'; document.getElementById('detail').style.display='block'; window._edit(); };
-document.getElementById('btnTabela').onclick = ()=>{ state.tPage=0; document.getElementById('tableModal').style.display='flex'; loadTable(); };
-document.getElementById('tClose').onclick = ()=>document.getElementById('tableModal').style.display='none';
-document.getElementById('tPrev').onclick = ()=>{ if(state.tPage>0){state.tPage--;loadTable();} };
-document.getElementById('tNext').onclick = ()=>{ state.tPage++; loadTable(); };
+window._editId=(id)=>{ const p=state.tCache[id]; if(!p) return; state.current=p; document.getElementById('tableModal').style.display='none'; document.getElementById('detail').style.display='block'; window._edit(); };
+document.getElementById('btnTabela').onclick=()=>{ state.tPage=0; document.getElementById('tableModal').style.display='flex'; loadTable(); };
+document.getElementById('tClose').onclick=()=>document.getElementById('tableModal').style.display='none';
+document.getElementById('tPrev').onclick=()=>{ if(state.tPage>0){state.tPage--;loadTable();} };
+document.getElementById('tNext').onclick=()=>{ state.tPage++; loadTable(); };
 ['tSearch','tBairro','tStatus'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{state.tPage=0;loadTable();}));
 
 // ---------- Auth ----------
-function setUser(u){
-  state.user=u;
-  document.getElementById('btnLogin').textContent = u ? 'Sair' : 'Entrar';
-  document.getElementById('btnNovo').style.display = u ? 'inline-block' : 'none';
-}
-document.getElementById('btnLogin').onclick = async ()=>{
-  if(state.user){ await sb.auth.signOut(); setUser(null); return; }
-  document.getElementById('loginModal').style.display='flex';
-};
-document.getElementById('liCancel').onclick = ()=>document.getElementById('loginModal').style.display='none';
-document.getElementById('liSubmit').onclick = async ()=>{
+function setUser(u){ state.user=u;
+  document.getElementById('btnLogin').textContent=u?'Sair':'Entrar';
+  document.getElementById('btnNovo').style.display=u?'inline-block':'none'; }
+document.getElementById('btnLogin').onclick=async ()=>{
+  if(state.user){ await sb.auth.signOut(); setUser(null); toast('Sessão encerrada'); return; }
+  document.getElementById('loginModal').style.display='flex'; };
+document.getElementById('liCancel').onclick=()=>document.getElementById('loginModal').style.display='none';
+document.getElementById('liSubmit').onclick=async ()=>{
   const email=document.getElementById('liEmail').value, password=document.getElementById('liPass').value;
-  const { data, error } = await sb.auth.signInWithPassword({email,password});
+  const {data,error}=await sb.auth.signInWithPassword({email,password});
   const err=document.getElementById('liErr');
   if(error){ err.style.display='block'; err.textContent='Falha no login: '+error.message; return; }
-  err.style.display='none'; document.getElementById('loginModal').style.display='none'; setUser(data.user);
-};
+  err.style.display='none'; document.getElementById('loginModal').style.display='none'; setUser(data.user); toast('Bem-vindo, '+email); };
 sb.auth.getSession().then(({data})=>setUser(data.session?.user||null));
 
 // ---------- init ----------
