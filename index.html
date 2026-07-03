@@ -7,6 +7,9 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet-image@0.4.0/leaflet-image.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
   html,body,#map{height:100%;margin:0}
@@ -55,6 +58,18 @@
       <label style="font-size:11px;color:#9ca3af">Estado<select id="fEstado"><option value="">Todos</option><option value="led">LED</option><option value="pendente">Pendente</option></select></label>
       <label style="font-size:11px;color:#9ca3af">Potência mínima<select id="fPot"><option value="">Qualquer</option><option value="150">≥ 150 W</option><option value="250">≥ 250 W</option><option value="400">≥ 400 W</option></select></label>
       <button class="btn" id="fLimpar">Limpar filtros</button>
+    </div>
+  </div>
+  <div style="position:relative">
+    <button class="btn" id="btnExport">Exportar ▾</button>
+    <div id="exportPop" class="panel" style="position:absolute;top:40px;right:0;width:220px;border-radius:10px;padding:8px;display:none;flex-direction:column;gap:6px;z-index:1001">
+      <div style="font-size:11px;color:#6b7280;padding:0 2px">Conforme filtros ativos</div>
+      <button class="btn" data-exp="csv">Dados (CSV)</button>
+      <button class="btn" data-exp="geojson">Dados (GeoJSON · GIS)</button>
+      <button class="btn" data-exp="bairros">Passivo por bairro (CSV)</button>
+      <button class="btn" data-exp="serie">Série de métricas (CSV)</button>
+      <button class="btn" data-exp="png">Mapa atual (PNG)</button>
+      <button class="btn" data-exp="pdf">Relatório (PDF)</button>
     </div>
   </div>
   <div style="display:flex;gap:6px">
@@ -136,7 +151,7 @@ async function rpc(fn,args){ setBusy(true); try{
   }catch(e){ toast('Erro ao carregar: '+(e.message||e),true); return null; } finally{ setBusy(false); } }
 
 const map = L.map('map',{zoomControl:true,attributionControl:false}).setView([-22.905,-43.075],12);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd'}).addTo(map);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',crossOrigin:true}).addTo(map);
 state.layer = L.layerGroup().addTo(map);
 
 const POINT_ZOOM = 16;
@@ -351,8 +366,12 @@ function updateFCount(){
 }
 document.getElementById('btnFiltros').onclick = (e)=>{ e.stopPropagation();
   const p=document.getElementById('filtrosPop'); p.style.display = p.style.display==='flex'?'none':'flex'; };
-document.addEventListener('click', e=>{ const p=document.getElementById('filtrosPop');
-  if(p.style.display==='flex' && !p.contains(e.target) && e.target.id!=='btnFiltros') p.style.display='none'; });
+document.addEventListener('click', e=>{
+  [['filtrosPop','btnFiltros'],['exportPop','btnExport']].forEach(([pid,bid])=>{
+    const p=document.getElementById(pid);
+    if(p && p.style.display==='flex' && !p.contains(e.target) && e.target.id!==bid) p.style.display='none';
+  });
+});
 document.getElementById('fLimpar').onclick = ()=>{
   state.bairro=state.tipo=state.estado=state.pot='';
   ['fBairro','fTipo','fEstado','fPot'].forEach(id=>document.getElementById(id).value='');
@@ -411,6 +430,83 @@ document.getElementById('liSubmit').onclick=async ()=>{
   if(error){ err.style.display='block'; err.textContent='Falha no login: '+error.message; return; }
   err.style.display='none'; document.getElementById('loginModal').style.display='none'; setUser(data.user); toast('Bem-vindo, '+email); };
 sb.auth.getSession().then(({data})=>setUser(data.session?.user||null));
+
+// ---------- Exportação ----------
+function baixar(nome, conteudo, mime){
+  const blob = conteudo instanceof Blob ? conteudo : new Blob([conteudo],{type:mime||'text/plain;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=nome;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+}
+function toCSV(rows){
+  if(!rows||!rows.length) return '';
+  const cols=Object.keys(rows[0]);
+  const cell=v=>{ if(v==null)return''; v=String(v); return /[";\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
+  return cols.join(';')+'\n'+rows.map(r=>cols.map(c=>cell(r[c])).join(';')).join('\n');
+}
+function stamp(){ return new Date().toISOString().slice(0,10).replace(/-/g,''); }
+async function fetchFiltrado(){
+  setBusy(true); let rows=[], from=0; const page=1000;
+  try{
+    while(true){
+      let q=sb.from('v_parque_export').select('*').order('id').range(from,from+page-1);
+      if(state.bairro) q=q.eq('bairro_nome',state.bairro);
+      if(state.tipo) q=q.eq('tipo_lampada',state.tipo);
+      if(state.estado==='led') q=q.eq('modernizado_led',true);
+      if(state.estado==='pendente') q=q.eq('modernizado_led',false);
+      if(state.pot) q=q.gte('potencia_w',parseInt(state.pot));
+      const {data,error}=await q; if(error) throw error;
+      rows=rows.concat(data||[]); if(!data||data.length<page) break; from+=page;
+    }
+    return rows;
+  }catch(e){ toast('Erro no export: '+e.message,true); return null; } finally{ setBusy(false); }
+}
+async function exportData(fmt){
+  const rows=await fetchFiltrado(); if(!rows) return;
+  if(!rows.length){ toast('Nenhum ponto no filtro atual',true); return; }
+  const suf=state.bairro?('_'+state.bairro.replace(/\s+/g,'')):'';
+  if(fmt==='csv') baixar(`parque${suf}_${stamp()}.csv`, '\uFEFF'+toCSV(rows),'text/csv;charset=utf-8');
+  else { const fc={type:'FeatureCollection',features:rows.filter(r=>r.lat!=null).map(r=>{
+      const {lat,lon,...p}=r; return {type:'Feature',geometry:{type:'Point',coordinates:[lon,lat]},properties:p}; })};
+    baixar(`parque${suf}_${stamp()}.geojson`, JSON.stringify(fc),'application/geo+json'); }
+  toast(`Exportado: ${rows.length.toLocaleString('pt-BR')} pontos`);
+}
+async function exportBairros(){ const d=await rpc('ip_por_bairro'); if(!d)return;
+  baixar(`passivo_por_bairro_${stamp()}.csv`,'\uFEFF'+toCSV(d),'text/csv;charset=utf-8'); toast('Passivo por bairro exportado'); }
+async function exportSerie(){ const d=await rpc('ip_serie_metricas'); if(!d)return;
+  if(!d.length){ toast('Sem série ainda (o cron grava diariamente)',true); return; }
+  baixar(`serie_metricas_${stamp()}.csv`,'\uFEFF'+toCSV(d),'text/csv;charset=utf-8'); toast('Série exportada'); }
+function comMapa(cb){
+  if(!window.leafletImage){ toast('Componente de imagem não carregou',true); return; }
+  setBusy(true);
+  try{ leafletImage(map,(err,canvas)=>{ setBusy(false); if(err){ toast('Falha ao capturar o mapa',true); return; } cb(canvas); }); }
+  catch(e){ setBusy(false); toast('Falha ao capturar o mapa',true); }
+}
+function exportPNG(){ comMapa(canvas=>{ canvas.toBlob(b=>baixar(`mapa_ip_${stamp()}.png`,b,'image/png'),'image/png'); toast('Mapa exportado'); }); }
+async function exportPDF(){
+  const jsPDF=(window.jspdf||{}).jsPDF; if(!jsPDF){ toast('Gerador de PDF não carregou',true); return; }
+  const [s,porBairro]=await Promise.all([ rpc('ip_estatisticas',{p_bairro:state.bairro||null}), rpc('ip_por_bairro') ]);
+  comMapa(canvas=>{ try{
+    const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+    doc.setFontSize(14); doc.text('Iluminação Pública — Niterói / SECONSER',14,14);
+    doc.setFontSize(9); doc.setTextColor(120);
+    doc.text(`Emitido em ${new Date().toLocaleString('pt-BR')} · Escopo: ${state.bairro||'Niterói'}`,14,20);
+    doc.setTextColor(20); doc.setFontSize(10);
+    doc.text(`Luminárias ${s.total}   |   LED ${s.led} (${s.pct_led}%)   |   Pendentes ${s.pendente}   |   Pot. LED ${s.potencia_kw} kW`,14,27);
+    try{ const img=canvas.toDataURL('image/png'); const w=140,h=Math.min(w*canvas.height/canvas.width,150);
+      doc.addImage(img,'PNG',14,32,w,h); }catch(e){}
+    if(doc.autoTable) doc.autoTable({ startY:32, margin:{left:160}, tableWidth:122,
+      head:[['Bairro','Total','LED','Pend','%']],
+      body:(porBairro||[]).map(b=>[b.bairro_nome,b.total,b.led,b.pendente,b.pct_led+'%']),
+      styles:{fontSize:6.5,cellPadding:1}, headStyles:{fillColor:[29,78,216]} });
+    doc.save(`relatorio_ip_${stamp()}.pdf`); toast('Relatório PDF gerado');
+  }catch(e){ toast('Falha no PDF: '+e.message,true); } });
+}
+document.getElementById('btnExport').onclick=(e)=>{ e.stopPropagation();
+  const p=document.getElementById('exportPop'); p.style.display=p.style.display==='flex'?'none':'flex'; };
+document.getElementById('exportPop').addEventListener('click',e=>{ const b=e.target.closest('[data-exp]'); if(!b)return;
+  document.getElementById('exportPop').style.display='none';
+  ({csv:()=>exportData('csv'),geojson:()=>exportData('geojson'),bairros:exportBairros,
+    serie:exportSerie,png:exportPNG,pdf:exportPDF})[b.dataset.exp]?.(); });
 
 // ---------- init ----------
 loadBairroOptions(); loadStatsChips(); refresh();
