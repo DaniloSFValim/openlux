@@ -37,19 +37,33 @@
 <body>
 <div id="map"></div>
 
-<div class="panel" style="position:absolute;top:10px;left:10px;right:10px;z-index:1000;border-radius:10px;display:flex;align-items:center;gap:10px;padding:8px 12px;flex-wrap:wrap">
-  <div style="font-weight:700;letter-spacing:.3px">Iluminação Pública · <span style="color:#93c5fd">Niterói</span> <span style="color:#6b7280;font-weight:400">· SECONSER</span></div>
+<div class="panel" style="position:absolute;top:10px;left:10px;right:10px;z-index:1000;border-radius:12px;display:flex;align-items:center;gap:14px;padding:7px 14px">
+  <div style="min-width:0">
+    <div style="font-weight:700;font-size:14px;line-height:1.1;white-space:nowrap">Iluminação Pública <span style="color:#6b7280;font-weight:400">· Niterói · SECONSER</span></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+      <div style="width:120px;height:6px;background:#1a2431;border-radius:3px;overflow:hidden"><div id="pctBar" style="height:100%;width:0;background:linear-gradient(90deg,#f59e0b,#22c55e);transition:width .5s"></div></div>
+      <span id="kpi" style="font-size:12px;color:#cbd5e1;white-space:nowrap">—</span>
+    </div>
+  </div>
   <span id="loading" style="display:none"><span class="spin"></span></span>
-  <div id="chips" style="display:flex;gap:8px;flex-wrap:wrap;flex:1"></div>
-  <select id="fBairro" style="width:150px"><option value="">Todos os bairros</option></select>
-  <select id="fTipo" style="width:120px"><option value="">Tipo: todos</option></select>
-  <select id="fEstado" style="width:120px"><option value="">Estado: todos</option><option value="led">LED</option><option value="pendente">Pendente</option></select>
-  <select id="fPot" style="width:110px"><option value="">Potência</option><option value="150">≥ 150 W</option><option value="250">≥ 250 W</option><option value="400">≥ 400 W</option></select>
-  <button class="btn" id="btnChoro" title="Colorir bairros por % LED">Coroplético</button>
-  <button class="btn" id="btnTabela">Tabela</button>
-  <button class="btn" id="btnStats">Indicadores</button>
-  <button class="btn btn-accent" id="btnNovo" style="display:none">+ Ponto</button>
-  <button class="btn" id="btnLogin">Entrar</button>
+  <div style="flex:1"></div>
+  <div style="position:relative">
+    <button class="btn" id="btnFiltros">Filtros<span id="fCount" style="display:none;margin-left:6px;background:#1d4ed8;color:#fff;border-radius:999px;padding:0 7px;font-size:11px"></span></button>
+    <div id="filtrosPop" class="panel" style="position:absolute;top:40px;right:0;width:230px;border-radius:10px;padding:10px;display:none;flex-direction:column;gap:8px;z-index:1001">
+      <label style="font-size:11px;color:#9ca3af">Bairro<select id="fBairro"><option value="">Todos</option></select></label>
+      <label style="font-size:11px;color:#9ca3af">Tipo<select id="fTipo"><option value="">Todos</option></select></label>
+      <label style="font-size:11px;color:#9ca3af">Estado<select id="fEstado"><option value="">Todos</option><option value="led">LED</option><option value="pendente">Pendente</option></select></label>
+      <label style="font-size:11px;color:#9ca3af">Potência mínima<select id="fPot"><option value="">Qualquer</option><option value="150">≥ 150 W</option><option value="250">≥ 250 W</option><option value="400">≥ 400 W</option></select></label>
+      <button class="btn" id="fLimpar">Limpar filtros</button>
+    </div>
+  </div>
+  <div style="display:flex;gap:6px">
+    <button class="btn" id="btnChoro" title="Colorir bairros por % LED">Coroplético</button>
+    <button class="btn" id="btnTabela">Tabela</button>
+    <button class="btn" id="btnStats">Indicadores</button>
+    <button class="btn btn-accent" id="btnNovo" style="display:none">+ Ponto</button>
+    <button class="btn" id="btnLogin">Entrar</button>
+  </div>
 </div>
 
 <div class="panel" id="legend" style="position:absolute;bottom:14px;left:10px;z-index:1000;border-radius:10px;padding:8px 10px;font-size:12px">
@@ -286,14 +300,10 @@ map.on('click', e=>{
 async function loadStatsChips(){
   const data = await rpc('ip_estatisticas',{ p_bairro: state.bairro||null });
   if(!data) return;
-  document.getElementById('chips').innerHTML = [
-    ['Luminárias', data.total.toLocaleString('pt-BR')],
-    ['LED', `${data.led.toLocaleString('pt-BR')} · ${data.pct_led}%`],
-    ['— censo', data.led_censo.toLocaleString('pt-BR')],
-    ['— SECONSER', data.led_seconser.toLocaleString('pt-BR')],
-    ['Pendentes', data.pendente.toLocaleString('pt-BR')],
-    ['Pot. LED', `${data.potencia_kw} kW`],
-  ].map(([k,v])=>`<span class="chip" style="border-radius:8px;padding:4px 9px;font-size:12px"><span style="color:#9ca3af">${k}</span> <b>${v}</b></span>`).join('');
+  state.stats=data;
+  const scope = state.bairro? esc(state.bairro) : 'Niterói';
+  document.getElementById('kpi').innerHTML = `<b>${data.total.toLocaleString('pt-BR')}</b> lum · <b style="color:#4ade80">${data.pct_led}%</b> LED · <b style="color:#fbbf24">${data.pendente.toLocaleString('pt-BR')}</b> pend · <span style="color:#9ca3af">${scope}</span>`;
+  document.getElementById('pctBar').style.width = (data.pct_led||0)+'%';
 }
 function sparkline(serie){
   if(!serie||serie.length<1) return '';
@@ -309,14 +319,20 @@ function sparkline(serie){
 }
 async function loadStatsPanel(){
   const [porBairro, serie] = await Promise.all([ rpc('ip_por_bairro'), rpc('ip_serie_metricas') ]);
+  if(!state.stats){ state.stats = await rpc('ip_estatisticas',{p_bairro:state.bairro||null}); }
+  const s=state.stats||{};
+  const kv=(k,v)=>`<div class="chip" style="border-radius:8px;padding:6px 9px"><div style="color:#9ca3af;font-size:11px">${k}</div><div style="font-weight:700;font-size:14px">${v}</div></div>`;
+  const bd=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
+    ${kv('Luminárias',(s.total||0).toLocaleString('pt-BR'))}${kv('% LED',(s.pct_led||0)+'%')}${kv('Pot. LED',(s.potencia_kw||0)+' kW')}
+    ${kv('LED censo',(s.led_censo||0).toLocaleString('pt-BR'))}${kv('LED SECONSER',(s.led_seconser||0).toLocaleString('pt-BR'))}${kv('Pendentes',(s.pendente||0).toLocaleString('pt-BR'))}</div>`;
   const rows=(porBairro||[]).map(b=>`<tr style="cursor:pointer" onclick="window._zoomBairro('${esc(b.bairro_nome).replace(/'/g,"\\'")}')">
     <td>${esc(b.bairro_nome)}</td><td style="text-align:right">${b.total}</td>
     <td style="text-align:right;color:#4ade80">${b.led}</td><td style="text-align:right;color:#fbbf24">${b.pendente}</td>
     <td style="text-align:right">${b.pct_led}%</td></tr>`).join('');
   document.getElementById('stats').innerHTML = `
-    <div style="display:flex;justify-content:space-between;margin-bottom:6px"><b>Indicadores</b><button class="btn" onclick="document.getElementById('stats').style.display='none'">✕</button></div>
-    ${sparkline(serie)}
-    <div style="margin:8px 0 4px;color:#9ca3af;font-size:12px">Passivo de troca por bairro</div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>Indicadores${state.bairro?' · '+esc(state.bairro):''}</b><button class="btn" onclick="document.getElementById('stats').style.display='none'">✕</button></div>
+    ${bd}${sparkline(serie)}
+    <div style="margin:10px 0 4px;color:#9ca3af;font-size:12px">Passivo de troca por bairro</div>
     <table style="width:100%;border-collapse:collapse"><thead><tr><th>Bairro</th><th style="text-align:right">Total</th><th style="text-align:right">LED</th><th style="text-align:right">Pend.</th><th style="text-align:right">%</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 window._zoomBairro = (b)=>{ document.getElementById('fBairro').value=b; state.bairro=b; loadStatsChips(); highlightBairro(b); };
@@ -328,10 +344,25 @@ async function loadBairroOptions(){
   names.forEach(n=>{ f.insertAdjacentHTML('beforeend',`<option>${esc(n)}</option>`); t.insertAdjacentHTML('beforeend',`<option>${esc(n)}</option>`); });
   TIPOS.forEach(tp=>document.getElementById('fTipo').insertAdjacentHTML('beforeend',`<option value="${tp}">${tp}</option>`));
 }
-document.getElementById('fBairro').onchange = e=>{ state.bairro=e.target.value; loadStatsChips(); highlightBairro(e.target.value); };
-document.getElementById('fTipo').onchange = e=>{ state.tipo=e.target.value; state.choroData=null; refresh(); };
-document.getElementById('fEstado').onchange = e=>{ state.estado=e.target.value; refresh(); };
-document.getElementById('fPot').onchange = e=>{ state.pot=e.target.value; refresh(); };
+function updateFCount(){
+  const n=[state.bairro,state.tipo,state.estado,state.pot].filter(Boolean).length;
+  const b=document.getElementById('fCount');
+  if(n){ b.style.display='inline'; b.textContent=n; } else b.style.display='none';
+}
+document.getElementById('btnFiltros').onclick = (e)=>{ e.stopPropagation();
+  const p=document.getElementById('filtrosPop'); p.style.display = p.style.display==='flex'?'none':'flex'; };
+document.addEventListener('click', e=>{ const p=document.getElementById('filtrosPop');
+  if(p.style.display==='flex' && !p.contains(e.target) && e.target.id!=='btnFiltros') p.style.display='none'; });
+document.getElementById('fLimpar').onclick = ()=>{
+  state.bairro=state.tipo=state.estado=state.pot='';
+  ['fBairro','fTipo','fEstado','fPot'].forEach(id=>document.getElementById(id).value='');
+  updateFCount(); loadStatsChips(); if(state.bairroLayer){map.removeLayer(state.bairroLayer);state.bairroLayer=null;}
+  state.choroData=null; refresh();
+};
+document.getElementById('fBairro').onchange = e=>{ state.bairro=e.target.value; updateFCount(); loadStatsChips(); highlightBairro(e.target.value); };
+document.getElementById('fTipo').onchange = e=>{ state.tipo=e.target.value; updateFCount(); state.choroData=null; refresh(); };
+document.getElementById('fEstado').onchange = e=>{ state.estado=e.target.value; updateFCount(); refresh(); };
+document.getElementById('fPot').onchange = e=>{ state.pot=e.target.value; updateFCount(); refresh(); };
 document.getElementById('btnStats').onclick = ()=>{ const s=document.getElementById('stats'); if(s.style.display==='block'){s.style.display='none';} else {s.style.display='block'; loadStatsPanel();} };
 
 // ---------- Tabela ----------
