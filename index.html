@@ -12,6 +12,7 @@
   html,body,#map{height:100%;margin:0}
   body{background:#0b0f14;color:#e5e7eb;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
   .leaflet-container{background:#0b0f14}
+  .leaflet-interactive{cursor:pointer}
   .panel{background:#0f151c;border:1px solid #1f2a37}
   .chip{background:#111a24;border:1px solid #1f2a37}
   .cluster-label{color:#0b0f14;font-weight:700;font-size:11px;text-align:center;line-height:1}
@@ -105,7 +106,7 @@ const URL_SB = "https://lrnmydrwzxxajylsmoih.supabase.co";
 const ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxybm15ZHJ3enh4YWp5bHNtb2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5MjcxNDcsImV4cCI6MjA5ODUwMzE0N30.nNukQrAINdBCcBNwVF7x1HfYgz1vg2QPyvWOfYGAHnM";
 const sb = window.supabase.createClient(URL_SB, ANON);
 
-const state = { user:null, bairro:"", layer:null, mode:"", tPage:0, tSize:50, addMode:false };
+const state = { user:null, bairro:"", layer:null, mode:"", tPage:0, tSize:50, addMode:false, bairroLayer:null };
 const TIPOS = ["led","vapor_sodio","metalico","vapor_mercurio","fluorescente","sem_lampada","desconhecido"];
 const STATUS = ["led_instalado","pendente_troca","a_verificar"];
 
@@ -120,7 +121,8 @@ function mix(pct){ // 0..1 amber->green
   const a=[245,158,11], b=[34,197,94]; return `rgb(${a.map((x,i)=>Math.round(x+(b[i]-x)*pct)).join(',')})`;
 }
 
-async function refresh(){
+function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
+async function _refresh(){
   const b = map.getBounds(), z = map.getZoom();
   const args = { min_lng:b.getWest(), min_lat:b.getSouth(), max_lng:b.getEast(), max_lat:b.getNorth(), p_bairro: state.bairro||null };
   state.layer.clearLayers();
@@ -129,7 +131,8 @@ async function refresh(){
     const { data, error } = await sb.rpc('ip_pontos_bbox', {...args, limite:4000});
     if(error){ console.error(error); return; }
     (data||[]).forEach(p=>{
-      L.circleMarker([p.lat,p.lon],{radius:5,weight:1,color:'#0b0f14',fillColor:colorFor(p),fillOpacity:.95})
+      const rad = z>=18?9:(z>=17?7:6);
+      L.circleMarker([p.lat,p.lon],{radius:rad,weight:1,color:'#0b0f14',fillColor:colorFor(p),fillOpacity:.95,bubblingMouseEvents:false})
         .on('click',()=>openDetail(p)).addTo(state.layer);
     });
     document.getElementById('modeHint').textContent = `${(data||[]).length} pontos nesta área`;
@@ -146,7 +149,20 @@ async function refresh(){
     document.getElementById('modeHint').textContent = 'Aproxime para ver luminárias individuais';
   }
 }
+const refresh = debounce(_refresh, 120);
 map.on('moveend', refresh);
+
+// ---------- Realce do bairro ----------
+async function highlightBairro(name){
+  if(state.bairroLayer){ map.removeLayer(state.bairroLayer); state.bairroLayer=null; }
+  if(!name){ refresh(); return; }
+  const { data } = await sb.rpc('ip_bairro_geojson', { p_bairro:name });
+  if(data){
+    state.bairroLayer = L.geoJSON(data, {style:{color:'#60a5fa',weight:2,fillColor:'#3b82f6',fillOpacity:.14,interactive:false}}).addTo(map);
+    try{ map.fitBounds(state.bairroLayer.getBounds(), {padding:[30,30]}); }catch(e){}
+  }
+  refresh();
+}
 
 // ---------- Detail ----------
 function fld(label,val){ return `<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid #161f29"><span style="color:#9ca3af">${label}</span><span style="text-align:right">${val??'—'}</span></div>`; }
@@ -261,7 +277,7 @@ async function loadBairroPanel(){
   s.innerHTML = `<div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>Passivo de troca por bairro</b><button class="btn" onclick="document.getElementById('stats').style.display='none'">✕</button></div>
     <table style="width:100%;border-collapse:collapse"><thead><tr><th>Bairro</th><th style="text-align:right">Total</th><th style="text-align:right">LED</th><th style="text-align:right">Pend.</th><th style="text-align:right">%</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
-window._zoomBairro = (b)=>{ document.getElementById('fBairro').value=b; state.bairro=b; loadStatsChips(); refresh(); };
+window._zoomBairro = (b)=>{ document.getElementById('fBairro').value=b; state.bairro=b; loadStatsChips(); highlightBairro(b); };
 
 // bairro filter dropdown
 async function loadBairroOptions(){
@@ -270,7 +286,7 @@ async function loadBairroOptions(){
   const f=document.getElementById('fBairro'), t=document.getElementById('tBairro');
   names.forEach(n=>{ f.insertAdjacentHTML('beforeend',`<option>${n}</option>`); t.insertAdjacentHTML('beforeend',`<option>${n}</option>`); });
 }
-document.getElementById('fBairro').onchange = e=>{ state.bairro=e.target.value; loadStatsChips(); refresh(); };
+document.getElementById('fBairro').onchange = e=>{ state.bairro=e.target.value; loadStatsChips(); highlightBairro(e.target.value); };
 document.getElementById('btnStats').onclick = ()=>{ const s=document.getElementById('stats'); if(s.style.display==='block'){s.style.display='none';} else {s.style.display='block'; loadBairroPanel();} };
 
 // ---------- Table ----------
