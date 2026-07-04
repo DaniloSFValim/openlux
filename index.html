@@ -80,6 +80,7 @@
     <button class="btn" id="btnTabela">Tabela</button>
     <button class="btn" id="btnStats">Indicadores</button>
     <button class="btn btn-accent" id="btnNovo" style="display:none">+ Ponto</button>
+    <button class="btn" id="btnAdmin" style="display:none;border-color:#ef4444;color:#f87171">Usuários</button>
     <button class="btn" id="btnLogin">Entrar</button>
   </div>
 </div>
@@ -118,6 +119,25 @@
   </div>
 </div>
 
+<div id="adminModal" style="position:absolute;inset:0;z-index:1300;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center">
+  <div class="panel" style="width:min(640px,94vw);max-height:86vh;border-radius:12px;display:flex;flex-direction:column;padding:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1f2a37;padding-bottom:8px;margin-bottom:12px">
+      <b>Gerenciar usuários</b><button class="btn" id="admClose">Fechar</button>
+    </div>
+    <div class="chip" style="border-radius:8px;padding:10px;margin-bottom:12px">
+      <div style="font-size:12px;color:#9ca3af;margin-bottom:6px">Novo operador</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <input id="admEmail" type="email" placeholder="E-mail" style="flex:2;min-width:150px"/>
+        <input id="admPass" type="text" placeholder="Senha (opcional)" style="flex:1;min-width:120px"/>
+        <select id="admRole" style="flex:1;min-width:100px"><option value="leitura">Leitura</option><option value="editor">Editor</option><option value="admin">Admin</option></select>
+        <button class="btn btn-accent" id="admCreate">Adicionar</button>
+      </div>
+    </div>
+    <div style="flex:1;overflow:auto"><table style="width:100%;border-collapse:collapse">
+      <thead><tr><th>E-mail</th><th>Papel</th><th></th></tr></thead><tbody id="admBody"></tbody></table></div>
+  </div>
+</div>
+
 <div id="loginModal" style="position:absolute;inset:0;z-index:1200;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center">
   <div class="panel" style="width:320px;border-radius:12px;padding:18px">
     <b>Entrar para editar</b>
@@ -138,7 +158,7 @@ const URL_SB = "https://lrnmydrwzxxajylsmoih.supabase.co";
 const ANON = "sb_publishable_w3UmLsmcDtT81S3MDdDJjw_rEWckoVl";
 const sb = window.supabase.createClient(URL_SB, ANON);
 
-const state = { user:null, bairro:"", tipo:"", estado:"", pot:"", layer:null, mode:"", tPage:0, tSize:50,
+const state = { user:null, userRole:null, bairro:"", tipo:"", estado:"", pot:"", layer:null, mode:"", tPage:0, tSize:50,
   addMode:false, bairroLayer:null, choropleth:false, choroLayer:null, choroData:null, current:null, tCache:{} };
 const TIPOS = ["led","vapor_sodio","metalico","vapor_mercurio","fluorescente","sem_lampada","desconhecido"];
 const STATUS = ["led_instalado","pendente_troca","a_verificar"];
@@ -194,7 +214,9 @@ async function _refresh(){
       L.circleMarker([p.lat,p.lon],{radius:rad,weight:1,color:'#0b0f14',fillColor:colorFor(p),fillOpacity:.95,bubblingMouseEvents:false})
         .on('click',()=>openDetail(p)).addTo(state.layer);
     });
-    document.getElementById('modeHint').textContent = `${(data||[]).length} pontos nesta área`;
+    const mh=document.getElementById('modeHint');
+    if(!(data||[]).length){ mh.textContent='Nenhum ponto atende aos filtros nesta região'; mh.style.color='#fbbf24'; }
+    else { mh.textContent=`${data.length} pontos nesta área`; mh.style.color='#6b7280'; }
   } else {
     state.mode="clusters";
     const data = await rpc('ip_clusters_grid', {...box, grid_deg:gridForZoom(z), ...filtros()});
@@ -204,7 +226,9 @@ async function _refresh(){
         .on('click',()=>map.setView([c.lat,c.lon], Math.min(POINT_ZOOM, z+2))).addTo(state.layer);
       L.marker([c.lat,c.lon],{interactive:false,icon:L.divIcon({className:'',html:`<div class="cluster-label" style="width:${r*2}px;transform:translate(-50%,-50%)">${c.n}</div>`})}).addTo(state.layer);
     });
-    document.getElementById('modeHint').textContent = 'Aproxime para ver luminárias individuais';
+    const mh=document.getElementById('modeHint');
+    if(!(data||[]).length){ mh.textContent='Nenhum ponto atende aos filtros nesta região'; mh.style.color='#fbbf24'; }
+    else { mh.textContent='Aproxime para ver luminárias individuais'; mh.style.color='#6b7280'; }
   }
 }
 const refresh = debounce(_refresh, 120);
@@ -261,7 +285,7 @@ function openDetail(p){
     ${p.flag_revisao_censo?`<div style="color:#fbbf24;font-size:11px;margin-top:4px">⚑ marcado para revisão (linha idêntica no censo)</div>`:''}
     ${p.observacoes?`<div style="color:#9ca3af;font-size:11px;margin-top:6px">${esc(p.observacoes)}</div>`:''}
     <div style="margin-top:10px;display:flex;gap:8px">
-      ${state.user?`<button class="btn btn-accent" style="flex:1" onclick="window._edit()">Editar</button>`:''}
+      ${podeEditar()?`<button class="btn btn-accent" style="flex:1" onclick="window._edit()">Editar</button>`:''}
       <button class="btn" onclick="document.getElementById('detail').style.display='none'">Fechar</button></div>`;
 }
 window._edit = function(){
@@ -288,7 +312,7 @@ window._edit = function(){
     let pLat=null,pLng=null;
     if(!(isNaN(lat)&&isNaN(lng))){
       if(isNaN(lat)||isNaN(lng)||lat<-23.05||lat>-22.80||lng<-43.20||lng>-42.90){ toast('Coordenadas inválidas ou fora de Niterói',true); return; }
-      pLat=lat; pLng=lng;
+      pLat=+lat.toFixed(6); pLng=+lng.toFixed(6);
     }
     setBusy(true);
     const {error}=await sb.rpc('ip_atualizar_ponto',{ p_id:p.id, p_tipo:document.getElementById('eTipo').value,
@@ -305,7 +329,7 @@ window._reopen = ()=>openDetail(state.current);
 
 // ---------- Novo ponto ----------
 document.getElementById('btnNovo').onclick = ()=>{
-  if(!state.user) return;
+  if(!podeEditar()) return;
   const c=map.getCenter();
   const d=document.getElementById('detail'); d.style.display='block';
   d.innerHTML = `
@@ -328,7 +352,7 @@ document.getElementById('btnNovo').onclick = ()=>{
     const pot=parseInt(document.getElementById('nPot').value);
     if(!isNaN(pot) && (pot<0||pot>2000)){ toast('Potência fora da faixa (0–2000 W)',true); return; }
     setBusy(true);
-    const {error}=await sb.rpc('ip_inserir_ponto',{ p_lat:lat, p_lng:lng,
+    const {error}=await sb.rpc('ip_inserir_ponto',{ p_lat:+lat.toFixed(6), p_lng:+lng.toFixed(6),
       p_tipo:document.getElementById('nTipo').value, p_potencia:isNaN(pot)?null:pot,
       p_status:document.getElementById('nStatus').value, p_modernizado:document.getElementById('nMod').checked,
       p_endereco:document.getElementById('nEnd').value||null, p_patrimonio:document.getElementById('nPatr').value||null, p_obs:'cadastro manual' });
@@ -436,7 +460,7 @@ async function loadTable(){
     const origem=p.fonte_modernizacao==='censo_enel'?'censo':p.fonte_modernizacao==='seconser_pos_censo'?'SECONSER':p.fonte_modernizacao==='campo'?'campo':'—';
     const est=p.modernizado_led?`<span class="badge" style="background:#0d3d24;color:#4ade80">LED</span>`:`<span class="badge" style="background:#3d2f0d;color:#fbbf24">Pend.</span>`;
     return `<tr><td>${esc(p.numero_patrimonio)||'—'}</td><td>${esc(p.endereco)||'—'}</td><td>${esc(p.bairro_nome)||'—'}</td><td>${p.tipo_lampada}</td><td>${p.potencia_w||'—'}</td><td>${est}</td><td style="color:#9ca3af">${origem}</td>
-      <td>${state.user?`<button class="btn" style="padding:2px 8px" onclick="window._editId('${p.id}')" aria-label="Editar luminária">editar</button>`:''}</td></tr>`;
+      <td>${podeEditar()?`<button class="btn" style="padding:2px 8px" onclick="window._editId('${p.id}')" aria-label="Editar luminária">editar</button>`:''}</td></tr>`;
   }).join('');
   document.getElementById('tBody').innerHTML = linhas || '<tr><td colspan="8" style="text-align:center;color:#6b7280;padding:18px">Nenhum registro encontrado</td></tr>';
 }
@@ -448,9 +472,15 @@ document.getElementById('tNext').onclick=()=>{ state.tPage++; loadTable(); };
 ['tSearch','tBairro','tStatus'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{state.tPage=0;loadTable();}));
 
 // ---------- Auth ----------
-function setUser(u){ state.user=u;
-  document.getElementById('btnLogin').textContent=u?'Sair':'Entrar';
-  document.getElementById('btnNovo').style.display=u?'inline-block':'none'; }
+function podeEditar(){ return ['admin','editor'].includes(state.userRole); }
+async function setUser(u){
+  state.user=u; state.userRole=null;
+  document.getElementById('btnLogin').textContent = u?'Sair':'Entrar';
+  if(u){ try{ const {data}=await sb.from('profiles').select('role').eq('id',u.id).single(); state.userRole=data?.role||'leitura'; }
+         catch(e){ state.userRole='leitura'; } }
+  document.getElementById('btnNovo').style.display = podeEditar()?'inline-block':'none';
+  document.getElementById('btnAdmin').style.display = state.userRole==='admin'?'inline-block':'none';
+}
 document.getElementById('btnLogin').onclick=async ()=>{
   if(state.user){ await sb.auth.signOut(); setUser(null); toast('Sessão encerrada'); return; }
   document.getElementById('loginModal').style.display='flex'; };
@@ -462,6 +492,41 @@ document.getElementById('liSubmit').onclick=async ()=>{
   if(error){ err.style.display='block'; err.textContent='Falha no login: '+error.message; return; }
   err.style.display='none'; document.getElementById('loginModal').style.display='none'; setUser(data.user); toast('Bem-vindo, '+email); };
 sb.auth.getSession().then(({data})=>setUser(data.session?.user||null));
+
+// ---------- Painel admin ----------
+document.getElementById('btnAdmin').onclick = ()=>{ document.getElementById('adminModal').style.display='flex'; loadAdminUsers(); };
+document.getElementById('admClose').onclick = ()=>document.getElementById('adminModal').style.display='none';
+async function loadAdminUsers(){
+  const body=document.getElementById('admBody');
+  body.innerHTML='<tr><td colspan="3" style="text-align:center;color:#6b7280;padding:14px"><span class="spin"></span> Carregando…</td></tr>';
+  const {data,error}=await sb.from('profiles').select('id,email,role').order('email');
+  if(error){ toast('Erro ao listar: '+error.message,true); body.innerHTML=''; return; }
+  const roles=['leitura','editor','admin'];
+  body.innerHTML=(data||[]).map(u=>{
+    const eu=u.id===state.user.id;
+    return `<tr><td>${esc(u.email)}</td>
+      <td><select ${eu?'disabled':''} onchange="window._setRole('${u.id}',this.value)">${roles.map(r=>`<option value="${r}" ${u.role===r?'selected':''}>${r}</option>`).join('')}</select></td>
+      <td style="text-align:right">${eu?'<span style="color:#6b7280;font-size:11px">você</span>':`<button class="btn" style="padding:2px 8px;color:#f87171" onclick="window._delUser('${u.id}','${esc(u.email).replace(/'/g,"\\'")}')">remover</button>`}</td></tr>`;
+  }).join('') || '<tr><td colspan="3" style="text-align:center;color:#6b7280;padding:14px">Nenhum usuário</td></tr>';
+}
+window._setRole = async (id,role)=>{ const {error}=await sb.from('profiles').update({role,atualizado_em:new Date().toISOString()}).eq('id',id);
+  toast(error?('Erro: '+error.message):'Papel atualizado',!!error); };
+window._delUser = async (id,email)=>{ if(!confirm('Remover '+email+'? Isso exclui o acesso do usuário.')) return;
+  setBusy(true); const {data,error}=await sb.functions.invoke('admin-users',{body:{action:'delete',userId:id}}); setBusy(false);
+  if(error||data?.error){ toast('Erro ao remover: '+(data?.error||error.message),true); return; }
+  toast('Usuário removido'); loadAdminUsers(); };
+document.getElementById('admCreate').onclick = async ()=>{
+  const email=document.getElementById('admEmail').value.trim(), password=document.getElementById('admPass').value.trim(), role=document.getElementById('admRole').value;
+  if(!email){ toast('Informe o e-mail',true); return; }
+  setBusy(true);
+  const {data,error}=await sb.functions.invoke('admin-users',{body:{action:'create',email,password:password||undefined,role}});
+  setBusy(false);
+  if(error||data?.error){ toast('Erro ao criar: '+(data?.error||error.message),true); return; }
+  document.getElementById('admEmail').value=''; document.getElementById('admPass').value='';
+  if(data.senha_temporaria) alert('Usuário criado.\nE-mail: '+email+'\nSenha temporária: '+data.senha_temporaria+'\n\nComunique ao operador e peça que troque depois.');
+  else toast('Usuário criado');
+  loadAdminUsers();
+};
 
 // ---------- Exportação ----------
 function baixar(nome, conteudo, mime){
@@ -561,7 +626,7 @@ document.getElementById('exportPop').addEventListener('click',e=>{ const b=e.tar
 { const arias={fBairro:'Filtrar por bairro',fTipo:'Filtrar por tipo de lâmpada',fEstado:'Filtrar por estado',
     fPot:'Filtrar por potência mínima',fLimpar:'Limpar filtros',btnFiltros:'Abrir filtros',
     btnExport:'Abrir menu de exportação',btnChoro:'Alternar mapa coroplético',btnTabela:'Abrir tabela de registros',
-    btnStats:'Abrir indicadores',btnNovo:'Cadastrar novo ponto',btnLogin:'Entrar ou sair',
+    btnStats:'Abrir indicadores',btnNovo:'Cadastrar novo ponto',btnAdmin:'Gerenciar usuários',btnLogin:'Entrar ou sair',
     tSearch:'Buscar por endereço ou patrimônio',tBairro:'Filtrar tabela por bairro',tStatus:'Filtrar tabela por estado',
     tPrev:'Página anterior',tNext:'Próxima página',tClose:'Fechar tabela'};
   Object.entries(arias).forEach(([id,l])=>{const el=document.getElementById(id); if(el) el.setAttribute('aria-label',l);}); }
