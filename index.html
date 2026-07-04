@@ -34,6 +34,10 @@
   #toast{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:2000;display:none;padding:10px 16px;border-radius:8px;font-size:13px;max-width:80vw}
   .spin{width:12px;height:12px;border:2px solid #24303d;border-top-color:#3b82f6;border-radius:50%;display:inline-block;animation:sp .7s linear infinite}
   @keyframes sp{to{transform:rotate(360deg)}}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+  @media (max-width:640px){
+    #tblReg th:nth-child(5),#tblReg td:nth-child(5),#tblReg th:nth-child(7),#tblReg td:nth-child(7){display:none}
+  }
 </style>
 </head>
 <body>
@@ -54,7 +58,7 @@
     <div id="filtrosPop" class="panel" style="position:absolute;top:40px;right:0;width:230px;border-radius:10px;padding:10px;display:none;flex-direction:column;gap:8px;z-index:1001">
       <label style="font-size:11px;color:#9ca3af">Bairro<select id="fBairro"><option value="">Todos</option></select></label>
       <label style="font-size:11px;color:#9ca3af">Tipo<select id="fTipo"><option value="">Todos</option></select></label>
-      <label style="font-size:11px;color:#9ca3af">Estado<select id="fEstado"><option value="">Todos</option><option value="led">LED</option><option value="pendente">Pendente</option></select></label>
+      <label style="font-size:11px;color:#9ca3af">Estado<select id="fEstado"><option value="">Todos</option><option value="led">LED</option><option value="pendente">Pendente</option><option value="sem_lampada">Sem lâmpada</option></select></label>
       <label style="font-size:11px;color:#9ca3af">Potência mínima<select id="fPot"><option value="">Qualquer</option><option value="150">≥ 150 W</option><option value="250">≥ 250 W</option><option value="400">≥ 400 W</option></select></label>
       <button class="btn" id="fLimpar">Limpar filtros</button>
     </div>
@@ -97,11 +101,12 @@
       <b>Registro de luminárias</b>
       <input id="tSearch" placeholder="Endereço ou patrimônio…" style="width:220px"/>
       <select id="tBairro" style="width:160px"><option value="">Bairro: todos</option></select>
-      <select id="tStatus" style="width:150px"><option value="">Estado: todos</option><option value="led">LED</option><option value="pendente">Pendente</option></select>
+      <select id="tStatus" style="width:150px"><option value="">Estado: todos</option><option value="led">LED</option><option value="pendente">Pendente</option><option value="sem_lampada">Sem lâmpada</option></select>
       <span id="tCount" style="color:#9ca3af;font-size:12px;margin-left:auto"></span>
       <button class="btn" id="tClose">Fechar</button>
     </div>
-    <div style="flex:1;overflow:auto"><table style="width:100%;border-collapse:collapse">
+    <div style="flex:1;overflow:auto"><table id="tblReg" style="width:100%;border-collapse:collapse">
+      <caption class="sr-only">Registro de luminárias de iluminação pública de Niterói, com endereço, bairro, tipo, potência, estado e origem da modernização.</caption>
       <thead><tr><th>Patrimônio</th><th>Endereço</th><th>Bairro</th><th>Tipo</th><th>Pot.</th><th>Estado</th><th>Origem mod.</th><th></th></tr></thead>
       <tbody id="tBody"></tbody>
     </table></div>
@@ -165,8 +170,13 @@ const POINT_ZOOM = 16;
 function gridForZoom(z){ return Math.max(0.0015, 0.05/Math.pow(2, z-11)); }
 function colorFor(p){ if(p.modernizado_led) return '#22c55e'; if(p.tipo_lampada==='sem_lampada') return '#6b7280'; return '#f59e0b'; }
 function mix(pct){ const a=[245,158,11], b=[34,197,94]; return `rgb(${a.map((x,i)=>Math.round(x+(b[i]-x)*pct)).join(',')})`; }
-function filtros(){ return { p_bairro: state.bairro||null, p_tipo: state.tipo||null,
-  p_modernizado: state.estado===''?null:(state.estado==='led'), p_pot_min: state.pot?parseInt(state.pot):null }; }
+function filtros(){
+  let p_tipo=state.tipo||null, p_modernizado=null;
+  if(state.estado==='led') p_modernizado=true;
+  else if(state.estado==='pendente') p_modernizado=false;
+  else if(state.estado==='sem_lampada') p_tipo='sem_lampada';
+  return { p_bairro:state.bairro||null, p_tipo, p_modernizado, p_pot_min: state.pot?parseInt(state.pot):null };
+}
 
 function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
 
@@ -405,26 +415,30 @@ document.getElementById('btnStats').onclick = ()=>{ const s=document.getElementB
 // ---------- Tabela ----------
 async function loadTable(){
   setBusy(true);
+  document.getElementById('tBody').innerHTML='<tr><td colspan="8" style="text-align:center;color:#6b7280;padding:18px"><span class="spin"></span> Carregando…</td></tr>';
   let q=sb.from('v_parque_export').select('id,numero_patrimonio,endereco,bairro_nome,tipo_lampada,potencia_w,modernizado_led,fonte_modernizacao,status,observacoes,lat,lon',{count:'exact'});
   const s=document.getElementById('tSearch').value.trim();
   const bb=document.getElementById('tBairro').value, st=document.getElementById('tStatus').value;
   if(s) q=q.or(`endereco.ilike.%${s}%,numero_patrimonio.ilike.%${s}%`);
   if(bb) q=q.eq('bairro_nome',bb);
   if(st==='led') q=q.eq('modernizado_led',true);
-  if(st==='pendente') q=q.eq('modernizado_led',false);
+  else if(st==='pendente') q=q.eq('modernizado_led',false);
+  else if(st==='sem_lampada') q=q.eq('tipo_lampada','sem_lampada');
   const from=state.tPage*state.tSize;
   const {data,count,error}=await q.order('bairro_nome').range(from,from+state.tSize-1);
   setBusy(false);
-  if(error){ toast('Erro na tabela: '+error.message,true); return; }
+  if(error){ toast('Erro na tabela: '+error.message,true);
+    document.getElementById('tBody').innerHTML='<tr><td colspan="8" style="text-align:center;color:#f87171;padding:18px">Falha ao carregar. Tente novamente.</td></tr>'; return; }
   document.getElementById('tCount').textContent=`${(count||0).toLocaleString('pt-BR')} registros`;
   document.getElementById('tPage').textContent=`Página ${state.tPage+1} de ${Math.max(1,Math.ceil((count||0)/state.tSize))}`;
   state.tCache={}; (data||[]).forEach(p=>state.tCache[p.id]=p);
-  document.getElementById('tBody').innerHTML=(data||[]).map(p=>{
+  const linhas=(data||[]).map(p=>{
     const origem=p.fonte_modernizacao==='censo_enel'?'censo':p.fonte_modernizacao==='seconser_pos_censo'?'SECONSER':p.fonte_modernizacao==='campo'?'campo':'—';
     const est=p.modernizado_led?`<span class="badge" style="background:#0d3d24;color:#4ade80">LED</span>`:`<span class="badge" style="background:#3d2f0d;color:#fbbf24">Pend.</span>`;
     return `<tr><td>${esc(p.numero_patrimonio)||'—'}</td><td>${esc(p.endereco)||'—'}</td><td>${esc(p.bairro_nome)||'—'}</td><td>${p.tipo_lampada}</td><td>${p.potencia_w||'—'}</td><td>${est}</td><td style="color:#9ca3af">${origem}</td>
-      <td>${state.user?`<button class="btn" style="padding:2px 8px" onclick="window._editId('${p.id}')">editar</button>`:''}</td></tr>`;
+      <td>${state.user?`<button class="btn" style="padding:2px 8px" onclick="window._editId('${p.id}')" aria-label="Editar luminária">editar</button>`:''}</td></tr>`;
   }).join('');
+  document.getElementById('tBody').innerHTML = linhas || '<tr><td colspan="8" style="text-align:center;color:#6b7280;padding:18px">Nenhum registro encontrado</td></tr>';
 }
 window._editId=(id)=>{ const p=state.tCache[id]; if(!p) return; state.current=p; document.getElementById('tableModal').style.display='none'; document.getElementById('detail').style.display='block'; window._edit(); };
 document.getElementById('btnTabela').onclick=()=>{ state.tPage=0; document.getElementById('tableModal').style.display='flex'; loadTable(); };
@@ -542,6 +556,15 @@ document.getElementById('exportPop').addEventListener('click',e=>{ const b=e.tar
   document.getElementById('exportPop').style.display='none';
   ({csv:()=>exportData('csv'),geojson:()=>exportData('geojson'),bairros:exportBairros,
     serie:exportSerie,png:exportPNG,pdf:exportPDF})[b.dataset.exp]?.(); });
+
+// ---------- acessibilidade ----------
+{ const arias={fBairro:'Filtrar por bairro',fTipo:'Filtrar por tipo de lâmpada',fEstado:'Filtrar por estado',
+    fPot:'Filtrar por potência mínima',fLimpar:'Limpar filtros',btnFiltros:'Abrir filtros',
+    btnExport:'Abrir menu de exportação',btnChoro:'Alternar mapa coroplético',btnTabela:'Abrir tabela de registros',
+    btnStats:'Abrir indicadores',btnNovo:'Cadastrar novo ponto',btnLogin:'Entrar ou sair',
+    tSearch:'Buscar por endereço ou patrimônio',tBairro:'Filtrar tabela por bairro',tStatus:'Filtrar tabela por estado',
+    tPrev:'Página anterior',tNext:'Próxima página',tClose:'Fechar tabela'};
+  Object.entries(arias).forEach(([id,l])=>{const el=document.getElementById(id); if(el) el.setAttribute('aria-label',l);}); }
 
 // ---------- init ----------
 loadBairroOptions(); loadStatsChips(); refresh();
