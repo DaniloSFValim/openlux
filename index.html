@@ -89,6 +89,7 @@
     <button class="btn" id="btnTabela">Tabela</button>
     <button class="btn" id="btnStats">Indicadores</button>
     <button class="btn btn-accent" id="btnNovo" style="display:none">+ Ponto</button>
+    <button class="btn" id="btnAparencia" style="display:none">Aparência</button>
     <button class="btn" id="btnAdmin" style="display:none;border-color:#ef4444;color:#f87171">Usuários</button>
     <button class="btn" id="btnLogin">Entrar</button>
   </div>
@@ -128,33 +129,38 @@
   </div>
 </div>
 
+<div id="aparModal" style="position:absolute;inset:0;z-index:1300;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center">
+  <div class="panel" style="width:min(560px,94vw);max-height:86vh;overflow:auto;border-radius:12px;display:flex;flex-direction:column;padding:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1f2a37;padding-bottom:8px;margin-bottom:12px">
+      <b>Aparência do site</b><button class="btn" id="aparClose">Fechar</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <label style="font-size:11px;color:#9ca3af">Título<input id="cfgTit"/></label>
+      <label style="font-size:11px;color:#9ca3af">Subtítulo<input id="cfgSubIn"/></label>
+      <div style="display:flex;gap:6px">
+        <label style="font-size:11px;color:#9ca3af;flex:1">Cor de destaque<input id="cfgAccent" type="color" style="height:34px;padding:2px"/></label>
+        <label style="font-size:11px;color:#9ca3af;flex:1">Fonte<select id="cfgFonte"><option value="system">Sistema</option><option value="inter">Inter</option><option value="roboto">Roboto</option><option value="georgia">Georgia</option><option value="mono">Monoespaçada</option></select></label>
+      </div>
+      <div style="display:flex;gap:6px">
+        <label style="font-size:11px;color:#9ca3af;flex:1">Fundo dos painéis<input id="cfgPanel" type="color" style="height:34px;padding:2px"/></label>
+        <label style="font-size:11px;color:#9ca3af;flex:1">Densidade<select id="cfgDensity"><option value="normal">Normal</option><option value="compact">Compacta</option><option value="comfortable">Confortável</option></select></label>
+      </div>
+      <div style="font-size:11px;color:#9ca3af">Logotipo / brasão
+        <div style="display:flex;gap:6px;align-items:center;margin-top:4px">
+          <img id="cfgLogoPrev" style="height:28px;border-radius:4px;display:none"/>
+          <input id="cfgLogoFile" type="file" accept="image/*" style="flex:1"/>
+          <button class="btn" id="cfgLogoRemove" type="button">Remover</button>
+        </div>
+      </div>
+      <button class="btn btn-accent" id="cfgSave" style="margin-top:4px">Salvar aparência</button>
+    </div>
+  </div>
+</div>
+
 <div id="adminModal" style="position:absolute;inset:0;z-index:1300;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center">
   <div class="panel" style="width:min(640px,94vw);max-height:86vh;border-radius:12px;display:flex;flex-direction:column;padding:16px">
     <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1f2a37;padding-bottom:8px;margin-bottom:12px">
       <b>Gerenciar usuários</b><button class="btn" id="admClose">Fechar</button>
-    </div>
-    <div class="chip" style="border-radius:8px;padding:10px;margin-bottom:12px">
-      <div style="font-size:12px;color:#9ca3af;margin-bottom:6px">Aparência do site</div>
-      <div style="display:flex;flex-direction:column;gap:6px">
-        <label style="font-size:11px;color:#9ca3af">Título<input id="cfgTit"/></label>
-        <label style="font-size:11px;color:#9ca3af">Subtítulo<input id="cfgSubIn"/></label>
-        <div style="display:flex;gap:6px">
-          <label style="font-size:11px;color:#9ca3af;flex:1">Cor de destaque<input id="cfgAccent" type="color" style="height:34px;padding:2px"/></label>
-          <label style="font-size:11px;color:#9ca3af;flex:1">Fonte<select id="cfgFonte"><option value="system">Sistema</option><option value="inter">Inter</option><option value="roboto">Roboto</option><option value="georgia">Georgia</option><option value="mono">Monoespaçada</option></select></label>
-        </div>
-        <div style="display:flex;gap:6px">
-          <label style="font-size:11px;color:#9ca3af;flex:1">Fundo dos painéis<input id="cfgPanel" type="color" style="height:34px;padding:2px"/></label>
-          <label style="font-size:11px;color:#9ca3af;flex:1">Densidade<select id="cfgDensity"><option value="normal">Normal</option><option value="compact">Compacta</option><option value="comfortable">Confortável</option></select></label>
-        </div>
-        <div style="font-size:11px;color:#9ca3af">Logotipo / brasão
-          <div style="display:flex;gap:6px;align-items:center;margin-top:4px">
-            <img id="cfgLogoPrev" style="height:28px;border-radius:4px;display:none"/>
-            <input id="cfgLogoFile" type="file" accept="image/*" style="flex:1"/>
-            <button class="btn" id="cfgLogoRemove" type="button">Remover</button>
-          </div>
-        </div>
-        <button class="btn btn-accent" id="cfgSave">Salvar aparência</button>
-      </div>
     </div>
     <div class="chip" style="border-radius:8px;padding:10px;margin-bottom:12px">
       <div style="font-size:12px;color:#9ca3af;margin-bottom:6px">Novo operador</div>
@@ -511,7 +517,9 @@ async function setUser(u){
   if(u){ try{ const {data}=await sb.from('profiles').select('role').eq('id',u.id).single(); state.userRole=data?.role||'leitura'; }
          catch(e){ state.userRole='leitura'; } }
   document.getElementById('btnNovo').style.display = podeEditar()?'inline-block':'none';
-  document.getElementById('btnAdmin').style.display = state.userRole==='admin'?'inline-block':'none';
+  const adm = state.userRole==='admin';
+  document.getElementById('btnAparencia').style.display = adm?'inline-block':'none';
+  document.getElementById('btnAdmin').style.display = adm?'inline-block':'none';
 }
 document.getElementById('btnLogin').onclick=async ()=>{
   if(state.user){ await sb.auth.signOut(); setUser(null); toast('Sessão encerrada'); return; }
@@ -526,8 +534,10 @@ document.getElementById('liSubmit').onclick=async ()=>{
 sb.auth.getSession().then(({data})=>setUser(data.session?.user||null));
 
 // ---------- Painel admin ----------
-document.getElementById('btnAdmin').onclick = ()=>{ document.getElementById('adminModal').style.display='flex'; fillConfigForm(); loadAdminUsers(); };
+document.getElementById('btnAdmin').onclick = ()=>{ document.getElementById('adminModal').style.display='flex'; loadAdminUsers(); };
 document.getElementById('admClose').onclick = ()=>document.getElementById('adminModal').style.display='none';
+document.getElementById('btnAparencia').onclick = ()=>{ document.getElementById('aparModal').style.display='flex'; fillConfigForm(); };
+document.getElementById('aparClose').onclick = ()=>document.getElementById('aparModal').style.display='none';
 async function loadAdminUsers(){
   const body=document.getElementById('admBody');
   body.innerHTML='<tr><td colspan="3" style="text-align:center;color:#6b7280;padding:14px"><span class="spin"></span> Carregando…</td></tr>';
@@ -718,7 +728,7 @@ document.getElementById('cfgSave').onclick=async()=>{
 { const arias={fBairro:'Filtrar por bairro',fTipo:'Filtrar por tipo de lâmpada',fEstado:'Filtrar por estado',
     fPot:'Filtrar por potência mínima',fLimpar:'Limpar filtros',btnFiltros:'Abrir filtros',
     btnExport:'Abrir menu de exportação',btnChoro:'Alternar mapa coroplético',btnTabela:'Abrir tabela de registros',
-    btnStats:'Abrir indicadores',btnNovo:'Cadastrar novo ponto',btnAdmin:'Gerenciar usuários',btnLogin:'Entrar ou sair',
+    btnStats:'Abrir indicadores',btnNovo:'Cadastrar novo ponto',btnAparencia:'Configurar aparência',btnAdmin:'Gerenciar usuários',btnLogin:'Entrar ou sair',
     tSearch:'Buscar por endereço ou patrimônio',tBairro:'Filtrar tabela por bairro',tStatus:'Filtrar tabela por estado',
     tPrev:'Página anterior',tNext:'Próxima página',tClose:'Fechar tabela'};
   Object.entries(arias).forEach(([id,l])=>{const el=document.getElementById(id); if(el) el.setAttribute('aria-label',l);}); }
