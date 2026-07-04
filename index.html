@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Dashboard de Iluminação Pública · Niterói · SECONSER</title>
+<title>Iluminação Pública · Niterói · SECONSER</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -15,17 +15,18 @@
   body{background:#0b0f14;color:#e5e7eb;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
   .leaflet-container{background:#0b0f14}
   .leaflet-interactive{cursor:pointer}
-  .panel{background:#0f151c;border:1px solid #1f2a37}
+  .panel{background:var(--panel);border:1px solid #1f2a37}
   .chip{background:#111a24;border:1px solid #1f2a37}
   .cluster-label{color:#0b0f14;font-weight:700;font-size:11px;text-align:center;line-height:1}
   input,select,textarea{background:#0b1017;border:1px solid #24303d;color:#e5e7eb;border-radius:6px;padding:6px 8px;font-size:13px;width:100%}
-  input:focus,select:focus,textarea:focus{outline:none;border-color:#3b82f6}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
   button{cursor:pointer}
+  :root{--accent:#1d4ed8;--panel:#0f151c}
   .btn{border:1px solid #24303d;background:#111a24;border-radius:6px;padding:6px 12px;font-size:13px;color:#e5e7eb}
-  .btn:hover{border-color:#3b82f6}
-  .btn.on{border-color:#3b82f6;background:#16233a}
-  .btn-accent{background:#1d4ed8;border-color:#1d4ed8;color:#fff}
-  .btn-accent:hover{background:#2563eb}
+  .btn:hover{border-color:var(--accent)}
+  .btn.on{border-color:var(--accent);background:#16233a}
+  .btn-accent{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn-accent:hover{filter:brightness(1.12)}
   ::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:#24303d;border-radius:4px}
   .badge{font-size:11px;padding:2px 8px;border-radius:999px;font-weight:600}
   table{font-size:12.5px}th,td{padding:6px 8px;text-align:left;border-bottom:1px solid #1a232e}
@@ -35,6 +36,13 @@
   .spin{width:12px;height:12px;border:2px solid #24303d;border-top-color:#3b82f6;border-radius:50%;display:inline-block;animation:sp .7s linear infinite}
   @keyframes sp{to{transform:rotate(360deg)}}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+  #cfgLogo{height:26px;width:auto;border-radius:4px;display:none;margin-right:8px}
+  body[data-density="compact"] .btn{padding:4px 9px;font-size:12px}
+  body[data-density="compact"] td,body[data-density="compact"] th{padding:4px 6px}
+  body[data-density="compact"] input,body[data-density="compact"] select,body[data-density="compact"] textarea{padding:4px 6px}
+  body[data-density="comfortable"] .btn{padding:9px 16px;font-size:14px}
+  body[data-density="comfortable"] td,body[data-density="comfortable"] th{padding:9px 11px}
+  body[data-density="comfortable"] input,body[data-density="comfortable"] select,body[data-density="comfortable"] textarea{padding:9px 11px}
   @media (max-width:640px){
     #tblReg th:nth-child(5),#tblReg td:nth-child(5),#tblReg th:nth-child(7),#tblReg td:nth-child(7){display:none}
   }
@@ -44,8 +52,9 @@
 <div id="map"></div>
 
 <div class="panel" style="position:absolute;top:10px;left:10px;right:10px;z-index:1000;border-radius:12px;display:flex;align-items:center;gap:14px;padding:7px 14px">
+  <img id="cfgLogo" alt="Logo"/>
   <div style="min-width:0">
-    <div style="font-weight:700;font-size:14px;line-height:1.1;white-space:nowrap">Iluminação Pública <span style="color:#6b7280;font-weight:400">· Niterói · SECONSER</span></div>
+    <div style="font-weight:700;font-size:14px;line-height:1.1;white-space:nowrap"><span id="cfgTitulo">Iluminação Pública</span> <span id="cfgSub" style="color:#6b7280;font-weight:400">· Niterói · SECONSER</span></div>
     <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
       <div style="width:120px;height:6px;background:#1a2431;border-radius:3px;overflow:hidden"><div id="pctBar" style="height:100%;width:0;background:linear-gradient(90deg,#f59e0b,#22c55e);transition:width .5s"></div></div>
       <span id="kpi" style="font-size:12px;color:#cbd5e1;white-space:nowrap">—</span>
@@ -125,6 +134,29 @@
       <b>Gerenciar usuários</b><button class="btn" id="admClose">Fechar</button>
     </div>
     <div class="chip" style="border-radius:8px;padding:10px;margin-bottom:12px">
+      <div style="font-size:12px;color:#9ca3af;margin-bottom:6px">Aparência do site</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font-size:11px;color:#9ca3af">Título<input id="cfgTit"/></label>
+        <label style="font-size:11px;color:#9ca3af">Subtítulo<input id="cfgSubIn"/></label>
+        <div style="display:flex;gap:6px">
+          <label style="font-size:11px;color:#9ca3af;flex:1">Cor de destaque<input id="cfgAccent" type="color" style="height:34px;padding:2px"/></label>
+          <label style="font-size:11px;color:#9ca3af;flex:1">Fonte<select id="cfgFonte"><option value="system">Sistema</option><option value="inter">Inter</option><option value="roboto">Roboto</option><option value="georgia">Georgia</option><option value="mono">Monoespaçada</option></select></label>
+        </div>
+        <div style="display:flex;gap:6px">
+          <label style="font-size:11px;color:#9ca3af;flex:1">Fundo dos painéis<input id="cfgPanel" type="color" style="height:34px;padding:2px"/></label>
+          <label style="font-size:11px;color:#9ca3af;flex:1">Densidade<select id="cfgDensity"><option value="normal">Normal</option><option value="compact">Compacta</option><option value="comfortable">Confortável</option></select></label>
+        </div>
+        <div style="font-size:11px;color:#9ca3af">Logotipo / brasão
+          <div style="display:flex;gap:6px;align-items:center;margin-top:4px">
+            <img id="cfgLogoPrev" style="height:28px;border-radius:4px;display:none"/>
+            <input id="cfgLogoFile" type="file" accept="image/*" style="flex:1"/>
+            <button class="btn" id="cfgLogoRemove" type="button">Remover</button>
+          </div>
+        </div>
+        <button class="btn btn-accent" id="cfgSave">Salvar aparência</button>
+      </div>
+    </div>
+    <div class="chip" style="border-radius:8px;padding:10px;margin-bottom:12px">
       <div style="font-size:12px;color:#9ca3af;margin-bottom:6px">Novo operador</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
         <input id="admEmail" type="email" placeholder="E-mail" style="flex:2;min-width:150px"/>
@@ -159,7 +191,7 @@ const ANON = "sb_publishable_w3UmLsmcDtT81S3MDdDJjw_rEWckoVl";
 const sb = window.supabase.createClient(URL_SB, ANON);
 
 const state = { user:null, userRole:null, bairro:"", tipo:"", estado:"", pot:"", layer:null, mode:"", tPage:0, tSize:50,
-  addMode:false, bairroLayer:null, choropleth:false, choroLayer:null, choroData:null, current:null, tCache:{} };
+  addMode:false, bairroLayer:null, choropleth:false, choroLayer:null, choroData:null, current:null, tCache:{}, config:null };
 const TIPOS = ["led","vapor_sodio","metalico","vapor_mercurio","fluorescente","sem_lampada","desconhecido"];
 const STATUS = ["led_instalado","pendente_troca","a_verificar"];
 
@@ -494,7 +526,7 @@ document.getElementById('liSubmit').onclick=async ()=>{
 sb.auth.getSession().then(({data})=>setUser(data.session?.user||null));
 
 // ---------- Painel admin ----------
-document.getElementById('btnAdmin').onclick = ()=>{ document.getElementById('adminModal').style.display='flex'; loadAdminUsers(); };
+document.getElementById('btnAdmin').onclick = ()=>{ document.getElementById('adminModal').style.display='flex'; fillConfigForm(); loadAdminUsers(); };
 document.getElementById('admClose').onclick = ()=>document.getElementById('adminModal').style.display='none';
 async function loadAdminUsers(){
   const body=document.getElementById('admBody');
@@ -622,6 +654,66 @@ document.getElementById('exportPop').addEventListener('click',e=>{ const b=e.tar
   ({csv:()=>exportData('csv'),geojson:()=>exportData('geojson'),bairros:exportBairros,
     serie:exportSerie,png:exportPNG,pdf:exportPDF})[b.dataset.exp]?.(); });
 
+// ---------- Aparência (config do site) ----------
+const FONTS={ system:{stack:"ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif"},
+  inter:{stack:"'Inter',sans-serif",url:"https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"},
+  roboto:{stack:"'Roboto',sans-serif",url:"https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"},
+  georgia:{stack:"Georgia,'Times New Roman',serif"},
+  mono:{stack:"ui-monospace,'Cascadia Code',Consolas,monospace"} };
+let cfgLogoUrl=null;
+function applyConfig(cfg){
+  cfg=cfg||{}; state.config=cfg;
+  const titulo=cfg.titulo||'Iluminação Pública', sub=cfg.subtitulo||'Niterói · SECONSER';
+  const t=document.getElementById('cfgTitulo'), s=document.getElementById('cfgSub');
+  if(t) t.textContent=titulo; if(s) s.textContent=' · '+sub;
+  document.title=titulo+' · '+sub;
+  document.documentElement.style.setProperty('--accent',cfg.accent||'#1d4ed8');
+  document.documentElement.style.setProperty('--panel',cfg.panelBg||'#0f151c');
+  document.body.dataset.density=cfg.density||'normal';
+  const f=FONTS[cfg.fonte]||FONTS.system;
+  if(f.url){ let l=document.getElementById('cfgFontLink'); if(!l){ l=document.createElement('link'); l.id='cfgFontLink'; l.rel='stylesheet'; document.head.appendChild(l);} l.href=f.url; }
+  document.body.style.fontFamily=f.stack;
+  const lg=document.getElementById('cfgLogo');
+  if(lg){ if(cfg.logo){ lg.src=cfg.logo; lg.style.display='block'; } else { lg.style.display='none'; lg.removeAttribute('src'); } }
+}
+async function loadConfig(){ try{ const {data}=await sb.from('site_config').select('dados').eq('id',1).single(); if(data) applyConfig(data.dados); }catch(e){} }
+function fillConfigForm(){ const c=state.config||{};
+  document.getElementById('cfgTit').value=c.titulo||'Iluminação Pública';
+  document.getElementById('cfgSubIn').value=c.subtitulo||'Niterói · SECONSER';
+  document.getElementById('cfgAccent').value=c.accent||'#1d4ed8';
+  document.getElementById('cfgFonte').value=c.fonte||'system';
+  document.getElementById('cfgPanel').value=c.panelBg||'#0f151c';
+  document.getElementById('cfgDensity').value=c.density||'normal';
+  cfgLogoUrl=c.logo||null;
+  const pv=document.getElementById('cfgLogoPrev');
+  if(cfgLogoUrl){ pv.src=cfgLogoUrl; pv.style.display='inline-block'; } else { pv.style.display='none'; pv.removeAttribute('src'); }
+}
+document.getElementById('cfgLogoFile').onchange=async(e)=>{
+  const file=e.target.files[0]; if(!file) return;
+  if(file.size>1024*1024){ toast('Logo muito grande (máx. 1 MB)',true); return; }
+  setBusy(true);
+  const ext=(file.name.split('.').pop()||'png').toLowerCase();
+  const path=`logo_${Date.now()}.${ext}`;
+  const {error}=await sb.storage.from('branding').upload(path,file,{upsert:true,cacheControl:'3600'});
+  setBusy(false);
+  if(error){ toast('Falha no upload: '+error.message,true); return; }
+  cfgLogoUrl=sb.storage.from('branding').getPublicUrl(path).data.publicUrl;
+  const pv=document.getElementById('cfgLogoPrev'); pv.src=cfgLogoUrl; pv.style.display='inline-block';
+  toast('Logo enviado — clique em Salvar aparência');
+};
+document.getElementById('cfgLogoRemove').onclick=()=>{ cfgLogoUrl=null;
+  const pv=document.getElementById('cfgLogoPrev'); pv.style.display='none'; pv.removeAttribute('src');
+  document.getElementById('cfgLogoFile').value=''; };
+document.getElementById('cfgSave').onclick=async()=>{
+  const dados={ titulo:document.getElementById('cfgTit').value.trim()||'Iluminação Pública',
+    subtitulo:document.getElementById('cfgSubIn').value.trim()||'Niterói · SECONSER',
+    accent:document.getElementById('cfgAccent').value, fonte:document.getElementById('cfgFonte').value,
+    panelBg:document.getElementById('cfgPanel').value, density:document.getElementById('cfgDensity').value,
+    logo:cfgLogoUrl||null };
+  setBusy(true); const {error}=await sb.from('site_config').update({dados,atualizado_em:new Date().toISOString()}).eq('id',1); setBusy(false);
+  if(error){ toast('Erro ao salvar aparência: '+error.message,true); return; }
+  applyConfig(dados); toast('Aparência atualizada — vale para todos os visitantes'); };
+
 // ---------- acessibilidade ----------
 { const arias={fBairro:'Filtrar por bairro',fTipo:'Filtrar por tipo de lâmpada',fEstado:'Filtrar por estado',
     fPot:'Filtrar por potência mínima',fLimpar:'Limpar filtros',btnFiltros:'Abrir filtros',
@@ -632,7 +724,7 @@ document.getElementById('exportPop').addEventListener('click',e=>{ const b=e.tar
   Object.entries(arias).forEach(([id,l])=>{const el=document.getElementById(id); if(el) el.setAttribute('aria-label',l);}); }
 
 // ---------- init ----------
-loadBairroOptions(); loadStatsChips(); refresh();
+loadConfig(); loadBairroOptions(); loadStatsChips(); refresh();
 </script>
 </body>
 </html>
