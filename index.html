@@ -149,8 +149,16 @@ async function rpc(fn,args){ setBusy(true); try{
     const {data,error}=await sb.rpc(fn,args); if(error) throw error; return data;
   }catch(e){ toast('Erro ao carregar: '+(e.message||e),true); return null; } finally{ setBusy(false); } }
 
-const map = L.map('map',{zoomControl:true,attributionControl:false,preferCanvas:true}).setView([-22.905,-43.075],12);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',crossOrigin:true}).addTo(map);
+const map = L.map('map',{zoomControl:true,attributionControl:false,preferCanvas:true,minZoom:11,maxBoundsViscosity:1}).setView([-22.905,-43.055],12);
+map.setMaxBounds([[-23.03,-43.20],[-22.80,-42.90]]);
+const bases = {
+  'Escuro': L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',crossOrigin:true}),
+  'Claro': L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',crossOrigin:true}),
+  'Ruas': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,crossOrigin:true}),
+  'Satélite': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,crossOrigin:true})
+};
+bases['Escuro'].addTo(map);
+L.control.layers(bases,null,{position:'bottomright'}).addTo(map);
 state.layer = L.layerGroup().addTo(map);
 
 const POINT_ZOOM = 16;
@@ -252,6 +260,10 @@ window._edit = function(){
   d.innerHTML = `
     <b style="font-size:13px">Editar · ${esc(p.numero_patrimonio)}</b>
     <div style="margin-top:8px;display:flex;flex-direction:column;gap:7px">
+      <div style="display:flex;gap:6px">
+        <label style="font-size:11px;color:#9ca3af;flex:1">Latitude<input id="eLat" type="number" step="0.000001" value="${p.lat??''}"/></label>
+        <label style="font-size:11px;color:#9ca3af;flex:1">Longitude<input id="eLng" type="number" step="0.000001" value="${p.lon??''}"/></label>
+      </div>
       <label style="font-size:11px;color:#9ca3af">Tipo<select id="eTipo">${TIPOS.map(t=>`<option ${t===p.tipo_lampada?'selected':''}>${t}</option>`).join('')}</select></label>
       <label style="font-size:11px;color:#9ca3af">Potência (W)<input id="ePot" type="number" value="${p.potencia_w||''}"/></label>
       <label style="font-size:11px;color:#9ca3af">Estado<select id="eStatus">${STATUS.map(s=>`<option ${s===p.status?'selected':''}>${s}</option>`).join('')}</select></label>
@@ -262,10 +274,17 @@ window._edit = function(){
   document.getElementById('eSave').onclick = async ()=>{
     const pot=parseInt(document.getElementById('ePot').value);
     if(!isNaN(pot) && (pot<0||pot>2000)){ toast('Potência fora da faixa (0–2000 W)',true); return; }
+    const lat=parseFloat(document.getElementById('eLat').value), lng=parseFloat(document.getElementById('eLng').value);
+    let pLat=null,pLng=null;
+    if(!(isNaN(lat)&&isNaN(lng))){
+      if(isNaN(lat)||isNaN(lng)||lat<-23.05||lat>-22.80||lng<-43.20||lng>-42.90){ toast('Coordenadas inválidas ou fora de Niterói',true); return; }
+      pLat=lat; pLng=lng;
+    }
     setBusy(true);
     const {error}=await sb.rpc('ip_atualizar_ponto',{ p_id:p.id, p_tipo:document.getElementById('eTipo').value,
       p_potencia:isNaN(pot)?null:pot, p_status:document.getElementById('eStatus').value,
-      p_modernizado:document.getElementById('eMod').checked, p_obs:document.getElementById('eObs').value||null });
+      p_modernizado:document.getElementById('eMod').checked, p_obs:document.getElementById('eObs').value||null,
+      p_lat:pLat, p_lng:pLng });
     setBusy(false);
     if(error){ toast('Falha ao salvar: '+error.message,true); return; }
     toast('Ponto atualizado'); document.getElementById('detail').style.display='none';
@@ -276,39 +295,39 @@ window._reopen = ()=>openDetail(state.current);
 
 // ---------- Novo ponto ----------
 document.getElementById('btnNovo').onclick = ()=>{
-  state.addMode=!state.addMode;
-  document.getElementById('btnNovo').textContent = state.addMode?'⨯ Cancelar':'+ Ponto';
-  map.getContainer().style.cursor = state.addMode?'crosshair':'';
-  if(state.addMode) toast('Clique no mapa para posicionar o novo ponto');
-};
-map.on('click', e=>{
-  if(!state.addMode || !state.user) return;
+  if(!state.user) return;
+  const c=map.getCenter();
   const d=document.getElementById('detail'); d.style.display='block';
   d.innerHTML = `
     <b style="font-size:13px">Novo ponto</b>
-    <div style="font-size:11px;color:#9ca3af;margin:4px 0">${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}</div>
-    <div style="display:flex;flex-direction:column;gap:7px">
+    <div style="display:flex;flex-direction:column;gap:7px;margin-top:8px">
+      <div style="display:flex;gap:6px">
+        <label style="font-size:11px;color:#9ca3af;flex:1">Latitude<input id="nLat" type="number" step="0.000001" value="${c.lat.toFixed(6)}"/></label>
+        <label style="font-size:11px;color:#9ca3af;flex:1">Longitude<input id="nLng" type="number" step="0.000001" value="${c.lng.toFixed(6)}"/></label>
+      </div>
       <input id="nPatr" placeholder="Nº patrimônio"/><input id="nEnd" placeholder="Endereço"/>
       <select id="nTipo">${TIPOS.map(t=>`<option>${t}</option>`).join('')}</select>
       <input id="nPot" type="number" placeholder="Potência (W)"/>
       <select id="nStatus">${STATUS.map(s=>`<option>${s}</option>`).join('')}</select>
       <label style="font-size:12px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="nMod" style="width:auto"/> LED</label>
-      <button class="btn btn-accent" id="nSave">Cadastrar</button></div>`;
+      <div style="display:flex;gap:8px"><button class="btn btn-accent" style="flex:1" id="nSave">Cadastrar</button><button class="btn" onclick="document.getElementById('detail').style.display='none'">Cancelar</button></div>
+    </div>`;
   document.getElementById('nSave').onclick = async ()=>{
+    const lat=parseFloat(document.getElementById('nLat').value), lng=parseFloat(document.getElementById('nLng').value);
+    if(isNaN(lat)||isNaN(lng)||lat<-23.05||lat>-22.80||lng<-43.20||lng>-42.90){ toast('Coordenadas fora de Niterói',true); return; }
     const pot=parseInt(document.getElementById('nPot').value);
     if(!isNaN(pot) && (pot<0||pot>2000)){ toast('Potência fora da faixa (0–2000 W)',true); return; }
     setBusy(true);
-    const {error}=await sb.rpc('ip_inserir_ponto',{ p_lat:e.latlng.lat, p_lng:e.latlng.lng,
+    const {error}=await sb.rpc('ip_inserir_ponto',{ p_lat:lat, p_lng:lng,
       p_tipo:document.getElementById('nTipo').value, p_potencia:isNaN(pot)?null:pot,
       p_status:document.getElementById('nStatus').value, p_modernizado:document.getElementById('nMod').checked,
       p_endereco:document.getElementById('nEnd').value||null, p_patrimonio:document.getElementById('nPatr').value||null, p_obs:'cadastro manual' });
     setBusy(false);
     if(error){ toast('Falha ao cadastrar: '+error.message,true); return; }
-    toast('Ponto cadastrado'); d.style.display='none'; state.addMode=false;
-    document.getElementById('btnNovo').textContent='+ Ponto'; map.getContainer().style.cursor='';
-    state.choroData=null; refresh(); loadStatsChips();
+    toast('Ponto cadastrado'); d.style.display='none'; state.choroData=null; refresh(); loadStatsChips();
+    map.setView([lat,lng], Math.max(map.getZoom(),17));
   };
-});
+};
 
 // ---------- Estatísticas ----------
 async function loadStatsChips(){
@@ -386,7 +405,7 @@ document.getElementById('btnStats').onclick = ()=>{ const s=document.getElementB
 // ---------- Tabela ----------
 async function loadTable(){
   setBusy(true);
-  let q=sb.from('pontos_luminaria').select('id,numero_patrimonio,endereco,bairro_nome,tipo_lampada,potencia_w,modernizado_led,fonte_modernizacao,status,observacoes',{count:'exact'});
+  let q=sb.from('v_parque_export').select('id,numero_patrimonio,endereco,bairro_nome,tipo_lampada,potencia_w,modernizado_led,fonte_modernizacao,status,observacoes,lat,lon',{count:'exact'});
   const s=document.getElementById('tSearch').value.trim();
   const bb=document.getElementById('tBairro').value, st=document.getElementById('tStatus').value;
   if(s) q=q.or(`endereco.ilike.%${s}%,numero_patrimonio.ilike.%${s}%`);
