@@ -52,6 +52,15 @@
 </head>
 <body>
 <div id="map"></div>
+<div id="splash" style="position:fixed;inset:0;z-index:3000;background:#0b0f14;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;transition:opacity .5s">
+  <img id="splashLogo" alt="" style="height:56px;display:none;margin-bottom:8px"/>
+  <div id="splashTitle" style="font-size:23px;font-weight:700;color:#e5e7eb;letter-spacing:.3px">Iluminação Pública · Niterói</div>
+  <div style="font-size:13px;color:#9ca3af">SECONSER · Diretoria de Iluminação Pública</div>
+  <div style="font-size:12px;color:#6b7280;margin-top:16px">Desenvolvido por <span style="color:#cbd5e1">Danilo Valim</span></div>
+  <div style="font-size:11px;color:#5f6b78">v1.0</div>
+  <button class="btn" id="splashSkip" style="margin-top:16px">Entrar</button>
+</div>
+<div id="footerBand" style="position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:800;background:rgba(15,21,28,0.86);border:1px solid #1f2a37;border-radius:8px;padding:5px 14px;font-size:11px;color:#9ca3af;white-space:nowrap;pointer-events:none">SECONSER · Diretoria de Iluminação Pública · Niterói · <span style="color:#cbd5e1">v1.0</span></div>
 
 <div class="panel" style="position:absolute;top:10px;left:10px;right:10px;z-index:1000;border-radius:12px;display:flex;align-items:center;gap:14px;padding:7px 14px">
   <img id="cfgLogo" alt="Logo"/>
@@ -212,6 +221,13 @@
       </section>
     </div>
   </div>
+  <div style="padding:8px 18px;border-top:1px solid #1f2a37;font-size:11px;color:#6b7280;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <span style="color:#9ca3af">Cadastro de Iluminação Pública — Niterói</span><span>·</span>
+    <span>SECONSER · Diretoria de Iluminação Pública · Prefeitura de Niterói</span><span>·</span>
+    <span>Base: Censo ENEL + diário SECONSER</span><span>·</span>
+    <span>Desenvolvido por <span style="color:#cbd5e1">Danilo Valim</span></span><span>·</span>
+    <span>v1.0 · 2026</span>
+  </div>
 </div>
 
 <div id="loginModal" style="position:absolute;inset:0;z-index:1200;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center">
@@ -226,6 +242,7 @@
         <button class="btn btn-accent" id="liSubmit">Entrar</button>
       </div>
     </div>
+    <div style="margin-top:14px;padding-top:10px;border-top:1px solid #1f2a37;font-size:11px;color:#6b7280;text-align:center">Desenvolvido por <span style="color:#cbd5e1">Danilo Valim</span> · v1.0</div>
   </div>
 </div>
 
@@ -925,6 +942,8 @@ function applyConfig(cfg){
   if(lg){ if(cfg.logo){ lg.src=cfg.logo; lg.style.display='block'; } else { lg.style.display='none'; lg.removeAttribute('src'); } }
   const fav=document.getElementById('favicon');
   if(fav && cfg.logo) fav.href=cfg.logo;
+  const stt=document.getElementById('splashTitle'); if(stt) stt.textContent=titulo+' · '+((sub.split('·')[0]||'').trim()||'Niterói');
+  const sl=document.getElementById('splashLogo'); if(sl){ if(cfg.logo){ sl.src=cfg.logo; sl.style.display='block'; } else sl.style.display='none'; }
 }
 async function loadConfig(){ try{ const {data}=await sb.from('site_config').select('dados').eq('id',1).single(); if(data) applyConfig(data.dados); }catch(e){} }
 function fillConfigForm(){ const c=state.config||{};
@@ -972,6 +991,12 @@ document.getElementById('cfgSave').onclick=async()=>{
     tSearch:'Buscar por endereço ou patrimônio',tBairro:'Filtrar tabela por bairro',tStatus:'Filtrar tabela por estado',
     tPrev:'Página anterior',tNext:'Próxima página',tClose:'Fechar tabela'};
   Object.entries(arias).forEach(([id,l])=>{const el=document.getElementById(id); if(el) el.setAttribute('aria-label',l);}); }
+
+// ---------- splash ----------
+function dismissSplash(){ const s=document.getElementById('splash'); if(!s||s.style.display==='none') return; s.style.opacity='0'; setTimeout(()=>{ s.style.display='none'; },500); }
+document.getElementById('splashSkip').onclick=dismissSplash;
+document.getElementById('splash').addEventListener('click',e=>{ if(e.target.id==='splash') dismissSplash(); });
+setTimeout(dismissSplash, 2200);
 
 // ---------- init ----------
 loadConfig(); loadBairroOptions(); loadStatsChips(); refresh();
