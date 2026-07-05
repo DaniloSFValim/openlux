@@ -112,7 +112,7 @@
   <div class="panel" style="width:min(1050px,95vw);height:min(80vh,760px);border-radius:12px;display:flex;flex-direction:column;overflow:hidden">
     <div style="display:flex;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid #1f2a37;flex-wrap:wrap">
       <b>Registro de luminárias</b>
-      <input id="tSearch" placeholder="Endereço ou patrimônio…" style="width:220px"/>
+      <input id="tSearch" placeholder="Código, endereço ou patrimônio…" style="width:220px"/>
       <select id="tBairro" style="width:160px"><option value="">Bairro: todos</option></select>
       <select id="tStatus" style="width:150px"><option value="">Estado: todos</option><option value="led">LED</option><option value="pendente">Pendente</option><option value="sem_lampada">Sem lâmpada</option></select>
       <span id="tCount" style="color:#9ca3af;font-size:12px;margin-left:auto"></span>
@@ -120,7 +120,7 @@
     </div>
     <div style="flex:1;overflow:auto"><table id="tblReg" style="width:100%;border-collapse:collapse">
       <caption class="sr-only">Registro de luminárias de iluminação pública de Niterói, com endereço, bairro, tipo, potência, estado e origem da modernização.</caption>
-      <thead><tr><th>Patrimônio</th><th>Endereço</th><th>Bairro</th><th>Tipo</th><th>Pot.</th><th>Estado</th><th>Origem mod.</th><th></th></tr></thead>
+      <thead><tr><th>Código</th><th>Endereço</th><th>Bairro</th><th>Tipo</th><th>Pot.</th><th>Estado</th><th>Origem mod.</th><th></th></tr></thead>
       <tbody id="tBody"></tbody>
     </table></div>
     <div style="display:flex;gap:8px;align-items:center;justify-content:center;padding:8px;border-top:1px solid #1f2a37">
@@ -237,6 +237,11 @@ const state = { user:null, userRole:null, bairro:"", tipo:"", estado:"", pot:"",
   bairroLayer:null, choropleth:false, choroLayer:null, choroData:null, current:null, tCache:{}, config:null };
 const TIPOS = ["led","vapor_sodio","metalico","vapor_mercurio","fluorescente","sem_lampada","desconhecido"];
 const STATUS = ["led_instalado","pendente_troca","a_verificar"];
+const TIPO_ATIVO = [['luminaria','Luminária'],['caixa_comando','Caixa de comando'],['chave_magnetica','Chave magnética'],['rele_fotoeletrico','Relé fotoelétrico'],['poste','Poste'],['braco','Braço'],['outro','Outro']];
+const TIPO_LUM = ["viaria","globo","petala","projetor","balizador","orla","ornamental","piso","outro"];
+const INTERV = [['instalacao','Instalação'],['substituicao','Substituição'],['manutencao','Manutenção'],['vistoria','Vistoria'],['remocao','Remoção']];
+function ativoLabel(t){ return (TIPO_ATIVO.find(x=>x[0]===t)||[t,t])[1]; }
+function intervLabel(t){ return (INTERV.find(x=>x[0]===t)||[t,t])[1]; }
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 let busy=0;
@@ -375,15 +380,25 @@ function openDetail(p){
   const d=document.getElementById('detail'); d.style.display='block';
   const badge=p.modernizado_led?`<span class="badge" style="background:#0d3d24;color:#4ade80">LED</span>`:`<span class="badge" style="background:#3d2f0d;color:#fbbf24">Pendente</span>`;
   const origem=p.fonte_modernizacao==='censo_enel'?'Censo ENEL':p.fonte_modernizacao==='seconser_pos_censo'?'SECONSER (pós-censo)':p.fonte_modernizacao==='campo'?'Campo':'—';
+  const ehLum=(p.tipo_ativo||'luminaria')==='luminaria';
   d.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <b style="font-size:13px">${esc(p.numero_patrimonio)||'Luminária'}</b> ${badge}</div>
-    ${fld('Endereço', p.endereco)}${fld('Bairro', p.bairro_nome)}${fld('Tipo atual', p.tipo_lampada)}
-    ${fld('Potência', p.potencia_w? p.potencia_w+' W':null)}${fld('Estado', p.status)}
-    ${fld('Origem modernização', origem)}${fld('Tipo no censo', p.censo_tipo_original)}${fld('Fonte do ponto', p.fonte)}
-    ${p.flag_revisao_censo?`<div style="color:#fbbf24;font-size:11px;margin-top:4px">⚑ marcado para revisão (linha idêntica no censo)</div>`:''}
+      <b style="font-size:13px">${esc(p.codigo_seconser)||'—'}</b> ${ehLum?badge:''}</div>
+    ${fld('Referência ENEL', p.numero_patrimonio)}
+    ${fld('Tipo de ativo', ativoLabel(p.tipo_ativo||'luminaria'))}
+    ${ehLum?fld('Tipo de luminária', p.tipo_luminaria):''}
+    ${ehLum?fld('Classe NBR', p.classe_nbr):''}
+    ${fld('Endereço', p.endereco)}${fld('Bairro', p.bairro_nome)}
+    ${ehLum?fld('Lâmpada', p.tipo_lampada):''}
+    ${ehLum?fld('Potência', p.potencia_w? p.potencia_w+' W':null):''}
+    ${ehLum?fld('Estado', p.status):''}
+    ${ehLum?fld('Origem modernização', origem):''}
+    ${p.flag_revisao_censo?`<div style="color:#fbbf24;font-size:11px;margin-top:4px">⚑ marcado para revisão</div>`:''}
     ${p.observacoes?`<div style="color:#9ca3af;font-size:11px;margin-top:6px">${esc(p.observacoes)}</div>`:''}
-    ${state.user?`<button class="btn" style="width:100%;margin-top:8px" onclick="window._hist('${p.id}')">Ver histórico de alterações</button><div id="histBox"></div>`:''}
+    ${state.user?`<div style="display:flex;gap:6px;margin-top:8px">
+        <button class="btn" style="flex:1" onclick="window._interv('${p.id}')">Intervenções</button>
+        <button class="btn" style="flex:1" onclick="window._hist('${p.id}')">Histórico</button>
+      </div><div id="histBox"></div>`:''}
     <div style="margin-top:10px;display:flex;gap:8px">
       ${podeEditar()?`<button class="btn btn-accent" style="flex:1" onclick="window._edit()">Editar</button>`:''}
       <button class="btn" onclick="document.getElementById('detail').style.display='none'">Fechar</button></div>`;
@@ -402,6 +417,8 @@ window._edit = function(){
       <label style="font-size:11px;color:#9ca3af">Potência (W)<input id="ePot" type="number" value="${p.potencia_w||''}"/></label>
       <label style="font-size:11px;color:#9ca3af">Estado<select id="eStatus">${STATUS.map(s=>`<option ${s===p.status?'selected':''}>${s}</option>`).join('')}</select></label>
       <label style="font-size:12px;display:flex;gap:8px;align-items:center;color:#e5e7eb"><input type="checkbox" id="eMod" ${p.modernizado_led?'checked':''} style="width:auto"/> Modernizado para LED</label>
+      <label style="font-size:11px;color:#9ca3af">Tipo de luminária<select id="eTipoLum"><option value="">—</option>${TIPO_LUM.map(t=>`<option ${t===p.tipo_luminaria?'selected':''}>${t}</option>`).join('')}</select></label>
+      <label style="font-size:11px;color:#9ca3af">Classe NBR<input id="eClasse" value="${esc(p.classe_nbr)}" placeholder="V3, P2, C4…"/></label>
       <label style="font-size:11px;color:#9ca3af">Observações<textarea id="eObs" rows="2">${esc(p.observacoes)}</textarea></label>
       <div style="display:flex;gap:8px"><button class="btn btn-accent" style="flex:1" id="eSave">Salvar</button><button class="btn" onclick="window._reopen()">Cancelar</button></div>
     </div>`;
@@ -418,7 +435,8 @@ window._edit = function(){
     const {error}=await sb.rpc('ip_atualizar_ponto',{ p_id:p.id, p_tipo:document.getElementById('eTipo').value,
       p_potencia:isNaN(pot)?null:pot, p_status:document.getElementById('eStatus').value,
       p_modernizado:document.getElementById('eMod').checked, p_obs:document.getElementById('eObs').value||null,
-      p_lat:pLat, p_lng:pLng });
+      p_lat:pLat, p_lng:pLng,
+      p_tipo_luminaria:document.getElementById('eTipoLum').value||null, p_classe_nbr:document.getElementById('eClasse').value||null });
     setBusy(false);
     if(error){ toast('Falha ao salvar: '+error.message,true); return; }
     toast('Ponto atualizado'); document.getElementById('detail').style.display='none';
@@ -426,6 +444,53 @@ window._edit = function(){
   };
 };
 window._reopen = ()=>openDetail(state.current);
+window._interv = async (id)=>{
+  const box=document.getElementById('histBox'); if(!box) return;
+  box.innerHTML='<div style="color:#6b7280;font-size:11px;padding:6px 0"><span class="spin"></span> Carregando…</div>';
+  const data = await rpc('ip_intervencoes',{p_id:id});
+  let html = podeEditar()?`<button class="btn btn-accent" style="width:100%;margin:6px 0" onclick="window._formInterv('${id}')">+ Registrar intervenção</button>`:'';
+  const arr = data||[];
+  const ultSub = arr.find(x=>x.tipo==='substituicao'), ultMan = arr.find(x=>x.tipo==='manutencao');
+  if(ultSub||ultMan) html += `<div style="font-size:11px;color:#9ca3af;margin:2px 0 6px">${ultSub?('Última substituição: '+ultSub.data):''}${ultSub&&ultMan?' · ':''}${ultMan?('Última manutenção: '+ultMan.data):''}</div>`;
+  if(!arr.length) html += '<div style="color:#6b7280;font-size:11px">Sem intervenções registradas.</div>';
+  else html += arr.map(h=>{
+    const extra=h.lampada_nova?` → ${esc(h.lampada_nova)}${h.potencia_nova?(' '+h.potencia_nova+' W'):''}`:'';
+    return `<div style="border-bottom:1px solid #161f29;padding:4px 0;font-size:11px">
+      <div style="color:#cbd5e1">${esc(intervLabel(h.tipo))}${extra}</div>
+      ${h.descricao?`<div style="color:#9ca3af">${esc(h.descricao)}</div>`:''}
+      <div style="color:#6b7280">${h.data} · ${esc(h.responsavel||h.registrado_por||'—')}</div></div>`;
+  }).join('');
+  box.innerHTML=html;
+};
+window._formInterv = (id)=>{
+  const box=document.getElementById('histBox');
+  box.innerHTML = `<div style="border:1px solid #24303d;border-radius:8px;padding:8px;margin:6px 0;display:flex;flex-direction:column;gap:6px">
+    <b style="font-size:12px">Registrar intervenção</b>
+    <select id="ivTipo">${INTERV.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select>
+    <input id="ivData" type="date" value="${new Date().toISOString().slice(0,10)}"/>
+    <input id="ivResp" placeholder="Responsável / equipe"/>
+    <textarea id="ivDesc" rows="2" placeholder="Descrição"></textarea>
+    <div id="ivSub" style="display:none;flex-direction:column;gap:6px">
+      <select id="ivLamp"><option value="">— lâmpada nova —</option>${TIPOS.map(t=>`<option>${t}</option>`).join('')}</select>
+      <input id="ivPot" type="number" placeholder="Potência nova (W)"/>
+    </div>
+    <div style="display:flex;gap:6px"><button class="btn btn-accent" style="flex:1" id="ivSave">Salvar</button><button class="btn" onclick="window._interv('${id}')">Cancelar</button></div>
+  </div>`;
+  const tipoSel=document.getElementById('ivTipo');
+  const toggleSub=()=>{ document.getElementById('ivSub').style.display = tipoSel.value==='substituicao'?'flex':'none'; };
+  tipoSel.onchange=toggleSub; toggleSub();
+  document.getElementById('ivSave').onclick=async()=>{
+    setBusy(true);
+    const {error}=await sb.rpc('ip_registrar_intervencao',{ p_ponto:id, p_tipo:tipoSel.value,
+      p_data:document.getElementById('ivData').value||null, p_descricao:document.getElementById('ivDesc').value||null,
+      p_responsavel:document.getElementById('ivResp').value||null,
+      p_lampada_nova:document.getElementById('ivLamp').value||null,
+      p_potencia_nova:parseInt(document.getElementById('ivPot').value)||null });
+    setBusy(false);
+    if(error){ toast('Falha ao registrar: '+error.message,true); return; }
+    toast('Intervenção registrada'); window._interv(id); state.choroData=null; refresh(); loadStatsChips();
+  };
+};
 window._hist = async (id)=>{
   const box=document.getElementById('histBox'); if(!box) return;
   box.innerHTML='<div style="color:#6b7280;font-size:11px;padding:6px 0"><span class="spin"></span> Carregando histórico…</div>';
@@ -456,32 +521,45 @@ document.getElementById('btnNovo').onclick = ()=>{
   const c=map.getCenter();
   const d=document.getElementById('detail'); d.style.display='block';
   d.innerHTML = `
-    <b style="font-size:13px">Novo ponto</b>
+    <b style="font-size:13px">Novo ativo</b>
+    <div style="font-size:11px;color:#6b7280;margin-top:2px">O código IPNIT é gerado automaticamente.</div>
     <div style="display:flex;flex-direction:column;gap:7px;margin-top:8px">
       <div style="display:flex;gap:6px">
         <label style="font-size:11px;color:#9ca3af;flex:1">Latitude<input id="nLat" type="number" step="0.000001" value="${c.lat.toFixed(6)}"/></label>
         <label style="font-size:11px;color:#9ca3af;flex:1">Longitude<input id="nLng" type="number" step="0.000001" value="${c.lng.toFixed(6)}"/></label>
       </div>
-      <input id="nPatr" placeholder="Nº patrimônio"/><input id="nEnd" placeholder="Endereço"/>
-      <select id="nTipo">${TIPOS.map(t=>`<option>${t}</option>`).join('')}</select>
-      <input id="nPot" type="number" placeholder="Potência (W)"/>
-      <select id="nStatus">${STATUS.map(s=>`<option>${s}</option>`).join('')}</select>
-      <label style="font-size:12px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="nMod" style="width:auto"/> LED</label>
+      <label style="font-size:11px;color:#9ca3af">Tipo de ativo<select id="nAtivo">${TIPO_ATIVO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
+      <input id="nPatr" placeholder="Referência ENEL (opcional)"/>
+      <input id="nEnd" placeholder="Endereço"/>
+      <div id="nLumFields" style="display:flex;flex-direction:column;gap:7px">
+        <label style="font-size:11px;color:#9ca3af">Tipo de luminária<select id="nTipoLum"><option value="">—</option>${TIPO_LUM.map(t=>`<option>${t}</option>`).join('')}</select></label>
+        <input id="nClasse" placeholder="Classe NBR (V3, P2, C4…)"/>
+        <select id="nTipo">${TIPOS.map(t=>`<option>${t}</option>`).join('')}</select>
+        <input id="nPot" type="number" placeholder="Potência (W)"/>
+        <select id="nStatus">${STATUS.map(s=>`<option>${s}</option>`).join('')}</select>
+        <label style="font-size:12px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="nMod" style="width:auto"/> LED</label>
+      </div>
       <div style="display:flex;gap:8px"><button class="btn btn-accent" style="flex:1" id="nSave">Cadastrar</button><button class="btn" onclick="document.getElementById('detail').style.display='none'">Cancelar</button></div>
     </div>`;
+  const nAtivo=document.getElementById('nAtivo');
+  const toggleLum=()=>{ document.getElementById('nLumFields').style.display = nAtivo.value==='luminaria'?'flex':'none'; };
+  nAtivo.onchange=toggleLum; toggleLum();
   document.getElementById('nSave').onclick = async ()=>{
     const lat=parseFloat(document.getElementById('nLat').value), lng=parseFloat(document.getElementById('nLng').value);
     if(isNaN(lat)||isNaN(lng)||lat<-23.05||lat>-22.80||lng<-43.20||lng>-42.90){ toast('Coordenadas fora de Niterói',true); return; }
+    const ehLum=nAtivo.value==='luminaria';
     const pot=parseInt(document.getElementById('nPot').value);
-    if(!isNaN(pot) && (pot<0||pot>2000)){ toast('Potência fora da faixa (0–2000 W)',true); return; }
+    if(ehLum && !isNaN(pot) && (pot<0||pot>2000)){ toast('Potência fora da faixa (0–2000 W)',true); return; }
     setBusy(true);
-    const {error}=await sb.rpc('ip_inserir_ponto',{ p_lat:+lat.toFixed(6), p_lng:+lng.toFixed(6),
-      p_tipo:document.getElementById('nTipo').value, p_potencia:isNaN(pot)?null:pot,
-      p_status:document.getElementById('nStatus').value, p_modernizado:document.getElementById('nMod').checked,
-      p_endereco:document.getElementById('nEnd').value||null, p_patrimonio:document.getElementById('nPatr').value||null, p_obs:'cadastro manual' });
+    const {data,error}=await sb.rpc('ip_inserir_ponto',{ p_lat:+lat.toFixed(6), p_lng:+lng.toFixed(6),
+      p_tipo: ehLum?document.getElementById('nTipo').value:'desconhecido', p_potencia: ehLum&&!isNaN(pot)?pot:null,
+      p_status: ehLum?document.getElementById('nStatus').value:'a_verificar', p_modernizado: ehLum?document.getElementById('nMod').checked:false,
+      p_endereco:document.getElementById('nEnd').value||null, p_patrimonio:document.getElementById('nPatr').value||null, p_obs:'cadastro manual',
+      p_tipo_ativo:nAtivo.value, p_tipo_luminaria: ehLum?(document.getElementById('nTipoLum').value||null):null,
+      p_classe_nbr: ehLum?(document.getElementById('nClasse').value||null):null });
     setBusy(false);
     if(error){ toast('Falha ao cadastrar: '+error.message,true); return; }
-    toast('Ponto cadastrado'); d.style.display='none'; state.choroData=null; refresh(); loadStatsChips();
+    toast('Cadastrado: '+(data||'ok')); d.style.display='none'; state.choroData=null; refresh(); loadStatsChips();
     map.setView([lat,lng], Math.max(map.getZoom(),17));
   };
 };
@@ -566,10 +644,10 @@ document.getElementById('btnStats').onclick = ()=>{ const s=document.getElementB
 async function loadTable(){
   setBusy(true);
   document.getElementById('tBody').innerHTML='<tr><td colspan="8" style="text-align:center;color:#6b7280;padding:18px"><span class="spin"></span> Carregando…</td></tr>';
-  let q=sb.from('v_parque_export').select('id,numero_patrimonio,endereco,bairro_nome,tipo_lampada,potencia_w,modernizado_led,fonte_modernizacao,status,observacoes,lat,lon',{count:'exact'});
+  let q=sb.from('v_parque_export').select('id,codigo_seconser,numero_patrimonio,endereco,bairro_nome,tipo_lampada,potencia_w,modernizado_led,fonte_modernizacao,status,observacoes,lat,lon,tipo_ativo,tipo_luminaria,classe_nbr',{count:'exact'});
   const s=document.getElementById('tSearch').value.trim();
   const bb=document.getElementById('tBairro').value, st=document.getElementById('tStatus').value;
-  if(s) q=q.or(`endereco.ilike.%${s}%,numero_patrimonio.ilike.%${s}%`);
+  if(s) q=q.or(`codigo_seconser.ilike.%${s}%,endereco.ilike.%${s}%,numero_patrimonio.ilike.%${s}%`);
   if(bb) q=q.eq('bairro_nome',bb);
   if(st==='led') q=q.eq('modernizado_led',true);
   else if(st==='pendente') q=q.eq('modernizado_led',false);
@@ -586,7 +664,7 @@ async function loadTable(){
   const linhas=(data||[]).map(p=>{
     const origem=p.fonte_modernizacao==='censo_enel'?'censo':p.fonte_modernizacao==='seconser_pos_censo'?'SECONSER':p.fonte_modernizacao==='campo'?'campo':'—';
     const est=p.modernizado_led?`<span class="badge" style="background:#0d3d24;color:#4ade80">LED</span>`:`<span class="badge" style="background:#3d2f0d;color:#fbbf24">Pend.</span>`;
-    return `<tr><td>${esc(p.numero_patrimonio)||'—'}</td><td>${esc(p.endereco)||'—'}</td><td>${esc(p.bairro_nome)||'—'}</td><td>${p.tipo_lampada}</td><td>${p.potencia_w||'—'}</td><td>${est}</td><td style="color:#9ca3af">${origem}</td>
+    return `<tr><td>${esc(p.codigo_seconser)||'—'}</td><td>${esc(p.endereco)||'—'}</td><td>${esc(p.bairro_nome)||'—'}</td><td>${p.tipo_lampada}</td><td>${p.potencia_w||'—'}</td><td>${est}</td><td style="color:#9ca3af">${origem}</td>
       <td>${podeEditar()?`<button class="btn" style="padding:2px 8px" onclick="window._editId('${p.id}')" aria-label="Editar luminária">editar</button>`:''}</td></tr>`;
   }).join('');
   document.getElementById('tBody').innerHTML = linhas || '<tr><td colspan="8" style="text-align:center;color:#6b7280;padding:18px">Nenhum registro encontrado</td></tr>';
