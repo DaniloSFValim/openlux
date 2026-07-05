@@ -36,6 +36,7 @@
   #toast{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:2000;display:none;padding:10px 16px;border-radius:8px;font-size:13px;max-width:80vw}
   .spin{width:12px;height:12px;border:2px solid #24303d;border-top-color:#3b82f6;border-radius:50%;display:inline-block;animation:sp .7s linear infinite}
   @keyframes sp{to{transform:rotate(360deg)}}
+  .lamp-ic{background:none;border:none}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
   #cfgLogo{height:26px;width:auto;border-radius:4px;display:none;margin-right:8px}
   body[data-density="compact"] .btn{padding:4px 9px;font-size:12px}
@@ -97,9 +98,9 @@
 </div>
 
 <div class="panel" id="legend" style="position:absolute;bottom:14px;left:10px;z-index:1000;border-radius:10px;padding:8px 10px;font-size:12px">
-  <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span style="width:10px;height:10px;border-radius:50%;background:#22c55e;display:inline-block"></span> LED</div>
-  <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:inline-block"></span> Pendente de troca</div>
-  <div style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#6b7280;display:inline-block"></span> Sem lâmpada</div>
+  <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><svg width="13" height="16" viewBox="0 0 20 24"><path d="M10 1.5a6.5 6.5 0 0 0-3.7 11.8V16h7.4v-2.7A6.5 6.5 0 0 0 10 1.5z" fill="#22c55e" stroke="#0b0f14" stroke-width="1.4"/><rect x="6.8" y="16.3" width="6.4" height="2.6" rx="1" fill="#9ca3af"/></svg> LED</div>
+  <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><svg width="13" height="16" viewBox="0 0 20 24"><path d="M10 1.5a6.5 6.5 0 0 0-3.7 11.8V16h7.4v-2.7A6.5 6.5 0 0 0 10 1.5z" fill="#f59e0b" stroke="#0b0f14" stroke-width="1.4"/><rect x="6.8" y="16.3" width="6.4" height="2.6" rx="1" fill="#9ca3af"/></svg> Pendente de troca</div>
+  <div style="display:flex;align-items:center;gap:6px"><svg width="13" height="16" viewBox="0 0 20 24"><path d="M10 1.5a6.5 6.5 0 0 0-3.7 11.8V16h7.4v-2.7A6.5 6.5 0 0 0 10 1.5z" fill="#141b24" stroke="#6b7280" stroke-width="1.4"/><rect x="6.8" y="16.3" width="6.4" height="2.6" rx="1" fill="#9ca3af"/></svg> Sem lâmpada</div>
   <div id="modeHint" style="color:#6b7280;margin-top:5px"></div>
 </div>
 
@@ -263,6 +264,16 @@ state.layer = L.layerGroup().addTo(map);
 const POINT_ZOOM = 16;
 function gridForZoom(z){ return Math.max(0.0015, 0.05/Math.pow(2, z-11)); }
 function colorFor(p){ if(p.modernizado_led) return '#22c55e'; if(p.tipo_lampada==='sem_lampada') return '#6b7280'; return '#f59e0b'; }
+function svgLamp(color, hollow){
+  const fill = hollow?'#141b24':color;
+  return `<svg width="20" height="24" viewBox="0 0 20 24" xmlns="http://www.w3.org/2000/svg">`
+    +`<path d="M10 1.5a6.5 6.5 0 0 0-3.7 11.8V16h7.4v-2.7A6.5 6.5 0 0 0 10 1.5z" fill="${fill}" stroke="#0b0f14" stroke-width="1.4"/>`
+    +`<rect x="6.8" y="16.3" width="6.4" height="2.6" rx="1" fill="#9ca3af" stroke="#0b0f14" stroke-width="0.7"/>`
+    +`<rect x="8" y="19.3" width="4" height="2.2" rx="1" fill="#9ca3af"/></svg>`;
+}
+function makeLampIcon(color, hollow){ return L.divIcon({className:'lamp-ic', html:svgLamp(color,hollow), iconSize:[20,24], iconAnchor:[10,12]}); }
+const LAMP_ICONS = { led:makeLampIcon('#22c55e'), pend:makeLampIcon('#f59e0b'), sem:makeLampIcon('#6b7280',true) };
+function iconFor(p){ if(p.modernizado_led) return LAMP_ICONS.led; if(p.tipo_lampada==='sem_lampada') return LAMP_ICONS.sem; return LAMP_ICONS.pend; }
 function mix(pct){ const a=[245,158,11], b=[34,197,94]; return `rgb(${a.map((x,i)=>Math.round(x+(b[i]-x)*pct)).join(',')})`; }
 function filtros(){
   let p_tipo=state.tipo||null, p_modernizado=null;
@@ -294,10 +305,13 @@ async function _refresh(){
   if(z >= POINT_ZOOM){
     state.mode="pontos";
     const data = await rpc('ip_pontos_bbox', {...box, limite:4000, ...filtros()});
+    const usarIcones = (data||[]).length <= 1000;
     (data||[]).forEach(p=>{
-      const rad = z>=18?9:(z>=17?7:6);
-      L.circleMarker([p.lat,p.lon],{radius:rad,weight:1,color:'#0b0f14',fillColor:colorFor(p),fillOpacity:.95,bubblingMouseEvents:false})
-        .on('click',()=>openDetail(p)).addTo(state.layer);
+      let mk;
+      if(usarIcones){ mk = L.marker([p.lat,p.lon],{icon:iconFor(p),keyboard:false}); }
+      else { const rad = z>=18?9:(z>=17?7:6);
+        mk = L.circleMarker([p.lat,p.lon],{radius:rad,weight:1,color:'#0b0f14',fillColor:colorFor(p),fillOpacity:.95,bubblingMouseEvents:false}); }
+      mk.on('click',()=>openDetail(p)).addTo(state.layer);
     });
     const mh=document.getElementById('modeHint');
     if(!(data||[]).length){ mh.textContent='Nenhum ponto atende aos filtros nesta região'; mh.style.color='#fbbf24'; }
@@ -745,6 +759,14 @@ async function capturarMapa(){
     const r=cv.getBoundingClientRect();
     try{ ctx.drawImage(cv, r.left-rect.left, r.top-rect.top, r.width, r.height); }catch(e){}
   });
+  const svgs=[...c.querySelectorAll('.leaflet-marker-pane svg')];
+  await Promise.all(svgs.map(sv=>new Promise(res=>{
+    const r=sv.getBoundingClientRect();
+    const img=new Image();
+    img.onload=()=>{ try{ ctx.drawImage(img, r.left-rect.left, r.top-rect.top, r.width, r.height); }catch(e){} res(); };
+    img.onerror=()=>res();
+    img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(sv));
+  })));
   return out;
 }
 async function comMapa(cb){
