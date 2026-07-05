@@ -70,6 +70,7 @@
       <label style="font-size:11px;color:#9ca3af">Tipo<select id="fTipo"><option value="">Todos</option></select></label>
       <label style="font-size:11px;color:#9ca3af">Estado<select id="fEstado"><option value="">Todos</option><option value="led">LED</option><option value="pendente">Pendente</option><option value="sem_lampada">Sem lâmpada</option></select></label>
       <label style="font-size:11px;color:#9ca3af">Potência mínima<select id="fPot"><option value="">Qualquer</option><option value="150">≥ 150 W</option><option value="250">≥ 250 W</option><option value="400">≥ 400 W</option></select></label>
+      <label style="font-size:11px;color:#9ca3af">Fila de auditoria<select id="fFila"><option value="">— nenhuma —</option><option value="revisao">Marcados p/ revisão</option><option value="suspeito">LED suspeito (&gt;400 W)</option><option value="mod_seconser">Origem: SECONSER</option><option value="mod_censo">Origem: censo ENEL</option><option value="mod_campo">Origem: campo</option></select></label>
       <button class="btn" id="fLimpar">Limpar filtros</button>
     </div>
   </div>
@@ -197,7 +198,7 @@ const URL_SB = "https://lrnmydrwzxxajylsmoih.supabase.co";
 const ANON = "sb_publishable_w3UmLsmcDtT81S3MDdDJjw_rEWckoVl";
 const sb = window.supabase.createClient(URL_SB, ANON);
 
-const state = { user:null, userRole:null, bairro:"", tipo:"", estado:"", pot:"", layer:null, mode:"", tPage:0, tSize:50,
+const state = { user:null, userRole:null, bairro:"", tipo:"", estado:"", pot:"", fila:"", layer:null, mode:"", tPage:0, tSize:50,
   bairroLayer:null, choropleth:false, choroLayer:null, choroData:null, current:null, tCache:{}, config:null };
 const TIPOS = ["led","vapor_sodio","metalico","vapor_mercurio","fluorescente","sem_lampada","desconhecido"];
 const STATUS = ["led_instalado","pendente_troca","a_verificar"];
@@ -234,8 +235,19 @@ function filtros(){
   if(state.estado==='led') p_modernizado=true;
   else if(state.estado==='pendente') p_modernizado=false;
   else if(state.estado==='sem_lampada') p_tipo='sem_lampada';
-  return { p_bairro:state.bairro||null, p_tipo, p_modernizado, p_pot_min: state.pot?parseInt(state.pot):null };
+  const f=state.fila;
+  return { p_bairro:state.bairro||null, p_tipo, p_modernizado, p_pot_min: state.pot?parseInt(state.pot):null,
+    p_revisao: f==='revisao'?true:null,
+    p_fonte_mod: f==='mod_censo'?'censo_enel':f==='mod_seconser'?'seconser_pos_censo':f==='mod_campo'?'campo':null,
+    p_suspeito: f==='suspeito'?true:null };
 }
+function aplicaFila(q){ const f=state.fila;
+  if(f==='revisao') q=q.eq('flag_revisao_censo',true);
+  else if(f==='suspeito') q=q.eq('modernizado_led',true).gt('potencia_w',400);
+  else if(f==='mod_censo') q=q.eq('fonte_modernizacao','censo_enel');
+  else if(f==='mod_seconser') q=q.eq('fonte_modernizacao','seconser_pos_censo');
+  else if(f==='mod_campo') q=q.eq('fonte_modernizacao','campo');
+  return q; }
 
 function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
 
@@ -475,7 +487,7 @@ async function loadBairroOptions(){
   TIPOS.forEach(tp=>document.getElementById('fTipo').insertAdjacentHTML('beforeend',`<option value="${tp}">${tp}</option>`));
 }
 function updateFCount(){
-  const n=[state.bairro,state.tipo,state.estado,state.pot].filter(Boolean).length;
+  const n=[state.bairro,state.tipo,state.estado,state.pot,state.fila].filter(Boolean).length;
   const b=document.getElementById('fCount');
   if(n){ b.style.display='inline'; b.textContent=n; } else b.style.display='none';
 }
@@ -488,8 +500,8 @@ document.addEventListener('click', e=>{
   });
 });
 document.getElementById('fLimpar').onclick = ()=>{
-  state.bairro=state.tipo=state.estado=state.pot='';
-  ['fBairro','fTipo','fEstado','fPot'].forEach(id=>document.getElementById(id).value='');
+  state.bairro=state.tipo=state.estado=state.pot=state.fila='';
+  ['fBairro','fTipo','fEstado','fPot','fFila'].forEach(id=>document.getElementById(id).value='');
   updateFCount(); loadStatsChips(); if(state.bairroLayer){map.removeLayer(state.bairroLayer);state.bairroLayer=null;}
   state.choroData=null; refresh();
 };
@@ -497,6 +509,9 @@ document.getElementById('fBairro').onchange = e=>{ state.bairro=e.target.value; 
 document.getElementById('fTipo').onchange = e=>{ state.tipo=e.target.value; updateFCount(); state.choroData=null; refresh(); };
 document.getElementById('fEstado').onchange = e=>{ state.estado=e.target.value; updateFCount(); refresh(); };
 document.getElementById('fPot').onchange = e=>{ state.pot=e.target.value; updateFCount(); refresh(); };
+document.getElementById('fFila').onchange = async e=>{ state.fila=e.target.value; updateFCount(); state.choroData=null; refresh();
+  if(e.target.value){ let q=sb.from('v_parque_export').select('id',{count:'exact',head:true}); q=aplicaFila(q);
+    const {count}=await q; toast('Fila: '+((count||0).toLocaleString('pt-BR'))+' ponto(s)'); } };
 document.getElementById('btnStats').onclick = ()=>{ const s=document.getElementById('stats'); if(s.style.display==='block'){s.style.display='none';} else {s.style.display='block'; loadStatsPanel();} };
 
 // ---------- Tabela ----------
@@ -511,6 +526,7 @@ async function loadTable(){
   if(st==='led') q=q.eq('modernizado_led',true);
   else if(st==='pendente') q=q.eq('modernizado_led',false);
   else if(st==='sem_lampada') q=q.eq('tipo_lampada','sem_lampada');
+  q=aplicaFila(q);
   const from=state.tPage*state.tSize;
   const {data,count,error}=await q.order('bairro_nome').range(from,from+state.tSize-1);
   setBusy(false);
@@ -618,6 +634,7 @@ async function fetchFiltrado(){
       if(state.estado==='led') q=q.eq('modernizado_led',true);
       if(state.estado==='pendente') q=q.eq('modernizado_led',false);
       if(state.pot) q=q.gte('potencia_w',parseInt(state.pot));
+      q=aplicaFila(q);
       const {data,error}=await q; if(error) throw error;
       rows=rows.concat(data||[]); if(!data||data.length<page) break; from+=page;
     }
@@ -753,7 +770,7 @@ document.getElementById('cfgSave').onclick=async()=>{
 
 // ---------- acessibilidade ----------
 { const arias={fBairro:'Filtrar por bairro',fTipo:'Filtrar por tipo de lâmpada',fEstado:'Filtrar por estado',
-    fPot:'Filtrar por potência mínima',fLimpar:'Limpar filtros',btnFiltros:'Abrir filtros',
+    fPot:'Filtrar por potência mínima',fFila:'Fila de auditoria',fLimpar:'Limpar filtros',btnFiltros:'Abrir filtros',
     btnExport:'Abrir menu de exportação',btnChoro:'Alternar mapa coroplético',btnTabela:'Abrir tabela de registros',
     btnStats:'Abrir indicadores',btnNovo:'Cadastrar novo ponto',btnAparencia:'Configurar aparência',btnAdmin:'Gerenciar usuários',btnLogin:'Entrar ou sair',
     tSearch:'Buscar por endereço ou patrimônio',tBairro:'Filtrar tabela por bairro',tStatus:'Filtrar tabela por estado',
