@@ -91,8 +91,7 @@
     <button class="btn" id="btnTabela">Tabela</button>
     <button class="btn" id="btnStats">Indicadores</button>
     <button class="btn btn-accent" id="btnNovo" style="display:none">+ Ponto</button>
-    <button class="btn" id="btnAparencia" style="display:none">Aparência</button>
-    <button class="btn" id="btnAdmin" style="display:none;border-color:#ef4444;color:#f87171">Usuários</button>
+    <button class="btn" id="btnAdminConsole" style="display:none;border-color:#ef4444;color:#f87171">Admin</button>
     <button class="btn" id="btnLogin">Entrar</button>
   </div>
 </div>
@@ -131,50 +130,85 @@
   </div>
 </div>
 
-<div id="aparModal" style="position:absolute;inset:0;z-index:1300;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center">
-  <div class="panel" style="width:min(560px,94vw);max-height:86vh;overflow:auto;border-radius:12px;display:flex;flex-direction:column;padding:16px">
-    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1f2a37;padding-bottom:8px;margin-bottom:12px">
-      <b>Aparência do site</b><button class="btn" id="aparClose">Fechar</button>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <label style="font-size:11px;color:#9ca3af">Título<input id="cfgTit"/></label>
-      <label style="font-size:11px;color:#9ca3af">Subtítulo<input id="cfgSubIn"/></label>
-      <div style="display:flex;gap:6px">
-        <label style="font-size:11px;color:#9ca3af;flex:1">Cor de destaque<input id="cfgAccent" type="color" style="height:34px;padding:2px"/></label>
-        <label style="font-size:11px;color:#9ca3af;flex:1">Fonte<select id="cfgFonte"><option value="system">Sistema</option><option value="inter">Inter</option><option value="roboto">Roboto</option><option value="georgia">Georgia</option><option value="mono">Monoespaçada</option></select></label>
-      </div>
-      <div style="display:flex;gap:6px">
-        <label style="font-size:11px;color:#9ca3af;flex:1">Fundo dos painéis<input id="cfgPanel" type="color" style="height:34px;padding:2px"/></label>
-        <label style="font-size:11px;color:#9ca3af;flex:1">Densidade<select id="cfgDensity"><option value="normal">Normal</option><option value="compact">Compacta</option><option value="comfortable">Confortável</option></select></label>
-      </div>
-      <div style="font-size:11px;color:#9ca3af">Logotipo / brasão
-        <div style="display:flex;gap:6px;align-items:center;margin-top:4px">
-          <img id="cfgLogoPrev" style="height:28px;border-radius:4px;display:none"/>
-          <input id="cfgLogoFile" type="file" accept="image/*" style="flex:1"/>
-          <button class="btn" id="cfgLogoRemove" type="button">Remover</button>
-        </div>
-      </div>
-      <button class="btn btn-accent" id="cfgSave" style="margin-top:4px">Salvar aparência</button>
-    </div>
+<div id="adminConsole" style="position:fixed;inset:0;z-index:1400;background:#0b0f14;display:none;flex-direction:column">
+  <div style="display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid #1f2a37">
+    <b style="font-size:16px">Administração</b>
+    <span style="color:#6b7280;font-size:12px">Iluminação Pública · Niterói · SECONSER</span>
+    <div style="flex:1"></div>
+    <button class="btn" id="acVoltar">← Voltar ao mapa</button>
   </div>
-</div>
+  <div style="flex:1;display:flex;min-height:0">
+    <nav style="width:180px;border-right:1px solid #1f2a37;padding:12px;display:flex;flex-direction:column;gap:4px">
+      <button class="btn acnav on" data-sec="visao" style="text-align:left">Visão geral</button>
+      <button class="btn acnav" data-sec="usuarios" style="text-align:left">Usuários</button>
+      <button class="btn acnav" data-sec="aparencia" style="text-align:left">Aparência</button>
+      <button class="btn acnav" data-sec="dados" style="text-align:left">Dados</button>
+    </nav>
+    <div style="flex:1;overflow:auto;padding:18px">
+      <section id="sec-visao" class="acsec"></section>
 
-<div id="adminModal" style="position:absolute;inset:0;z-index:1300;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center">
-  <div class="panel" style="width:min(640px,94vw);max-height:86vh;border-radius:12px;display:flex;flex-direction:column;padding:16px">
-    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1f2a37;padding-bottom:8px;margin-bottom:12px">
-      <b>Gerenciar usuários</b><button class="btn" id="admClose">Fechar</button>
+      <section id="sec-usuarios" class="acsec" style="display:none">
+        <h3 style="margin:0 0 12px;font-size:15px">Usuários</h3>
+        <div class="chip" style="border-radius:8px;padding:10px;margin-bottom:12px;max-width:680px">
+          <div style="font-size:12px;color:#9ca3af;margin-bottom:6px">Novo operador</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <input id="admEmail" type="email" placeholder="E-mail" style="flex:2;min-width:150px"/>
+            <input id="admPass" type="text" placeholder="Senha (opcional)" style="flex:1;min-width:120px"/>
+            <select id="admRole" style="flex:1;min-width:100px"><option value="leitura">Leitura</option><option value="editor">Editor</option><option value="admin">Admin</option></select>
+            <button class="btn btn-accent" id="admCreate">Adicionar</button>
+          </div>
+        </div>
+        <table style="width:100%;border-collapse:collapse;max-width:680px">
+          <thead><tr><th>E-mail</th><th>Papel</th><th></th></tr></thead><tbody id="admBody"></tbody></table>
+      </section>
+
+      <section id="sec-aparencia" class="acsec" style="display:none">
+        <h3 style="margin:0 0 12px;font-size:15px">Aparência do site</h3>
+        <div style="display:flex;flex-direction:column;gap:8px;max-width:520px">
+          <label style="font-size:11px;color:#9ca3af">Título<input id="cfgTit"/></label>
+          <label style="font-size:11px;color:#9ca3af">Subtítulo<input id="cfgSubIn"/></label>
+          <div style="display:flex;gap:6px">
+            <label style="font-size:11px;color:#9ca3af;flex:1">Cor de destaque<input id="cfgAccent" type="color" style="height:34px;padding:2px"/></label>
+            <label style="font-size:11px;color:#9ca3af;flex:1">Fonte<select id="cfgFonte"><option value="system">Sistema</option><option value="inter">Inter</option><option value="roboto">Roboto</option><option value="georgia">Georgia</option><option value="mono">Monoespaçada</option></select></label>
+          </div>
+          <div style="display:flex;gap:6px">
+            <label style="font-size:11px;color:#9ca3af;flex:1">Fundo dos painéis<input id="cfgPanel" type="color" style="height:34px;padding:2px"/></label>
+            <label style="font-size:11px;color:#9ca3af;flex:1">Densidade<select id="cfgDensity"><option value="normal">Normal</option><option value="compact">Compacta</option><option value="comfortable">Confortável</option></select></label>
+          </div>
+          <div style="font-size:11px;color:#9ca3af">Logotipo / brasão
+            <div style="display:flex;gap:6px;align-items:center;margin-top:4px">
+              <img id="cfgLogoPrev" style="height:28px;border-radius:4px;display:none"/>
+              <input id="cfgLogoFile" type="file" accept="image/*" style="flex:1"/>
+              <button class="btn" id="cfgLogoRemove" type="button">Remover</button>
+            </div>
+          </div>
+          <button class="btn btn-accent" id="cfgSave" style="margin-top:4px">Salvar aparência</button>
+        </div>
+      </section>
+
+      <section id="sec-dados" class="acsec" style="display:none">
+        <h3 style="margin:0 0 12px;font-size:15px">Dados</h3>
+        <div style="max-width:600px;display:flex;flex-direction:column;gap:10px">
+          <div class="chip" style="border-radius:8px;padding:12px">
+            <div style="font-size:12px;color:#9ca3af;margin-bottom:8px">Exportar — parque completo ou conforme os filtros ativos no mapa</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button class="btn" data-exp="csv">Dados (CSV)</button>
+              <button class="btn" data-exp="geojson">Dados (GeoJSON)</button>
+              <button class="btn" data-exp="bairros">Passivo por bairro (CSV)</button>
+              <button class="btn" data-exp="serie">Série de métricas (CSV)</button>
+            </div>
+          </div>
+          <div class="chip" style="border-radius:8px;padding:12px">
+            <div style="font-size:12px;color:#9ca3af;margin-bottom:4px">Backup independente</div>
+            <div style="font-size:12px;color:#cbd5e1">O parque é copiado para fora do Supabase pelo script <code>backup_parque.py</code> (somente leitura, sem segredo). Agende-o localmente para cópia periódica.</div>
+          </div>
+          <div class="chip" style="border-radius:8px;padding:12px;opacity:.6">
+            <div style="font-size:12px;color:#9ca3af;margin-bottom:4px">Importação em massa</div>
+            <div style="font-size:12px;color:#cbd5e1">Reservado para o fechamento da auditoria em papel: subir um CSV corrigido, validar e aplicar em lote com relatório de divergências. (a implementar)</div>
+          </div>
+        </div>
+      </section>
     </div>
-    <div class="chip" style="border-radius:8px;padding:10px;margin-bottom:12px">
-      <div style="font-size:12px;color:#9ca3af;margin-bottom:6px">Novo operador</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <input id="admEmail" type="email" placeholder="E-mail" style="flex:2;min-width:150px"/>
-        <input id="admPass" type="text" placeholder="Senha (opcional)" style="flex:1;min-width:120px"/>
-        <select id="admRole" style="flex:1;min-width:100px"><option value="leitura">Leitura</option><option value="editor">Editor</option><option value="admin">Admin</option></select>
-        <button class="btn btn-accent" id="admCreate">Adicionar</button>
-      </div>
-    </div>
-    <div style="flex:1;overflow:auto"><table style="width:100%;border-collapse:collapse">
-      <thead><tr><th>E-mail</th><th>Papel</th><th></th></tr></thead><tbody id="admBody"></tbody></table></div>
   </div>
 </div>
 
@@ -558,9 +592,7 @@ async function setUser(u){
   if(u){ try{ const {data}=await sb.from('profiles').select('role').eq('id',u.id).single(); state.userRole=data?.role||'leitura'; }
          catch(e){ state.userRole='leitura'; } }
   document.getElementById('btnNovo').style.display = podeEditar()?'inline-block':'none';
-  const adm = state.userRole==='admin';
-  document.getElementById('btnAparencia').style.display = adm?'inline-block':'none';
-  document.getElementById('btnAdmin').style.display = adm?'inline-block':'none';
+  document.getElementById('btnAdminConsole').style.display = state.userRole==='admin'?'inline-block':'none';
 }
 document.getElementById('btnLogin').onclick=async ()=>{
   if(state.user){ await sb.auth.signOut(); setUser(null); toast('Sessão encerrada'); return; }
@@ -575,10 +607,54 @@ document.getElementById('liSubmit').onclick=async ()=>{
 sb.auth.getSession().then(({data})=>setUser(data.session?.user||null));
 
 // ---------- Painel admin ----------
-document.getElementById('btnAdmin').onclick = ()=>{ document.getElementById('adminModal').style.display='flex'; loadAdminUsers(); };
-document.getElementById('admClose').onclick = ()=>document.getElementById('adminModal').style.display='none';
-document.getElementById('btnAparencia').onclick = ()=>{ document.getElementById('aparModal').style.display='flex'; fillConfigForm(); };
-document.getElementById('aparClose').onclick = ()=>document.getElementById('aparModal').style.display='none';
+function acShow(sec){
+  document.querySelectorAll('.acsec').forEach(s=>s.style.display='none');
+  document.getElementById('sec-'+sec).style.display='block';
+  document.querySelectorAll('.acnav').forEach(b=>b.classList.toggle('on', b.dataset.sec===sec));
+  if(sec==='visao') loadVisaoGeral();
+  else if(sec==='usuarios') loadAdminUsers();
+  else if(sec==='aparencia') fillConfigForm();
+}
+document.getElementById('btnAdminConsole').onclick = ()=>{ document.getElementById('adminConsole').style.display='flex'; acShow('visao'); };
+document.getElementById('acVoltar').onclick = ()=>document.getElementById('adminConsole').style.display='none';
+document.querySelectorAll('.acnav').forEach(b=>b.onclick=()=>acShow(b.dataset.sec));
+document.getElementById('sec-dados').addEventListener('click',e=>{ const b=e.target.closest('[data-exp]'); if(!b)return;
+  ({csv:()=>exportData('csv'),geojson:()=>exportData('geojson'),bairros:exportBairros,serie:exportSerie})[b.dataset.exp]?.(); });
+function qcard(label,n,fila,nota){
+  return `<div class="chip" style="border-radius:10px;padding:12px;min-width:160px">
+    <div style="color:#9ca3af;font-size:11px">${label}</div>
+    <div style="font-weight:700;font-size:20px">${(n||0).toLocaleString('pt-BR')}</div>
+    ${fila?`<button class="btn" style="margin-top:6px;padding:3px 8px;font-size:11px" onclick="window._filaMapa('${fila}')">abrir no mapa</button>`:`<div style="color:#6b7280;font-size:11px;margin-top:6px">${nota||''}</div>`}</div>`;
+}
+async function loadVisaoGeral(){
+  const box=document.getElementById('sec-visao');
+  box.innerHTML='<div style="color:#6b7280"><span class="spin"></span> Carregando…</div>';
+  const [s,serie,q]=await Promise.all([ rpc('ip_estatisticas',{p_bairro:null}), rpc('ip_serie_metricas'), rpc('ip_qualidade_dado') ]);
+  const S=s||{}, Q=q||{};
+  const kv=(k,v,c)=>`<div class="chip" style="border-radius:10px;padding:12px;min-width:120px"><div style="color:#9ca3af;font-size:11px">${k}</div><div style="font-weight:700;font-size:20px;color:${c||'#e5e7eb'}">${v}</div></div>`;
+  box.innerHTML = `<h3 style="margin:0 0 12px;font-size:15px">Visão geral</h3>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+      ${kv('Luminárias',(S.total||0).toLocaleString('pt-BR'))}
+      ${kv('LED',(S.pct_led||0)+'%','#4ade80')}
+      ${kv('Pendentes',(S.pendente||0).toLocaleString('pt-BR'),'#fbbf24')}
+      ${kv('Pot. LED',(S.potencia_kw||0)+' kW')}
+      ${kv('LED censo',(S.led_censo||0).toLocaleString('pt-BR'))}
+      ${kv('LED SECONSER',(S.led_seconser||0).toLocaleString('pt-BR'))}
+    </div>
+    <div style="font-size:13px;color:#9ca3af;margin:6px 0">Evolução do % LED</div>${sparkline(serie)}
+    <div style="font-size:13px;color:#9ca3af;margin:16px 0 6px">Qualidade do dado · filas de auditoria</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      ${qcard('Marcados p/ revisão', Q.revisao, 'revisao')}
+      ${qcard('LED suspeito (>400 W)', Q.suspeito, 'suspeito')}
+      ${qcard('Resíduo da conciliação', Q.residuo, null, 'conferência de campo')}
+    </div>`;
+}
+window._filaMapa=(fila)=>{
+  state.fila=fila; const sel=document.getElementById('fFila'); if(sel) sel.value=fila;
+  updateFCount(); document.getElementById('adminConsole').style.display='none';
+  state.choroData=null; refresh();
+  toast('Filtro aplicado: '+(fila==='revisao'?'marcados p/ revisão':fila==='suspeito'?'LED suspeito':fila));
+};
 async function loadAdminUsers(){
   const body=document.getElementById('admBody');
   body.innerHTML='<tr><td colspan="3" style="text-align:center;color:#6b7280;padding:14px"><span class="spin"></span> Carregando…</td></tr>';
@@ -772,7 +848,7 @@ document.getElementById('cfgSave').onclick=async()=>{
 { const arias={fBairro:'Filtrar por bairro',fTipo:'Filtrar por tipo de lâmpada',fEstado:'Filtrar por estado',
     fPot:'Filtrar por potência mínima',fFila:'Fila de auditoria',fLimpar:'Limpar filtros',btnFiltros:'Abrir filtros',
     btnExport:'Abrir menu de exportação',btnChoro:'Alternar mapa coroplético',btnTabela:'Abrir tabela de registros',
-    btnStats:'Abrir indicadores',btnNovo:'Cadastrar novo ponto',btnAparencia:'Configurar aparência',btnAdmin:'Gerenciar usuários',btnLogin:'Entrar ou sair',
+    btnStats:'Abrir indicadores',btnNovo:'Cadastrar novo ponto',btnAdminConsole:'Abrir administração',btnLogin:'Entrar ou sair',
     tSearch:'Buscar por endereço ou patrimônio',tBairro:'Filtrar tabela por bairro',tStatus:'Filtrar tabela por estado',
     tPrev:'Página anterior',tNext:'Próxima página',tClose:'Fechar tabela'};
   Object.entries(arias).forEach(([id,l])=>{const el=document.getElementById(id); if(el) el.setAttribute('aria-label',l);}); }
