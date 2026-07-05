@@ -323,6 +323,7 @@ function openDetail(p){
     ${fld('Origem modernização', origem)}${fld('Tipo no censo', p.censo_tipo_original)}${fld('Fonte do ponto', p.fonte)}
     ${p.flag_revisao_censo?`<div style="color:#fbbf24;font-size:11px;margin-top:4px">⚑ marcado para revisão (linha idêntica no censo)</div>`:''}
     ${p.observacoes?`<div style="color:#9ca3af;font-size:11px;margin-top:6px">${esc(p.observacoes)}</div>`:''}
+    ${state.user?`<button class="btn" style="width:100%;margin-top:8px" onclick="window._hist('${p.id}')">Ver histórico de alterações</button><div id="histBox"></div>`:''}
     <div style="margin-top:10px;display:flex;gap:8px">
       ${podeEditar()?`<button class="btn btn-accent" style="flex:1" onclick="window._edit()">Editar</button>`:''}
       <button class="btn" onclick="document.getElementById('detail').style.display='none'">Fechar</button></div>`;
@@ -365,6 +366,29 @@ window._edit = function(){
   };
 };
 window._reopen = ()=>openDetail(state.current);
+window._hist = async (id)=>{
+  const box=document.getElementById('histBox'); if(!box) return;
+  box.innerHTML='<div style="color:#6b7280;font-size:11px;padding:6px 0"><span class="spin"></span> Carregando histórico…</div>';
+  const data = await rpc('ip_historico_ponto',{p_id:id});
+  if(!data){ box.innerHTML=''; return; }
+  if(!data.length){ box.innerHTML='<div style="color:#6b7280;font-size:11px;padding:6px 0">Sem alterações registradas.</div>'; return; }
+  box.innerHTML='<div style="font-size:11px;color:#9ca3af;margin:8px 0 4px">Histórico ('+data.length+')</div>'+data.map(h=>{
+    const dt=new Date(h.alterado_em).toLocaleString('pt-BR');
+    let ch=[];
+    if(h.operacao==='INSERT') ch.push('ponto criado');
+    else if(h.operacao==='DELETE') ch.push('ponto removido');
+    else {
+      if(h.tipo_antes!==h.tipo_depois) ch.push(`tipo ${h.tipo_antes||'—'}→${h.tipo_depois||'—'}`);
+      if(h.status_antes!==h.status_depois) ch.push(`estado ${h.status_antes||'—'}→${h.status_depois||'—'}`);
+      if(h.pot_antes!==h.pot_depois) ch.push(`pot ${h.pot_antes||'—'}→${h.pot_depois||'—'} W`);
+      if(h.led_antes!==h.led_depois) ch.push('LED: '+(h.led_depois==='true'?'sim':'não'));
+    }
+    if(!ch.length) ch.push('sem mudança de atributo');
+    return `<div style="border-bottom:1px solid #161f29;padding:4px 0;font-size:11px">
+      <div style="color:#cbd5e1">${esc(ch.join(' · '))}</div>
+      <div style="color:#6b7280">${dt} · ${esc(h.alterado_por||'—')}</div></div>`;
+  }).join('');
+};
 
 // ---------- Novo ponto ----------
 document.getElementById('btnNovo').onclick = ()=>{
