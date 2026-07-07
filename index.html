@@ -75,7 +75,7 @@
   <div style="flex:1"></div>
   <div style="position:relative">
     <button class="btn" id="btnFiltros">Filtros<span id="fCount" style="display:none;margin-left:6px;background:#1d4ed8;color:#fff;border-radius:999px;padding:0 7px;font-size:11px"></span></button>
-    <div id="filtrosPop" class="panel" style="position:absolute;top:40px;right:0;width:230px;border-radius:10px;padding:10px;display:none;flex-direction:column;gap:8px;z-index:1001">
+    <div id="filtrosPop" class="panel" style="position:absolute;top:40px;right:0;width:230px;border-radius:10px;padding:10px;display:none;flex-direction:column;gap:8px;z-index:1000">
       <label style="font-size:11px;color:#9ca3af">Bairro<select id="fBairro"><option value="">Todos</option></select></label>
       <label style="font-size:11px;color:#9ca3af">Tipo<select id="fTipo"><option value="">Todos</option></select></label>
       <label style="font-size:11px;color:#9ca3af">Estado<select id="fEstado"><option value="">Todos</option><option value="led">LED</option><option value="pendente">Pendente</option><option value="sem_lampada">Sem lâmpada</option></select></label>
@@ -86,7 +86,7 @@
   </div>
   <div style="position:relative">
     <button class="btn" id="btnExport">Exportar ▾</button>
-    <div id="exportPop" class="panel" style="position:absolute;top:40px;right:0;width:220px;border-radius:10px;padding:8px;display:none;flex-direction:column;gap:6px;z-index:1001">
+    <div id="exportPop" class="panel" style="position:absolute;top:40px;right:0;width:220px;border-radius:10px;padding:8px;display:none;flex-direction:column;gap:6px;z-index:1000">
       <div style="font-size:11px;color:#6b7280;padding:0 2px">Conforme filtros ativos</div>
       <button class="btn" data-exp="csv">Dados (CSV)</button>
       <button class="btn" data-exp="geojson">Dados (GeoJSON · GIS)</button>
@@ -99,7 +99,7 @@
   </div>
   <div style="position:relative">
     <button class="btn" id="btnVis">Visualizar ▾</button>
-    <div id="visPop" class="panel" style="position:absolute;top:40px;right:0;width:190px;border-radius:10px;padding:8px;display:none;flex-direction:column;gap:6px;z-index:1001">
+    <div id="visPop" class="panel" style="position:absolute;top:40px;right:0;width:190px;border-radius:10px;padding:8px;display:none;flex-direction:column;gap:6px;z-index:1000">
       <button class="btn" id="btnChoro" title="Colorir bairros por % LED">Coroplético</button>
       <button class="btn" id="btnDens" title="Grade 250 m de densidade luminotécnica">Densidade</button>
       <button class="btn" id="btnTabela">Tabela</button>
@@ -301,6 +301,7 @@ async function rpc(fn,args){ setBusy(true); try{
 
 const map = L.map('map',{zoomControl:true,attributionControl:false,preferCanvas:true,minZoom:11,maxBoundsViscosity:1}).setView([-22.905,-43.055],12);
 map.setMaxBounds([[-23.03,-43.20],[-22.80,-42.90]]);
+state.munLayer = L.layerGroup().addTo(map);
 const bases = {
   'Escuro': L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',crossOrigin:true}),
   'Claro': L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',crossOrigin:true}),
@@ -429,6 +430,7 @@ document.getElementById('btnChoro').onclick = ()=>{
   document.getElementById('btnChoro').classList.toggle('on',state.choropleth);
   document.getElementById('btnVis').classList.toggle('on',state.choropleth||state.densidade);
   document.getElementById('legend').style.display = (state.choropleth||state.densidade)?'none':'block';
+  if(!state.choropleth && !state.densidade) renderMunicipioLimites();
   refresh();
 };
 
@@ -512,6 +514,7 @@ document.getElementById('btnDens').onclick = ()=>{
     if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; }
     if(state.densMunLayer){ map.removeLayer(state.densMunLayer); state.densMunLayer=null; }
     document.getElementById('densCtl').style.display='none';
+    renderMunicipioLimites();
   }
   refresh();
 };
@@ -526,6 +529,16 @@ async function highlightBairro(name){
     try{ map.fitBounds(state.bairroLayer.getBounds(),{padding:[30,30]}); }catch(e){}
   }
   refresh();
+}
+
+// ---------- Limites do município ----------
+async function renderMunicipioLimites(){
+  state.munLayer.clearLayers();
+  const data = await rpc('ip_bairros_choropleth', {});
+  if(data && data.features){
+    const munGeoJson={type:'FeatureCollection',features:data.features.map(f=>({type:'Feature',geometry:f.geometry,properties:f.properties}))};
+    L.geoJSON(munGeoJson,{style:{color:'#60a5fa',weight:2.5,fill:false,opacity:.5,dashArray:'5,5'},interactive:false}).addTo(state.munLayer);
+  }
 }
 
 // ---------- Detalhe ----------
@@ -772,17 +785,16 @@ function updateFCount(){
   const b=document.getElementById('fCount');
   if(n){ b.style.display='inline'; b.textContent=n; } else b.style.display='none';
 }
-document.getElementById('btnFiltros').onclick = (e)=>{ e.stopPropagation();
-  const p=document.getElementById('filtrosPop'); p.style.display = p.style.display==='flex'?'none':'flex'; };
+document.getElementById('btnFiltros').addEventListener('mouseenter',()=>{ document.getElementById('filtrosPop').style.display='flex'; });
+document.getElementById('filtrosPop').addEventListener('mouseleave',()=>{ document.getElementById('filtrosPop').style.display='none'; });
 document.addEventListener('click', e=>{
   [['filtrosPop','btnFiltros'],['exportPop','btnExport'],['visPop','btnVis']].forEach(([pid,bid])=>{
     const p=document.getElementById(pid);
     if(p && p.style.display==='flex' && !p.contains(e.target) && e.target.id!==bid) p.style.display='none';
   });
 });
-document.getElementById('btnVis').onclick=(e)=>{ e.stopPropagation();
-  const p=document.getElementById('visPop'); p.style.display=p.style.display==='flex'?'none':'flex'; };
-document.getElementById('visPop').addEventListener('click',e=>{ if(e.target.closest('button')) setTimeout(()=>document.getElementById('visPop').style.display='none',60); });
+document.getElementById('btnVis').addEventListener('mouseenter',()=>{ document.getElementById('visPop').style.display='flex'; });
+document.getElementById('visPop').addEventListener('mouseleave',()=>{ document.getElementById('visPop').style.display='none'; });
 document.getElementById('fLimpar').onclick = ()=>{
   state.bairro=state.tipo=state.estado=state.pot=state.fila='';
   ['fBairro','fTipo','fEstado','fPot','fFila'].forEach(id=>document.getElementById(id).value='');
@@ -1113,8 +1125,8 @@ async function exportPDF(){
     doc.save(`relatorio_ip_${stamp()}.pdf`); toast('Relatório PDF gerado');
   }catch(e){ toast('Falha no PDF: '+e.message,true); } });
 }
-document.getElementById('btnExport').onclick=(e)=>{ e.stopPropagation();
-  const p=document.getElementById('exportPop'); p.style.display=p.style.display==='flex'?'none':'flex'; };
+document.getElementById('btnExport').addEventListener('mouseenter',()=>{ document.getElementById('exportPop').style.display='flex'; });
+document.getElementById('exportPop').addEventListener('mouseleave',()=>{ document.getElementById('exportPop').style.display='none'; });
 document.getElementById('exportPop').addEventListener('click',e=>{ const b=e.target.closest('[data-exp]'); if(!b)return;
   document.getElementById('exportPop').style.display='none';
   ({csv:()=>exportData('csv'),geojson:()=>exportData('geojson'),bairros:exportBairros,
@@ -1200,7 +1212,7 @@ document.getElementById('splash').addEventListener('click',e=>{ if(e.target.id==
 setTimeout(dismissSplash, 2200);
 
 // ---------- init ----------
-loadConfig(); loadBairroOptions(); loadStatsChips(); refresh();
+loadConfig(); loadBairroOptions(); renderMunicipioLimites(); loadStatsChips(); refresh();
 </script>
 </body>
 </html>
