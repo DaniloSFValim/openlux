@@ -1,0 +1,45 @@
+# Git Attributes - Language Detection & Line Endings
+# https://github.com/github/linguist
+
+# Auto detect text files and normalize line endings to LF
+* text=auto
+
+# Source Code
+*.html linguist-language=HTML
+*.js linguist-language=JavaScript
+*.ts linguist-language=TypeScript
+*.tsx linguist-language=TypeScript
+*.css linguist-language=CSS
+*.json linguist-language=JSON
+*.toml linguist-language=TOML
+*.yaml linguist-language=YAML
+*.yml linguist-language=YAML
+
+# Documentation
+*.md linguist-documentation
+README* linguist-documentation
+LICENSE* linguist-documentation
+
+# Supabase
+supabase/migrations/*.sql linguist-language=SQL
+
+# Shell Scripts
+*.sh linguist-language=Shell
+
+# GitHub
+.github/** linguist-vendored=false
+.github/workflows/** linguist-vendored=false
+
+# Binary files
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.db binary
+
+# Don't count these as code
+node_modules/** linguist-vendored
+pycache/** linguist-vendored
+.next/** linguist-vendored
+dist/** linguist-vendored
+build/** linguist-vendored
