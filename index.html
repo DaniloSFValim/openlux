@@ -560,6 +560,10 @@ window._edit = function(){
       <label style="font-size:11px;color:#9ca3af">Classe NBR<input id="eClasse" value="${esc(p.classe_nbr)}" placeholder="V3, P2, C4…"/></label>
       <label style="font-size:11px;color:#9ca3af">Observações<textarea id="eObs" rows="2">${esc(p.observacoes)}</textarea></label>
       <div style="display:flex;gap:8px"><button class="btn btn-accent" style="flex:1" id="eSave">Salvar</button><button class="btn" onclick="window._reopen()">Cancelar</button></div>
+      ${state.userRole==='admin'?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid #24303d">
+        <button class="btn" style="width:100%;background:#7f1d1d;border-color:#991b1b;color:#fca5a5" id="eRemove">🗑 Remover este ativo</button>
+        <div style="font-size:10px;color:#6b7280;margin-top:4px">Apenas admins podem remover. Será necessária aprovação.</div>
+      </div>`:''}
     </div>`;
   document.getElementById('eSave').onclick = async ()=>{
     const pot=parseInt(document.getElementById('ePot').value);
@@ -575,12 +579,25 @@ window._edit = function(){
       p_potencia:isNaN(pot)?null:pot, p_status:document.getElementById('eStatus').value,
       p_modernizado:document.getElementById('eMod').checked, p_obs:document.getElementById('eObs').value||null,
       p_lat:pLat, p_lng:pLng,
-      p_tipo_luminaria:document.getElementById('eTipoLum').value||null, p_classe_nbr:document.getElementById('eClasse').value||null });
+      p_tipo_luminaria:document.getElementById('eTipoLum').value||null, p_classe_nbr:document.getElementById('eClasse').value||null,
+      p_requer_aprovacao:state.userRole!=='admin'});
     setBusy(false);
     if(error){ toast('Falha ao salvar: '+error.message,true); return; }
-    toast('Ponto atualizado'); document.getElementById('detail').style.display='none';
+    toast(state.userRole!=='admin'?'Alteração salva - aguardando aprovação do admin':'Ponto atualizado'); document.getElementById('detail').style.display='none';
     state.choroData=null; state.densData=null; refresh(); loadStatsChips();
   };
+  const eRemove=document.getElementById('eRemove');
+  if(eRemove){
+    eRemove.onclick=async()=>{
+      if(!confirm('Tem certeza que deseja remover este ativo?\n\nUm admin precisará aprovar a remoção.')){return;}
+      setBusy(true);
+      const {error}=await sb.rpc('ip_remover_ponto',{p_id:p.id, p_motivo:'Remoção solicitada via interface administrativa'});
+      setBusy(false);
+      if(error){ toast('Falha ao remover: '+error.message,true); return; }
+      toast('Remoção marcada para aprovação'); document.getElementById('detail').style.display='none';
+      state.choroData=null; state.densData=null; refresh(); loadStatsChips();
+    };
+  }
 };
 window._reopen = ()=>openDetail(state.current);
 window._interv = async (id)=>{
@@ -624,10 +641,11 @@ window._formInterv = (id)=>{
       p_data:document.getElementById('ivData').value||null, p_descricao:document.getElementById('ivDesc').value||null,
       p_responsavel:document.getElementById('ivResp').value||null,
       p_lampada_nova:document.getElementById('ivLamp').value||null,
-      p_potencia_nova:parseInt(document.getElementById('ivPot').value)||null });
+      p_potencia_nova:parseInt(document.getElementById('ivPot').value)||null,
+      p_requer_aprovacao:state.userRole!=='admin'});
     setBusy(false);
     if(error){ toast('Falha ao registrar: '+error.message,true); return; }
-    toast('Intervenção registrada'); window._interv(id); state.choroData=null; state.densData=null; refresh(); loadStatsChips();
+    toast(state.userRole!=='admin'?'Intervenção registrada - aguardando aprovação':'Intervenção registrada'); window._interv(id); state.choroData=null; state.densData=null; refresh(); loadStatsChips();
   };
 };
 window._hist = async (id)=>{
@@ -695,10 +713,11 @@ document.getElementById('btnNovo').onclick = ()=>{
       p_status: ehLum?document.getElementById('nStatus').value:'a_verificar', p_modernizado: ehLum?document.getElementById('nMod').checked:false,
       p_endereco:document.getElementById('nEnd').value||null, p_patrimonio:document.getElementById('nPatr').value||null, p_obs:'cadastro manual',
       p_tipo_ativo:nAtivo.value, p_tipo_luminaria: ehLum?(document.getElementById('nTipoLum').value||null):null,
-      p_classe_nbr: ehLum?(document.getElementById('nClasse').value||null):null });
+      p_classe_nbr: ehLum?(document.getElementById('nClasse').value||null):null,
+      p_requer_aprovacao:state.userRole!=='admin'});
     setBusy(false);
     if(error){ toast('Falha ao cadastrar: '+error.message,true); return; }
-    toast('Cadastrado: '+(data||'ok')); d.style.display='none'; state.choroData=null; state.densData=null; refresh(); loadStatsChips();
+    toast(state.userRole!=='admin'?'Cadastro realizado - aguardando aprovação do admin':'Cadastrado: '+(data||'ok')); d.style.display='none'; state.choroData=null; state.densData=null; refresh(); loadStatsChips();
     map.setView([lat,lng], Math.max(map.getZoom(),17));
   };
 };
@@ -1032,6 +1051,7 @@ async function exportPDF(){
   }catch(e){ toast('Falha no PDF: '+e.message,true); } });
 }
 document.getElementById('btnExport').onclick=(e)=>{ e.stopPropagation();
+  if(!state.user){ toast('Faça login para exportar dados',true); return; }
   const p=document.getElementById('exportPop'); p.style.display=p.style.display==='flex'?'none':'flex'; };
 document.getElementById('exportPop').addEventListener('click',e=>{ const b=e.target.closest('[data-exp]'); if(!b)return;
   document.getElementById('exportPop').style.display='none';
