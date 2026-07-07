@@ -434,11 +434,10 @@ async function renderDensidade(){
   if(!state.densData){
     setBusy(true);
     try{
-      const {data,error}=await sb.rpc('ip_grid_densidade_completo',{p_cell_m:250})
-        .range(0, 9999);
+      const {data,error}=await sb.rpc('ip_grid_densidade_json',{p_cell_m:250});
       if(error) throw error;
-      state.densData = data;
-    }catch(e){ toast('Erro ao carregar densidade: '+(e.message||e),true); }
+      state.densData = data || [];
+    }catch(e){ toast('Erro ao carregar densidade: '+(e.message||e),true); state.densData=[]; }
     finally{ setBusy(false); }
   }
   if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; }
