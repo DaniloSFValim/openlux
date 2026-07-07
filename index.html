@@ -51,7 +51,7 @@
 </style>
 </head>
 <body>
-<div id="map"></div>
+<div id="map" role="main" aria-label="Mapa de iluminação pública de Niterói"></div>
 <div id="splash" style="position:fixed;inset:0;z-index:3000;background:#0b0f14;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;transition:opacity .5s">
   <img id="splashLogo" alt="" style="height:56px;display:none;margin-bottom:8px"/>
   <div id="splashTitle" style="font-size:23px;font-weight:700;color:#e5e7eb;letter-spacing:.3px">Iluminação Pública · Niterói</div>
@@ -60,9 +60,9 @@
   <div style="font-size:11px;color:#5f6b78">v1.0</div>
   <button class="btn" id="splashSkip" style="margin-top:16px">Entrar</button>
 </div>
-<div id="footerBand" style="position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:800;max-width:92vw;background:rgba(15,21,28,0.86);border:1px solid #1f2a37;border-radius:8px;padding:5px 14px;font-size:11px;color:#9ca3af;text-align:center;pointer-events:none">SECONSER · Diretoria de Iluminação Pública · Prefeitura de Niterói · Desenvolvido por <span style="color:#cbd5e1">Danilo Valim</span> · v1.0</div>
+<div id="footerBand" role="contentinfo" style="position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:800;max-width:92vw;background:rgba(15,21,28,0.86);border:1px solid #1f2a37;border-radius:8px;padding:5px 14px;font-size:11px;color:#9ca3af;text-align:center;pointer-events:none">SECONSER · Diretoria de Iluminação Pública · Prefeitura de Niterói · Desenvolvido por <span style="color:#cbd5e1">Danilo Valim</span> · v1.0</div>
 
-<div class="panel" style="position:absolute;top:10px;left:10px;right:10px;z-index:1000;border-radius:12px;display:flex;align-items:center;gap:14px;padding:7px 14px">
+<div class="panel" role="banner" aria-label="Barra principal" style="position:absolute;top:10px;left:10px;right:10px;z-index:1000;border-radius:12px;display:flex;align-items:center;gap:14px;padding:7px 14px">
   <img id="cfgLogo" alt="Logo"/>
   <div style="min-width:0">
     <div style="font-weight:700;font-size:14px;line-height:1.1;white-space:nowrap"><span id="cfgTitulo">Iluminação Pública</span></div>
@@ -96,17 +96,22 @@
       <button class="btn" data-exp="pdf">Relatório (PDF)</button>
     </div>
   </div>
+  <div style="position:relative">
+    <button class="btn" id="btnVis">Visualizar ▾</button>
+    <div id="visPop" class="panel" style="position:absolute;top:40px;right:0;width:190px;border-radius:10px;padding:8px;display:none;flex-direction:column;gap:6px;z-index:1001">
+      <button class="btn" id="btnChoro" title="Colorir bairros por % LED">Coroplético</button>
+      <button class="btn" id="btnTabela">Tabela</button>
+      <button class="btn" id="btnStats">Indicadores</button>
+    </div>
+  </div>
   <div style="display:flex;gap:6px">
-    <button class="btn" id="btnChoro" title="Colorir bairros por % LED">Coroplético</button>
-    <button class="btn" id="btnTabela">Tabela</button>
-    <button class="btn" id="btnStats">Indicadores</button>
     <button class="btn btn-accent" id="btnNovo" style="display:none">+ Ponto</button>
     <button class="btn" id="btnAdminConsole" style="display:none;border-color:#ef4444;color:#f87171">Admin</button>
     <button class="btn" id="btnLogin">Entrar</button>
   </div>
 </div>
 
-<div class="panel" id="legend" style="position:absolute;bottom:14px;left:10px;z-index:1000;border-radius:10px;padding:8px 10px;font-size:12px">
+<div class="panel" id="legend" role="complementary" aria-label="Legenda" style="position:absolute;bottom:14px;left:10px;z-index:1000;border-radius:10px;padding:8px 10px;font-size:12px">
   <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><svg width="13" height="16" viewBox="0 0 20 24"><path d="M10 1.5a6.5 6.5 0 0 0-3.7 11.8V16h7.4v-2.7A6.5 6.5 0 0 0 10 1.5z" fill="#22c55e" stroke="#0b0f14" stroke-width="1.4"/><rect x="6.8" y="16.3" width="6.4" height="2.6" rx="1" fill="#9ca3af"/></svg> LED</div>
   <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><svg width="13" height="16" viewBox="0 0 20 24"><path d="M10 1.5a6.5 6.5 0 0 0-3.7 11.8V16h7.4v-2.7A6.5 6.5 0 0 0 10 1.5z" fill="#f59e0b" stroke="#0b0f14" stroke-width="1.4"/><rect x="6.8" y="16.3" width="6.4" height="2.6" rx="1" fill="#9ca3af"/></svg> Pendente de troca</div>
   <div style="display:flex;align-items:center;gap:6px"><svg width="13" height="16" viewBox="0 0 20 24"><path d="M10 1.5a6.5 6.5 0 0 0-3.7 11.8V16h7.4v-2.7A6.5 6.5 0 0 0 10 1.5z" fill="#141b24" stroke="#6b7280" stroke-width="1.4"/><rect x="6.8" y="16.3" width="6.4" height="2.6" rx="1" fill="#9ca3af"/></svg> Sem lâmpada</div>
@@ -114,8 +119,8 @@
   <div id="modeHint" style="color:#6b7280;margin-top:5px"></div>
 </div>
 
-<div id="detail" class="panel" style="position:absolute;top:64px;right:10px;width:300px;z-index:1000;border-radius:10px;padding:12px;display:none;max-height:calc(100% - 90px);overflow:auto"></div>
-<div id="stats" class="panel" style="position:absolute;top:64px;left:10px;width:360px;z-index:1000;border-radius:10px;padding:12px;display:none;max-height:calc(100% - 90px);overflow:auto"></div>
+<div id="detail" class="panel" role="complementary" aria-label="Detalhe do ativo" style="position:absolute;top:64px;right:10px;width:300px;z-index:1000;border-radius:10px;padding:12px;display:none;max-height:calc(100% - 90px);overflow:auto"></div>
+<div id="stats" class="panel" role="complementary" aria-label="Indicadores" style="position:absolute;top:64px;left:10px;width:360px;z-index:1000;border-radius:10px;padding:12px;display:none;max-height:calc(100% - 90px);overflow:auto"></div>
 <div id="toast"></div>
 
 <div id="tableModal" style="position:absolute;inset:0;z-index:1100;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center">
@@ -149,7 +154,7 @@
     <button class="btn" id="acVoltar">← Voltar ao mapa</button>
   </div>
   <div style="flex:1;display:flex;min-height:0">
-    <nav style="width:180px;border-right:1px solid #1f2a37;padding:12px;display:flex;flex-direction:column;gap:4px">
+    <nav role="navigation" aria-label="Seções da administração" style="width:180px;border-right:1px solid #1f2a37;padding:12px;display:flex;flex-direction:column;gap:4px">
       <button class="btn acnav on" data-sec="visao" style="text-align:left">Visão geral</button>
       <button class="btn acnav" data-sec="usuarios" style="text-align:left">Usuários</button>
       <button class="btn acnav" data-sec="aparencia" style="text-align:left">Aparência</button>
@@ -394,6 +399,7 @@ async function renderChoropleth(){
 document.getElementById('btnChoro').onclick = ()=>{
   state.choropleth=!state.choropleth;
   document.getElementById('btnChoro').classList.toggle('on',state.choropleth);
+  document.getElementById('btnVis').classList.toggle('on',state.choropleth);
   document.getElementById('legend').style.display = state.choropleth?'none':'block';
   refresh();
 };
@@ -657,11 +663,14 @@ function updateFCount(){
 document.getElementById('btnFiltros').onclick = (e)=>{ e.stopPropagation();
   const p=document.getElementById('filtrosPop'); p.style.display = p.style.display==='flex'?'none':'flex'; };
 document.addEventListener('click', e=>{
-  [['filtrosPop','btnFiltros'],['exportPop','btnExport']].forEach(([pid,bid])=>{
+  [['filtrosPop','btnFiltros'],['exportPop','btnExport'],['visPop','btnVis']].forEach(([pid,bid])=>{
     const p=document.getElementById(pid);
     if(p && p.style.display==='flex' && !p.contains(e.target) && e.target.id!==bid) p.style.display='none';
   });
 });
+document.getElementById('btnVis').onclick=(e)=>{ e.stopPropagation();
+  const p=document.getElementById('visPop'); p.style.display=p.style.display==='flex'?'none':'flex'; };
+document.getElementById('visPop').addEventListener('click',e=>{ if(e.target.closest('button')) setTimeout(()=>document.getElementById('visPop').style.display='none',60); });
 document.getElementById('fLimpar').onclick = ()=>{
   state.bairro=state.tipo=state.estado=state.pot=state.fila='';
   ['fBairro','fTipo','fEstado','fPot','fFila'].forEach(id=>document.getElementById(id).value='');
@@ -985,7 +994,7 @@ document.getElementById('cfgSave').onclick=async()=>{
 
 // ---------- acessibilidade ----------
 { const arias={fBairro:'Filtrar por bairro',fTipo:'Filtrar por tipo de lâmpada',fEstado:'Filtrar por estado',
-    fPot:'Filtrar por potência mínima',fFila:'Fila de auditoria',fLimpar:'Limpar filtros',btnFiltros:'Abrir filtros',
+    fPot:'Filtrar por potência mínima',fFila:'Fila de auditoria',fLimpar:'Limpar filtros',btnFiltros:'Abrir filtros',btnVis:'Alternar visualizações',
     btnExport:'Abrir menu de exportação',btnChoro:'Alternar mapa coroplético',btnTabela:'Abrir tabela de registros',
     btnStats:'Abrir indicadores',btnNovo:'Cadastrar novo ponto',btnAdminConsole:'Abrir administração',btnLogin:'Entrar ou sair',
     tSearch:'Buscar por endereço ou patrimônio',tBairro:'Filtrar tabela por bairro',tStatus:'Filtrar tabela por estado',
