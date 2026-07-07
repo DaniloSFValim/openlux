@@ -1,0 +1,52 @@
+# Configuração Supabase Local
+# Para desenvolvimento offline e testes sem afetar produção
+# Documentação: https://supabase.com/docs/guides/local-development
+
+[project]
+project_id = "lrnmydrwzxxajylsmoih"
+region = "us-east-1"
+
+[api]
+# Porta da API (PostgREST)
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+# PostgreSQL local
+port = 54322
+# As credenciais padrão são:
+# user: postgres
+# password: postgres
+# host: localhost
+
+[auth]
+# Supabase Auth local
+enabled = true
+email = { enable_signup = true, double_confirm_changes = true, enable_confirmations = true }
+external = { apple = { enabled = false }, google = { enabled = false }, github = { enabled = false } }
+
+[analytics]
+enabled = false
+
+[vector]
+# pgvector para embeddings (opcional)
+enabled = false
+
+[realtime]
+# Supabase Realtime (WebSockets)
+enabled = true
+max_bytes_per_second = 1000000
+
+[storage]
+file_size_limit = 52428800
+
+[functions]
+# Supabase Edge Functions
+enabled = true
+
+[scripts]
+# SQL scripts a executar ao inicializar
+# Descomentar para usar seed.sql
+# before_reset = []

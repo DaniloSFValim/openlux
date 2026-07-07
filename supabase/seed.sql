@@ -1,0 +1,73 @@
+-- Supabase Seed SQL
+-- Dados de teste para desenvolvimento local
+--
+-- Exemplos de como popular tabelas para testes
+-- Descomentar e adaptar conforme necessário
+
+-- ============================================
+-- EXEMPLO: Criar Usuários de Teste
+-- ============================================
+-- Nota: Em Supabase local, criar usuários é complicado
+-- Usar interface do Studio (http://localhost:54323)
+-- ou criar direto no auth.users com cuidado
+
+-- ============================================
+-- EXEMPLO: Criar Perfis (Roles)
+-- ============================================
+-- INSERT INTO public.profiles (id, role, email)
+-- VALUES
+--   ('00000000-0000-0000-0000-000000000001', 'leitura', 'leitor@teste.local'),
+--   ('00000000-0000-0000-0000-000000000002', 'editor', 'editor@teste.local'),
+--   ('00000000-0000-0000-0000-000000000003', 'admin', 'admin@teste.local');
+
+-- ============================================
+-- EXEMPLO: Criar Configuração do Site
+-- ============================================
+-- INSERT INTO public.site_config (id, titulo, cor_principal, cor_secundaria)
+-- VALUES
+--   (1, 'Iluminação LED Niterói', '#4CAF50', '#2196F3');
+
+-- ============================================
+-- EXEMPLO: Dados de Teste para Parque
+-- ============================================
+-- Descomentar para popular tabela de luminárias
+-- (adaptar com nomes de tabelas corretos)
+
+-- INSERT INTO public.parque (
+--   id,
+--   codigo_seconser,
+--   tipo_ativo,
+--   tipo_luminaria,
+--   tipo_lampada,
+--   potencia,
+--   led_instalado,
+--   latitude,
+--   longitude,
+--   bairro_nome,
+--   estado
+-- )
+-- VALUES
+--   (gen_random_uuid(), 'LUM001', 'luminaria', 'viaria', 'led', 150, true, -22.905, -43.055, 'Centro', 'ativo'),
+--   (gen_random_uuid(), 'LUM002', 'luminaria', 'globo', 'vapor_sodio', 250, false, -22.910, -43.050, 'Praia Grande', 'ativo'),
+--   (gen_random_uuid(), 'LUM003', 'caixa', 'viaria', 'led', 400, true, -22.900, -43.060, 'São Domingos', 'ativo'),
+--   (gen_random_uuid(), 'LUM004', 'luminaria', 'sinaleira', 'led', 100, true, -22.895, -43.045, 'Centro', 'manutencao');
+
+-- ============================================
+-- NOTAS
+-- ============================================
+-- 1. Para criar usuários no Supabase local:
+--    - Abrir http://localhost:54323 (Studio)
+--    - Ir em Authentication → Users → Create new user
+--    - Preencher email e password
+--    - Copiar user ID
+--    - Usar ID para criar profile acima
+--
+-- 2. Adaptar nomes de tabelas conforme seu schema
+--    (pode ser "v_parque_export", "parque", etc)
+--
+-- 3. Descomentar linhas conforme necessário
+--
+-- 4. Para executar este arquivo:
+--    supabase seed run
+--    ou
+--    psql postgresql://postgres:postgres@localhost:54322/postgres -f seed.sql

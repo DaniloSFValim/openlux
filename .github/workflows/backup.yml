@@ -1,0 +1,62 @@
+name: Backup Automático Supabase
+
+on:
+  # Executar diariamente às 02:00 UTC
+  schedule:
+    - cron: '0 2 * * *'
+
+  # Permitir trigger manual
+  workflow_dispatch:
+
+jobs:
+  backup:
+    name: Backup Database
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Supabase CLI
+        run: npm install -g supabase
+
+      - name: Backup Database
+        run: |
+          # Nota: Em produção, usar credenciais via secrets
+          # Para este exemplo, apenas validamos o script existe
+
+          test -f ./scripts/backup.sh || exit 1
+          chmod +x ./scripts/backup.sh
+
+          # Backup local (quando rodando CI em máquina com Supabase local)
+          # ./scripts/backup.sh
+
+          # Ou backup produção (descomentar e configurar secrets)
+          # export SUPABASE_ACCESS_TOKEN=${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          # export SUPABASE_DB_URL=${{ secrets.SUPABASE_DB_URL }}
+          # ./scripts/backup.sh --prod
+
+          echo "✅ Backup script validado"
+          echo "   Para produção, configure:"
+          echo "   - GitHub Secrets: SUPABASE_ACCESS_TOKEN, SUPABASE_DB_URL"
+          echo "   - Descomentar comando ./scripts/backup.sh --prod"
+
+      - name: Upload backup artifacts
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: backup-logs
+          path: backups/
+          retention-days: 30
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Backup falhou"
+          echo "Verificar logs acima"
+        continue-on-error: true
