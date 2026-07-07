@@ -431,7 +431,16 @@ async function renderDensidade(){
   state.layer.clearLayers();
   if(state.choroLayer){ map.removeLayer(state.choroLayer); state.choroLayer=null; }
   if(state.bairroLayer){ map.removeLayer(state.bairroLayer); state.bairroLayer=null; }
-  if(!state.densData){ state.densData = await rpc('ip_grid_densidade_completo',{p_cell_m:250}); }
+  if(!state.densData){
+    setBusy(true);
+    try{
+      const {data,error}=await sb.rpc('ip_grid_densidade_completo',{p_cell_m:250})
+        .range(0, 9999);
+      if(error) throw error;
+      state.densData = data;
+    }catch(e){ toast('Erro ao carregar densidade: '+(e.message||e),true); }
+    finally{ setBusy(false); }
+  }
   if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; }
   if(state.densMunLayer){ map.removeLayer(state.densMunLayer); state.densMunLayer=null; }
   const rows=state.densData;
