@@ -1,5 +1,11 @@
 # Iluminação LED Niterói 💡
 
+[![CI/CD Pipeline](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/8e1c5730-5e9e-4c8b-82f1-a1b1c2d3e4f5/deploy-status)](https://app.netlify.com/projects/iluminacao-niteroi)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code Coverage](https://img.shields.io/badge/coverage-TBD-inactive.svg)](#)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org)
+
 Sistema georreferenciado de gestão de infraestrutura de iluminação pública da cidade de Niterói.
 
 ## 📊 Visão Geral
