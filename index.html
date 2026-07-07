@@ -160,6 +160,7 @@
   <div style="flex:1;display:flex;min-height:0">
     <nav role="navigation" aria-label="Seções da administração" style="width:180px;border-right:1px solid #1f2a37;padding:12px;display:flex;flex-direction:column;gap:4px">
       <button class="btn acnav on" data-sec="visao" style="text-align:left">Visão geral</button>
+      <button class="btn acnav" data-sec="aprovacoes" style="text-align:left">Aprovações</button>
       <button class="btn acnav" data-sec="usuarios" style="text-align:left">Usuários</button>
       <button class="btn acnav" data-sec="aparencia" style="text-align:left">Aparência</button>
       <button class="btn acnav" data-sec="dados" style="text-align:left">Dados</button>
@@ -203,6 +204,21 @@
             </div>
           </div>
           <button class="btn btn-accent" id="cfgSave" style="margin-top:4px">Salvar aparência</button>
+        </div>
+      </section>
+
+      <section id="sec-aprovacoes" class="acsec" style="display:none">
+        <h3 style="margin:0 0 12px;font-size:15px">Aprovações de mudanças</h3>
+        <div style="max-width:900px;display:flex;flex-direction:column;gap:12px">
+          <div class="chip" style="border-radius:8px;padding:12px">
+            <div style="font-size:12px;color:#9ca3af;margin-bottom:8px">Mudanças pendentes de aprovação</div>
+            <div id="aprovacoesCount" style="font-weight:700;font-size:18px;color:#fbbf24;margin-bottom:8px">—</div>
+            <div style="display:flex;gap:6px"><button class="btn btn-accent" id="refAprova">Recarregar</button></div>
+          </div>
+          <div style="max-height:500px;overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead><tr style="position:sticky;top:0;background:#0f151c"><th style="text-align:left;padding:8px;border-bottom:1px solid #1f2a37">Tipo</th><th style="text-align:left;padding:8px;border-bottom:1px solid #1f2a37">Usuário</th><th style="text-align:left;padding:8px;border-bottom:1px solid #1f2a37">Mudança</th><th style="text-align:left;padding:8px;border-bottom:1px solid #1f2a37">Criado</th><th style="padding:8px;border-bottom:1px solid #1f2a37"></th></tr></thead>
+            <tbody id="aprovacoesBody"></tbody>
+          </table></div>
         </div>
       </section>
 
@@ -846,6 +862,7 @@ function acShow(sec){
   document.getElementById('sec-'+sec).style.display='block';
   document.querySelectorAll('.acnav').forEach(b=>b.classList.toggle('on', b.dataset.sec===sec));
   if(sec==='visao') loadVisaoGeral();
+  else if(sec==='aprovacoes') loadAprovacoes();
   else if(sec==='usuarios') loadAdminUsers();
   else if(sec==='aparencia') fillConfigForm();
 }
@@ -889,6 +906,71 @@ window._filaMapa=(fila)=>{
   state.choroData=null; refresh();
   toast('Filtro aplicado: '+(fila==='revisao'?'marcados p/ revisão':fila==='suspeito'?'LED suspeito':fila));
 };
+async function loadAprovacoes(){
+  const body=document.getElementById('aprovacoesBody');
+  const countEl=document.getElementById('aprovacoesCount');
+  body.innerHTML='<tr><td colspan="5" style="text-align:center;color:#6b7280;padding:14px"><span class="spin"></span> Carregando…</td></tr>';
+  countEl.textContent='—';
+  try{
+    const {data:filas,error}=await sb.from('fila_aprovacao').select('id,tipo_operacao,tabela_alvo,registro_id,usuario_id,dados_antes,dados_depois,motivo,criado_em');
+    if(error) throw error;
+    const {data:profiles}=await sb.from('profiles').select('id,email');
+    const emailMap={};
+    (profiles||[]).forEach(p=>emailMap[p.id]=p.email);
+    countEl.textContent=(filas||[]).length.toLocaleString('pt-BR');
+    if(!filas||!filas.length){
+      body.innerHTML='<tr><td colspan="5" style="text-align:center;color:#6b7280;padding:14px">Nenhuma mudança pendente</td></tr>';
+      return;
+    }
+    body.innerHTML=(filas||[]).map(f=>{
+      const email=emailMap[f.usuario_id]||'desconhecido';
+      const resumo=(() => {
+        if(f.tipo_operacao==='DELETE') return 'Remover ativo';
+        if(f.tipo_operacao==='INSERT') return 'Novo ativo';
+        if(f.tipo_operacao==='UPDATE'){
+          const antes=f.dados_antes||{};
+          const depois=f.dados_depois||{};
+          const mudancas=[];
+          for(const k in depois){
+            if(antes[k]!==depois[k]){
+              const v=typeof depois[k]==='string' && depois[k].length>30 ? depois[k].slice(0,30)+'…' : depois[k];
+              mudancas.push(k+': '+v);
+            }
+          }
+          return mudancas.slice(0,2).join(', ') || 'Modificação';
+        }
+        return f.tipo_operacao||'?';
+      })();
+      const criado=new Date(f.criado_em).toLocaleString('pt-BR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+      return `<tr><td style="padding:8px;border-bottom:1px solid #1a232e">${f.tipo_operacao||'?'}</td>
+        <td style="padding:8px;border-bottom:1px solid #1a232e"><span style="color:#9ca3af;font-size:11px">${esc(email)}</span></td>
+        <td style="padding:8px;border-bottom:1px solid #1a232e;max-width:250px"><span style="color:#cbd5e1">${esc(resumo)}</span></td>
+        <td style="padding:8px;border-bottom:1px solid #1a232e"><span style="color:#6b7280;font-size:11px">${criado}</span></td>
+        <td style="padding:8px;border-bottom:1px solid #1a232e;text-align:right;display:flex;gap:4px;justify-content:flex-end">
+          <button class="btn" style="padding:2px 8px;font-size:11px;border-color:#4ade80;color:#4ade80" onclick="window._aprovarMudanca('${f.id}',true)">✓ Aprovar</button>
+          <button class="btn" style="padding:2px 8px;font-size:11px;border-color:#f87171;color:#f87171" onclick="window._aprovarMudanca('${f.id}',false)">✕ Rejeitar</button></td></tr>`;
+    }).join('');
+  }catch(e){
+    toast('Erro ao carregar aprovações: '+e.message,true);
+    body.innerHTML='<tr><td colspan="5" style="text-align:center;color:#f87171;padding:14px">Falha ao carregar</td></tr>';
+  }
+}
+window._aprovarMudanca=async(filaId,aprovado)=>{
+  const motivo=aprovado?null:prompt('Motivo da rejeição (opcional):','');
+  if(!aprovado && motivo===null) return;
+  setBusy(true);
+  try{
+    const {data,error}=await sb.rpc('aprovar_mudanca',{p_fila_id:filaId,p_aprovado:aprovado,p_motivo_rejeicao:motivo||null});
+    if(error) throw error;
+    toast(aprovado?'Mudança aprovada':'Mudança rejeitada');
+    loadAprovacoes();
+  }catch(e){
+    toast('Erro ao processar: '+e.message,true);
+  }finally{
+    setBusy(false);
+  }
+};
+document.getElementById('refAprova').onclick=()=>loadAprovacoes();
 async function loadAdminUsers(){
   const body=document.getElementById('admBody');
   body.innerHTML='<tr><td colspan="3" style="text-align:center;color:#6b7280;padding:14px"><span class="spin"></span> Carregando…</td></tr>';
