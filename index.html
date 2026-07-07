@@ -73,9 +73,9 @@
   </div>
   <span id="loading" style="display:none"><span class="spin"></span></span>
   <div style="flex:1"></div>
-  <div style="position:relative">
+  <div style="position:relative" onmouseleave="document.getElementById('filtrosPop').style.display='none'">
     <button class="btn" id="btnFiltros">Filtros<span id="fCount" style="display:none;margin-left:6px;background:#1d4ed8;color:#fff;border-radius:999px;padding:0 7px;font-size:11px"></span></button>
-    <div id="filtrosPop" class="panel" style="position:absolute;top:40px;right:0;width:230px;border-radius:10px;padding:10px;display:none;flex-direction:column;gap:8px;z-index:1001">
+    <div id="filtrosPop" class="panel" style="position:absolute;top:40px;right:0;width:230px;border-radius:10px;padding:10px;display:none;flex-direction:column;gap:8px;z-index:1000">
       <label style="font-size:11px;color:#9ca3af">Bairro<select id="fBairro"><option value="">Todos</option></select></label>
       <label style="font-size:11px;color:#9ca3af">Tipo<select id="fTipo"><option value="">Todos</option></select></label>
       <label style="font-size:11px;color:#9ca3af">Estado<select id="fEstado"><option value="">Todos</option><option value="led">LED</option><option value="pendente">Pendente</option><option value="sem_lampada">Sem lâmpada</option></select></label>
@@ -84,9 +84,9 @@
       <button class="btn" id="fLimpar">Limpar filtros</button>
     </div>
   </div>
-  <div style="position:relative">
+  <div id="exportContainer" style="position:relative;display:none" onmouseleave="document.getElementById('exportPop').style.display='none'">
     <button class="btn" id="btnExport">Exportar ▾</button>
-    <div id="exportPop" class="panel" style="position:absolute;top:40px;right:0;width:220px;border-radius:10px;padding:8px;display:none;flex-direction:column;gap:6px;z-index:1001">
+    <div id="exportPop" class="panel" style="position:absolute;top:40px;right:-100px;width:220px;border-radius:10px;padding:8px;display:none;flex-direction:column;gap:6px;z-index:1000">
       <div style="font-size:11px;color:#6b7280;padding:0 2px">Conforme filtros ativos</div>
       <button class="btn" data-exp="csv">Dados (CSV)</button>
       <button class="btn" data-exp="geojson">Dados (GeoJSON · GIS)</button>
@@ -97,9 +97,9 @@
       <button class="btn" data-exp="pdf">Relatório (PDF)</button>
     </div>
   </div>
-  <div style="position:relative">
+  <div style="position:relative" onmouseleave="document.getElementById('visPop').style.display='none'">
     <button class="btn" id="btnVis">Visualizar ▾</button>
-    <div id="visPop" class="panel" style="position:absolute;top:40px;right:0;width:190px;border-radius:10px;padding:8px;display:none;flex-direction:column;gap:6px;z-index:1001">
+    <div id="visPop" class="panel" style="position:absolute;top:40px;right:0;width:190px;border-radius:10px;padding:8px;display:none;flex-direction:column;gap:6px;z-index:1000">
       <button class="btn" id="btnChoro" title="Colorir bairros por % LED">Coroplético</button>
       <button class="btn" id="btnDens" title="Grade 250 m de densidade luminotécnica">Densidade</button>
       <button class="btn" id="btnTabela">Tabela</button>
@@ -843,6 +843,7 @@ async function setUser(u){
          catch(e){ state.userRole='leitura'; } }
   document.getElementById('btnNovo').style.display = podeEditar()?'inline-block':'none';
   document.getElementById('btnAdminConsole').style.display = state.userRole==='admin'?'inline-block':'none';
+  document.getElementById('exportContainer').style.display = u?'block':'none';
 }
 document.getElementById('btnLogin').onclick=async ()=>{
   if(state.user){ await sb.auth.signOut(); setUser(null); toast('Sessão encerrada'); return; }
