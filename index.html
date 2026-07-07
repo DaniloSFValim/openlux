@@ -57,10 +57,10 @@
   <div id="splashTitle" style="font-size:23px;font-weight:700;color:#e5e7eb;letter-spacing:.3px">Iluminação Pública · Niterói</div>
   <div style="font-size:13px;color:#9ca3af">SECONSER · Diretoria de Iluminação Pública</div>
   <div style="font-size:12px;color:#6b7280;margin-top:16px">Desenvolvido por <span style="color:#cbd5e1">Danilo Valim</span></div>
-  <div style="font-size:11px;color:#5f6b78">v1.0</div>
+  <div style="font-size:11px;color:#5f6b78">v1.1</div>
   <button class="btn" id="splashSkip" style="margin-top:16px">Entrar</button>
 </div>
-<div id="footerBand" role="contentinfo" style="position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:800;max-width:92vw;background:rgba(15,21,28,0.86);border:1px solid #1f2a37;border-radius:8px;padding:5px 14px;font-size:11px;color:#9ca3af;text-align:center;pointer-events:none">SECONSER · Diretoria de Iluminação Pública · Prefeitura de Niterói · Desenvolvido por <span style="color:#cbd5e1">Danilo Valim</span> · v1.0</div>
+<div id="footerBand" role="contentinfo" style="position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:800;max-width:92vw;background:rgba(15,21,28,0.86);border:1px solid #1f2a37;border-radius:8px;padding:5px 14px;font-size:11px;color:#9ca3af;text-align:center;pointer-events:none">SECONSER · Diretoria de Iluminação Pública · Prefeitura de Niterói · Desenvolvido por <span style="color:#cbd5e1">Danilo Valim</span> · v1.1</div>
 
 <div class="panel" role="banner" aria-label="Barra principal" style="position:absolute;top:10px;left:10px;right:10px;z-index:1000;border-radius:12px;display:flex;align-items:center;gap:14px;padding:7px 14px">
   <img id="cfgLogo" alt="Logo"/>
@@ -92,6 +92,7 @@
       <button class="btn" data-exp="geojson">Dados (GeoJSON · GIS)</button>
       <button class="btn" data-exp="bairros">Passivo por bairro (CSV)</button>
       <button class="btn" data-exp="serie">Série de métricas (CSV)</button>
+      <button class="btn" data-exp="grade">Grade de densidade (CSV)</button>
       <button class="btn" data-exp="png">Mapa atual (PNG)</button>
       <button class="btn" data-exp="pdf">Relatório (PDF)</button>
     </div>
@@ -100,6 +101,7 @@
     <button class="btn" id="btnVis">Visualizar ▾</button>
     <div id="visPop" class="panel" style="position:absolute;top:40px;right:0;width:190px;border-radius:10px;padding:8px;display:none;flex-direction:column;gap:6px;z-index:1001">
       <button class="btn" id="btnChoro" title="Colorir bairros por % LED">Coroplético</button>
+      <button class="btn" id="btnDens" title="Grade 250 m de densidade luminotécnica">Densidade</button>
       <button class="btn" id="btnTabela">Tabela</button>
       <button class="btn" id="btnStats">Indicadores</button>
     </div>
@@ -118,6 +120,8 @@
   <div style="display:flex;align-items:center;gap:6px;margin-top:3px"><svg width="12" height="12" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" fill="#38bdf8" stroke="#0b0f14" stroke-width="1.6"/></svg> Outros ativos</div>
   <div id="modeHint" style="color:#6b7280;margin-top:5px"></div>
 </div>
+
+<div id="densCtl" class="panel" role="complementary" aria-label="Controle da grade de densidade" style="position:absolute;bottom:14px;left:10px;z-index:1000;border-radius:10px;padding:8px 10px;font-size:12px;display:none;max-width:250px"></div>
 
 <div id="detail" class="panel" role="complementary" aria-label="Detalhe do ativo" style="position:absolute;top:64px;right:10px;width:300px;z-index:1000;border-radius:10px;padding:12px;display:none;max-height:calc(100% - 90px);overflow:auto"></div>
 <div id="stats" class="panel" role="complementary" aria-label="Indicadores" style="position:absolute;top:64px;left:10px;width:360px;z-index:1000;border-radius:10px;padding:12px;display:none;max-height:calc(100% - 90px);overflow:auto"></div>
@@ -212,6 +216,7 @@
               <button class="btn" data-exp="geojson">Dados (GeoJSON)</button>
               <button class="btn" data-exp="bairros">Passivo por bairro (CSV)</button>
               <button class="btn" data-exp="serie">Série de métricas (CSV)</button>
+              <button class="btn" data-exp="grade">Grade de densidade (CSV)</button>
             </div>
           </div>
           <div class="chip" style="border-radius:8px;padding:12px">
@@ -231,7 +236,7 @@
     <span>SECONSER · Diretoria de Iluminação Pública · Prefeitura de Niterói</span><span>·</span>
     <span>Base: Censo ENEL + diário SECONSER</span><span>·</span>
     <span>Desenvolvido por <span style="color:#cbd5e1">Danilo Valim</span></span><span>·</span>
-    <span>v1.0 · 2026</span>
+    <span>v1.1 · 2026</span>
   </div>
 </div>
 
@@ -247,7 +252,7 @@
         <button class="btn btn-accent" id="liSubmit">Entrar</button>
       </div>
     </div>
-    <div style="margin-top:14px;padding-top:10px;border-top:1px solid #1f2a37;font-size:11px;color:#6b7280;text-align:center">Desenvolvido por <span style="color:#cbd5e1">Danilo Valim</span> · v1.0</div>
+    <div style="margin-top:14px;padding-top:10px;border-top:1px solid #1f2a37;font-size:11px;color:#6b7280;text-align:center">Desenvolvido por <span style="color:#cbd5e1">Danilo Valim</span> · v1.1</div>
   </div>
 </div>
 
@@ -257,7 +262,8 @@ const ANON = "sb_publishable_w3UmLsmcDtT81S3MDdDJjw_rEWckoVl";
 const sb = window.supabase.createClient(URL_SB, ANON);
 
 const state = { user:null, userRole:null, bairro:"", tipo:"", estado:"", pot:"", fila:"", layer:null, mode:"", tPage:0, tSize:50,
-  bairroLayer:null, choropleth:false, choroLayer:null, choroData:null, current:null, tCache:{}, config:null };
+  bairroLayer:null, choropleth:false, choroLayer:null, choroData:null, current:null, tCache:{}, config:null,
+  densidade:false, densLayer:null, densData:null, densMetric:'klm' };
 const TIPOS = ["led","vapor_sodio","metalico","vapor_mercurio","fluorescente","sem_lampada","desconhecido"];
 const STATUS = ["led_instalado","pendente_troca","a_verificar"];
 const TIPO_ATIVO = [['luminaria','Luminária'],['caixa_comando','Caixa de comando'],['chave_magnetica','Chave magnética'],['rele_fotoeletrico','Relé fotoelétrico'],['poste','Poste'],['braco','Braço'],['outro','Outro']];
@@ -344,6 +350,8 @@ function aplicaFila(q){ const f=state.fila;
 function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
 
 async function _refresh(){
+  if(state.densidade){ if(!state.densLayer) renderDensidade(); return; }
+  if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; document.getElementById('densCtl').style.display='none'; }
   if(state.choropleth){ renderChoropleth(); return; }
   if(state.choroLayer){ map.removeLayer(state.choroLayer); state.choroLayer=null; }
   const b = map.getBounds(), z = map.getZoom();
@@ -398,9 +406,80 @@ async function renderChoropleth(){
 }
 document.getElementById('btnChoro').onclick = ()=>{
   state.choropleth=!state.choropleth;
+  if(state.choropleth && state.densidade){ state.densidade=false;
+    document.getElementById('btnDens').classList.remove('on');
+    if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; }
+    document.getElementById('densCtl').style.display='none'; }
   document.getElementById('btnChoro').classList.toggle('on',state.choropleth);
-  document.getElementById('btnVis').classList.toggle('on',state.choropleth);
-  document.getElementById('legend').style.display = state.choropleth?'none':'block';
+  document.getElementById('btnVis').classList.toggle('on',state.choropleth||state.densidade);
+  document.getElementById('legend').style.display = (state.choropleth||state.densidade)?'none':'block';
+  refresh();
+};
+
+// ---------- Grade de densidade luminotécnica ----------
+const DENS_M = {
+  klm:{rot:'Fluxo', unid:'klm por célula (fluxo instalado estimado)', ramp:['#312e81','#1d4ed8','#0891b2','#65a30d','#fde047']},
+  kw:{rot:'Potência', unid:'kW por célula (potência instalada · COSIP)', ramp:['#450a0a','#7f1d1d','#b91c1c','#ef4444','#fca5a5']},
+  lm_w:{rot:'Eficiência', unid:'lm/W médio da célula', fixo:[70,90,110,125], ramp:['#dc2626','#f97316','#eab308','#a3e635','#22c55e']}
+};
+function quantis(vals,k){ const s=[...vals].sort((a,b)=>a-b), out=[];
+  for(let i=1;i<k;i++) out.push(s[Math.min(s.length-1,Math.floor(s.length*i/k))]);
+  return out; }
+function classeDens(v,breaks){ let i=0; while(i<breaks.length && v>=breaks[i]) i++; return i; }
+function fmtDens(x){ x=Number(x); return x>=1000?Math.round(x).toLocaleString('pt-BR'):(Math.round(x*10)/10).toLocaleString('pt-BR'); }
+async function renderDensidade(){
+  state.layer.clearLayers();
+  if(state.choroLayer){ map.removeLayer(state.choroLayer); state.choroLayer=null; }
+  if(!state.densData){ state.densData = await rpc('ip_grid_densidade',{p_cell_m:250}); }
+  if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; }
+  const rows=state.densData;
+  if(!rows||!rows.length){ document.getElementById('modeHint').textContent='Grade indisponível'; return; }
+  const m=state.densMetric, cfg=DENS_M[m];
+  const vals=rows.map(r=>Number(r[m])).filter(v=>v!=null&&!isNaN(v));
+  const breaks=cfg.fixo||quantis(vals,cfg.ramp.length);
+  const fc={type:'FeatureCollection',features:rows.map(r=>({type:'Feature',geometry:r.gj,properties:r}))};
+  state.densLayer=L.geoJSON(fc,{
+    style:f=>{ const v=f.properties[m];
+      const cor=(v==null||isNaN(Number(v)))?'#374151':cfg.ramp[classeDens(Number(v),breaks)];
+      return {color:'#0b0f14',weight:.5,fillColor:cor,fillOpacity:.62}; },
+    onEachFeature:(f,l)=>{ const p=f.properties;
+      l.bindPopup(`<div style="font-size:12px;min-width:210px;line-height:1.5">
+        <b>Célula 250 × 250 m</b><br/>
+        Luminárias: <b>${p.n}</b> · LED: <b>${p.pct_led}%</b><br/>
+        Potência instalada: <b>${Number(p.kw).toLocaleString('pt-BR')} kW</b><br/>
+        Fluxo estimado: <b>${p.klm==null?'—':Number(p.klm).toLocaleString('pt-BR')+' klm'}</b><br/>
+        Eficiência média: <b>${p.lm_w==null?'—':p.lm_w+' lm/W'}</b> · Pot. conhecida: ${p.cobertura_pot}%<br/>
+        <span style="color:#6b7280;font-size:10.5px">Fluxo <i>instalado</i> estimado por tipo de fonte. Não é medição de iluminância nem atesta conformidade com a NBR 5101.</span></div>`); }
+  }).addTo(map);
+  buildDensCtl(breaks,cfg);
+  document.getElementById('modeHint').textContent='Grade 250 m · '+cfg.rot;
+}
+function buildDensCtl(breaks,cfg){
+  const c=document.getElementById('densCtl');
+  const mBtns=Object.entries(DENS_M).map(([k,v])=>
+    `<button class="btn ${k===state.densMetric?'on':''}" style="padding:3px 8px;font-size:11px" onclick="window._densMetric('${k}')">${v.rot}</button>`).join('');
+  const sw=cfg.ramp.map((cor,i)=>{
+    const lo=i===0?null:breaks[i-1], hi=i<breaks.length?breaks[i]:null;
+    const rot=lo==null?('&lt; '+fmtDens(hi)):hi==null?('≥ '+fmtDens(lo)):(fmtDens(lo)+' – '+fmtDens(hi));
+    return `<div style="display:flex;align-items:center;gap:6px;margin-top:2px"><span style="width:14px;height:11px;border-radius:2px;background:${cor};display:inline-block;flex-shrink:0"></span><span>${rot}</span></div>`; }).join('');
+  c.innerHTML=`<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">${mBtns}</div>
+    <div style="color:#9ca3af;margin-bottom:2px">${cfg.unid}${cfg.fixo?'':' · quintis'}</div>${sw}
+    <div style="color:#6b7280;margin-top:5px;font-size:10.5px">Estimativa de fluxo instalado — não é medição NBR 5101</div>`;
+  c.style.display='block';
+}
+window._densMetric=(m)=>{ state.densMetric=m; renderDensidade(); };
+document.getElementById('btnDens').onclick = ()=>{
+  state.densidade=!state.densidade;
+  if(state.densidade && state.choropleth){ state.choropleth=false;
+    document.getElementById('btnChoro').classList.remove('on');
+    if(state.choroLayer){ map.removeLayer(state.choroLayer); state.choroLayer=null; } }
+  document.getElementById('btnDens').classList.toggle('on',state.densidade);
+  document.getElementById('btnVis').classList.toggle('on',state.densidade||state.choropleth);
+  document.getElementById('legend').style.display=(state.densidade||state.choropleth)?'none':'block';
+  if(!state.densidade){
+    if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; }
+    document.getElementById('densCtl').style.display='none';
+  }
   refresh();
 };
 
@@ -483,7 +562,7 @@ window._edit = function(){
     setBusy(false);
     if(error){ toast('Falha ao salvar: '+error.message,true); return; }
     toast('Ponto atualizado'); document.getElementById('detail').style.display='none';
-    state.choroData=null; refresh(); loadStatsChips();
+    state.choroData=null; state.densData=null; refresh(); loadStatsChips();
   };
 };
 window._reopen = ()=>openDetail(state.current);
@@ -531,7 +610,7 @@ window._formInterv = (id)=>{
       p_potencia_nova:parseInt(document.getElementById('ivPot').value)||null });
     setBusy(false);
     if(error){ toast('Falha ao registrar: '+error.message,true); return; }
-    toast('Intervenção registrada'); window._interv(id); state.choroData=null; refresh(); loadStatsChips();
+    toast('Intervenção registrada'); window._interv(id); state.choroData=null; state.densData=null; refresh(); loadStatsChips();
   };
 };
 window._hist = async (id)=>{
@@ -602,7 +681,7 @@ document.getElementById('btnNovo').onclick = ()=>{
       p_classe_nbr: ehLum?(document.getElementById('nClasse').value||null):null });
     setBusy(false);
     if(error){ toast('Falha ao cadastrar: '+error.message,true); return; }
-    toast('Cadastrado: '+(data||'ok')); d.style.display='none'; state.choroData=null; refresh(); loadStatsChips();
+    toast('Cadastrado: '+(data||'ok')); d.style.display='none'; state.choroData=null; state.densData=null; refresh(); loadStatsChips();
     map.setView([lat,lng], Math.max(map.getZoom(),17));
   };
 };
@@ -757,7 +836,7 @@ document.getElementById('btnAdminConsole').onclick = ()=>{ document.getElementBy
 document.getElementById('acVoltar').onclick = ()=>document.getElementById('adminConsole').style.display='none';
 document.querySelectorAll('.acnav').forEach(b=>b.onclick=()=>acShow(b.dataset.sec));
 document.getElementById('sec-dados').addEventListener('click',e=>{ const b=e.target.closest('[data-exp]'); if(!b)return;
-  ({csv:()=>exportData('csv'),geojson:()=>exportData('geojson'),bairros:exportBairros,serie:exportSerie})[b.dataset.exp]?.(); });
+  ({csv:()=>exportData('csv'),geojson:()=>exportData('geojson'),bairros:exportBairros,serie:exportSerie,grade:exportGrade})[b.dataset.exp]?.(); });
 function qcard(label,n,fila,nota){
   return `<div class="chip" style="border-radius:10px;padding:12px;min-width:160px">
     <div style="color:#9ca3af;font-size:11px">${label}</div>
@@ -870,6 +949,20 @@ async function exportBairros(){ const d=await rpc('ip_por_bairro'); if(!d)return
 async function exportSerie(){ const d=await rpc('ip_serie_metricas'); if(!d)return;
   if(!d.length){ toast('Sem série ainda (o cron grava diariamente)',true); return; }
   baixar(`serie_metricas_${stamp()}.csv`,'\uFEFF'+toCSV(d),'text/csv;charset=utf-8'); toast('Série exportada'); }
+async function exportGrade(){
+  const d=state.densData || await rpc('ip_grid_densidade',{p_cell_m:250});
+  if(!d||!d.length){ toast('Grade indisponível',true); return; }
+  state.densData=d;
+  const rows=d.map(r=>{
+    const ring=(r.gj&&r.gj.coordinates&&r.gj.coordinates[0])||null;
+    const lon=ring?((ring[0][0]+ring[2][0])/2).toFixed(6):'';
+    const lat=ring?((ring[0][1]+ring[2][1])/2).toFixed(6):'';
+    return { lon_centro:lon, lat_centro:lat, luminarias:r.n, led:r.n_led, pct_led:r.pct_led,
+      potencia_kw:r.kw, fluxo_klm:r.klm, lm_w_medio:r.lm_w, cobertura_pot_pct:r.cobertura_pot };
+  });
+  baixar(`grade_densidade_250m_${stamp()}.csv`,'\uFEFF'+toCSV(rows),'text/csv;charset=utf-8');
+  toast('Grade exportada: '+rows.length.toLocaleString('pt-BR')+' células');
+}
 async function capturarMapa(){
   const c=map.getContainer(), rect=c.getBoundingClientRect();
   const out=document.createElement('canvas'); out.width=Math.round(rect.width); out.height=Math.round(rect.height);
@@ -926,7 +1019,7 @@ document.getElementById('btnExport').onclick=(e)=>{ e.stopPropagation();
 document.getElementById('exportPop').addEventListener('click',e=>{ const b=e.target.closest('[data-exp]'); if(!b)return;
   document.getElementById('exportPop').style.display='none';
   ({csv:()=>exportData('csv'),geojson:()=>exportData('geojson'),bairros:exportBairros,
-    serie:exportSerie,png:exportPNG,pdf:exportPDF})[b.dataset.exp]?.(); });
+    serie:exportSerie,grade:exportGrade,png:exportPNG,pdf:exportPDF})[b.dataset.exp]?.(); });
 
 // ---------- Aparência (config do site) ----------
 const FONTS={ system:{stack:"ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif"},
@@ -995,7 +1088,7 @@ document.getElementById('cfgSave').onclick=async()=>{
 // ---------- acessibilidade ----------
 { const arias={fBairro:'Filtrar por bairro',fTipo:'Filtrar por tipo de lâmpada',fEstado:'Filtrar por estado',
     fPot:'Filtrar por potência mínima',fFila:'Fila de auditoria',fLimpar:'Limpar filtros',btnFiltros:'Abrir filtros',btnVis:'Alternar visualizações',
-    btnExport:'Abrir menu de exportação',btnChoro:'Alternar mapa coroplético',btnTabela:'Abrir tabela de registros',
+    btnExport:'Abrir menu de exportação',btnChoro:'Alternar mapa coroplético',btnDens:'Alternar grade de densidade luminotécnica',btnTabela:'Abrir tabela de registros',
     btnStats:'Abrir indicadores',btnNovo:'Cadastrar novo ponto',btnAdminConsole:'Abrir administração',btnLogin:'Entrar ou sair',
     tSearch:'Buscar por endereço ou patrimônio',tBairro:'Filtrar tabela por bairro',tStatus:'Filtrar tabela por estado',
     tPrev:'Página anterior',tNext:'Próxima página',tClose:'Fechar tabela'};
