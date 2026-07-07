@@ -263,7 +263,7 @@ const sb = window.supabase.createClient(URL_SB, ANON);
 
 const state = { user:null, userRole:null, bairro:"", tipo:"", estado:"", pot:"", fila:"", layer:null, mode:"", tPage:0, tSize:50,
   bairroLayer:null, choropleth:false, choroLayer:null, choroData:null, current:null, tCache:{}, config:null,
-  densidade:false, densLayer:null, densData:null, densMetric:'klm' };
+  densidade:false, densLayer:null, densMunLayer:null, densData:null, densMetric:'klm' };
 const TIPOS = ["led","vapor_sodio","metalico","vapor_mercurio","fluorescente","sem_lampada","desconhecido"];
 const STATUS = ["led_instalado","pendente_troca","a_verificar"];
 const TIPO_ATIVO = [['luminaria','Luminária'],['caixa_comando','Caixa de comando'],['chave_magnetica','Chave magnética'],['rele_fotoeletrico','Relé fotoelétrico'],['poste','Poste'],['braco','Braço'],['outro','Outro']];
@@ -430,8 +430,10 @@ function fmtDens(x){ x=Number(x); return x>=1000?Math.round(x).toLocaleString('p
 async function renderDensidade(){
   state.layer.clearLayers();
   if(state.choroLayer){ map.removeLayer(state.choroLayer); state.choroLayer=null; }
-  if(!state.densData){ state.densData = await rpc('ip_grid_densidade',{p_cell_m:250}); }
+  if(state.bairroLayer){ map.removeLayer(state.bairroLayer); state.bairroLayer=null; }
+  if(!state.densData){ state.densData = await rpc('ip_grid_densidade_completo',{p_cell_m:250}); }
   if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; }
+  if(state.densMunLayer){ map.removeLayer(state.densMunLayer); state.densMunLayer=null; }
   const rows=state.densData;
   if(!rows||!rows.length){ document.getElementById('modeHint').textContent='Grade indisponível'; return; }
   const m=state.densMetric, cfg=DENS_M[m];
@@ -440,7 +442,7 @@ async function renderDensidade(){
   const fc={type:'FeatureCollection',features:rows.map(r=>({type:'Feature',geometry:r.gj,properties:r}))};
   state.densLayer=L.geoJSON(fc,{
     style:f=>{ const v=f.properties[m];
-      const cor=(v==null||isNaN(Number(v)))?'#374151':cfg.ramp[classeDens(Number(v),breaks)];
+      const cor=(v==null||isNaN(Number(v)))?'#1f2a37':cfg.ramp[classeDens(Number(v),breaks)];
       return {color:'#0b0f14',weight:.5,fillColor:cor,fillOpacity:.62}; },
     onEachFeature:(f,l)=>{ const p=f.properties;
       l.bindPopup(`<div style="font-size:12px;min-width:210px;line-height:1.5">
@@ -451,8 +453,14 @@ async function renderDensidade(){
         Eficiência média: <b>${p.lm_w==null?'—':p.lm_w+' lm/W'}</b> · Pot. conhecida: ${p.cobertura_pot}%<br/>
         <span style="color:#6b7280;font-size:10.5px">Fluxo <i>instalado</i> estimado por tipo de fonte. Não é medição de iluminância nem atesta conformidade com a NBR 5101.</span></div>`); }
   }).addTo(map);
+  // Hachura de limites municipais
+  const munData = await rpc('ip_bairros_choropleth', {});
+  if(munData){
+    const munGeoJson={type:'FeatureCollection',features:munData.features.map(f=>({type:'Feature',geometry:f.geometry,properties:f.properties}))};
+    state.densMunLayer=L.geoJSON(munGeoJson,{style:{color:'#60a5fa',weight:2,fill:false,opacity:.4},interactive:false}).addTo(map);
+  }
   buildDensCtl(breaks,cfg);
-  document.getElementById('modeHint').textContent='Grade 250 m · '+cfg.rot;
+  document.getElementById('modeHint').textContent='Grade 250 m · '+cfg.rot+' (limites em azul)';
 }
 function buildDensCtl(breaks,cfg){
   const c=document.getElementById('densCtl');
@@ -478,6 +486,7 @@ document.getElementById('btnDens').onclick = ()=>{
   document.getElementById('legend').style.display=(state.densidade||state.choropleth)?'none':'block';
   if(!state.densidade){
     if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; }
+    if(state.densMunLayer){ map.removeLayer(state.densMunLayer); state.densMunLayer=null; }
     document.getElementById('densCtl').style.display='none';
   }
   refresh();
