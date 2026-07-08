@@ -11,6 +11,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script defer data-domain="iluminacao-niteroi.netlify.app" src="https://plausible.io/js/script.js"></script>
 <style>
   html,body,#map{height:100%;margin:0}
   body{background:#0b0f14;color:#e5e7eb;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
@@ -48,6 +49,20 @@
   @media (max-width:640px){
     #tblReg th:nth-child(5),#tblReg td:nth-child(5),#tblReg th:nth-child(7),#tblReg td:nth-child(7){display:none}
   }
+  /* Light theme */
+  body[data-theme="light"]{background:#f5f5f5;color:#1a1a1a}
+  body[data-theme="light"] .leaflet-container{background:#f0f0f0}
+  body[data-theme="light"] .panel{background:#ffffff;border-color:#e0e0e0}
+  body[data-theme="light"] .chip{background:#f9f9f9;border-color:#e0e0e0}
+  body[data-theme="light"] input,body[data-theme="light"] select,body[data-theme="light"] textarea{background:#ffffff;border-color:#d0d0d0;color:#1a1a1a}
+  body[data-theme="light"] input:focus,body[data-theme="light"] select:focus,body[data-theme="light"] textarea:focus{border-color:#1d4ed8}
+  body[data-theme="light"] .btn{border-color:#d0d0d0;background:#f5f5f5;color:#1a1a1a}
+  body[data-theme="light"] .btn:hover{border-color:#1d4ed8;background:#e8e8e8}
+  body[data-theme="light"] table th{background:#f5f5f5;color:#1a1a1a}
+  body[data-theme="light"] table tr:hover td{background:#f9f9f9}
+  body[data-theme="light"] #toast{background:#f0f0f0;border-color:#ddd}
+  #themeToggle{position:fixed;top:12px;right:120px;z-index:999;padding:6px 12px;font-size:11px;background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.3);color:#e5e7eb;border-radius:6px;cursor:pointer}
+  #themeToggle:hover{background:rgba(0,0,0,0.3)}
 </style>
 </head>
 <body>
@@ -73,6 +88,7 @@
   </div>
   <span id="loading" style="display:none"><span class="spin"></span></span>
   <div style="flex:1"></div>
+  <button id="themeToggle" title="Alternar tema">🌙 Escuro</button>
   <div style="position:relative">
     <button class="btn" id="btnFiltros">Filtros<span id="fCount" style="display:none;margin-left:6px;background:#1d4ed8;color:#fff;border-radius:999px;padding:0 7px;font-size:11px"></span></button>
     <div id="filtrosPop" class="panel" style="position:absolute;top:40px;right:0;width:230px;border-radius:10px;padding:10px;display:none;flex-direction:column;gap:8px;z-index:1000">
@@ -1253,6 +1269,47 @@ document.getElementById('cfgSave').onclick=async()=>{
   setBusy(true); const {error}=await sb.from('site_config').update({dados,atualizado_em:new Date().toISOString()}).eq('id',1); setBusy(false);
   if(error){ toast('Erro ao salvar aparência: '+error.message,true); return; }
   applyConfig(dados); toast('Aparência atualizada — vale para todos os visitantes'); };
+
+// ---------- Theme Management (Dark/Light) ----------
+let currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+function setTheme(theme) {
+  currentTheme = theme;
+  localStorage.setItem('theme', theme);
+  document.documentElement.setAttribute('data-theme', theme);
+  const btn = document.getElementById('themeToggle');
+  if(btn) btn.textContent = (theme === 'dark' ? '🌙 Escuro' : '☀️ Claro');
+  const htmlBg = theme === 'dark' ? '#0b0f14' : '#f5f5f5';
+  document.documentElement.style.background = htmlBg;
+}
+setTheme(currentTheme);
+document.getElementById('themeToggle').onclick = () => setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+  if(!localStorage.getItem('theme')) setTheme(e.matches ? 'dark' : 'light');
+});
+
+// ---------- Rate Limiting para RPC calls ----------
+const rpcQueue = [];
+let rpcBusy = false;
+async function rpcQueued(fn, args) {
+  return new Promise(resolve => {
+    rpcQueue.push(async () => {
+      const result = await rpc(fn, args);
+      resolve(result);
+    });
+    if(!rpcBusy) processRpcQueue();
+  });
+}
+async function processRpcQueue() {
+  if(rpcBusy || rpcQueue.length === 0) return;
+  rpcBusy = true;
+  try {
+    const fn = rpcQueue.shift();
+    if(fn) await fn();
+  } finally {
+    rpcBusy = false;
+    if(rpcQueue.length > 0) setTimeout(processRpcQueue, 100);
+  }
+}
 
 // ---------- acessibilidade ----------
 { const arias={fBairro:'Filtrar por bairro',fTipo:'Filtrar por tipo de lâmpada',fEstado:'Filtrar por estado',
