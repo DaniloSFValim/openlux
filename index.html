@@ -61,8 +61,6 @@
   body[data-theme="light"] table th{background:#f5f5f5;color:#1a1a1a}
   body[data-theme="light"] table tr:hover td{background:#f9f9f9}
   body[data-theme="light"] #toast{background:#f0f0f0;border-color:#ddd}
-  #themeToggle{border:1px solid #24303d;background:#111a24;border-radius:6px;padding:6px 12px;font-size:13px;color:#e5e7eb;cursor:pointer}
-  #themeToggle:hover{border-color:var(--accent)}
 </style>
 </head>
 <body>
@@ -121,11 +119,11 @@
       <button class="btn" id="btnStats">Indicadores</button>
     </div>
   </div>
-  <div style="display:flex;gap:6px">
-    <button id="themeToggle" class="btn" title="Alternar tema">🌙 Escuro</button>
+  <div style="display:flex;gap:6px;align-items:center">
     <button class="btn btn-accent" id="btnNovo" style="display:none">+ Ponto</button>
     <button class="btn" id="btnAdminConsole" style="display:none;border-color:#ef4444;color:#f87171">Admin</button>
     <button class="btn" id="btnLogin">Entrar</button>
+    <button id="themeToggle" class="btn" title="Alternar tema claro/escuro" aria-label="Alternar tema" style="padding:6px 9px">🌙</button>
   </div>
 </div>
 
@@ -142,6 +140,17 @@
 <div id="detail" class="panel" role="complementary" aria-label="Detalhe do ativo" style="position:absolute;top:64px;right:10px;width:300px;z-index:1000;border-radius:10px;padding:12px;display:none;max-height:calc(100% - 90px);overflow:auto"></div>
 <div id="stats" class="panel" role="complementary" aria-label="Indicadores" style="position:absolute;top:64px;left:10px;width:360px;z-index:1000;border-radius:10px;padding:12px;display:none;max-height:calc(100% - 90px);overflow:auto"></div>
 <div id="toast"></div>
+
+<div id="modeloModal" style="position:absolute;inset:0;z-index:1150;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center">
+  <div class="panel" style="width:min(600px,95vw);height:min(70vh,600px);border-radius:12px;display:flex;flex-direction:column;overflow:hidden">
+    <div style="display:flex;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid #1f2a37">
+      <b>Selecionar modelo de equipamento</b>
+      <div style="flex:1"></div>
+      <button class="btn" onclick="document.getElementById('modeloModal').style.display='none'" style="padding:4px 8px">✕</button>
+    </div>
+    <div id="modeloList" style="flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:6px"></div>
+  </div>
+</div>
 
 <div id="tableModal" style="position:absolute;inset:0;z-index:1100;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center">
   <div class="panel" style="width:min(1050px,95vw);height:min(80vh,760px);border-radius:12px;display:flex;flex-direction:column;overflow:hidden">
@@ -175,11 +184,11 @@
   </div>
   <div style="flex:1;display:flex;min-height:0">
     <nav role="navigation" aria-label="Seções da administração" style="width:180px;border-right:1px solid #1f2a37;padding:12px;display:flex;flex-direction:column;gap:4px">
-      <button class="btn acnav on" data-sec="visao" style="text-align:left">Visão geral</button>
-      <button class="btn acnav" data-sec="aprovacoes" style="text-align:left">Aprovações</button>
-      <button class="btn acnav" data-sec="usuarios" style="text-align:left">Usuários</button>
-      <button class="btn acnav" data-sec="aparencia" style="text-align:left">Aparência</button>
-      <button class="btn acnav" data-sec="dados" style="text-align:left">Dados</button>
+      <button class="btn acnav on" data-sec="visao" style="text-align:left">📊 Visão geral</button>
+      <button class="btn acnav" data-sec="usuarios" style="text-align:left">👥 Usuários</button>
+      <button class="btn acnav" data-sec="modelos" style="text-align:left">💡 Modelos</button>
+      <button class="btn acnav" data-sec="aparencia" style="text-align:left">🎨 Aparência</button>
+      <button class="btn acnav" data-sec="dados" style="text-align:left">📦 Dados</button>
     </nav>
     <div style="flex:1;overflow:auto;padding:18px">
       <section id="sec-visao" class="acsec"></section>
@@ -220,6 +229,43 @@
             </div>
           </div>
           <button class="btn btn-accent" id="cfgSave" style="margin-top:4px">Salvar aparência</button>
+        </div>
+      </section>
+
+      <section id="sec-modelos" class="acsec" style="display:none">
+        <h3 style="margin:0 0 12px;font-size:15px">Modelos de equipamento</h3>
+        <div style="font-size:12px;color:#9ca3af;margin:-6px 0 12px;max-width:680px">Catálogo de luminárias homologadas. No cadastro de um novo ponto, o operador escolhe um modelo e os campos técnicos são preenchidos automaticamente.</div>
+        <div class="chip" style="border-radius:8px;padding:12px;margin-bottom:12px;max-width:680px">
+          <div style="font-size:12px;color:#9ca3af;margin-bottom:8px"><b>Novo modelo</b></div>
+          <div style="display:flex;gap:8px;flex-direction:column">
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <label style="font-size:11px;color:#9ca3af;flex:1;min-width:150px">Fabricante *<input id="modFabricante" placeholder="ex: Philips"/></label>
+              <label style="font-size:11px;color:#9ca3af;flex:1;min-width:150px">Modelo *<input id="modModelo" placeholder="ex: CorePro 150W"/></label>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <label style="font-size:11px;color:#9ca3af;flex:1;min-width:110px">Potência (W) *<input id="modPotencia" type="number" min="1" max="2000" placeholder="150"/></label>
+              <label style="font-size:11px;color:#9ca3af;flex:1;min-width:110px">Temperatura (K)<input id="modTemperatura" type="number" placeholder="4000"/></label>
+              <label style="font-size:11px;color:#9ca3af;flex:1;min-width:110px">Tensão<select id="modTensao"><option value="">—</option><option>110</option><option>220</option><option value="110/220 (bivolt)">110/220 (bivolt)</option></select></label>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <label style="font-size:11px;color:#9ca3af;flex:1;min-width:110px">Grau IP<input id="modIp" placeholder="IP65"/></label>
+              <label style="font-size:11px;color:#9ca3af;flex:1;min-width:110px">Classe NBR<input id="modClasse" placeholder="V3, P2, C4…"/></label>
+              <label style="font-size:11px;color:#9ca3af;flex:1;min-width:110px">Tecnologia<input id="modTecnologia" value="LED" placeholder="LED"/></label>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <label style="font-size:11px;color:#9ca3af;flex:1;min-width:150px">Tipo de luminária<select id="modTipoLum"><option value="">—</option></select></label>
+              <label style="font-size:11px;color:#9ca3af;flex:1;min-width:150px">Tipo de lâmpada<select id="modTipoLamp"></select></label>
+            </div>
+            <label style="font-size:11px;color:#9ca3af">Foto (URL)<input id="modFoto" type="url" placeholder="https://…/foto.jpg (opcional)"/></label>
+            <label style="font-size:11px;color:#9ca3af">Descrição<textarea id="modDescricao" placeholder="Aplicação, observações… (opcional)" rows="2"></textarea></label>
+            <button class="btn btn-accent" id="modCreate">Adicionar modelo</button>
+          </div>
+        </div>
+        <div style="max-width:900px;overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr><th>Fabricante</th><th>Modelo</th><th style="text-align:right">Potência</th><th>Luminária</th><th>Lâmpada</th><th>Classe</th><th>IP</th><th></th></tr></thead>
+          <tbody id="modBody"></tbody>
+        </table>
         </div>
       </section>
 
@@ -309,7 +355,8 @@ async function rpc(fn,args){ setBusy(true); try{
     const {data,error}=await sb.rpc(fn,args); if(error) throw error; return data;
   }catch(e){ toast('Erro ao carregar: '+(e.message||e),true); return null; } finally{ setBusy(false); } }
 
-const map = L.map('map',{zoomControl:true,attributionControl:false,preferCanvas:true,minZoom:11,maxBoundsViscosity:1}).setView([-22.905,-43.055],12);
+const map = L.map('map',{zoomControl:false,attributionControl:false,preferCanvas:true,minZoom:11,maxBoundsViscosity:1}).setView([-22.905,-43.055],12);
+L.control.zoom({position:'bottomright'}).addTo(map); // canto inferior direito: a barra superior cobre a posição padrão
 map.setMaxBounds([[-23.03,-43.20],[-22.80,-42.90]]);
 state.munLayer = L.layerGroup().addTo(map);
 const bases = {
@@ -693,7 +740,9 @@ window._edit = function(){
       <label style="font-size:11px;color:#9ca3af">Classe NBR<input id="eClasse" value="${esc(p.classe_nbr)}" placeholder="V3, P2, C4…"/></label>
       <label style="font-size:11px;color:#9ca3af">Observações<textarea id="eObs" rows="2">${esc(p.observacoes)}</textarea></label>
       <div style="display:flex;gap:8px"><button class="btn btn-accent" style="flex:1" id="eSave">Salvar</button><button class="btn" onclick="window._reopen()">Cancelar</button></div>
+      <button class="btn" id="eDelete" style="border-color:#ef4444;color:#f87171">🗑 Excluir ativo</button>
     </div>`;
+  document.getElementById('eDelete').onclick = ()=>window._excluirPonto(p);
   document.getElementById('eSave').onclick = async ()=>{
     const pot=parseInt(document.getElementById('ePot').value);
     if(!isNaN(pot) && (pot<0||pot>2000)){ toast('Potência fora da faixa (0–2000 W)',true); return; }
@@ -716,6 +765,23 @@ window._edit = function(){
   };
 };
 window._reopen = ()=>openDetail(state.current);
+window._excluirPonto = async (p)=>{
+  if(!podeEditar()) return;
+  const cod = p.numero_patrimonio || p.id;
+  const motivo = prompt('Excluir o ativo '+cod+'?\n\nInforme o motivo da exclusão (obrigatório):','');
+  if(motivo===null) return; // cancelou
+  if(!motivo.trim()){ toast('Informe o motivo da exclusão',true); return; }
+  if(!confirm('Confirmar exclusão de '+cod+'?\n\nUm backup completo fica guardado e a exclusão é registrada no histórico com seu usuário.')) return;
+  setBusy(true);
+  const {data,error}=await sb.rpc('ip_remover_ponto',{ p_id:p.id, p_motivo:motivo.trim() });
+  setBusy(false);
+  if(error){ toast('Falha ao excluir: '+error.message,true); return; }
+  if(data && data.error){ toast(data.error,true); return; }
+  toast('Ativo '+cod+' removido');
+  document.getElementById('detail').style.display='none';
+  state.current=null; state.choroData=null; state.densData=null;
+  refresh(); loadStatsChips();
+};
 window._interv = async (id)=>{
   const box=document.getElementById('histBox'); if(!box) return;
   box.innerHTML='<div style="color:#6b7280;font-size:11px;padding:6px 0"><span class="spin"></span> Carregando…</div>';
@@ -804,6 +870,7 @@ document.getElementById('btnNovo').onclick = ()=>{
       <input id="nPatr" placeholder="Referência ENEL (opcional)"/>
       <input id="nEnd" placeholder="Endereço"/>
       <div id="nLumFields" style="display:flex;flex-direction:column;gap:7px">
+        <button class="btn" style="width:100%;margin-bottom:8px;border-color:var(--accent);color:var(--accent)" id="nBtnModelo">📋 Inserir com modelo</button>
         <label style="font-size:11px;color:#9ca3af">Tipo de luminária<select id="nTipoLum"><option value="">—</option>${TIPO_LUM.map(t=>`<option>${t}</option>`).join('')}</select></label>
         <input id="nClasse" placeholder="Classe NBR (V3, P2, C4…)"/>
         <select id="nTipo">${TIPOS.map(t=>`<option>${t}</option>`).join('')}</select>
@@ -816,6 +883,10 @@ document.getElementById('btnNovo').onclick = ()=>{
   const nAtivo=document.getElementById('nAtivo');
   const toggleLum=()=>{ document.getElementById('nLumFields').style.display = nAtivo.value==='luminaria'?'flex':'none'; };
   nAtivo.onchange=toggleLum; toggleLum();
+
+  // Modelo selection
+  document.getElementById('nBtnModelo').onclick = ()=>{ window._selecionarModelo(); };
+
   document.getElementById('nSave').onclick = async ()=>{
     const lat=parseFloat(document.getElementById('nLat').value), lng=parseFloat(document.getElementById('nLng').value);
     if(isNaN(lat)||isNaN(lng)||lat<-23.05||lat>-22.80||lng<-43.20||lng>-42.90){ toast('Coordenadas fora de Niterói',true); return; }
@@ -834,6 +905,50 @@ document.getElementById('btnNovo').onclick = ()=>{
     toast('Cadastrado: '+(data||'ok')); d.style.display='none'; state.choroData=null; state.densData=null; refresh(); loadStatsChips();
     map.setView([lat,lng], Math.max(map.getZoom(),17));
   };
+};
+
+// ---------- Equipamentos Modelo ----------
+window._selecionarModelo = async ()=>{
+  const modal = document.getElementById('modeloModal');
+  const list = document.getElementById('modeloList');
+  modal.style.display='flex';
+  list.innerHTML='<div style="color:#6b7280;font-size:11px;padding:6px 0"><span class="spin"></span> Carregando modelos…</div>';
+
+  const data = await rpc('ip_listar_modelos');
+  state.modelosCache = data||[];
+  if(!state.modelosCache.length){
+    list.innerHTML='<div style="color:#6b7280;font-size:12px;padding:8px">Nenhum modelo cadastrado.<br/>Um administrador pode criar modelos em <b>Admin → Modelos de equipamento</b>.</div>';
+    return;
+  }
+
+  list.innerHTML = state.modelosCache.map(m=>`
+    <div class="chip" style="border-radius:8px;padding:10px;cursor:pointer;display:flex;gap:10px;align-items:center" onclick="window._aplicarModelo('${m.id}')" title="Clique para preencher os campos com este modelo">
+      ${m.foto_url?`<img src="${esc(m.foto_url)}" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:6px;flex-shrink:0"/>`:''}
+      <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
+        <div style="font-weight:600;font-size:12px">${esc(m.fabricante)} · ${esc(m.modelo)}</div>
+        <div style="color:#9ca3af;font-size:11px">${m.potencia_w} W${m.temperatura_cor_k?' · '+m.temperatura_cor_k+' K':''}${m.tensao?' · '+esc(m.tensao)+' V':''}${m.ip?' · '+esc(m.ip):''}${m.classe_nbr?' · '+esc(m.classe_nbr):''}</div>
+        <div style="color:#6b7280;font-size:10.5px">${esc(m.tipo_luminaria||'')}${m.tipo_luminaria&&m.tipo_lampada?' · ':''}${esc(m.tipo_lampada||'')}${m.descricao?' — '+esc(m.descricao):''}</div>
+      </div>
+    </div>
+  `).join('');
+};
+
+window._aplicarModelo = (id)=>{
+  const m = (state.modelosCache||[]).find(x=>x.id===id);
+  if(!m){ toast('Modelo não encontrado',true); return; }
+
+  // Copiar dados do modelo para os campos do formulário (cópia, não referência)
+  const set=(elId,v)=>{ const el=document.getElementById(elId); if(el&&v!=null&&v!=='') el.value=v; };
+  set('nTipo', m.tipo_lampada);
+  set('nPot', m.potencia_w);
+  set('nClasse', m.classe_nbr);
+  set('nTipoLum', m.tipo_luminaria);
+  const ehLed = (m.tipo_lampada==='led') || (m.tecnologia||'').toLowerCase().includes('led');
+  const mod=document.getElementById('nMod'); if(mod) mod.checked = ehLed;
+  const st=document.getElementById('nStatus'); if(st) st.value = ehLed ? 'led_instalado' : st.value;
+
+  document.getElementById('modeloModal').style.display='none';
+  toast('Modelo aplicado: '+m.fabricante+' '+m.modelo);
 };
 
 // ---------- Estatísticas ----------
@@ -981,7 +1096,7 @@ function acShow(sec){
   if(sec==='visao') loadVisaoGeral();
   else if(sec==='usuarios') loadAdminUsers();
   else if(sec==='aparencia') fillConfigForm();
-  else if(sec==='dados') {} // Dados section doesn't need loading
+  else if(sec==='modelos') loadAdminModelos();
 }
 document.getElementById('btnAdminConsole').onclick = ()=>{ document.getElementById('adminConsole').style.display='flex'; acShow('visao'); };
 document.getElementById('acVoltar').onclick = ()=>document.getElementById('adminConsole').style.display='none';
@@ -1055,6 +1170,80 @@ document.getElementById('admCreate').onclick = async ()=>{
   if(data.senha_temporaria) alert('Usuário criado.\nE-mail: '+email+'\nSenha temporária: '+data.senha_temporaria+'\n\nComunique ao operador e peça que troque depois.');
   else toast('Usuário criado');
   loadAdminUsers();
+};
+
+// ---------- Administração de Modelos ----------
+function initModelosForm(){
+  const selLum=document.getElementById('modTipoLum');
+  if(selLum.options.length<=1){
+    TIPO_LUM.forEach(t=>selLum.add(new Option(t,t)));
+    const selLamp=document.getElementById('modTipoLamp');
+    TIPOS.forEach(t=>selLamp.add(new Option(t,t)));
+    selLamp.value='led';
+  }
+}
+async function loadAdminModelos(){
+  initModelosForm();
+  const body=document.getElementById('modBody');
+  body.innerHTML='<tr><td colspan="8" style="text-align:center;color:#6b7280;padding:14px"><span class="spin"></span> Carregando…</td></tr>';
+  const data = await rpc('ip_listar_modelos');
+  state.modelosCache = data||[];
+  body.innerHTML=state.modelosCache.map(m=>`
+    <tr>
+      <td>${esc(m.fabricante)}</td>
+      <td>${esc(m.modelo)}${m.descricao?`<div style="color:#6b7280;font-size:10.5px">${esc(m.descricao)}</div>`:''}</td>
+      <td style="text-align:right">${m.potencia_w} W</td>
+      <td>${esc(m.tipo_luminaria||'—')}</td>
+      <td>${esc(m.tipo_lampada||'—')}</td>
+      <td>${esc(m.classe_nbr||'—')}</td>
+      <td>${esc(m.ip||'—')}</td>
+      <td style="text-align:right"><button class="btn" style="padding:2px 8px;color:#f87171;font-size:11px" onclick="window._delModelo('${m.id}')">remover</button></td>
+    </tr>
+  `).join('') || '<tr><td colspan="8" style="text-align:center;color:#6b7280;padding:14px">Nenhum modelo cadastrado ainda</td></tr>';
+}
+window._delModelo = async (id)=>{
+  if(!confirm('Remover este modelo do catálogo? Os pontos já cadastrados com ele não serão afetados.')) return;
+  setBusy(true);
+  const {error}=await sb.rpc('ip_deletar_modelo',{p_id:id});
+  setBusy(false);
+  if(error){ toast('Erro ao remover: '+error.message,true); return; }
+  toast('Modelo removido');
+  loadAdminModelos();
+};
+document.getElementById('modCreate').onclick = async ()=>{
+  const fab=document.getElementById('modFabricante').value.trim();
+  const mod=document.getElementById('modModelo').value.trim();
+  const pot=parseInt(document.getElementById('modPotencia').value);
+  const temp=document.getElementById('modTemperatura').value.trim()?parseInt(document.getElementById('modTemperatura').value):null;
+
+  if(!fab || !mod || isNaN(pot) || pot<=0 || pot>2000){
+    toast('Preencha: Fabricante, Modelo e Potência (1–2000 W)',true);
+    return;
+  }
+
+  setBusy(true);
+  const {error}=await sb.rpc('ip_criar_modelo',{
+    p_fabricante:fab, p_modelo:mod, p_potencia_w:pot,
+    p_temperatura_cor_k:temp,
+    p_tensao:document.getElementById('modTensao').value||null,
+    p_ip:document.getElementById('modIp').value.trim()||null,
+    p_classe_nbr:document.getElementById('modClasse').value.trim()||null,
+    p_tecnologia:document.getElementById('modTecnologia').value.trim()||'LED',
+    p_tipo_luminaria:document.getElementById('modTipoLum').value||null,
+    p_tipo_lampada:document.getElementById('modTipoLamp').value||'led',
+    p_foto_url:document.getElementById('modFoto').value.trim()||null,
+    p_descricao:document.getElementById('modDescricao').value.trim()||null
+  });
+  setBusy(false);
+  if(error){ toast('Erro ao criar: '+error.message,true); return; }
+
+  ['modFabricante','modModelo','modPotencia','modTemperatura','modTensao','modIp','modClasse','modFoto','modDescricao'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('modTecnologia').value='LED';
+  document.getElementById('modTipoLum').value='';
+  document.getElementById('modTipoLamp').value='led';
+
+  toast('Modelo adicionado ao catálogo');
+  loadAdminModelos();
 };
 
 // ---------- Exportação ----------
@@ -1246,7 +1435,7 @@ function setTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   document.body.setAttribute('data-theme', theme);
   const btn = document.getElementById('themeToggle');
-  if(btn) btn.textContent = (theme === 'dark' ? '🌙 Escuro' : '☀️ Claro');
+  if(btn){ btn.textContent = (theme === 'dark' ? '🌙' : '☀️'); btn.title = theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'; }
   const htmlBg = theme === 'dark' ? '#0b0f14' : '#f5f5f5';
   document.documentElement.style.background = htmlBg;
 }
