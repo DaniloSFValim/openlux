@@ -61,8 +61,8 @@
   body[data-theme="light"] table th{background:#f5f5f5;color:#1a1a1a}
   body[data-theme="light"] table tr:hover td{background:#f9f9f9}
   body[data-theme="light"] #toast{background:#f0f0f0;border-color:#ddd}
-  #themeToggle{position:fixed;top:12px;right:120px;z-index:999;padding:6px 12px;font-size:11px;background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.3);color:#e5e7eb;border-radius:6px;cursor:pointer}
-  #themeToggle:hover{background:rgba(0,0,0,0.3)}
+  #themeToggle{border:1px solid #24303d;background:#111a24;border-radius:6px;padding:6px 12px;font-size:13px;color:#e5e7eb;cursor:pointer}
+  #themeToggle:hover{border-color:var(--accent)}
 </style>
 </head>
 <body>
@@ -88,7 +88,6 @@
   </div>
   <span id="loading" style="display:none"><span class="spin"></span></span>
   <div style="flex:1"></div>
-  <button id="themeToggle" title="Alternar tema">🌙 Escuro</button>
   <div style="position:relative">
     <button class="btn" id="btnFiltros">Filtros<span id="fCount" style="display:none;margin-left:6px;background:#1d4ed8;color:#fff;border-radius:999px;padding:0 7px;font-size:11px"></span></button>
     <div id="filtrosPop" class="panel" style="position:absolute;top:40px;right:0;width:230px;border-radius:10px;padding:10px;display:none;flex-direction:column;gap:8px;z-index:1000">
@@ -123,6 +122,7 @@
     </div>
   </div>
   <div style="display:flex;gap:6px">
+    <button id="themeToggle" class="btn" title="Alternar tema">🌙 Escuro</button>
     <button class="btn btn-accent" id="btnNovo" style="display:none">+ Ponto</button>
     <button class="btn" id="btnAdminConsole" style="display:none;border-color:#ef4444;color:#f87171">Admin</button>
     <button class="btn" id="btnLogin">Entrar</button>
@@ -421,9 +421,28 @@ async function _refresh(){
 const refresh = debounce(_refresh, 120);
 map.on('moveend', refresh);
 
+// Mudar cursor quando zoom permite criar ponto
+map.on('zoomend', () => {
+  const container = map.getContainer();
+  if(state.user && podeEditar() && map.getZoom() >= 18) {
+    container.style.cursor = 'pointer';
+  } else {
+    container.style.cursor = 'grab';
+  }
+});
+map.on('mousedown', () => { if(map.getContainer().style.cursor !== 'pointer') map.getContainer().style.cursor = 'grabbing'; });
+map.on('mouseup', () => {
+  if(state.user && podeEditar() && map.getZoom() >= 18) {
+    map.getContainer().style.cursor = 'pointer';
+  } else {
+    map.getContainer().style.cursor = 'grab';
+  }
+});
+
 // ---------- Novo ponto via mapa (click) ----------
 map.on('click', function(e){
   if(!state.user || !podeEditar()) return;
+  if(map.getZoom() < 18){ toast('Zoom mínimo necessário: 18', true); return; }
   const lat = e.latlng.lat, lng = e.latlng.lng;
   if(lat < -23.05 || lat > -22.80 || lng < -43.20 || lng > -42.90){
     toast('Clique dentro dos limites de Niterói', true);
@@ -444,7 +463,7 @@ map.on('click', function(e){
       </div>
       <label style="font-size:11px;color:#9ca3af">Tipo de ativo<select id="nAtivo">${ativoOpts}</select></label>
       <input id="nPatr" placeholder="Referência ENEL (opcional)"/>
-      <input id="nEnd" placeholder="Endereço"/>
+      <div style="display:flex;gap:6px;align-items:center"><input id="nEnd" placeholder="Endereço" style="flex:1"/><span id="nEndLoading" style="font-size:12px;color:#6b7280;display:none"><span class="spin"></span></span></div>
       <div id="nLumFields" style="display:flex;flex-direction:column;gap:7px">
         <label style="font-size:11px;color:#9ca3af">Tipo de luminária<select id="nTipoLum"><option value="">—</option>${tipoLumOpts}</select></label>
         <input id="nClasse" placeholder="Classe NBR (V3, P2, C4…)"/>
@@ -458,6 +477,23 @@ map.on('click', function(e){
   const nAtivo = document.getElementById('nAtivo');
   const toggleLum = () => { document.getElementById('nLumFields').style.display = nAtivo.value === 'luminaria' ? 'flex' : 'none'; };
   nAtivo.onchange = toggleLum; toggleLum();
+
+  // Buscar endereço via reverse geocoding (OSM Nominatim)
+  const nEndInput = document.getElementById('nEnd');
+  const nEndLoading = document.getElementById('nEndLoading');
+  (async () => {
+    try {
+      nEndLoading.style.display = 'inline-block';
+      const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=18&addressdetails=1`);
+      const data = await resp.json();
+      if(data && data.address) {
+        const addr = data.address;
+        const endereco = addr.road ? `${addr.road}, ${addr.house_number || 'S/N'}` : data.display_name;
+        nEndInput.value = endereco.substring(0, 200);
+      }
+    } catch(e) { console.log('Nominatim lookup failed:', e); }
+    finally { nEndLoading.style.display = 'none'; }
+  })();
   document.getElementById('nSave').onclick = async () => {
     const lat2 = parseFloat(document.getElementById('nLat').value), lng2 = parseFloat(document.getElementById('nLng').value);
     if(isNaN(lat2) || isNaN(lng2) || lat2 < -23.05 || lat2 > -22.80 || lng2 < -43.20 || lng2 > -42.90){ toast('Coordenadas fora de Niterói', true); return; }
