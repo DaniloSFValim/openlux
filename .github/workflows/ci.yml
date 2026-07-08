@@ -33,7 +33,7 @@ jobs:
       - name: Lint CSS
         run: |
           npm install -g stylelint stylelint-config-standard
-          stylelint "**/*.css" || echo "CSS linting skipped (non-critical)"
+          stylelint "**/*.css" || true
         continue-on-error: true
 
       - name: Check for security vulnerabilities (npm audit)
