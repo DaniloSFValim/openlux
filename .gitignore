@@ -70,6 +70,8 @@ out/
 # Testing
 coverage/
 .nyc_output/
+test-results/
+playwright-report/
 
 # IDE local config
 .editorconfig.local
