@@ -78,7 +78,7 @@ jobs:
 
       - name: Upload test reports
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: newman-reports
           path: |
@@ -94,15 +94,17 @@ jobs:
           script: |
             const fs = require('fs');
 
-            let comment = `## 🧪 API Test Results
-
-**Endpoints Tested:**
-- ✅ Health Check
-- ✅ Data Retrieval
-- ✅ RPC Functions
-- ✅ Error Handling
-
-[📊 Full Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+            let comment = [
+              '## 🧪 API Test Results',
+              '',
+              '**Endpoints Tested:**',
+              '- ✅ Health Check',
+              '- ✅ Data Retrieval',
+              '- ✅ RPC Functions',
+              '- ✅ Error Handling',
+              '',
+              '[📊 Full Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})'
+            ].join('\n');
 
             if (fs.existsSync('./api-test-summary.md')) {
               const summary = fs.readFileSync('./api-test-summary.md', 'utf8');

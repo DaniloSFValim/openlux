@@ -44,7 +44,7 @@ jobs:
 
       - name: Upload Lighthouse reports
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: lighthouse-reports
           path: .lighthouseci/
@@ -55,22 +55,13 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const fs = require('fs');
-            const path = require('path');
-            const resultsDir = '.lighthouseci/lhr-*.json';
-
-            const comment = `## 🔦 Lighthouse CI Results
-
-**Performance Audit Summary:**
-
-| Metric | Score |
-|--------|-------|
-| Performance | 🟡 In Progress |
-| Accessibility | 🟡 In Progress |
-| Best Practices | 🟡 In Progress |
-| SEO | 🟡 In Progress |
-
-[📊 View Full Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+            const comment = [
+              '## 🔦 Lighthouse CI Results',
+              '',
+              '**Performance Audit Summary:** ver artifacts do run para os scores detalhados.',
+              '',
+              '[📊 View Full Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})'
+            ].join('\n');
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,
