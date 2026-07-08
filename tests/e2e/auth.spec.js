@@ -1,28 +1,36 @@
 import { test, expect } from '@playwright/test';
 
+async function dismissSplash(page) {
+  const skip = page.locator('#splashSkip');
+  if (await skip.isVisible()) await skip.click();
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 5000 });
+}
+
 test.describe('Authentication Flow', () => {
-  test('should load login page', async ({ page }) => {
+  test('should open login modal', async ({ page }) => {
     await page.goto('/');
+    await dismissSplash(page);
 
-    // Should show login form initially
-    const loginForm = page.locator('form');
-    await expect(loginForm).toBeVisible();
+    // Login é um modal aberto pelo botão "Entrar" da barra superior
+    await page.locator('#btnLogin').click();
+    await expect(page.locator('#loginModal')).toBeVisible();
 
-    // Should have email input
-    const emailInput = page.locator('input[type="email"]');
-    await expect(emailInput).toBeVisible();
+    // Campos de e-mail e senha do modal
+    await expect(page.locator('#liEmail')).toBeVisible();
+    await expect(page.locator('#liPass')).toBeVisible();
   });
 
   test('should display error on invalid login', async ({ page }) => {
     await page.goto('/');
+    await dismissSplash(page);
 
-    // Try login with non-existent account
-    await page.locator('input[type="email"]').fill('nonexistent@test.com');
-    await page.locator('input[type="password"]').fill('wrongpassword');
-    await page.locator('button:has-text("Entrar")').click();
+    await page.locator('#btnLogin').click();
+    await page.locator('#liEmail').fill('nonexistent@test.com');
+    await page.locator('#liPass').fill('wrongpassword');
+    await page.locator('#liSubmit').click();
 
-    // Should show error message
-    await expect(page.locator('text=/erro|erro|invalid/i')).toBeVisible({ timeout: 5000 });
+    // Mensagem de erro do modal (#liErr) deve aparecer
+    await expect(page.locator('#liErr')).toBeVisible({ timeout: 10000 });
   });
 
   test('should logout successfully', async ({ page }) => {

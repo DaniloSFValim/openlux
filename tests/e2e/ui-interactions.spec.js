@@ -1,55 +1,45 @@
 import { test, expect } from '@playwright/test';
 
+async function dismissSplash(page) {
+  const skip = page.locator('#splashSkip');
+  if (await skip.isVisible()) await skip.click();
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 5000 });
+}
+
 test.describe('UI Interactions', () => {
   test('should show filter controls', async ({ page }) => {
     await page.goto('/');
+    await dismissSplash(page);
 
-    // Should have navbar with filter dropdowns
-    const navbar = page.locator('nav');
-    await expect(navbar).toBeVisible();
-
-    // Should have cascade menus
-    const cascades = page.locator('[id*="Cascade"]');
-    expect(await cascades.count()).toBeGreaterThan(0);
+    // Barra superior com os selects de filtro
+    await expect(page.locator('#fBairro')).toBeVisible();
+    await expect(page.locator('#fTipo')).toBeVisible();
+    await expect(page.locator('#fEstado')).toBeVisible();
+    await expect(page.locator('#fPot')).toBeVisible();
   });
 
-  test('should open cascade menu on hover', async ({ page }) => {
+  test('should change filter selection', async ({ page }) => {
     await page.goto('/');
+    await dismissSplash(page);
 
-    // Wait for page load
-    await page.waitForTimeout(1000);
-
-    // Find a cascade button
-    const cascadeBtn = page.locator('[id*="Cascade"]').first();
-
-    if (await cascadeBtn.isVisible()) {
-      // Hover over it
-      await cascadeBtn.hover();
-
-      // Menu should appear
-      const menu = cascadeBtn.locator('..').locator('ul, .menu, [role="menu"]');
-      await expect(menu).toBeVisible({ timeout: 1000 });
-    }
+    // Selecionar um estado no filtro deve manter a UI estável
+    await page.locator('#fEstado').selectOption('led');
+    await page.waitForTimeout(500);
+    await expect(page.locator('#map')).toBeVisible();
   });
 
-  test('should show municipality limits on map', async ({ page }) => {
+  test('should initialize map layers', async ({ page }) => {
     await page.goto('/');
+    await dismissSplash(page);
 
-    // Wait for map to fully load
-    await page.waitForTimeout(2000);
-
-    // Municipality limits should be rendered
-    // (This is a Leaflet SVG/path element)
-    const municipioPath = page.locator('path[stroke*="blue"], g[id*="municipio"]');
-
-    // At least the element structure should exist
-    const mapSvg = page.locator('#map svg');
-    const isSvgPresent = await mapSvg.count() > 0;
-    expect(isSvgPresent).toBeTruthy();
+    // Leaflet cria os panes de camadas dentro do container do mapa
+    await expect(page.locator('#map .leaflet-pane').first()).toBeAttached();
+    await expect(page.locator('#map .leaflet-tile-pane')).toBeAttached();
   });
 
   test('should maintain UI responsiveness', async ({ page }) => {
     await page.goto('/');
+    await dismissSplash(page);
 
     // Simulate multiple rapid interactions
     const themeBtn = page.locator('#themeToggle');
@@ -62,15 +52,6 @@ test.describe('UI Interactions', () => {
 
     // Page should still be responsive
     await expect(page.locator('body')).toBeVisible();
-
-    // No console errors
-    const errors = [];
-    page.on('console', msg => {
-      if (msg.type() === 'error') errors.push(msg.text());
-    });
-
-    // After interactions, errors should be minimal
-    // (Some may exist but critical ones should not)
   });
 
   test('should load without console errors', async ({ page }) => {

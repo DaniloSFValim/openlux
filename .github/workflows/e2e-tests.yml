@@ -75,16 +75,20 @@ jobs:
             }
 
             const results = JSON.parse(fs.readFileSync(resultsFile, 'utf8'));
-            const totalTests = results.stats?.expected || 0;
-            const passedTests = results.stats?.expected - (results.stats?.unexpected || 0) || 0;
+            const stats = results.stats || {};
+            const passed = stats.expected || 0;
+            const failed = stats.unexpected || 0;
+            const skipped = stats.skipped || 0;
+            const flaky = stats.flaky || 0;
+            const total = passed + failed + skipped + flaky;
 
             const comment = [
               '## 🧪 E2E Test Results',
               '',
-              `- Total Tests: ${totalTests}`,
-              `- Passed: ${passedTests}`,
-              `- Failed: ${results.stats?.unexpected || 0}`,
-              `- Skipped: ${results.stats?.skipped || 0}`,
+              `- Total Tests: ${total}`,
+              `- Passed: ${passed}`,
+              `- Failed: ${failed}`,
+              `- Skipped: ${skipped}`,
               '',
               '[📊 Full Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})'
             ].join('\n');
