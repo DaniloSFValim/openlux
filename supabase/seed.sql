@@ -53,6 +53,31 @@
 --   (gen_random_uuid(), 'LUM004', 'luminaria', 'sinaleira', 'led', 100, true, -22.895, -43.045, 'Centro', 'manutencao');
 
 -- ============================================
+-- EXEMPLO: Modelos de Equipamento LED
+-- ============================================
+-- Dados de exemplo para o catálogo de modelos
+-- Descomentar para testar a feature de seleção de modelos
+
+-- INSERT INTO public.equipamentos_modelo (
+--   fabricante,
+--   modelo,
+--   potencia_w,
+--   temperatura_cor_k,
+--   tensao,
+--   ip,
+--   classe_nbr,
+--   tecnologia,
+--   tipo_luminaria,
+--   tipo_lampada,
+--   descricao
+-- ) VALUES
+--   ('Philips', 'CorePro LED 150W', 150, 4000, '220', 'IP66', 'V3', 'LED', 'viaria', 'led', 'Luminária para iluminação viária'),
+--   ('Osram', 'StreetEdge 250W', 250, 5000, '220', 'IP65', 'P2', 'LED', 'viaria', 'led', 'Com controle de intensidade'),
+--   ('Avant', 'Projetor LED 400W', 400, 6500, '110/220 (bivolt)', 'IP67', 'C4', 'LED', 'projetor', 'led', 'Para praças e áreas amplas'),
+--   ('Intelbras', 'LED UFN-F150', 150, 4000, '220', 'IP66', 'V3', 'LED', 'viaria', 'led', 'Econômica e confiável'),
+--   ('Elgin', 'Globo LED 60W', 60, 3000, '220', 'IP54', 'P4', 'LED', 'globo', 'led', 'Ornamental para orla');
+
+-- ============================================
 -- NOTAS
 -- ============================================
 -- 1. Para criar usuários no Supabase local:
