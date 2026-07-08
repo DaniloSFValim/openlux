@@ -111,17 +111,50 @@
       <span id="fCount" class="hidden ml-1 bg-blue-600 text-white rounded-full px-2 text-xs font-semibold"></span>
     </button>
     <div x-show="showFilters" @click.away="showFilters = false" class="absolute top-10 right-0 w-56 bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-3 flex flex-col gap-3 z-[1001]" id="filtrosPop" style="display:none">
+      <!-- Bairro Select - carrega opções dinamicamente via HTMX -->
       <div>
         <label class="block text-xs font-medium text-gray-400 mb-1.5">🏢 Bairro</label>
-        <select id="fBairro" class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"><option value="">Todos</option></select>
+        <select id="fBairro"
+          hx-get="/api/v1/bairros"
+          hx-target="#fTipo"
+          hx-trigger="change"
+          hx-swap="innerHTML swap:200ms"
+          hx-indicator="#loading"
+          class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors">
+          <option value="">Todos</option>
+        </select>
+        <div id="htmx-bairro-loading" class="htmx-request hidden text-xs text-slate-400 mt-1">
+          <span class="spin inline-block mr-1"></span> Carregando tipos...
+        </div>
       </div>
+
+      <!-- Tipo Select - atualizado dinamicamente via HTMX -->
       <div>
         <label class="block text-xs font-medium text-gray-400 mb-1.5">💡 Tipo</label>
-        <select id="fTipo" class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"><option value="">Todos</option></select>
+        <select id="fTipo"
+          hx-get="/api/v1/tipos-por-bairro"
+          hx-trigger="change"
+          hx-swap="innerHTML swap:200ms"
+          hx-indicator="#loading"
+          class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors">
+          <option value="">Todos</option>
+        </select>
+        <div id="htmx-tipo-loading" class="htmx-request hidden text-xs text-slate-400 mt-1">
+          <span class="spin inline-block mr-1"></span> Carregando estados...
+        </div>
       </div>
+
+      <!-- Estado Select - atualizado via HTMX (cascata completa) -->
       <div>
         <label class="block text-xs font-medium text-gray-400 mb-1.5">🔆 Estado</label>
-        <select id="fEstado" class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"><option value="">Todos</option><option value="led">LED</option><option value="pendente">Pendente</option><option value="sem_lampada">Sem lâmpada</option></select>
+        <select id="fEstado"
+          hx-trigger="change"
+          class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors">
+          <option value="">Todos</option>
+          <option value="led">LED</option>
+          <option value="pendente">Pendente</option>
+          <option value="sem_lampada">Sem lâmpada</option>
+        </select>
       </div>
       <div>
         <label class="block text-xs font-medium text-gray-400 mb-1.5">⚡ Potência mínima</label>
@@ -1803,6 +1836,109 @@ async function processRpcQueue() {
     if(rpcQueue.length > 0) setTimeout(processRpcQueue, 100);
   }
 }
+
+// ---------- HTMX Dynamic Filters (Cascata) ----------
+// Interceptar fetch para endpoints de API fictícios
+const originalFetch = window.fetch;
+window.fetch = async function(...args) {
+  const url = args[0]?.toString?.() || args[0];
+
+  // Handler para /api/v1/bairros - retorna opções de bairro
+  if (url.includes('/api/v1/bairros')) {
+    try {
+      const {data,error} = await sb.from('v_parque_export')
+        .select('bairro_nome')
+        .not('bairro_nome', 'is', null)
+        .order('bairro_nome');
+
+      if (error) throw error;
+
+      const bairros = [...new Set(data.map(d => d.bairro_nome).filter(Boolean))];
+      const html = `<option value="">Todos</option>\n${bairros.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join('\n')}`;
+
+      // Resetar Tipo ao mudar Bairro
+      setTimeout(() => {
+        const tipoSelect = document.querySelector('#fTipo');
+        if (tipoSelect) {
+          tipoSelect.innerHTML = '<option value="">Todos</option>';
+          state.tipo = '';
+        }
+      }, 100);
+
+      return new Response(html, {
+        status: 200,
+        headers: {'Content-Type': 'text/html; charset=utf-8'}
+      });
+    } catch (e) {
+      console.error('Erro ao carregar bairros:', e);
+      return new Response('<option value="">Erro ao carregar</option>', {status: 500});
+    }
+  }
+
+  // Handler para /api/v1/tipos-por-bairro - retorna tipos baseado no bairro
+  if (url.includes('/api/v1/tipos-por-bairro')) {
+    try {
+      const bairroSelect = document.querySelector('#fBairro');
+      const bairroSelecionado = bairroSelect?.value;
+
+      let query = sb.from('v_parque_export')
+        .select('tipo_luminaria')
+        .not('tipo_luminaria', 'is', null);
+
+      if (bairroSelecionado) {
+        query = query.eq('bairro_nome', bairroSelecionado);
+      }
+
+      const {data,error} = await query;
+
+      if (error) throw error;
+
+      const tipos = [...new Set(data.map(d => d.tipo_luminaria).filter(Boolean))].sort();
+      const html = `<option value="">Todos</option>\n${tipos.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('\n')}`;
+
+      return new Response(html, {
+        status: 200,
+        headers: {'Content-Type': 'text/html; charset=utf-8'}
+      });
+    } catch (e) {
+      console.error('Erro ao carregar tipos:', e);
+      return new Response('<option value="">Erro ao carregar</option>', {status: 500});
+    }
+  }
+
+  // Para outras requisições, usar fetch padrão
+  return originalFetch.apply(this, args);
+};
+
+// Event listeners para controlar estado dos filtros
+document.addEventListener('DOMContentLoaded', () => {
+  const fBairro = document.querySelector('#fBairro');
+  const fTipo = document.querySelector('#fTipo');
+  const fEstado = document.querySelector('#fEstado');
+
+  // Inicializar listeners
+  if (fBairro) {
+    fBairro.addEventListener('change', () => {
+      state.bairro = fBairro.value || '';
+      state.tipo = '';
+    });
+  }
+
+  if (fTipo) {
+    fTipo.addEventListener('change', () => {
+      state.tipo = fTipo.value || '';
+    });
+  }
+
+  if (fEstado) {
+    fEstado.addEventListener('change', () => {
+      state.estado = fEstado.value || '';
+    });
+  }
+
+  // Log para debug
+  console.log('✅ HTMX dynamic filters initialized');
+});
 
 // ---------- acessibilidade ----------
 { const arias={fBairro:'Filtrar por bairro',fTipo:'Filtrar por tipo de lâmpada',fEstado:'Filtrar por estado',
