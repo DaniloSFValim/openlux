@@ -63,17 +63,19 @@
 --   modelo,
 --   potencia_w,
 --   temperatura_cor_k,
---   tensao_v,
+--   tensao,
 --   ip,
 --   classe_nbr,
 --   tecnologia,
+--   tipo_luminaria,
+--   tipo_lampada,
 --   descricao
 -- ) VALUES
---   ('Philips', 'CorePro LED 150W', 150, 4000, 220, 'IP54', 'V3', 'LED', 'Luminária para iluminação viária'),
---   ('Osram', 'SylvaniaStreetEdge 250W', 250, 5000, 220, 'IP65', 'P2', 'LED Smart', 'Com controle de intensidade'),
---   ('Avant', 'LED RGB Pro 400W', 400, 6500, 110, 'IP67', 'C4', 'LED RGB', 'Para ambientes especiais'),
---   ('Intelbras', 'LED UFN-F150', 150, 4000, 220, 'IP54', 'V3', 'LED', 'Econômica e confiável'),
---   ('Elgin', 'LED 250W Branco Frio', 250, 6500, 220, 'IP65', 'P2', 'LED', 'Ideal para avenidas');
+--   ('Philips', 'CorePro LED 150W', 150, 4000, '220', 'IP66', 'V3', 'LED', 'viaria', 'led', 'Luminária para iluminação viária'),
+--   ('Osram', 'StreetEdge 250W', 250, 5000, '220', 'IP65', 'P2', 'LED', 'viaria', 'led', 'Com controle de intensidade'),
+--   ('Avant', 'Projetor LED 400W', 400, 6500, '110/220 (bivolt)', 'IP67', 'C4', 'LED', 'projetor', 'led', 'Para praças e áreas amplas'),
+--   ('Intelbras', 'LED UFN-F150', 150, 4000, '220', 'IP66', 'V3', 'LED', 'viaria', 'led', 'Econômica e confiável'),
+--   ('Elgin', 'Globo LED 60W', 60, 3000, '220', 'IP54', 'P4', 'LED', 'globo', 'led', 'Ornamental para orla');
 
 -- ============================================
 -- NOTAS
