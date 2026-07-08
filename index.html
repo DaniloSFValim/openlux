@@ -274,8 +274,17 @@
 </div>
 
 <script>
-const URL_SB = "https://lrnmydrwzxxajylsmoih.supabase.co";
-const ANON = "sb_publishable_w3UmLsmcDtT81S3MDdDJjw_rEWckoVl";
+// Get Supabase credentials from environment or build-time injection
+// In production (Netlify): injected as window.__CONFIG__ by build process
+// In development: configure in netlify.toml or local .env
+const URL_SB = window.__CONFIG__?.supabaseUrl || 'https://lrnmydrwzxxajylsmoih.supabase.co';
+const ANON = window.__CONFIG__?.supabaseAnonKey || 'sb_publishable_w3UmLsmcDtT81S3MDdDJjw_rEWckoVl';
+
+// Validate credentials exist (log warning if using defaults)
+if(!window.__CONFIG__) {
+  console.warn('⚠️ Using default Supabase credentials. Configure environment variables for security.');
+}
+
 const sb = window.supabase.createClient(URL_SB, ANON);
 
 const state = { user:null, userRole:null, bairro:"", tipo:"", estado:"", pot:"", fila:"", layer:null, mode:"", tPage:0, tSize:50,
