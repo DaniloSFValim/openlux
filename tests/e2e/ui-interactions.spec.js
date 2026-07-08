@@ -11,7 +11,8 @@ test.describe('UI Interactions', () => {
     await page.goto('/');
     await dismissSplash(page);
 
-    // Barra superior com os selects de filtro
+    // Os selects de filtro ficam no popup aberto pelo botão "Filtros"
+    await page.locator('#btnFiltros').click();
     await expect(page.locator('#fBairro')).toBeVisible();
     await expect(page.locator('#fTipo')).toBeVisible();
     await expect(page.locator('#fEstado')).toBeVisible();
@@ -22,7 +23,8 @@ test.describe('UI Interactions', () => {
     await page.goto('/');
     await dismissSplash(page);
 
-    // Selecionar um estado no filtro deve manter a UI estável
+    // Abrir o popup de filtros e selecionar um estado deve manter a UI estável
+    await page.locator('#btnFiltros').click();
     await page.locator('#fEstado').selectOption('led');
     await page.waitForTimeout(500);
     await expect(page.locator('#map')).toBeVisible();
