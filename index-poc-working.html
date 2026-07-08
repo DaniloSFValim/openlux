@@ -81,55 +81,93 @@
 </div>
 <div id="footerBand" role="contentinfo" style="position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:800;max-width:92vw;background:rgba(15,21,28,0.86);border:1px solid #1f2a37;border-radius:8px;padding:5px 14px;font-size:11px;color:#9ca3af;text-align:center;pointer-events:none">SECONSER · Diretoria de Iluminação Pública · Prefeitura de Niterói · Desenvolvido por <span style="color:#cbd5e1">Danilo Valim</span> · v1.1</div>
 
-<div class="panel" role="banner" aria-label="Barra principal" style="position:absolute;top:10px;left:10px;right:10px;z-index:1000;border-radius:12px;display:flex;align-items:center;gap:14px;padding:7px 14px">
-  <img id="cfgLogo" alt="Logo"/>
-  <div style="min-width:0">
-    <div style="font-weight:700;font-size:14px;line-height:1.1;white-space:nowrap"><span id="cfgTitulo">Iluminação Pública</span></div>
-    <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
-      <div style="width:120px;height:6px;background:#1a2431;border-radius:3px;overflow:hidden"><div id="pctBar" style="height:100%;width:0;background:linear-gradient(90deg,#f59e0b,#22c55e);transition:width .5s"></div></div>
-      <span id="kpi" style="font-size:12px;color:#cbd5e1;white-space:nowrap">—</span>
+<!-- TOP BAR - Modernized with Tailwind + Alpine -->
+<div x-data="{ showFilters: false, showExport: false, showVis: false }" class="fixed top-3 left-3 right-3 z-[1000] bg-slate-900/95 backdrop-blur border border-slate-700 rounded-xl shadow-xl p-3 flex items-center gap-3 flex-wrap" role="banner" aria-label="Barra principal">
+
+  <!-- Logo & Title -->
+  <img id="cfgLogo" alt="Logo" class="h-6 w-auto rounded hidden mr-2"/>
+  <div class="min-w-0 flex-shrink-0">
+    <div class="font-bold text-sm leading-tight whitespace-nowrap"><span id="cfgTitulo">Iluminação Pública</span></div>
+    <div class="flex items-center gap-2 mt-1">
+      <div class="w-28 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+        <div id="pctBar" class="h-full w-0 bg-gradient-to-r from-amber-400 to-green-500 transition-all duration-500"></div>
+      </div>
+      <span id="kpi" class="text-xs text-gray-300 whitespace-nowrap">—</span>
     </div>
   </div>
-  <span id="loading" style="display:none"><span class="spin"></span></span>
-  <div style="flex:1"></div>
-  <div style="position:relative">
-    <button class="btn" id="btnFiltros">Filtros<span id="fCount" style="display:none;margin-left:6px;background:#1d4ed8;color:#fff;border-radius:999px;padding:0 7px;font-size:11px"></span></button>
-    <div id="filtrosPop" class="panel" style="position:absolute;top:40px;right:0;width:230px;border-radius:10px;padding:10px;display:none;flex-direction:column;gap:8px;z-index:1000">
-      <label style="font-size:11px;color:#9ca3af">Bairro<select id="fBairro"><option value="">Todos</option></select></label>
-      <label style="font-size:11px;color:#9ca3af">Tipo<select id="fTipo"><option value="">Todos</option></select></label>
-      <label style="font-size:11px;color:#9ca3af">Estado<select id="fEstado"><option value="">Todos</option><option value="led">LED</option><option value="pendente">Pendente</option><option value="sem_lampada">Sem lâmpada</option></select></label>
-      <label style="font-size:11px;color:#9ca3af">Potência mínima<select id="fPot"><option value="">Qualquer</option><option value="150">≥ 150 W</option><option value="250">≥ 250 W</option><option value="400">≥ 400 W</option></select></label>
-      <label style="font-size:11px;color:#9ca3af">Fila de auditoria<select id="fFila"><option value="">— nenhuma —</option><option value="revisao">Marcados p/ revisão</option><option value="suspeito">LED suspeito (&gt;400 W)</option><option value="mod_seconser">Origem: SECONSER</option><option value="mod_censo">Origem: censo ENEL</option><option value="mod_campo">Origem: campo</option></select></label>
-      <button class="btn" id="fLimpar">Limpar filtros</button>
+
+  <!-- Loading Spinner -->
+  <span id="loading" class="hidden ml-2">
+    <div class="inline-block w-3 h-3 border-2 border-slate-600 border-t-blue-500 rounded-full animate-spin"></div>
+  </span>
+
+  <!-- Spacer -->
+  <div class="flex-1 hidden md:block"></div>
+
+  <!-- FILTERS -->
+  <div class="relative">
+    <button @click="showFilters = !showFilters" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 hover:border-blue-500 rounded-lg text-sm font-medium transition-colors flex items-center gap-2" id="btnFiltros">
+      <span>⚙️ Filtros</span>
+      <span id="fCount" class="hidden ml-1 bg-blue-600 text-white rounded-full px-2 text-xs font-semibold"></span>
+    </button>
+    <div x-show="showFilters" @click.away="showFilters = false" class="absolute top-10 right-0 w-56 bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-3 flex flex-col gap-3 z-[1001]" id="filtrosPop" style="display:none">
+      <div>
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">🏢 Bairro</label>
+        <select id="fBairro" class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"><option value="">Todos</option></select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">💡 Tipo</label>
+        <select id="fTipo" class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"><option value="">Todos</option></select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">🔆 Estado</label>
+        <select id="fEstado" class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"><option value="">Todos</option><option value="led">LED</option><option value="pendente">Pendente</option><option value="sem_lampada">Sem lâmpada</option></select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">⚡ Potência mínima</label>
+        <select id="fPot" class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"><option value="">Qualquer</option><option value="150">≥ 150 W</option><option value="250">≥ 250 W</option><option value="400">≥ 400 W</option></select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">📋 Fila de auditoria</label>
+        <select id="fFila" class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"><option value="">— nenhuma —</option><option value="revisao">Marcados p/ revisão</option><option value="suspeito">LED suspeito (&gt;400 W)</option><option value="mod_seconser">Origem: SECONSER</option><option value="mod_censo">Origem: censo ENEL</option><option value="mod_campo">Origem: campo</option></select>
+      </div>
+      <button id="fLimpar" class="w-full px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-medium transition-colors">Limpar filtros</button>
     </div>
   </div>
-  <div style="position:relative" id="exportContainer">
-    <button class="btn" id="btnExport">Exportar ▾</button>
-    <div id="exportPop" class="panel" style="position:absolute;top:40px;right:0;width:220px;border-radius:10px;padding:8px;display:none;flex-direction:column;gap:6px;z-index:1000">
-      <div style="font-size:11px;color:#6b7280;padding:0 2px">Conforme filtros ativos</div>
-      <button class="btn" data-exp="csv">Dados (CSV)</button>
-      <button class="btn" data-exp="geojson">Dados (GeoJSON · GIS)</button>
-      <button class="btn" data-exp="bairros">Passivo por bairro (CSV)</button>
-      <button class="btn" data-exp="serie">Série de métricas (CSV)</button>
-      <button class="btn" data-exp="grade">Grade de densidade (CSV)</button>
-      <button class="btn" data-exp="png">Mapa atual (PNG)</button>
-      <button class="btn" data-exp="pdf">Relatório (PDF)</button>
+
+  <!-- EXPORT -->
+  <div class="relative">
+    <button @click="showExport = !showExport" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 hover:border-blue-500 rounded-lg text-sm font-medium transition-colors" id="btnExport">📥 Exportar</button>
+    <div x-show="showExport" @click.away="showExport = false" class="absolute top-10 right-0 w-52 bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-2 flex flex-col gap-1.5 z-[1001]" id="exportPop" style="display:none">
+      <div class="px-2 py-1 text-xs text-gray-400">Conforme filtros ativos</div>
+      <button class="btn-export px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" data-exp="csv">📊 Dados (CSV)</button>
+      <button class="btn-export px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" data-exp="geojson">🗺️ GeoJSON (GIS)</button>
+      <button class="btn-export px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" data-exp="bairros">📈 Passivo/bairro</button>
+      <button class="btn-export px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" data-exp="serie">📉 Série de métricas</button>
+      <button class="btn-export px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" data-exp="grade">🔲 Grade de densidade</button>
+      <button class="btn-export px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" data-exp="png">🖼️ Mapa (PNG)</button>
+      <button class="btn-export px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" data-exp="pdf">📄 Relatório (PDF)</button>
+      <button class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors border-t border-slate-700 mt-1 pt-1.5" id="btnExportCustom">⚙️ Personalizar colunas...</button>
     </div>
   </div>
-  <div style="position:relative">
-    <button class="btn" id="btnVis">Visualizar ▾</button>
-    <div id="visPop" class="panel" style="position:absolute;top:40px;right:0;width:190px;border-radius:10px;padding:8px;display:none;flex-direction:column;gap:6px;z-index:1000">
-      <button class="btn" id="btnChoro" title="Colorir bairros por % LED">Coroplético</button>
-      <button class="btn" id="btnDens" title="Grade 250 m de densidade luminotécnica">Densidade</button>
-      <button class="btn" id="btnTabela">Tabela</button>
-      <button class="btn" id="btnStats">Indicadores</button>
+
+  <!-- VISUALIZE -->
+  <div class="relative">
+    <button @click="showVis = !showVis" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 hover:border-blue-500 rounded-lg text-sm font-medium transition-colors" id="btnVis">👁️ Visualizar</button>
+    <div x-show="showVis" @click.away="showVis = false" class="absolute top-10 right-0 w-48 bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-2 flex flex-col gap-1.5 z-[1001]" id="visPop" style="display:none">
+      <button id="btnChoro" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Colorir bairros por % LED">🎨 Coroplético</button>
+      <button id="btnDens" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Grade 250 m de densidade">📊 Densidade</button>
+      <button id="btnTabela" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors">📋 Tabela</button>
+      <button id="btnStats" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors">📈 Indicadores</button>
     </div>
   </div>
-  <div style="display:flex;gap:6px;align-items:center">
-    <button class="btn btn-accent" id="btnNovo" style="display:none">+ Ponto</button>
-    <button class="btn" id="btnAdminConsole" style="display:none;border-color:#ef4444;color:#f87171">Admin</button>
-    <button class="btn" id="btnLogin">Entrar</button>
-    <button id="themeToggle" class="btn" title="Alternar tema claro/escuro" aria-label="Alternar tema" style="padding:6px 9px">🌙</button>
+
+  <!-- ACTION BUTTONS -->
+  <div class="flex gap-2 items-center ml-auto">
+    <button id="btnNovo" class="hidden px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors">+ Ponto</button>
+    <button id="btnAdminConsole" class="hidden px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-red-500/50 text-red-400 rounded-lg text-sm font-medium transition-colors">⚙️ Admin</button>
+    <button id="btnLogin" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">🔑 Entrar</button>
+    <button id="themeToggle" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-sm transition-colors" title="Alternar tema claro/escuro" aria-label="Alternar tema">🌙</button>
   </div>
 </div>
 
@@ -177,6 +215,79 @@
       <button class="btn" id="tPrev">‹ Anterior</button>
       <span id="tPage" style="font-size:12px;color:#9ca3af"></span>
       <button class="btn" id="tNext">Próxima ›</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT COLUMNS SELECTOR MODAL -->
+<div id="exportCustomModal" style="position:absolute;inset:0;z-index:1150;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center">
+  <div class="panel" style="width:min(500px,95vw);border-radius:12px;display:flex;flex-direction:column;overflow:hidden">
+    <div style="display:flex;gap:8px;align-items:center;padding:12px;border-bottom:1px solid #1f2a37">
+      <b style="font-size:15px">Personalizar exportação CSV</b>
+      <div style="flex:1"></div>
+      <button class="btn" onclick="document.getElementById('exportCustomModal').style.display='none'" style="padding:4px 8px">✕</button>
+    </div>
+
+    <div style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;max-height:60vh">
+      <div style="font-size:12px;color:#9ca3af;margin-bottom:8px">Selecione as colunas que deseja exportar:</div>
+
+      <label style="display:flex;align-items:center;gap:8px;padding:8px;cursor:pointer;hover:background:#111a24;border-radius:6px">
+        <input type="checkbox" id="expCol-codigo" class="exp-col-checkbox" value="codigo" checked style="width:18px;height:18px;cursor:pointer"/>
+        <span style="font-size:13px">Código SECONSER</span>
+      </label>
+
+      <label style="display:flex;align-items:center;gap:8px;padding:8px;cursor:pointer;hover:background:#111a24;border-radius:6px">
+        <input type="checkbox" id="expCol-endereco" class="exp-col-checkbox" value="endereco" checked style="width:18px;height:18px;cursor:pointer"/>
+        <span style="font-size:13px">Endereço</span>
+      </label>
+
+      <label style="display:flex;align-items:center;gap:8px;padding:8px;cursor:pointer;hover:background:#111a24;border-radius:6px">
+        <input type="checkbox" id="expCol-bairro" class="exp-col-checkbox" value="bairro" checked style="width:18px;height:18px;cursor:pointer"/>
+        <span style="font-size:13px">Bairro</span>
+      </label>
+
+      <label style="display:flex;align-items:center;gap:8px;padding:8px;cursor:pointer;hover:background:#111a24;border-radius:6px">
+        <input type="checkbox" id="expCol-tipo" class="exp-col-checkbox" value="tipo" checked style="width:18px;height:18px;cursor:pointer"/>
+        <span style="font-size:13px">Tipo de Luminária</span>
+      </label>
+
+      <label style="display:flex;align-items:center;gap:8px;padding:8px;cursor:pointer;hover:background:#111a24;border-radius:6px">
+        <input type="checkbox" id="expCol-potencia" class="exp-col-checkbox" value="potencia" checked style="width:18px;height:18px;cursor:pointer"/>
+        <span style="font-size:13px">Potência (W)</span>
+      </label>
+
+      <label style="display:flex;align-items:center;gap:8px;padding:8px;cursor:pointer;hover:background:#111a24;border-radius:6px">
+        <input type="checkbox" id="expCol-estado" class="exp-col-checkbox" value="estado" checked style="width:18px;height:18px;cursor:pointer"/>
+        <span style="font-size:13px">Estado / LED</span>
+      </label>
+
+      <label style="display:flex;align-items:center;gap:8px;padding:8px;cursor:pointer;hover:background:#111a24;border-radius:6px">
+        <input type="checkbox" id="expCol-origem" class="exp-col-checkbox" value="origem" checked style="width:18px;height:18px;cursor:pointer"/>
+        <span style="font-size:13px">Origem da Modernização</span>
+      </label>
+
+      <label style="display:flex;align-items:center;gap:8px;padding:8px;cursor:pointer;hover:background:#111a24;border-radius:6px">
+        <input type="checkbox" id="expCol-latitude" class="exp-col-checkbox" value="latitude" style="width:18px;height:18px;cursor:pointer"/>
+        <span style="font-size:13px">Latitude</span>
+      </label>
+
+      <label style="display:flex;align-items:center;gap:8px;padding:8px;cursor:pointer;hover:background:#111a24;border-radius:6px">
+        <input type="checkbox" id="expCol-longitude" class="exp-col-checkbox" value="longitude" style="width:18px;height:18px;cursor:pointer"/>
+        <span style="font-size:13px">Longitude</span>
+      </label>
+
+      <label style="display:flex;align-items:center;gap:8px;padding:8px;cursor:pointer;hover:background:#111a24;border-radius:6px">
+        <input type="checkbox" id="expCol-data" class="exp-col-checkbox" value="data" style="width:18px;height:18px;cursor:pointer"/>
+        <span style="font-size:13px">Data Última Intervenção</span>
+      </label>
+    </div>
+
+    <div style="display:flex;gap:8px;padding:12px;border-top:1px solid #1f2a37">
+      <button class="btn" onclick="document.getElementById('exportCustomModal').style.display='none'">Cancelar</button>
+      <button class="btn" onclick="document.querySelectorAll('.exp-col-checkbox').forEach(cb=>cb.checked=true)">Todas</button>
+      <button class="btn" onclick="document.querySelectorAll('.exp-col-checkbox').forEach(cb=>cb.checked=false)">Nenhuma</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-accent" id="btnExportWithSettings">Exportar CSV</button>
     </div>
   </div>
 </div>
@@ -1368,6 +1479,36 @@ document.getElementById('exportPop').addEventListener('click',e=>{ const b=e.tar
   document.getElementById('exportPop').style.display='none';
   ({csv:()=>exportData('csv'),geojson:()=>exportData('geojson'),bairros:exportBairros,
     serie:exportSerie,grade:exportGrade,png:exportPNG,pdf:exportPDF})[b.dataset.exp]?.(); });
+
+// ---------- Custom Export (Seletor de Colunas) ----------
+document.getElementById('btnExportCustom').addEventListener('click',()=>{
+  document.getElementById('exportCustomModal').style.display='flex';
+});
+
+function toCSVCustom(rows, selectedCols){
+  if(!rows||!rows.length) return '';
+  const allCols=Object.keys(rows[0]);
+  const cols=selectedCols && selectedCols.length ? selectedCols.filter(c=>allCols.includes(c)) : allCols;
+  if(!cols.length) cols=allCols;
+  const cell=v=>{ if(v==null)return''; v=String(v); return /[";\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
+  return cols.join(';')+'\n'+rows.map(r=>cols.map(c=>cell(r[c])).join(';')).join('\n');
+}
+
+async function exportDataCustom(){
+  const selectedCols=Array.from(document.querySelectorAll('.exp-col-checkbox:checked')).map(cb=>cb.value);
+  if(!selectedCols.length){ toast('Selecione pelo menos uma coluna',true); return; }
+
+  const rows=await fetchFiltrado(); if(!rows) return;
+  if(!rows.length){ toast('Nenhum ponto no filtro atual',true); return; }
+
+  const suf=state.bairro?('_'+state.bairro.replace(/\s+/g,'')):'';
+  const csv=toCSVCustom(rows, selectedCols);
+  baixar(`parque_personalizado${suf}_${stamp()}.csv`, '﻿'+csv,'text/csv;charset=utf-8');
+  toast(`Exportado: ${rows.length.toLocaleString('pt-BR')} pontos com ${selectedCols.length} coluna(s)`);
+  document.getElementById('exportCustomModal').style.display='none';
+}
+
+document.getElementById('btnExportWithSettings').addEventListener('click', exportDataCustom);
 
 // ---------- Aparência (config do site) ----------
 const FONTS={ system:{stack:"ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif"},
