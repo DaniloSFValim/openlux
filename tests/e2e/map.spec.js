@@ -1,5 +1,11 @@
 import { test, expect } from '@playwright/test';
 
+async function dismissSplash(page) {
+  const skip = page.locator('#splashSkip');
+  if (await skip.isVisible()) await skip.click();
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 5000 });
+}
+
 test.describe('Map Visualization', () => {
   test('should load map on page load', async ({ page }) => {
     await page.goto('/');
@@ -11,21 +17,16 @@ test.describe('Map Visualization', () => {
 
   test('should support zoom controls', async ({ page }) => {
     await page.goto('/');
+    await dismissSplash(page);
 
-    // Wait for map to load
-    await page.waitForTimeout(2000);
-
-    // Get initial map center
-    const mapBounds = await page.locator('#map').boundingBox();
-    expect(mapBounds).toBeTruthy();
-
-    // Simulate zoom in
-    await page.keyboard.press('Plus');
+    // Leaflet renderiza os controles de zoom no canto do mapa
+    const zoomIn = page.locator('.leaflet-control-zoom-in');
+    await expect(zoomIn).toBeVisible();
+    await zoomIn.click();
     await page.waitForTimeout(500);
 
-    // Map should still be visible
-    const mapAfterZoom = page.locator('#map');
-    await expect(mapAfterZoom).toBeVisible();
+    // Map should still be visible after zooming
+    await expect(page.locator('#map')).toBeVisible();
   });
 
   test('should show theme toggle button', async ({ page }) => {
@@ -38,15 +39,14 @@ test.describe('Map Visualization', () => {
 
   test('should toggle between dark and light theme', async ({ page }) => {
     await page.goto('/');
+    await dismissSplash(page);
 
     // Get initial theme
     const initialTheme = await page.locator('body').getAttribute('data-theme');
+    expect(initialTheme).toMatch(/dark|light/);
 
     // Click theme toggle
-    const themeButton = page.locator('#themeToggle');
-    await themeButton.click();
-
-    // Wait for theme change
+    await page.locator('#themeToggle').click();
     await page.waitForTimeout(300);
 
     // Theme should have changed
@@ -56,6 +56,7 @@ test.describe('Map Visualization', () => {
 
   test('should persist theme in localStorage', async ({ page }) => {
     await page.goto('/');
+    await dismissSplash(page);
 
     // Click theme toggle
     await page.locator('#themeToggle').click();

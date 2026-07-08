@@ -5,22 +5,18 @@
 [![Lighthouse CI](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/lighthouse-ci.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/lighthouse-ci.yml)
 [![Security Scanning](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/security-scan.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/security-scan.yml)
 [![API Tests](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/api-testing.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/api-testing.yml)
-[![Netlify Status](https://api.netlify.com/api/v1/badges/8e1c5730-5e9e-4c8b-82f1-a1b1c2d3e4f5/deploy-status)](https://app.netlify.com/projects/iluminacao-niteroi)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/fad767e1-972b-40e7-995d-f0c38b287c8e/deploy-status)](https://app.netlify.com/projects/iluminacao-niteroi)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org)
 
-**Repository & Stack:**
-[![GitHub Stars](https://img.shields.io/github/stars/DaniloSFValim/iluminacao-led-niteroi?style=flat-square&logo=github)](https://github.com/DaniloSFValim/iluminacao-led-niteroi)
-[![GitHub Forks](https://img.shields.io/github/forks/DaniloSFValim/iluminacao-led-niteroi?style=flat-square&logo=github)](https://github.com/DaniloSFValim/iluminacao-led-niteroi/network/members)
-[![Last Commit](https://img.shields.io/github/last-commit/DaniloSFValim/iluminacao-led-niteroi?style=flat-square&logo=git)](https://github.com/DaniloSFValim/iluminacao-led-niteroi/commits)
-[![Repository Size](https://img.shields.io/github/repo-size/DaniloSFValim/iluminacao-led-niteroi?style=flat-square)](https://github.com/DaniloSFValim/iluminacao-led-niteroi)
-
+**Stack:**
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)
 ![Leaflet](https://img.shields.io/badge/Leaflet-1.9.4-199900?style=flat-square&logo=leaflet&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-336791?style=flat-square&logo=supabase&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-316192?style=flat-square&logo=postgresql&logoColor=white)
+
 Sistema georreferenciado de gestão de infraestrutura de iluminação pública da cidade de Niterói.
 
 ## 📊 Visão Geral

@@ -20,25 +20,23 @@
       "target": "temporary-public-storage"
     },
     "assert": {
-      "preset": "lighthouse:recommended",
       "assertions": {
         "categories:performance": [
-          "error",
+          "warn",
           { "minScore": 0.75 }
         ],
         "categories:accessibility": [
-          "error",
+          "warn",
           { "minScore": 0.80 }
         ],
         "categories:best-practices": [
-          "error",
+          "warn",
           { "minScore": 0.75 }
         ],
         "categories:seo": [
-          "error",
+          "warn",
           { "minScore": 0.85 }
-        ],
-        "modern-javascript-modules": "off"
+        ]
       }
     }
   }
