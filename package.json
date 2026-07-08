@@ -1,0 +1,40 @@
+{
+  "name": "iluminacao-led-niteroi",
+  "version": "1.1.0",
+  "description": "Sistema georreferenciado de gestão de infraestrutura de iluminação pública da cidade de Niterói",
+  "private": true,
+  "scripts": {
+    "test": "npm run test:e2e",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug",
+    "test:audit": "npm audit --production",
+    "serve": "http-server -p 8000 -c-1",
+    "lint:html": "html-validate index.html"
+  },
+  "keywords": [
+    "georreferenciado",
+    "iluminação",
+    "niterói",
+    "leaflet",
+    "supabase"
+  ],
+  "author": "Danilo SF Valim",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "html-validate": "^8.0.0",
+    "http-server": "^14.1.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DaniloSFValim/iluminacao-led-niteroi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DaniloSFValim/iluminacao-led-niteroi/issues"
+  },
+  "homepage": "https://github.com/DaniloSFValim/iluminacao-led-niteroi#readme"
+}

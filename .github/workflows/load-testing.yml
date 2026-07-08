@@ -20,12 +20,16 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Install HTTP Server
+        run: npm install --prefer-offline --no-audit || echo "Installation skipped"
+        continue-on-error: true
+
       - name: Start local server
         run: |
-          npm install http-server --prefer-offline --no-audit || true
           npx http-server -p 8000 -c-1 &
-          sleep 2
-          curl http://localhost:8000 || true
+          sleep 3
+          curl http://localhost:8000 || echo "Server may still be starting"
+        continue-on-error: true
 
       - name: Install k6
         run: |

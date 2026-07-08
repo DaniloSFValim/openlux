@@ -26,13 +26,14 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install --prefer-offline --no-audit
+        run: npm install --prefer-offline --no-audit || npm install
 
       - name: Start local server
         run: |
           npx http-server -p 8000 -c-1 &
-          sleep 2
-          curl http://localhost:8000 || true
+          sleep 3
+          curl http://localhost:8000 || echo "Server starting"
+        continue-on-error: true
 
       - name: Run Lighthouse CI
         uses: treosh/lighthouse-ci-action@v10

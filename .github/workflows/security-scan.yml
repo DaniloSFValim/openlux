@@ -27,7 +27,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install --prefer-offline --no-audit 2>/dev/null || true
+        run: npm install --prefer-offline --no-audit 2>/dev/null || npm install || echo "No npm dependencies"
 
       - name: Dependency Check (npm audit)
         run: |
