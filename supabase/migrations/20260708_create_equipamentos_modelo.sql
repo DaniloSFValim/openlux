@@ -202,3 +202,9 @@ begin
   return found;
 end;
 $$;
+
+-- Hardening: fixar search_path (recomendação do Supabase advisor)
+alter function public.ip_listar_modelos() set search_path = public;
+alter function public.ip_criar_modelo(text,text,integer,integer,text,text,text,text,text,text,text,text) set search_path = public;
+alter function public.ip_atualizar_modelo(uuid,text,text,integer,integer,text,text,text,text,text,text,text,text) set search_path = public;
+alter function public.ip_deletar_modelo(uuid) set search_path = public;
