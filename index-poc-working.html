@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Iluminação Pública · Niterói · SECONSER</title>
+<meta name="description" content="Cadastro georreferenciado e gestão da iluminação pública de Niterói — SECONSER. Mapa do parque de luminárias, situação da modernização LED e indicadores por bairro."/>
+<link id="favicon" rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Crect%20width%3D%2732%27%20height%3D%2732%27%20rx%3D%276%27%20fill%3D%27%230b0f14%27/%3E%3Ccircle%20cx%3D%2716%27%20cy%3D%2714%27%20r%3D%276%27%20fill%3D%27%23fbbf24%27/%3E%3Crect%20x%3D%2713%27%20y%3D%2719.5%27%20width%3D%276%27%20height%3D%274%27%20rx%3D%271%27%20fill%3D%27%239ca3af%27/%3E%3Cg%20stroke%3D%27%23fbbf24%27%20stroke-width%3D%271.6%27%20stroke-linecap%3D%27round%27%3E%3Cline%20x1%3D%2716%27%20y1%3D%272.5%27%20x2%3D%2716%27%20y2%3D%275.5%27/%3E%3Cline%20x1%3D%275.5%27%20y1%3D%2714%27%20x2%3D%272.5%27%20y2%3D%2714%27/%3E%3Cline%20x1%3D%2729.5%27%20y1%3D%2714%27%20x2%3D%2726.5%27%20y2%3D%2714%27/%3E%3Cline%20x1%3D%278%27%20y1%3D%276.5%27%20x2%3D%276%27%20y2%3D%274.5%27/%3E%3Cline%20x1%3D%2724%27%20y1%3D%276.5%27%20x2%3D%2726%27%20y2%3D%274.5%27/%3E%3C/g%3E%3C/svg%3E"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script defer data-domain="iluminacao-niteroi.netlify.app" src="https://plausible.io/js/script.js"></script>
+
+<!-- POC: Tailwind CSS + Alpine.js + HTMX -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+<style>
+  html,body,#map{height:100%;margin:0}
+  body{background:#0b0f14;color:#e5e7eb;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  .leaflet-container{background:#0b0f14}
+  .leaflet-interactive{cursor:pointer}
+  .panel{background:var(--panel);border:1px solid #1f2a37}
+  .chip{background:#111a24;border:1px solid #1f2a37}
+  .cluster-label{color:#0b0f14;font-weight:700;font-size:11px;text-align:center;line-height:1}
+  input,select,textarea{background:#0b1017;border:1px solid #24303d;color:#e5e7eb;border-radius:6px;padding:6px 8px;font-size:13px;width:100%}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+  button{cursor:pointer}
+  :root{--accent:#1d4ed8;--panel:#0f151c}
+  .btn{border:1px solid #24303d;background:#111a24;border-radius:6px;padding:6px 12px;font-size:13px;color:#e5e7eb}
+  .btn:hover{border-color:var(--accent)}
+  .btn.on{border-color:var(--accent);background:#16233a}
+  .btn-accent{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn-accent:hover{filter:brightness(1.12)}
+  ::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:#24303d;border-radius:4px}
+  .badge{font-size:11px;padding:2px 8px;border-radius:999px;font-weight:600}
+  table{font-size:12.5px}th,td{padding:6px 8px;text-align:left;border-bottom:1px solid #1a232e}
+  th{color:#9ca3af;font-weight:600;position:sticky;top:0;background:#0f151c}
+  tr:hover td{background:#111a24}
+  #toast{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:2000;display:none;padding:10px 16px;border-radius:8px;font-size:13px;max-width:80vw}
+  .spin{width:12px;height:12px;border:2px solid #24303d;border-top-color:#3b82f6;border-radius:50%;display:inline-block;animation:sp .7s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .lamp-ic{background:none;border:none}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+  #cfgLogo{height:26px;width:auto;border-radius:4px;display:none;margin-right:8px}
+  body[data-density="compact"] .btn{padding:4px 9px;font-size:12px}
+  body[data-density="compact"] td,body[data-density="compact"] th{padding:4px 6px}
+  body[data-density="compact"] input,body[data-density="compact"] select,body[data-density="compact"] textarea{padding:4px 6px}
+  body[data-density="comfortable"] .btn{padding:9px 16px;font-size:14px}
+  body[data-density="comfortable"] td,body[data-density="comfortable"] th{padding:9px 11px}
+  body[data-density="comfortable"] input,body[data-density="comfortable"] select,body[data-density="comfortable"] textarea{padding:9px 11px}
+  @media (max-width:640px){
+    #tblReg th:nth-child(5),#tblReg td:nth-child(5),#tblReg th:nth-child(7),#tblReg td:nth-child(7){display:none}
+  }
+  /* Light theme */
+  body[data-theme="light"]{background:#f5f5f5;color:#1a1a1a}
+  body[data-theme="light"] .leaflet-container{background:#f0f0f0}
+  body[data-theme="light"] .panel{background:#ffffff;border-color:#e0e0e0}
+  body[data-theme="light"] .chip{background:#f9f9f9;border-color:#e0e0e0}
+  body[data-theme="light"] input,body[data-theme="light"] select,body[data-theme="light"] textarea{background:#ffffff;border-color:#d0d0d0;color:#1a1a1a}
+  body[data-theme="light"] input:focus,body[data-theme="light"] select:focus,body[data-theme="light"] textarea:focus{border-color:#1d4ed8}
+  body[data-theme="light"] .btn{border-color:#d0d0d0;background:#f5f5f5;color:#1a1a1a}
+  body[data-theme="light"] .btn:hover{border-color:#1d4ed8;background:#e8e8e8}
+  body[data-theme="light"] table th{background:#f5f5f5;color:#1a1a1a}
+  body[data-theme="light"] table tr:hover td{background:#f9f9f9}
+  body[data-theme="light"] #toast{background:#f0f0f0;border-color:#ddd}
+</style>
+</head>
+<body>
+<div id="map" role="main" aria-label="Mapa de iluminação pública de Niterói"></div>
+<div id="splash" style="position:fixed;inset:0;z-index:3000;background:#0b0f14;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;transition:opacity .5s">
+  <img id="splashLogo" alt="" style="height:56px;display:none;margin-bottom:8px"/>
+  <div id="splashTitle" style="font-size:23px;font-weight:700;color:#e5e7eb;letter-spacing:.3px">Iluminação Pública · Niterói</div>
+  <div style="font-size:13px;color:#9ca3af">SECONSER · Diretoria de Iluminação Pública</div>
+  <div style="font-size:12px;color:#6b7280;margin-top:16px">Desenvolvido por <span style="color:#cbd5e1">Danilo Valim</span></div>
+  <div style="font-size:11px;color:#5f6b78">v1.1</div>
+  <button class="btn" id="splashSkip" style="margin-top:16px">Entrar</button>
+</div>
+<div id="footerBand" role="contentinfo" style="position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:800;max-width:92vw;background:rgba(15,21,28,0.86);border:1px solid #1f2a37;border-radius:8px;padding:5px 14px;font-size:11px;color:#9ca3af;text-align:center;pointer-events:none">SECONSER · Diretoria de Iluminação Pública · Prefeitura de Niterói · Desenvolvido por <span style="color:#cbd5e1">Danilo Valim</span> · v1.1</div>
+
+<div class="panel" role="banner" aria-label="Barra principal" style="position:absolute;top:10px;left:10px;right:10px;z-index:1000;border-radius:12px;display:flex;align-items:center;gap:14px;padding:7px 14px">
+  <img id="cfgLogo" alt="Logo"/>
+  <div style="min-width:0">
+    <div style="font-weight:700;font-size:14px;line-height:1.1;white-space:nowrap"><span id="cfgTitulo">Iluminação Pública</span></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+      <div style="width:120px;height:6px;background:#1a2431;border-radius:3px;overflow:hidden"><div id="pctBar" style="height:100%;width:0;background:linear-gradient(90deg,#f59e0b,#22c55e);transition:width .5s"></div></div>
+      <span id="kpi" style="font-size:12px;color:#cbd5e1;white-space:nowrap">—</span>
+    </div>
+  </div>
+  <span id="loading" style="display:none"><span class="spin"></span></span>
+  <div style="flex:1"></div>
+  <div style="position:relative">
+    <button class="btn" id="btnFiltros">Filtros<span id="fCount" style="display:none;margin-left:6px;background:#1d4ed8;color:#fff;border-radius:999px;padding:0 7px;font-size:11px"></span></button>
+    <div id="filtrosPop" class="panel" style="position:absolute;top:40px;right:0;width:230px;border-radius:10px;padding:10px;display:none;flex-direction:column;gap:8px;z-index:1000">
+      <label style="font-size:11px;color:#9ca3af">Bairro<select id="fBairro"><option value="">Todos</option></select></label>
+      <label style="font-size:11px;color:#9ca3af">Tipo<select id="fTipo"><option value="">Todos</option></select></label>
+      <label style="font-size:11px;color:#9ca3af">Estado<select id="fEstado"><option value="">Todos</option><option value="led">LED</option><option value="pendente">Pendente</option><option value="sem_lampada">Sem lâmpada</option></select></label>
+      <label style="font-size:11px;color:#9ca3af">Potência mínima<select id="fPot"><option value="">Qualquer</option><option value="150">≥ 150 W</option><option value="250">≥ 250 W</option><option value="400">≥ 400 W</option></select></label>
+      <label style="font-size:11px;color:#9ca3af">Fila de auditoria<select id="fFila"><option value="">— nenhuma —</option><option value="revisao">Marcados p/ revisão</option><option value="suspeito">LED suspeito (&gt;400 W)</option><option value="mod_seconser">Origem: SECONSER</option><option value="mod_censo">Origem: censo ENEL</option><option value="mod_campo">Origem: campo</option></select></label>
+      <button class="btn" id="fLimpar">Limpar filtros</button>
+    </div>
+  </div>
+  <div style="position:relative" id="exportContainer">
+    <button class="btn" id="btnExport">Exportar ▾</button>
+    <div id="exportPop" class="panel" style="position:absolute;top:40px;right:0;width:220px;border-radius:10px;padding:8px;display:none;flex-direction:column;gap:6px;z-index:1000">
+      <div style="font-size:11px;color:#6b7280;padding:0 2px">Conforme filtros ativos</div>
+      <button class="btn" data-exp="csv">Dados (CSV)</button>
+      <button class="btn" data-exp="geojson">Dados (GeoJSON · GIS)</button>
+      <button class="btn" data-exp="bairros">Passivo por bairro (CSV)</button>
+      <button class="btn" data-exp="serie">Série de métricas (CSV)</button>
+      <button class="btn" data-exp="grade">Grade de densidade (CSV)</button>
+      <button class="btn" data-exp="png">Mapa atual (PNG)</button>
+      <button class="btn" data-exp="pdf">Relatório (PDF)</button>
+    </div>
+  </div>
+  <div style="position:relative">
+    <button class="btn" id="btnVis">Visualizar ▾</button>
+    <div id="visPop" class="panel" style="position:absolute;top:40px;right:0;width:190px;border-radius:10px;padding:8px;display:none;flex-direction:column;gap:6px;z-index:1000">
+      <button class="btn" id="btnChoro" title="Colorir bairros por % LED">Coroplético</button>
+      <button class="btn" id="btnDens" title="Grade 250 m de densidade luminotécnica">Densidade</button>
+      <button class="btn" id="btnTabela">Tabela</button>
+      <button class="btn" id="btnStats">Indicadores</button>
+    </div>
+  </div>
+  <div style="display:flex;gap:6px;align-items:center">
+    <button class="btn btn-accent" id="btnNovo" style="display:none">+ Ponto</button>
+    <button class="btn" id="btnAdminConsole" style="display:none;border-color:#ef4444;color:#f87171">Admin</button>
+    <button class="btn" id="btnLogin">Entrar</button>
+    <button id="themeToggle" class="btn" title="Alternar tema claro/escuro" aria-label="Alternar tema" style="padding:6px 9px">🌙</button>
+  </div>
+</div>
+
+<div class="panel" id="legend" role="complementary" aria-label="Legenda" style="position:absolute;bottom:14px;left:10px;z-index:1000;border-radius:10px;padding:8px 10px;font-size:12px">
+  <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><svg width="13" height="16" viewBox="0 0 20 24"><path d="M10 1.5a6.5 6.5 0 0 0-3.7 11.8V16h7.4v-2.7A6.5 6.5 0 0 0 10 1.5z" fill="#22c55e" stroke="#0b0f14" stroke-width="1.4"/><rect x="6.8" y="16.3" width="6.4" height="2.6" rx="1" fill="#9ca3af"/></svg> LED</div>
+  <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><svg width="13" height="16" viewBox="0 0 20 24"><path d="M10 1.5a6.5 6.5 0 0 0-3.7 11.8V16h7.4v-2.7A6.5 6.5 0 0 0 10 1.5z" fill="#f59e0b" stroke="#0b0f14" stroke-width="1.4"/><rect x="6.8" y="16.3" width="6.4" height="2.6" rx="1" fill="#9ca3af"/></svg> Pendente de troca</div>
+  <div style="display:flex;align-items:center;gap:6px"><svg width="13" height="16" viewBox="0 0 20 24"><path d="M10 1.5a6.5 6.5 0 0 0-3.7 11.8V16h7.4v-2.7A6.5 6.5 0 0 0 10 1.5z" fill="#141b24" stroke="#6b7280" stroke-width="1.4"/><rect x="6.8" y="16.3" width="6.4" height="2.6" rx="1" fill="#9ca3af"/></svg> Sem lâmpada</div>
+  <div style="display:flex;align-items:center;gap:6px;margin-top:3px"><svg width="12" height="12" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" fill="#38bdf8" stroke="#0b0f14" stroke-width="1.6"/></svg> Outros ativos</div>
+  <div id="modeHint" style="color:#6b7280;margin-top:5px"></div>
+</div>
+
+<div id="densCtl" class="panel" role="complementary" aria-label="Controle da grade de densidade" style="position:absolute;bottom:14px;left:10px;z-index:1000;border-radius:10px;padding:8px 10px;font-size:12px;display:none;max-width:250px"></div>
+
+<div id="detail" class="panel" role="complementary" aria-label="Detalhe do ativo" style="position:absolute;top:64px;right:10px;width:300px;z-index:1000;border-radius:10px;padding:12px;display:none;max-height:calc(100% - 90px);overflow:auto"></div>
+<div id="stats" class="panel" role="complementary" aria-label="Indicadores" style="position:absolute;top:64px;left:10px;width:360px;z-index:1000;border-radius:10px;padding:12px;display:none;max-height:calc(100% - 90px);overflow:auto"></div>
+<div id="toast"></div>
+
+<div id="modeloModal" style="position:absolute;inset:0;z-index:1150;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center">
+  <div class="panel" style="width:min(600px,95vw);height:min(70vh,600px);border-radius:12px;display:flex;flex-direction:column;overflow:hidden">
+    <div style="display:flex;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid #1f2a37">
+      <b>Selecionar modelo de equipamento</b>
+      <div style="flex:1"></div>
+      <button class="btn" onclick="document.getElementById('modeloModal').style.display='none'" style="padding:4px 8px">✕</button>
+    </div>
+    <div id="modeloList" style="flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:6px"></div>
+  </div>
+</div>
+
+<div id="tableModal" style="position:absolute;inset:0;z-index:1100;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center">
+  <div class="panel" style="width:min(1050px,95vw);height:min(80vh,760px);border-radius:12px;display:flex;flex-direction:column;overflow:hidden">
+    <div style="display:flex;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid #1f2a37;flex-wrap:wrap">
+      <b>Registro de luminárias</b>
+      <input id="tSearch" placeholder="Código, endereço ou patrimônio…" style="width:220px"/>
+      <select id="tBairro" style="width:160px"><option value="">Bairro: todos</option></select>
+      <select id="tStatus" style="width:150px"><option value="">Estado: todos</option><option value="led">LED</option><option value="pendente">Pendente</option><option value="sem_lampada">Sem lâmpada</option></select>
+      <span id="tCount" style="color:#9ca3af;font-size:12px;margin-left:auto"></span>
+      <button class="btn" id="tClose">Fechar</button>
+    </div>
+    <div style="flex:1;overflow:auto"><table id="tblReg" style="width:100%;border-collapse:collapse">
+      <caption class="sr-only">Registro de luminárias de iluminação pública de Niterói, com endereço, bairro, tipo, potência, estado e origem da modernização.</caption>
+      <thead><tr><th>Código</th><th>Endereço</th><th>Bairro</th><th>Tipo</th><th>Pot.</th><th>Estado</th><th>Origem mod.</th><th></th></tr></thead>
+      <tbody id="tBody"></tbody>
+    </table></div>
+    <div style="display:flex;gap:8px;align-items:center;justify-content:center;padding:8px;border-top:1px solid #1f2a37">
+      <button class="btn" id="tPrev">‹ Anterior</button>
+      <span id="tPage" style="font-size:12px;color:#9ca3af"></span>
+      <button class="btn" id="tNext">Próxima ›</button>
+    </div>
+  </div>
+</div>
+
+<div id="adminConsole" style="position:fixed;inset:0;z-index:1400;background:#0b0f14;display:none;flex-direction:column">
+  <div style="display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid #1f2a37">
+    <b style="font-size:16px">Administração</b>
+    <span style="color:#6b7280;font-size:12px">Iluminação Pública · Niterói · SECONSER</span>
+    <div style="flex:1"></div>
+    <button class="btn" id="acVoltar">← Voltar ao mapa</button>
+  </div>
+  <div style="flex:1;display:flex;min-height:0">
+    <nav role="navigation" aria-label="Seções da administração" style="width:180px;border-right:1px solid #1f2a37;padding:12px;display:flex;flex-direction:column;gap:4px">
+      <button class="btn acnav on" data-sec="visao" style="text-align:left">📊 Visão geral</button>
+      <button class="btn acnav" data-sec="usuarios" style="text-align:left">👥 Usuários</button>
+      <button class="btn acnav" data-sec="modelos" style="text-align:left">💡 Modelos</button>
+      <button class="btn acnav" data-sec="aparencia" style="text-align:left">🎨 Aparência</button>
+      <button class="btn acnav" data-sec="dados" style="text-align:left">📦 Dados</button>
+    </nav>
+    <div style="flex:1;overflow:auto;padding:18px">
+      <section id="sec-visao" class="acsec"></section>
+
+      <section id="sec-usuarios" class="acsec" style="display:none">
+        <h3 style="margin:0 0 12px;font-size:15px">Usuários</h3>
+        <div class="chip" style="border-radius:8px;padding:10px;margin-bottom:12px;max-width:680px">
+          <div style="font-size:12px;color:#9ca3af;margin-bottom:6px">Novo operador</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <input id="admEmail" type="email" placeholder="E-mail" style="flex:2;min-width:150px"/>
+            <input id="admPass" type="text" placeholder="Senha (opcional)" style="flex:1;min-width:120px"/>
+            <select id="admRole" style="flex:1;min-width:100px"><option value="leitura">Leitura</option><option value="editor">Editor</option><option value="admin">Admin</option></select>
+            <button class="btn btn-accent" id="admCreate">Adicionar</button>
+          </div>
+        </div>
+        <table style="width:100%;border-collapse:collapse;max-width:680px">
+          <thead><tr><th>E-mail</th><th>Papel</th><th></th></tr></thead><tbody id="admBody"></tbody></table>
+      </section>
+
+      <section id="sec-aparencia" class="acsec" style="display:none">
+        <h3 style="margin:0 0 12px;font-size:15px">Aparência do site</h3>
+        <div style="display:flex;flex-direction:column;gap:8px;max-width:520px">
+          <label style="font-size:11px;color:#9ca3af">Título<input id="cfgTit"/></label>
+          <label style="font-size:11px;color:#9ca3af">Subtítulo<input id="cfgSubIn"/></label>
+          <div style="display:flex;gap:6px">
+            <label style="font-size:11px;color:#9ca3af;flex:1">Cor de destaque<input id="cfgAccent" type="color" style="height:34px;padding:2px"/></label>
+            <label style="font-size:11px;color:#9ca3af;flex:1">Fonte<select id="cfgFonte"><option value="system">Sistema</option><option value="inter">Inter</option><option value="roboto">Roboto</option><option value="georgia">Georgia</option><option value="mono">Monoespaçada</option></select></label>
+          </div>
+          <div style="display:flex;gap:6px">
+            <label style="font-size:11px;color:#9ca3af;flex:1">Fundo dos painéis<input id="cfgPanel" type="color" style="height:34px;padding:2px"/></label>
+            <label style="font-size:11px;color:#9ca3af;flex:1">Densidade<select id="cfgDensity"><option value="normal">Normal</option><option value="compact">Compacta</option><option value="comfortable">Confortável</option></select></label>
+          </div>
+          <div style="font-size:11px;color:#9ca3af">Logotipo / brasão
+            <div style="display:flex;gap:6px;align-items:center;margin-top:4px">
+              <img id="cfgLogoPrev" style="height:28px;border-radius:4px;display:none"/>
+              <input id="cfgLogoFile" type="file" accept="image/*" style="flex:1"/>
+              <button class="btn" id="cfgLogoRemove" type="button">Remover</button>
+            </div>
+          </div>
+          <button class="btn btn-accent" id="cfgSave" style="margin-top:4px">Salvar aparência</button>
+        </div>
+      </section>
+
+      <section id="sec-modelos" class="acsec" style="display:none">
+        <h3 style="margin:0 0 12px;font-size:15px">Modelos de equipamento</h3>
+        <div style="font-size:12px;color:#9ca3af;margin:-6px 0 12px;max-width:680px">Catálogo de luminárias homologadas. No cadastro de um novo ponto, o operador escolhe um modelo e os campos técnicos são preenchidos automaticamente.</div>
+        <div class="chip" style="border-radius:8px;padding:12px;margin-bottom:12px;max-width:680px">
+          <div style="font-size:12px;color:#9ca3af;margin-bottom:8px"><b>Novo modelo</b></div>
+          <div style="display:flex;gap:8px;flex-direction:column">
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <label style="font-size:11px;color:#9ca3af;flex:1;min-width:150px">Fabricante *<input id="modFabricante" placeholder="ex: Philips"/></label>
+              <label style="font-size:11px;color:#9ca3af;flex:1;min-width:150px">Modelo *<input id="modModelo" placeholder="ex: CorePro 150W"/></label>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <label style="font-size:11px;color:#9ca3af;flex:1;min-width:110px">Potência (W) *<input id="modPotencia" type="number" min="1" max="2000" placeholder="150"/></label>
+              <label style="font-size:11px;color:#9ca3af;flex:1;min-width:110px">Temperatura (K)<input id="modTemperatura" type="number" placeholder="4000"/></label>
+              <label style="font-size:11px;color:#9ca3af;flex:1;min-width:110px">Tensão<select id="modTensao"><option value="">—</option><option>110</option><option>220</option><option value="110/220 (bivolt)">110/220 (bivolt)</option></select></label>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <label style="font-size:11px;color:#9ca3af;flex:1;min-width:110px">Grau IP<input id="modIp" placeholder="IP65"/></label>
+              <label style="font-size:11px;color:#9ca3af;flex:1;min-width:110px">Classe NBR<input id="modClasse" placeholder="V3, P2, C4…"/></label>
+              <label style="font-size:11px;color:#9ca3af;flex:1;min-width:110px">Tecnologia<input id="modTecnologia" value="LED" placeholder="LED"/></label>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <label style="font-size:11px;color:#9ca3af;flex:1;min-width:150px">Tipo de luminária<select id="modTipoLum"><option value="">—</option></select></label>
+              <label style="font-size:11px;color:#9ca3af;flex:1;min-width:150px">Tipo de lâmpada<select id="modTipoLamp"></select></label>
+            </div>
+            <label style="font-size:11px;color:#9ca3af">Foto (URL)<input id="modFoto" type="url" placeholder="https://…/foto.jpg (opcional)"/></label>
+            <label style="font-size:11px;color:#9ca3af">Descrição<textarea id="modDescricao" placeholder="Aplicação, observações… (opcional)" rows="2"></textarea></label>
+            <button class="btn btn-accent" id="modCreate">Adicionar modelo</button>
+          </div>
+        </div>
+        <div style="max-width:900px;overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr><th>Fabricante</th><th>Modelo</th><th style="text-align:right">Potência</th><th>Luminária</th><th>Lâmpada</th><th>Classe</th><th>IP</th><th></th></tr></thead>
+          <tbody id="modBody"></tbody>
+        </table>
+        </div>
+      </section>
+
+      <section id="sec-dados" class="acsec" style="display:none">
+        <h3 style="margin:0 0 12px;font-size:15px">Dados</h3>
+        <div style="max-width:600px;display:flex;flex-direction:column;gap:10px">
+          <div class="chip" style="border-radius:8px;padding:12px">
+            <div style="font-size:12px;color:#9ca3af;margin-bottom:8px">Exportar — parque completo ou conforme os filtros ativos no mapa</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button class="btn" data-exp="csv">Dados (CSV)</button>
+              <button class="btn" data-exp="geojson">Dados (GeoJSON)</button>
+              <button class="btn" data-exp="bairros">Passivo por bairro (CSV)</button>
+              <button class="btn" data-exp="serie">Série de métricas (CSV)</button>
+              <button class="btn" data-exp="grade">Grade de densidade (CSV)</button>
+            </div>
+          </div>
+          <div class="chip" style="border-radius:8px;padding:12px">
+            <div style="font-size:12px;color:#9ca3af;margin-bottom:4px">Backup independente</div>
+            <div style="font-size:12px;color:#cbd5e1">O parque é copiado para fora do Supabase pelo script <code>backup_parque.py</code> (somente leitura, sem segredo). Agende-o localmente para cópia periódica.</div>
+          </div>
+          <div class="chip" style="border-radius:8px;padding:12px;opacity:.6">
+            <div style="font-size:12px;color:#9ca3af;margin-bottom:4px">Importação em massa</div>
+            <div style="font-size:12px;color:#cbd5e1">Reservado para o fechamento da auditoria em papel: subir um CSV corrigido, validar e aplicar em lote com relatório de divergências. (a implementar)</div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+  <div style="padding:8px 18px;border-top:1px solid #1f2a37;font-size:11px;color:#6b7280;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <span style="color:#9ca3af">Cadastro de Iluminação Pública — Niterói</span><span>·</span>
+    <span>SECONSER · Diretoria de Iluminação Pública · Prefeitura de Niterói</span><span>·</span>
+    <span>Base: Censo ENEL + diário SECONSER</span><span>·</span>
+    <span>Desenvolvido por <span style="color:#cbd5e1">Danilo Valim</span></span><span>·</span>
+    <span>v1.1 · 2026</span>
+  </div>
+</div>
+
+<div id="loginModal" style="position:absolute;inset:0;z-index:1200;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center">
+  <div class="panel" style="width:320px;border-radius:12px;padding:18px">
+    <b>Entrar para editar</b>
+    <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+      <input id="liEmail" type="email" placeholder="E-mail"/>
+      <input id="liPass" type="password" placeholder="Senha"/>
+      <div id="liErr" style="color:#f87171;font-size:12px;display:none"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
+        <button class="btn" id="liCancel">Cancelar</button>
+        <button class="btn btn-accent" id="liSubmit">Entrar</button>
+      </div>
+    </div>
+    <div style="margin-top:14px;padding-top:10px;border-top:1px solid #1f2a37;font-size:11px;color:#6b7280;text-align:center">Desenvolvido por <span style="color:#cbd5e1">Danilo Valim</span> · v1.1</div>
+  </div>
+</div>
+
+<script>
+// Get Supabase credentials from environment or build-time injection
+// In production (Netlify): injected as window.__CONFIG__ by build process
+// In development: configure in netlify.toml or local .env
+const URL_SB = window.__CONFIG__?.supabaseUrl || 'https://lrnmydrwzxxajylsmoih.supabase.co';
+const ANON = window.__CONFIG__?.supabaseAnonKey || 'sb_publishable_w3UmLsmcDtT81S3MDdDJjw_rEWckoVl';
+
+// Validate credentials exist (log warning if using defaults)
+if(!window.__CONFIG__) {
+  console.warn('⚠️ Using default Supabase credentials. Configure environment variables for security.');
+}
+
+const sb = window.supabase.createClient(URL_SB, ANON);
+
+const state = { user:null, userRole:null, bairro:"", tipo:"", estado:"", pot:"", fila:"", layer:null, mode:"", tPage:0, tSize:50,
+  bairroLayer:null, choropleth:false, choroLayer:null, choroData:null, current:null, tCache:{}, config:null,
+  densidade:false, densLayer:null, densMunLayer:null, densData:null, densMetric:'klm' };
+const TIPOS = ["led","vapor_sodio","metalico","vapor_mercurio","fluorescente","sem_lampada","desconhecido"];
+const STATUS = ["led_instalado","pendente_troca","a_verificar"];
+const TIPO_ATIVO = [['luminaria','Luminária'],['caixa_comando','Caixa de comando'],['chave_magnetica','Chave magnética'],['rele_fotoeletrico','Relé fotoelétrico'],['poste','Poste'],['braco','Braço'],['outro','Outro']];
+const TIPO_LUM = ["viaria","globo","petala","projetor","balizador","orla","ornamental","piso","outro"];
+const INTERV = [['instalacao','Instalação'],['substituicao','Substituição'],['manutencao','Manutenção'],['vistoria','Vistoria'],['remocao','Remoção']];
+function ativoLabel(t){ return (TIPO_ATIVO.find(x=>x[0]===t)||[t,t])[1]; }
+function intervLabel(t){ return (INTERV.find(x=>x[0]===t)||[t,t])[1]; }
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+let busy=0;
+function setBusy(b){ busy+=b?1:-1; document.getElementById('loading').style.display = busy>0?'inline':'none'; }
+function toast(msg,err){ const t=document.getElementById('toast'); t.textContent=msg;
+  t.style.background=err?'#3b1113':'#0d2a1a'; t.style.color=err?'#fca5a5':'#86efac';
+  t.style.border='1px solid '+(err?'#7f1d1d':'#14532d'); t.style.display='block';
+  clearTimeout(t._t); t._t=setTimeout(()=>t.style.display='none',3500); }
+async function rpc(fn,args){ setBusy(true); try{
+    const {data,error}=await sb.rpc(fn,args); if(error) throw error; return data;
+  }catch(e){ toast('Erro ao carregar: '+(e.message||e),true); return null; } finally{ setBusy(false); } }
+
+const map = L.map('map',{zoomControl:false,attributionControl:false,preferCanvas:true,minZoom:11,maxBoundsViscosity:1}).setView([-22.905,-43.055],12);
+L.control.zoom({position:'bottomright'}).addTo(map); // canto inferior direito: a barra superior cobre a posição padrão
+map.setMaxBounds([[-23.03,-43.20],[-22.80,-42.90]]);
+state.munLayer = L.layerGroup().addTo(map);
+const bases = {
+  'Escuro': L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',crossOrigin:true}),
+  'Claro': L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',crossOrigin:true}),
+  'Ruas': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,crossOrigin:true}),
+  'Satélite': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,crossOrigin:true})
+};
+bases['Escuro'].addTo(map);
+L.control.layers(bases,null,{position:'bottomright'}).addTo(map);
+state.layer = L.layerGroup().addTo(map);
+
+const POINT_ZOOM = 16;
+function gridForZoom(z){ return Math.max(0.0015, 0.05/Math.pow(2, z-11)); }
+function colorFor(p){ if((p.tipo_ativo||'luminaria')!=='luminaria') return '#38bdf8'; if(p.modernizado_led) return '#22c55e'; if(p.tipo_lampada==='sem_lampada') return '#6b7280'; return '#f59e0b'; }
+function svgLamp(color, hollow){
+  const fill = hollow?'#141b24':color;
+  return `<svg width="20" height="24" viewBox="0 0 20 24" xmlns="http://www.w3.org/2000/svg">`
+    +`<path d="M10 1.5a6.5 6.5 0 0 0-3.7 11.8V16h7.4v-2.7A6.5 6.5 0 0 0 10 1.5z" fill="${fill}" stroke="#0b0f14" stroke-width="1.4"/>`
+    +`<rect x="6.8" y="16.3" width="6.4" height="2.6" rx="1" fill="#9ca3af" stroke="#0b0f14" stroke-width="0.7"/>`
+    +`<rect x="8" y="19.3" width="4" height="2.2" rx="1" fill="#9ca3af"/></svg>`;
+}
+function makeLampIcon(color, hollow){ return L.divIcon({className:'lamp-ic', html:svgLamp(color,hollow), iconSize:[20,24], iconAnchor:[10,12]}); }
+const LAMP_ICONS = { led:makeLampIcon('#22c55e'), pend:makeLampIcon('#f59e0b'), sem:makeLampIcon('#6b7280',true) };
+const INFRA='#38bdf8', METAL='#9ca3af';
+function svgBox(c){ return `<svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="16" height="16" rx="2" fill="${c}" stroke="#0b0f14" stroke-width="1.6"/><line x1="12" y1="4" x2="12" y2="20" stroke="#0b0f14" stroke-width="1.2"/><circle cx="8" cy="12" r="1.3" fill="#0b0f14"/></svg>`; }
+function svgSwitch(c){ return `<svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="5" width="16" height="14" rx="2" fill="${c}" stroke="#0b0f14" stroke-width="1.6"/><line x1="8" y1="15" x2="16" y2="9" stroke="#0b0f14" stroke-width="2" stroke-linecap="round"/><circle cx="8" cy="15" r="1.6" fill="#0b0f14"/></svg>`; }
+function svgPhoto(c){ return `<svg width="20" height="22" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="7" y="14" width="10" height="6" rx="1.5" fill="${c}" stroke="#0b0f14" stroke-width="1.4"/><path d="M6 14a6 6 0 0 1 12 0z" fill="${c}" stroke="#0b0f14" stroke-width="1.4"/></svg>`; }
+function svgPole(c){ return `<svg width="14" height="24" viewBox="0 0 12 24" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="2" width="2.4" height="18" fill="${c}" stroke="#0b0f14" stroke-width="0.8"/><rect x="2" y="20" width="8" height="2.6" rx="1" fill="${c}" stroke="#0b0f14" stroke-width="0.8"/></svg>`; }
+function svgArm(c){ return `<svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 4v9a7 7 0 0 0 7 7h5" fill="none" stroke="#0b0f14" stroke-width="4.4" stroke-linecap="round"/><path d="M6 4v9a7 7 0 0 0 7 7h5" fill="none" stroke="${c}" stroke-width="2.6" stroke-linecap="round"/></svg>`; }
+function svgDiamond(c){ return `<svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 3l9 9-9 9-9-9z" fill="${c}" stroke="#0b0f14" stroke-width="1.6"/></svg>`; }
+const ASSET_ICONS = {
+  caixa_comando: L.divIcon({className:'lamp-ic',html:svgBox(INFRA),iconSize:[20,20],iconAnchor:[10,10]}),
+  chave_magnetica: L.divIcon({className:'lamp-ic',html:svgSwitch(INFRA),iconSize:[20,20],iconAnchor:[10,10]}),
+  rele_fotoeletrico: L.divIcon({className:'lamp-ic',html:svgPhoto(INFRA),iconSize:[20,22],iconAnchor:[10,11]}),
+  poste: L.divIcon({className:'lamp-ic',html:svgPole(METAL),iconSize:[14,24],iconAnchor:[7,12]}),
+  braco: L.divIcon({className:'lamp-ic',html:svgArm(METAL),iconSize:[20,20],iconAnchor:[10,10]}),
+  outro: L.divIcon({className:'lamp-ic',html:svgDiamond(INFRA),iconSize:[18,18],iconAnchor:[9,9]}),
+};
+function iconFor(p){
+  const ta=p.tipo_ativo||'luminaria';
+  if(ta!=='luminaria') return ASSET_ICONS[ta]||ASSET_ICONS.outro;
+  if(p.modernizado_led) return LAMP_ICONS.led; if(p.tipo_lampada==='sem_lampada') return LAMP_ICONS.sem; return LAMP_ICONS.pend;
+}
+function mix(pct){ const a=[245,158,11], b=[34,197,94]; return `rgb(${a.map((x,i)=>Math.round(x+(b[i]-x)*pct)).join(',')})`; }
+function filtros(){
+  let p_tipo=state.tipo||null, p_modernizado=null;
+  if(state.estado==='led') p_modernizado=true;
+  else if(state.estado==='pendente') p_modernizado=false;
+  else if(state.estado==='sem_lampada') p_tipo='sem_lampada';
+  const f=state.fila;
+  return { p_bairro:state.bairro||null, p_tipo, p_modernizado, p_pot_min: state.pot?parseInt(state.pot):null,
+    p_revisao: f==='revisao'?true:null,
+    p_fonte_mod: f==='mod_censo'?'censo_enel':f==='mod_seconser'?'seconser_pos_censo':f==='mod_campo'?'campo':null,
+    p_suspeito: f==='suspeito'?true:null };
+}
+function aplicaFila(q){ const f=state.fila;
+  if(f==='revisao') q=q.eq('flag_revisao_censo',true);
+  else if(f==='suspeito') q=q.eq('modernizado_led',true).gt('potencia_w',400);
+  else if(f==='mod_censo') q=q.eq('fonte_modernizacao','censo_enel');
+  else if(f==='mod_seconser') q=q.eq('fonte_modernizacao','seconser_pos_censo');
+  else if(f==='mod_campo') q=q.eq('fonte_modernizacao','campo');
+  return q; }
+
+function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
+
+async function _refresh(){
+  if(state.densidade){ if(!state.densLayer) renderDensidade(); return; }
+  if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; document.getElementById('densCtl').style.display='none'; }
+  if(state.choropleth){ renderChoropleth(); return; }
+  if(state.choroLayer){ map.removeLayer(state.choroLayer); state.choroLayer=null; }
+  const b = map.getBounds(), z = map.getZoom();
+  const box = { min_lng:b.getWest(), min_lat:b.getSouth(), max_lng:b.getEast(), max_lat:b.getNorth() };
+  state.layer.clearLayers();
+  if(z >= POINT_ZOOM){
+    state.mode="pontos";
+    const data = await rpc('ip_pontos_bbox', {...box, limite:4000, ...filtros()});
+    const usarIcones = (data||[]).length <= 1000;
+    (data||[]).forEach(p=>{
+      let mk;
+      if(usarIcones){ mk = L.marker([p.lat,p.lon],{icon:iconFor(p),keyboard:false}); }
+      else { const rad = z>=18?9:(z>=17?7:6);
+        mk = L.circleMarker([p.lat,p.lon],{radius:rad,weight:1,color:'#0b0f14',fillColor:colorFor(p),fillOpacity:.95,bubblingMouseEvents:false}); }
+      mk.on('click',()=>openDetail(p)).addTo(state.layer);
+    });
+    const mh=document.getElementById('modeHint');
+    if(!(data||[]).length){ mh.textContent='Nenhum ponto atende aos filtros nesta região'; mh.style.color='#fbbf24'; }
+    else { mh.textContent=`${data.length} pontos nesta área`; mh.style.color='#6b7280'; }
+  } else {
+    state.mode="clusters";
+    const data = await rpc('ip_clusters_grid', {...box, grid_deg:gridForZoom(z), ...filtros()});
+    (data||[]).forEach(c=>{
+      const r = Math.min(30, 8+Math.sqrt(c.n)*1.4), pct=c.led/c.n;
+      L.circleMarker([c.lat,c.lon],{radius:r,weight:1.5,color:'#0b0f14',fillColor:mix(pct),fillOpacity:.82})
+        .on('click',()=>map.setView([c.lat,c.lon], Math.min(POINT_ZOOM, z+2))).addTo(state.layer);
+      L.marker([c.lat,c.lon],{interactive:false,icon:L.divIcon({className:'',html:`<div class="cluster-label" style="width:${r*2}px;transform:translate(-50%,-50%)">${c.n}</div>`})}).addTo(state.layer);
+    });
+    const mh=document.getElementById('modeHint');
+    if(!(data||[]).length){ mh.textContent='Nenhum ponto atende aos filtros nesta região'; mh.style.color='#fbbf24'; }
+    else { mh.textContent='Aproxime para ver luminárias individuais'; mh.style.color='#6b7280'; }
+  }
+}
+const refresh = debounce(_refresh, 120);
+map.on('moveend', refresh);
+
+// Mudar cursor quando zoom permite criar ponto
+map.on('zoomend', () => {
+  const container = map.getContainer();
+  if(state.user && podeEditar() && map.getZoom() >= 18) {
+    container.style.cursor = 'pointer';
+  } else {
+    container.style.cursor = 'grab';
+  }
+});
+map.on('mousedown', () => { if(map.getContainer().style.cursor !== 'pointer') map.getContainer().style.cursor = 'grabbing'; });
+map.on('mouseup', () => {
+  if(state.user && podeEditar() && map.getZoom() >= 18) {
+    map.getContainer().style.cursor = 'pointer';
+  } else {
+    map.getContainer().style.cursor = 'grab';
+  }
+});
+
+// ---------- Novo ponto via mapa (click) ----------
+map.on('click', function(e){
+  if(!state.user || !podeEditar()) return;
+  if(map.getZoom() < 18){ toast('Zoom mínimo necessário: 18', true); return; }
+  const lat = e.latlng.lat, lng = e.latlng.lng;
+  if(lat < -23.05 || lat > -22.80 || lng < -43.20 || lng > -42.90){
+    toast('Clique dentro dos limites de Niterói', true);
+    return;
+  }
+  const d = document.getElementById('detail'); d.style.display = 'block';
+  const ativoOpts = TIPO_ATIVO.map(([v,l]) => '<option value="' + v + '">' + l + '</option>').join('');
+  const tipoLumOpts = TIPO_LUM.map(t => '<option>' + t + '</option>').join('');
+  const tipoOpts = TIPOS.map(t => '<option>' + t + '</option>').join('');
+  const statusOpts = STATUS.map(s => '<option>' + s + '</option>').join('');
+  d.innerHTML = `
+    <b style="font-size:13px">Novo ativo (mapa)</b>
+    <div style="font-size:11px;color:#6b7280;margin-top:2px">O código IPNIT é gerado automaticamente.</div>
+    <div style="display:flex;flex-direction:column;gap:7px;margin-top:8px">
+      <div style="display:flex;gap:6px">
+        <label style="font-size:11px;color:#9ca3af;flex:1">Latitude<input id="nLat" type="number" step="0.000001" value="${lat.toFixed(6)}"/></label>
+        <label style="font-size:11px;color:#9ca3af;flex:1">Longitude<input id="nLng" type="number" step="0.000001" value="${lng.toFixed(6)}"/></label>
+      </div>
+      <label style="font-size:11px;color:#9ca3af">Tipo de ativo<select id="nAtivo">${ativoOpts}</select></label>
+      <input id="nPatr" placeholder="Referência ENEL (opcional)"/>
+      <div style="display:flex;gap:6px;align-items:center"><input id="nEnd" placeholder="Endereço" style="flex:1"/><span id="nEndLoading" style="font-size:12px;color:#6b7280;display:none"><span class="spin"></span></span></div>
+      <div id="nLumFields" style="display:flex;flex-direction:column;gap:7px">
+        <label style="font-size:11px;color:#9ca3af">Tipo de luminária<select id="nTipoLum"><option value="">—</option>${tipoLumOpts}</select></label>
+        <input id="nClasse" placeholder="Classe NBR (V3, P2, C4…)"/>
+        <select id="nTipo">${tipoOpts}</select>
+        <input id="nPot" type="number" placeholder="Potência (W)"/>
+        <select id="nStatus">${statusOpts}</select>
+        <label style="font-size:12px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="nMod" style="width:auto"/> LED</label>
+      </div>
+      <div style="display:flex;gap:8px"><button class="btn btn-accent" style="flex:1" id="nSave">Cadastrar</button><button class="btn" onclick="document.getElementById('detail').style.display='none'">Cancelar</button></div>
+    </div>`;
+  const nAtivo = document.getElementById('nAtivo');
+  const toggleLum = () => { document.getElementById('nLumFields').style.display = nAtivo.value === 'luminaria' ? 'flex' : 'none'; };
+  nAtivo.onchange = toggleLum; toggleLum();
+
+  // Buscar endereço via reverse geocoding (OSM Nominatim) - only if zoom >= 18
+  const nEndInput = document.getElementById('nEnd');
+  const nEndLoading = document.getElementById('nEndLoading');
+  (async () => {
+    try {
+      nEndLoading.style.display = 'inline-block';
+      const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=18&addressdetails=1`, {signal: AbortSignal.timeout(3000)});
+      if(!resp.ok) throw new Error('HTTP ' + resp.status);
+      const data = await resp.json();
+      if(data && data.address) {
+        const addr = data.address;
+        const endereco = addr.road ? `${addr.road}, ${addr.house_number || 'S/N'}` : data.display_name;
+        nEndInput.value = endereco.substring(0, 200);
+      }
+    } catch(e) { console.log('Nominatim lookup skipped:', e.message); }
+    finally { nEndLoading.style.display = 'none'; }
+  })();
+  document.getElementById('nSave').onclick = async () => {
+    const lat2 = parseFloat(document.getElementById('nLat').value), lng2 = parseFloat(document.getElementById('nLng').value);
+    if(isNaN(lat2) || isNaN(lng2) || lat2 < -23.05 || lat2 > -22.80 || lng2 < -43.20 || lng2 > -42.90){ toast('Coordenadas fora de Niterói', true); return; }
+    const ehLum = nAtivo.value === 'luminaria';
+    const pot = parseInt(document.getElementById('nPot').value);
+    if(ehLum && !isNaN(pot) && (pot < 0 || pot > 2000)){ toast('Potência fora da faixa (0–2000 W)', true); return; }
+    setBusy(true);
+    const {data,error} = await sb.rpc('ip_inserir_ponto', { p_lat: +lat2.toFixed(6), p_lng: +lng2.toFixed(6),
+      p_tipo: ehLum ? document.getElementById('nTipo').value : 'desconhecido', p_potencia: ehLum && !isNaN(pot) ? pot : null,
+      p_status: ehLum ? document.getElementById('nStatus').value : 'a_verificar', p_modernizado: ehLum ? document.getElementById('nMod').checked : false,
+      p_endereco: document.getElementById('nEnd').value || null, p_patrimonio: document.getElementById('nPatr').value || null, p_obs: 'cadastro via mapa',
+      p_tipo_ativo: nAtivo.value, p_tipo_luminaria: ehLum ? (document.getElementById('nTipoLum').value || null) : null,
+      p_classe_nbr: ehLum ? (document.getElementById('nClasse').value || null) : null });
+    setBusy(false);
+    if(error){ toast('Falha ao cadastrar: ' + error.message, true); return; }
+    toast('Cadastrado: ' + (data || 'ok')); d.style.display = 'none'; state.choroData = null; state.densData = null; refresh(); loadStatsChips();
+    map.setView([lat2, lng2], Math.max(map.getZoom(), 17));
+  };
+});
+
+// ---------- Coroplético ----------
+async function renderChoropleth(){
+  state.layer.clearLayers();
+  if(!state.choroData){ state.choroData = await rpc('ip_bairros_choropleth', {}); }
+  if(state.choroLayer){ map.removeLayer(state.choroLayer); }
+  if(!state.choroData) return;
+  state.choroLayer = L.geoJSON(state.choroData,{
+    style: f=>{ const p=f.properties.pct_led; return {color:'#0b0f14',weight:1,
+      fillColor: p==null?'#3a3a3a':mix(p/100), fillOpacity:.6}; },
+    onEachFeature:(f,layer)=>{ const pr=f.properties;
+      layer.bindTooltip(`${esc(pr.bairro)} · ${pr.pct_led??0}% LED · ${pr.pendente} pendentes`,{sticky:true});
+      layer.on('click',()=>{ document.getElementById('fBairro').value=pr.bairro; state.bairro=pr.bairro; loadStatsChips(); });
+    }
+  }).addTo(map);
+  document.getElementById('modeHint').textContent = 'Coroplético: cor = % LED do bairro';
+}
+document.getElementById('btnChoro').onclick = ()=>{
+  state.choropleth=!state.choropleth;
+  if(state.choropleth && state.densidade){ state.densidade=false;
+    document.getElementById('btnDens').classList.remove('on');
+    if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; }
+    document.getElementById('densCtl').style.display='none'; }
+  document.getElementById('btnChoro').classList.toggle('on',state.choropleth);
+  document.getElementById('btnVis').classList.toggle('on',state.choropleth||state.densidade);
+  document.getElementById('legend').style.display = (state.choropleth||state.densidade)?'none':'block';
+  if(!state.choropleth && !state.densidade) renderMunicipioLimites();
+  refresh();
+};
+
+// ---------- Grade de densidade luminotécnica ----------
+const DENS_M = {
+  klm:{rot:'Fluxo', unid:'klm por célula (fluxo instalado estimado)', ramp:['#312e81','#1d4ed8','#0891b2','#65a30d','#fde047']},
+  kw:{rot:'Potência', unid:'kW por célula (potência instalada · COSIP)', ramp:['#450a0a','#7f1d1d','#b91c1c','#ef4444','#fca5a5']},
+  lm_w:{rot:'Eficiência', unid:'lm/W médio da célula', fixo:[70,90,110,125], ramp:['#dc2626','#f97316','#eab308','#a3e635','#22c55e']}
+};
+function quantis(vals,k){ const s=[...vals].sort((a,b)=>a-b), out=[];
+  for(let i=1;i<k;i++) out.push(s[Math.min(s.length-1,Math.floor(s.length*i/k))]);
+  return out; }
+function classeDens(v,breaks){ let i=0; while(i<breaks.length && v>=breaks[i]) i++; return i; }
+function fmtDens(x){ x=Number(x); return x>=1000?Math.round(x).toLocaleString('pt-BR'):(Math.round(x*10)/10).toLocaleString('pt-BR'); }
+async function renderDensidade(){
+  state.layer.clearLayers();
+  if(state.choroLayer){ map.removeLayer(state.choroLayer); state.choroLayer=null; }
+  if(state.bairroLayer){ map.removeLayer(state.bairroLayer); state.bairroLayer=null; }
+  if(!state.densData){
+    setBusy(true);
+    try{
+      const {data,error}=await sb.rpc('ip_grid_densidade_json',{p_cell_m:250});
+      if(error) throw error;
+      state.densData = data || [];
+    }catch(e){ toast('Erro ao carregar densidade: '+(e.message||e),true); state.densData=[]; }
+    finally{ setBusy(false); }
+  }
+  if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; }
+  if(state.densMunLayer){ map.removeLayer(state.densMunLayer); state.densMunLayer=null; }
+  const rows=state.densData;
+  if(!rows||!rows.length){ document.getElementById('modeHint').textContent='Grade indisponível'; return; }
+  const m=state.densMetric, cfg=DENS_M[m];
+  const vals=rows.map(r=>Number(r[m])).filter(v=>v!=null&&!isNaN(v));
+  const breaks=cfg.fixo||quantis(vals,cfg.ramp.length);
+  const fc={type:'FeatureCollection',features:rows.map(r=>({type:'Feature',geometry:r.gj,properties:r}))};
+  state.densLayer=L.geoJSON(fc,{
+    style:f=>{ const v=f.properties[m];
+      const cor=(v==null||isNaN(Number(v)))?'#1f2a37':cfg.ramp[classeDens(Number(v),breaks)];
+      return {color:'#0b0f14',weight:.5,fillColor:cor,fillOpacity:.62}; },
+    onEachFeature:(f,l)=>{ const p=f.properties;
+      l.bindPopup(`<div style="font-size:12px;min-width:210px;line-height:1.5">
+        <b>Célula 250 × 250 m</b><br/>
+        Luminárias: <b>${p.n}</b> · LED: <b>${p.pct_led}%</b><br/>
+        Potência instalada: <b>${Number(p.kw).toLocaleString('pt-BR')} kW</b><br/>
+        Fluxo estimado: <b>${p.klm==null?'—':Number(p.klm).toLocaleString('pt-BR')+' klm'}</b><br/>
+        Eficiência média: <b>${p.lm_w==null?'—':p.lm_w+' lm/W'}</b> · Pot. conhecida: ${p.cobertura_pot}%<br/>
+        <span style="color:#6b7280;font-size:10.5px">Fluxo <i>instalado</i> estimado por tipo de fonte. Não é medição de iluminância nem atesta conformidade com a NBR 5101.</span></div>`); }
+  }).addTo(map);
+  // Hachura de limites municipais
+  const munData = await rpc('ip_bairros_choropleth', {});
+  if(munData){
+    const munGeoJson={type:'FeatureCollection',features:munData.features.map(f=>({type:'Feature',geometry:f.geometry,properties:f.properties}))};
+    state.densMunLayer=L.geoJSON(munGeoJson,{style:{color:'#60a5fa',weight:2,fill:false,opacity:.4},interactive:false}).addTo(map);
+  }
+  buildDensCtl(breaks,cfg);
+  document.getElementById('modeHint').textContent='Grade 250 m · '+cfg.rot+' (limites em azul)';
+}
+function buildDensCtl(breaks,cfg){
+  const c=document.getElementById('densCtl');
+  const mBtns=Object.entries(DENS_M).map(([k,v])=>
+    `<button class="btn ${k===state.densMetric?'on':''}" style="padding:3px 8px;font-size:11px" onclick="window._densMetric('${k}')">${v.rot}</button>`).join('');
+  const sw=cfg.ramp.map((cor,i)=>{
+    const lo=i===0?null:breaks[i-1], hi=i<breaks.length?breaks[i]:null;
+    const rot=lo==null?('&lt; '+fmtDens(hi)):hi==null?('≥ '+fmtDens(lo)):(fmtDens(lo)+' – '+fmtDens(hi));
+    return `<div style="display:flex;align-items:center;gap:6px;margin-top:2px"><span style="width:14px;height:11px;border-radius:2px;background:${cor};display:inline-block;flex-shrink:0"></span><span>${rot}</span></div>`; }).join('');
+  c.innerHTML=`<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">${mBtns}</div>
+    <div style="color:#9ca3af;margin-bottom:2px">${cfg.unid}${cfg.fixo?'':' · quintis'}</div>${sw}
+    <div style="color:#6b7280;margin-top:5px;font-size:10.5px">Estimativa de fluxo instalado — não é medição NBR 5101</div>`;
+  c.style.display='block';
+}
+window._densMetric=(m)=>{ state.densMetric=m; renderDensidade(); };
+document.getElementById('btnDens').onclick = ()=>{
+  state.densidade=!state.densidade;
+  if(state.densidade && state.choropleth){ state.choropleth=false;
+    document.getElementById('btnChoro').classList.remove('on');
+    if(state.choroLayer){ map.removeLayer(state.choroLayer); state.choroLayer=null; } }
+  document.getElementById('btnDens').classList.toggle('on',state.densidade);
+  document.getElementById('btnVis').classList.toggle('on',state.densidade||state.choropleth);
+  document.getElementById('legend').style.display=(state.densidade||state.choropleth)?'none':'block';
+  if(!state.densidade){
+    if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; }
+    if(state.densMunLayer){ map.removeLayer(state.densMunLayer); state.densMunLayer=null; }
+    document.getElementById('densCtl').style.display='none';
+    renderMunicipioLimites();
+  }
+  refresh();
+};
+
+// ---------- Realce do bairro ----------
+async function highlightBairro(name){
+  if(state.bairroLayer){ map.removeLayer(state.bairroLayer); state.bairroLayer=null; }
+  if(!name){ refresh(); return; }
+  const data = await rpc('ip_bairro_geojson', { p_bairro:name });
+  if(data){
+    state.bairroLayer = L.geoJSON(data,{style:{color:'#60a5fa',weight:2,fillColor:'#3b82f6',fillOpacity:.14,interactive:false}}).addTo(map);
+    try{ map.fitBounds(state.bairroLayer.getBounds(),{padding:[30,30]}); }catch(e){}
+  }
+  refresh();
+}
+
+// ---------- Limites do município ----------
+async function renderMunicipioLimites(){
+  state.munLayer.clearLayers();
+  const data = await rpc('ip_bairros_choropleth', {});
+  if(data && data.features){
+    const munGeoJson={type:'FeatureCollection',features:data.features.map(f=>({type:'Feature',geometry:f.geometry,properties:f.properties}))};
+    L.geoJSON(munGeoJson,{style:{color:'#60a5fa',weight:2.5,fill:false,opacity:.5,dashArray:'5,5'},interactive:false}).addTo(state.munLayer);
+  }
+}
+
+// ---------- Detalhe ----------
+function fld(label,val){ return `<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid #161f29"><span style="color:#9ca3af">${label}</span><span style="text-align:right">${esc(val)||'—'}</span></div>`; }
+function openDetail(p){
+  state.current=p;
+  const d=document.getElementById('detail'); d.style.display='block';
+  const badge=p.modernizado_led?`<span class="badge" style="background:#0d3d24;color:#4ade80">LED</span>`:`<span class="badge" style="background:#3d2f0d;color:#fbbf24">Pendente</span>`;
+  const origem=p.fonte_modernizacao==='censo_enel'?'Censo ENEL':p.fonte_modernizacao==='seconser_pos_censo'?'SECONSER (pós-censo)':p.fonte_modernizacao==='campo'?'Campo':'—';
+  const ehLum=(p.tipo_ativo||'luminaria')==='luminaria';
+  d.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <b style="font-size:13px">${esc(p.codigo_seconser)||'—'}</b> ${ehLum?badge:''}</div>
+    ${fld('Referência ENEL', p.numero_patrimonio)}
+    ${fld('Tipo de ativo', ativoLabel(p.tipo_ativo||'luminaria'))}
+    ${ehLum?fld('Tipo de luminária', p.tipo_luminaria):''}
+    ${ehLum?fld('Classe NBR', p.classe_nbr):''}
+    ${fld('Endereço', p.endereco)}${fld('Bairro', p.bairro_nome)}
+    ${ehLum?fld('Lâmpada', p.tipo_lampada):''}
+    ${ehLum?fld('Potência', p.potencia_w? p.potencia_w+' W':null):''}
+    ${ehLum?fld('Estado', p.status):''}
+    ${ehLum?fld('Origem modernização', origem):''}
+    ${p.flag_revisao_censo?`<div style="color:#fbbf24;font-size:11px;margin-top:4px">⚑ marcado para revisão</div>`:''}
+    ${p.observacoes?`<div style="color:#9ca3af;font-size:11px;margin-top:6px">${esc(p.observacoes)}</div>`:''}
+    ${state.user?`<div style="display:flex;gap:6px;margin-top:8px">
+        <button class="btn" style="flex:1" onclick="window._interv('${p.id}')">Intervenções</button>
+        <button class="btn" style="flex:1" onclick="window._hist('${p.id}')">Histórico</button>
+      </div><div id="histBox"></div>`:''}
+    <div style="margin-top:10px;display:flex;gap:8px">
+      ${podeEditar()?`<button class="btn btn-accent" style="flex:1" onclick="window._edit()">Editar</button>`:''}
+      <button class="btn" onclick="document.getElementById('detail').style.display='none'">Fechar</button></div>`;
+}
+window._edit = function(){
+  const p=state.current; if(!p) return;
+  const d=document.getElementById('detail');
+  d.innerHTML = `
+    <b style="font-size:13px">Editar · ${esc(p.numero_patrimonio)}</b>
+    <div style="margin-top:8px;display:flex;flex-direction:column;gap:7px">
+      <div style="display:flex;gap:6px">
+        <label style="font-size:11px;color:#9ca3af;flex:1">Latitude<input id="eLat" type="number" step="0.000001" value="${p.lat??''}"/></label>
+        <label style="font-size:11px;color:#9ca3af;flex:1">Longitude<input id="eLng" type="number" step="0.000001" value="${p.lon??''}"/></label>
+      </div>
+      <label style="font-size:11px;color:#9ca3af">Tipo<select id="eTipo">${TIPOS.map(t=>`<option ${t===p.tipo_lampada?'selected':''}>${t}</option>`).join('')}</select></label>
+      <label style="font-size:11px;color:#9ca3af">Potência (W)<input id="ePot" type="number" value="${p.potencia_w||''}"/></label>
+      <label style="font-size:11px;color:#9ca3af">Estado<select id="eStatus">${STATUS.map(s=>`<option ${s===p.status?'selected':''}>${s}</option>`).join('')}</select></label>
+      <label style="font-size:12px;display:flex;gap:8px;align-items:center;color:#e5e7eb"><input type="checkbox" id="eMod" ${p.modernizado_led?'checked':''} style="width:auto"/> Modernizado para LED</label>
+      <label style="font-size:11px;color:#9ca3af">Tipo de luminária<select id="eTipoLum"><option value="">—</option>${TIPO_LUM.map(t=>`<option ${t===p.tipo_luminaria?'selected':''}>${t}</option>`).join('')}</select></label>
+      <label style="font-size:11px;color:#9ca3af">Classe NBR<input id="eClasse" value="${esc(p.classe_nbr)}" placeholder="V3, P2, C4…"/></label>
+      <label style="font-size:11px;color:#9ca3af">Observações<textarea id="eObs" rows="2">${esc(p.observacoes)}</textarea></label>
+      <div style="display:flex;gap:8px"><button class="btn btn-accent" style="flex:1" id="eSave">Salvar</button><button class="btn" onclick="window._reopen()">Cancelar</button></div>
+      <button class="btn" id="eDelete" style="border-color:#ef4444;color:#f87171">🗑 Excluir ativo</button>
+    </div>`;
+  document.getElementById('eDelete').onclick = ()=>window._excluirPonto(p);
+  document.getElementById('eSave').onclick = async ()=>{
+    const pot=parseInt(document.getElementById('ePot').value);
+    if(!isNaN(pot) && (pot<0||pot>2000)){ toast('Potência fora da faixa (0–2000 W)',true); return; }
+    const lat=parseFloat(document.getElementById('eLat').value), lng=parseFloat(document.getElementById('eLng').value);
+    let pLat=null,pLng=null;
+    if(!(isNaN(lat)&&isNaN(lng))){
+      if(isNaN(lat)||isNaN(lng)||lat<-23.05||lat>-22.80||lng<-43.20||lng>-42.90){ toast('Coordenadas inválidas ou fora de Niterói',true); return; }
+      pLat=+lat.toFixed(6); pLng=+lng.toFixed(6);
+    }
+    setBusy(true);
+    const {error}=await sb.rpc('ip_atualizar_ponto',{ p_id:p.id, p_tipo:document.getElementById('eTipo').value,
+      p_potencia:isNaN(pot)?null:pot, p_status:document.getElementById('eStatus').value,
+      p_modernizado:document.getElementById('eMod').checked, p_obs:document.getElementById('eObs').value||null,
+      p_lat:pLat, p_lng:pLng,
+      p_tipo_luminaria:document.getElementById('eTipoLum').value||null, p_classe_nbr:document.getElementById('eClasse').value||null });
+    setBusy(false);
+    if(error){ toast('Falha ao salvar: '+error.message,true); return; }
+    toast('Ponto atualizado'); document.getElementById('detail').style.display='none';
+    state.choroData=null; state.densData=null; refresh(); loadStatsChips();
+  };
+};
+window._reopen = ()=>openDetail(state.current);
+window._excluirPonto = async (p)=>{
+  if(!podeEditar()) return;
+  const cod = p.numero_patrimonio || p.id;
+  const motivo = prompt('Excluir o ativo '+cod+'?\n\nInforme o motivo da exclusão (obrigatório):','');
+  if(motivo===null) return; // cancelou
+  if(!motivo.trim()){ toast('Informe o motivo da exclusão',true); return; }
+  if(!confirm('Confirmar exclusão de '+cod+'?\n\nUm backup completo fica guardado e a exclusão é registrada no histórico com seu usuário.')) return;
+  setBusy(true);
+  const {data,error}=await sb.rpc('ip_remover_ponto',{ p_id:p.id, p_motivo:motivo.trim() });
+  setBusy(false);
+  if(error){ toast('Falha ao excluir: '+error.message,true); return; }
+  if(data && data.error){ toast(data.error,true); return; }
+  toast('Ativo '+cod+' removido');
+  document.getElementById('detail').style.display='none';
+  state.current=null; state.choroData=null; state.densData=null;
+  refresh(); loadStatsChips();
+};
+window._interv = async (id)=>{
+  const box=document.getElementById('histBox'); if(!box) return;
+  box.innerHTML='<div style="color:#6b7280;font-size:11px;padding:6px 0"><span class="spin"></span> Carregando…</div>';
+  const data = await rpc('ip_intervencoes',{p_id:id});
+  let html = podeEditar()?`<button class="btn btn-accent" style="width:100%;margin:6px 0" onclick="window._formInterv('${id}')">+ Registrar intervenção</button>`:'';
+  const arr = data||[];
+  const ultSub = arr.find(x=>x.tipo==='substituicao'), ultMan = arr.find(x=>x.tipo==='manutencao');
+  if(ultSub||ultMan) html += `<div style="font-size:11px;color:#9ca3af;margin:2px 0 6px">${ultSub?('Última substituição: '+ultSub.data):''}${ultSub&&ultMan?' · ':''}${ultMan?('Última manutenção: '+ultMan.data):''}</div>`;
+  if(!arr.length) html += '<div style="color:#6b7280;font-size:11px">Sem intervenções registradas.</div>';
+  else html += arr.map(h=>{
+    const extra=h.lampada_nova?` → ${esc(h.lampada_nova)}${h.potencia_nova?(' '+h.potencia_nova+' W'):''}`:'';
+    return `<div style="border-bottom:1px solid #161f29;padding:4px 0;font-size:11px">
+      <div style="color:#cbd5e1">${esc(intervLabel(h.tipo))}${extra}</div>
+      ${h.descricao?`<div style="color:#9ca3af">${esc(h.descricao)}</div>`:''}
+      <div style="color:#6b7280">${h.data} · ${esc(h.responsavel||h.registrado_por||'—')}</div></div>`;
+  }).join('');
+  box.innerHTML=html;
+};
+window._formInterv = (id)=>{
+  const box=document.getElementById('histBox');
+  box.innerHTML = `<div style="border:1px solid #24303d;border-radius:8px;padding:8px;margin:6px 0;display:flex;flex-direction:column;gap:6px">
+    <b style="font-size:12px">Registrar intervenção</b>
+    <select id="ivTipo">${INTERV.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select>
+    <input id="ivData" type="date" value="${new Date().toISOString().slice(0,10)}"/>
+    <input id="ivResp" placeholder="Responsável / equipe"/>
+    <textarea id="ivDesc" rows="2" placeholder="Descrição"></textarea>
+    <div id="ivSub" style="display:none;flex-direction:column;gap:6px">
+      <select id="ivLamp"><option value="">— lâmpada nova —</option>${TIPOS.map(t=>`<option>${t}</option>`).join('')}</select>
+      <input id="ivPot" type="number" placeholder="Potência nova (W)"/>
+    </div>
+    <div style="display:flex;gap:6px"><button class="btn btn-accent" style="flex:1" id="ivSave">Salvar</button><button class="btn" onclick="window._interv('${id}')">Cancelar</button></div>
+  </div>`;
+  const tipoSel=document.getElementById('ivTipo');
+  const toggleSub=()=>{ document.getElementById('ivSub').style.display = tipoSel.value==='substituicao'?'flex':'none'; };
+  tipoSel.onchange=toggleSub; toggleSub();
+  document.getElementById('ivSave').onclick=async()=>{
+    setBusy(true);
+    const {error}=await sb.rpc('ip_registrar_intervencao',{ p_ponto:id, p_tipo:tipoSel.value,
+      p_data:document.getElementById('ivData').value||null, p_descricao:document.getElementById('ivDesc').value||null,
+      p_responsavel:document.getElementById('ivResp').value||null,
+      p_lampada_nova:document.getElementById('ivLamp').value||null,
+      p_potencia_nova:parseInt(document.getElementById('ivPot').value)||null });
+    setBusy(false);
+    if(error){ toast('Falha ao registrar: '+error.message,true); return; }
+    toast('Intervenção registrada'); window._interv(id); state.choroData=null; state.densData=null; refresh(); loadStatsChips();
+  };
+};
+window._hist = async (id)=>{
+  const box=document.getElementById('histBox'); if(!box) return;
+  box.innerHTML='<div style="color:#6b7280;font-size:11px;padding:6px 0"><span class="spin"></span> Carregando histórico…</div>';
+  const data = await rpc('ip_historico_ponto',{p_id:id});
+  if(!data){ box.innerHTML=''; return; }
+  if(!data.length){ box.innerHTML='<div style="color:#6b7280;font-size:11px;padding:6px 0">Sem alterações registradas.</div>'; return; }
+  box.innerHTML='<div style="font-size:11px;color:#9ca3af;margin:8px 0 4px">Histórico ('+data.length+')</div>'+data.map(h=>{
+    const dt=new Date(h.alterado_em).toLocaleString('pt-BR');
+    let ch=[];
+    if(h.operacao==='INSERT') ch.push('ponto criado');
+    else if(h.operacao==='DELETE') ch.push('ponto removido');
+    else {
+      if(h.tipo_antes!==h.tipo_depois) ch.push(`tipo ${h.tipo_antes||'—'}→${h.tipo_depois||'—'}`);
+      if(h.status_antes!==h.status_depois) ch.push(`estado ${h.status_antes||'—'}→${h.status_depois||'—'}`);
+      if(h.pot_antes!==h.pot_depois) ch.push(`pot ${h.pot_antes||'—'}→${h.pot_depois||'—'} W`);
+      if(h.led_antes!==h.led_depois) ch.push('LED: '+(h.led_depois==='true'?'sim':'não'));
+    }
+    if(!ch.length) ch.push('sem mudança de atributo');
+    return `<div style="border-bottom:1px solid #161f29;padding:4px 0;font-size:11px">
+      <div style="color:#cbd5e1">${esc(ch.join(' · '))}</div>
+      <div style="color:#6b7280">${dt} · ${esc(h.alterado_por||'—')}</div></div>`;
+  }).join('');
+};
+
+// ---------- Novo ponto ----------
+document.getElementById('btnNovo').onclick = ()=>{
+  if(!podeEditar()) return;
+  const c=map.getCenter();
+  const d=document.getElementById('detail'); d.style.display='block';
+  d.innerHTML = `
+    <b style="font-size:13px">Novo ativo</b>
+    <div style="font-size:11px;color:#6b7280;margin-top:2px">O código IPNIT é gerado automaticamente.</div>
+    <div style="display:flex;flex-direction:column;gap:7px;margin-top:8px">
+      <div style="display:flex;gap:6px">
+        <label style="font-size:11px;color:#9ca3af;flex:1">Latitude<input id="nLat" type="number" step="0.000001" value="${c.lat.toFixed(6)}"/></label>
+        <label style="font-size:11px;color:#9ca3af;flex:1">Longitude<input id="nLng" type="number" step="0.000001" value="${c.lng.toFixed(6)}"/></label>
+      </div>
+      <label style="font-size:11px;color:#9ca3af">Tipo de ativo<select id="nAtivo">${TIPO_ATIVO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
+      <input id="nPatr" placeholder="Referência ENEL (opcional)"/>
+      <input id="nEnd" placeholder="Endereço"/>
+      <div id="nLumFields" style="display:flex;flex-direction:column;gap:7px">
+        <button class="btn" style="width:100%;margin-bottom:8px;border-color:var(--accent);color:var(--accent)" id="nBtnModelo">📋 Inserir com modelo</button>
+        <label style="font-size:11px;color:#9ca3af">Tipo de luminária<select id="nTipoLum"><option value="">—</option>${TIPO_LUM.map(t=>`<option>${t}</option>`).join('')}</select></label>
+        <input id="nClasse" placeholder="Classe NBR (V3, P2, C4…)"/>
+        <select id="nTipo">${TIPOS.map(t=>`<option>${t}</option>`).join('')}</select>
+        <input id="nPot" type="number" placeholder="Potência (W)"/>
+        <select id="nStatus">${STATUS.map(s=>`<option>${s}</option>`).join('')}</select>
+        <label style="font-size:12px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="nMod" style="width:auto"/> LED</label>
+      </div>
+      <div style="display:flex;gap:8px"><button class="btn btn-accent" style="flex:1" id="nSave">Cadastrar</button><button class="btn" onclick="document.getElementById('detail').style.display='none'">Cancelar</button></div>
+    </div>`;
+  const nAtivo=document.getElementById('nAtivo');
+  const toggleLum=()=>{ document.getElementById('nLumFields').style.display = nAtivo.value==='luminaria'?'flex':'none'; };
+  nAtivo.onchange=toggleLum; toggleLum();
+
+  // Modelo selection
+  document.getElementById('nBtnModelo').onclick = ()=>{ window._selecionarModelo(); };
+
+  document.getElementById('nSave').onclick = async ()=>{
+    const lat=parseFloat(document.getElementById('nLat').value), lng=parseFloat(document.getElementById('nLng').value);
+    if(isNaN(lat)||isNaN(lng)||lat<-23.05||lat>-22.80||lng<-43.20||lng>-42.90){ toast('Coordenadas fora de Niterói',true); return; }
+    const ehLum=nAtivo.value==='luminaria';
+    const pot=parseInt(document.getElementById('nPot').value);
+    if(ehLum && !isNaN(pot) && (pot<0||pot>2000)){ toast('Potência fora da faixa (0–2000 W)',true); return; }
+    setBusy(true);
+    const {data,error}=await sb.rpc('ip_inserir_ponto',{ p_lat:+lat.toFixed(6), p_lng:+lng.toFixed(6),
+      p_tipo: ehLum?document.getElementById('nTipo').value:'desconhecido', p_potencia: ehLum&&!isNaN(pot)?pot:null,
+      p_status: ehLum?document.getElementById('nStatus').value:'a_verificar', p_modernizado: ehLum?document.getElementById('nMod').checked:false,
+      p_endereco:document.getElementById('nEnd').value||null, p_patrimonio:document.getElementById('nPatr').value||null, p_obs:'cadastro manual',
+      p_tipo_ativo:nAtivo.value, p_tipo_luminaria: ehLum?(document.getElementById('nTipoLum').value||null):null,
+      p_classe_nbr: ehLum?(document.getElementById('nClasse').value||null):null });
+    setBusy(false);
+    if(error){ toast('Falha ao cadastrar: '+error.message,true); return; }
+    toast('Cadastrado: '+(data||'ok')); d.style.display='none'; state.choroData=null; state.densData=null; refresh(); loadStatsChips();
+    map.setView([lat,lng], Math.max(map.getZoom(),17));
+  };
+};
+
+// ---------- Equipamentos Modelo ----------
+window._selecionarModelo = async ()=>{
+  const modal = document.getElementById('modeloModal');
+  const list = document.getElementById('modeloList');
+  modal.style.display='flex';
+  list.innerHTML='<div style="color:#6b7280;font-size:11px;padding:6px 0"><span class="spin"></span> Carregando modelos…</div>';
+
+  const data = await rpc('ip_listar_modelos');
+  state.modelosCache = data||[];
+  if(!state.modelosCache.length){
+    list.innerHTML='<div style="color:#6b7280;font-size:12px;padding:8px">Nenhum modelo cadastrado.<br/>Um administrador pode criar modelos em <b>Admin → Modelos de equipamento</b>.</div>';
+    return;
+  }
+
+  list.innerHTML = state.modelosCache.map(m=>`
+    <div class="chip" style="border-radius:8px;padding:10px;cursor:pointer;display:flex;gap:10px;align-items:center" onclick="window._aplicarModelo('${m.id}')" title="Clique para preencher os campos com este modelo">
+      ${m.foto_url?`<img src="${esc(m.foto_url)}" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:6px;flex-shrink:0"/>`:''}
+      <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
+        <div style="font-weight:600;font-size:12px">${esc(m.fabricante)} · ${esc(m.modelo)}</div>
+        <div style="color:#9ca3af;font-size:11px">${m.potencia_w} W${m.temperatura_cor_k?' · '+m.temperatura_cor_k+' K':''}${m.tensao?' · '+esc(m.tensao)+' V':''}${m.ip?' · '+esc(m.ip):''}${m.classe_nbr?' · '+esc(m.classe_nbr):''}</div>
+        <div style="color:#6b7280;font-size:10.5px">${esc(m.tipo_luminaria||'')}${m.tipo_luminaria&&m.tipo_lampada?' · ':''}${esc(m.tipo_lampada||'')}${m.descricao?' — '+esc(m.descricao):''}</div>
+      </div>
+    </div>
+  `).join('');
+};
+
+window._aplicarModelo = (id)=>{
+  const m = (state.modelosCache||[]).find(x=>x.id===id);
+  if(!m){ toast('Modelo não encontrado',true); return; }
+
+  // Copiar dados do modelo para os campos do formulário (cópia, não referência)
+  const set=(elId,v)=>{ const el=document.getElementById(elId); if(el&&v!=null&&v!=='') el.value=v; };
+  set('nTipo', m.tipo_lampada);
+  set('nPot', m.potencia_w);
+  set('nClasse', m.classe_nbr);
+  set('nTipoLum', m.tipo_luminaria);
+  const ehLed = (m.tipo_lampada==='led') || (m.tecnologia||'').toLowerCase().includes('led');
+  const mod=document.getElementById('nMod'); if(mod) mod.checked = ehLed;
+  const st=document.getElementById('nStatus'); if(st) st.value = ehLed ? 'led_instalado' : st.value;
+
+  document.getElementById('modeloModal').style.display='none';
+  toast('Modelo aplicado: '+m.fabricante+' '+m.modelo);
+};
+
+// ---------- Estatísticas ----------
+async function loadStatsChips(){
+  const data = await rpc('ip_estatisticas',{ p_bairro: state.bairro||null });
+  if(!data) return;
+  state.stats=data;
+  const scope = state.bairro? esc(state.bairro) : 'Niterói';
+  document.getElementById('kpi').innerHTML = `<b>${data.total.toLocaleString('pt-BR')}</b> lum · <b style="color:#4ade80">${data.pct_led}%</b> LED · <b style="color:#fbbf24">${data.pendente.toLocaleString('pt-BR')}</b> pend · <span style="color:#9ca3af">${scope}</span>`;
+  document.getElementById('pctBar').style.width = (data.pct_led||0)+'%';
+}
+function sparkline(serie){
+  if(!serie||serie.length<1) return '';
+  const w=320,h=54,pad=6, xs=serie.map((_,i)=>i), ys=serie.map(d=>Number(d.pct_led)||0);
+  const maxi=Math.max(1,xs.length-1), mn=Math.min(...ys,0), mx=Math.max(...ys,100);
+  const px=i=>pad+(w-2*pad)*(maxi?i/maxi:0.5), py=v=>h-pad-(h-2*pad)*((v-mn)/((mx-mn)||1));
+  const pts=serie.map((d,i)=>`${px(i)},${py(ys[i])}`).join(' ');
+  const dots=serie.map((d,i)=>`<circle cx="${px(i)}" cy="${py(ys[i])}" r="2.5" fill="#22c55e"/>`).join('');
+  const last=serie[serie.length-1];
+  return `<div style="margin-top:4px"><svg width="${w}" height="${h}" style="max-width:100%">
+    <polyline points="${pts}" fill="none" stroke="#22c55e" stroke-width="2"/>${dots}</svg>
+    <div style="font-size:11px;color:#9ca3af">Evolução do % LED — ${serie.length} ponto(s), atual ${last.pct_led}%</div></div>`;
+}
+async function loadStatsPanel(){
+  const [porBairro, serie] = await Promise.all([ rpc('ip_por_bairro'), rpc('ip_serie_metricas') ]);
+  if(!state.stats){ state.stats = await rpc('ip_estatisticas',{p_bairro:state.bairro||null}); }
+  const s=state.stats||{};
+  const kv=(k,v)=>`<div class="chip" style="border-radius:8px;padding:6px 9px"><div style="color:#9ca3af;font-size:11px">${k}</div><div style="font-weight:700;font-size:14px">${v}</div></div>`;
+  const bd=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
+    ${kv('Luminárias',(s.total||0).toLocaleString('pt-BR'))}${kv('% LED',(s.pct_led||0)+'%')}${kv('Pot. LED',(s.potencia_kw||0)+' kW')}
+    ${kv('LED censo',(s.led_censo||0).toLocaleString('pt-BR'))}${kv('LED SECONSER',(s.led_seconser||0).toLocaleString('pt-BR'))}${kv('Pendentes',(s.pendente||0).toLocaleString('pt-BR'))}</div>`;
+  const rows=(porBairro||[]).map(b=>`<tr style="cursor:pointer" onclick="window._zoomBairro('${esc(b.bairro_nome).replace(/'/g,"\\'")}')">
+    <td>${esc(b.bairro_nome)}</td><td style="text-align:right">${b.total}</td>
+    <td style="text-align:right;color:#4ade80">${b.led}</td><td style="text-align:right;color:#fbbf24">${b.pendente}</td>
+    <td style="text-align:right">${b.pct_led}%</td></tr>`).join('');
+  document.getElementById('stats').innerHTML = `
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>Indicadores${state.bairro?' · '+esc(state.bairro):''}</b><button class="btn" onclick="document.getElementById('stats').style.display='none'">✕</button></div>
+    ${bd}${sparkline(serie)}
+    <div style="margin:10px 0 4px;color:#9ca3af;font-size:12px">Passivo de troca por bairro</div>
+    <table style="width:100%;border-collapse:collapse"><thead><tr><th>Bairro</th><th style="text-align:right">Total</th><th style="text-align:right">LED</th><th style="text-align:right">Pend.</th><th style="text-align:right">%</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+window._zoomBairro = (b)=>{ document.getElementById('fBairro').value=b; state.bairro=b; loadStatsChips(); highlightBairro(b); };
+
+async function loadBairroOptions(){
+  const data = await rpc('ip_por_bairro');
+  const names=(data||[]).map(b=>b.bairro_nome).sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  const f=document.getElementById('fBairro'), t=document.getElementById('tBairro');
+  names.forEach(n=>{ f.insertAdjacentHTML('beforeend',`<option>${esc(n)}</option>`); t.insertAdjacentHTML('beforeend',`<option>${esc(n)}</option>`); });
+  TIPOS.forEach(tp=>document.getElementById('fTipo').insertAdjacentHTML('beforeend',`<option value="${tp}">${tp}</option>`));
+}
+function updateFCount(){
+  const n=[state.bairro,state.tipo,state.estado,state.pot,state.fila].filter(Boolean).length;
+  const b=document.getElementById('fCount');
+  if(n){ b.style.display='inline'; b.textContent=n; } else b.style.display='none';
+}
+document.getElementById('btnFiltros').addEventListener('mouseenter',()=>{ document.getElementById('filtrosPop').style.display='flex'; });
+document.getElementById('filtrosPop').addEventListener('mouseleave',()=>{ document.getElementById('filtrosPop').style.display='none'; });
+document.addEventListener('click', e=>{
+  [['filtrosPop','btnFiltros'],['exportPop','btnExport'],['visPop','btnVis']].forEach(([pid,bid])=>{
+    const p=document.getElementById(pid);
+    if(p && p.style.display==='flex' && !p.contains(e.target) && e.target.id!==bid) p.style.display='none';
+  });
+});
+document.getElementById('btnVis').addEventListener('mouseenter',()=>{ document.getElementById('visPop').style.display='flex'; });
+document.getElementById('visPop').addEventListener('mouseleave',()=>{ document.getElementById('visPop').style.display='none'; });
+document.getElementById('fLimpar').onclick = ()=>{
+  state.bairro=state.tipo=state.estado=state.pot=state.fila='';
+  ['fBairro','fTipo','fEstado','fPot','fFila'].forEach(id=>document.getElementById(id).value='');
+  updateFCount(); loadStatsChips(); if(state.bairroLayer){map.removeLayer(state.bairroLayer);state.bairroLayer=null;}
+  state.choroData=null; refresh();
+};
+document.getElementById('fBairro').onchange = e=>{ state.bairro=e.target.value; updateFCount(); loadStatsChips(); highlightBairro(e.target.value); };
+document.getElementById('fTipo').onchange = e=>{ state.tipo=e.target.value; updateFCount(); state.choroData=null; refresh(); };
+document.getElementById('fEstado').onchange = e=>{ state.estado=e.target.value; updateFCount(); refresh(); };
+document.getElementById('fPot').onchange = e=>{ state.pot=e.target.value; updateFCount(); refresh(); };
+document.getElementById('fFila').onchange = async e=>{ state.fila=e.target.value; updateFCount(); state.choroData=null; refresh();
+  if(e.target.value){ let q=sb.from('v_parque_export').select('id',{count:'exact',head:true}); q=aplicaFila(q);
+    const {count}=await q; toast('Fila: '+((count||0).toLocaleString('pt-BR'))+' ponto(s)'); } };
+document.getElementById('btnStats').onclick = ()=>{ const s=document.getElementById('stats'); if(s.style.display==='block'){s.style.display='none';} else {s.style.display='block'; loadStatsPanel();} };
+
+// ---------- Tabela ----------
+async function loadTable(){
+  setBusy(true);
+  document.getElementById('tBody').innerHTML='<tr><td colspan="8" style="text-align:center;color:#6b7280;padding:18px"><span class="spin"></span> Carregando…</td></tr>';
+  let q=sb.from('v_parque_export').select('id,codigo_seconser,numero_patrimonio,endereco,bairro_nome,tipo_lampada,potencia_w,modernizado_led,fonte_modernizacao,status,observacoes,lat,lon,tipo_ativo,tipo_luminaria,classe_nbr',{count:'exact'});
+  const s=document.getElementById('tSearch').value.trim();
+  const bb=document.getElementById('tBairro').value, st=document.getElementById('tStatus').value;
+  if(s) q=q.or(`codigo_seconser.ilike.%${s}%,endereco.ilike.%${s}%,numero_patrimonio.ilike.%${s}%`);
+  if(bb) q=q.eq('bairro_nome',bb);
+  if(st==='led') q=q.eq('modernizado_led',true);
+  else if(st==='pendente') q=q.eq('modernizado_led',false);
+  else if(st==='sem_lampada') q=q.eq('tipo_lampada','sem_lampada');
+  q=aplicaFila(q);
+  const from=state.tPage*state.tSize;
+  const {data,count,error}=await q.order('bairro_nome').range(from,from+state.tSize-1);
+  setBusy(false);
+  if(error){ toast('Erro na tabela: '+error.message,true);
+    document.getElementById('tBody').innerHTML='<tr><td colspan="8" style="text-align:center;color:#f87171;padding:18px">Falha ao carregar. Tente novamente.</td></tr>'; return; }
+  document.getElementById('tCount').textContent=`${(count||0).toLocaleString('pt-BR')} registros`;
+  document.getElementById('tPage').textContent=`Página ${state.tPage+1} de ${Math.max(1,Math.ceil((count||0)/state.tSize))}`;
+  state.tCache={}; (data||[]).forEach(p=>state.tCache[p.id]=p);
+  const linhas=(data||[]).map(p=>{
+    const origem=p.fonte_modernizacao==='censo_enel'?'censo':p.fonte_modernizacao==='seconser_pos_censo'?'SECONSER':p.fonte_modernizacao==='campo'?'campo':'—';
+    const est=p.modernizado_led?`<span class="badge" style="background:#0d3d24;color:#4ade80">LED</span>`:`<span class="badge" style="background:#3d2f0d;color:#fbbf24">Pend.</span>`;
+    return `<tr><td>${esc(p.codigo_seconser)||'—'}</td><td>${esc(p.endereco)||'—'}</td><td>${esc(p.bairro_nome)||'—'}</td><td>${p.tipo_lampada}</td><td>${p.potencia_w||'—'}</td><td>${est}</td><td style="color:#9ca3af">${origem}</td>
+      <td>${podeEditar()?`<button class="btn" style="padding:2px 8px" onclick="window._editId('${p.id}')" aria-label="Editar luminária">editar</button>`:''}</td></tr>`;
+  }).join('');
+  document.getElementById('tBody').innerHTML = linhas || '<tr><td colspan="8" style="text-align:center;color:#6b7280;padding:18px">Nenhum registro encontrado</td></tr>';
+}
+window._editId=(id)=>{ const p=state.tCache[id]; if(!p) return; state.current=p; document.getElementById('tableModal').style.display='none'; document.getElementById('detail').style.display='block'; window._edit(); };
+document.getElementById('btnTabela').onclick=()=>{ state.tPage=0; document.getElementById('tableModal').style.display='flex'; loadTable(); };
+document.getElementById('tClose').onclick=()=>document.getElementById('tableModal').style.display='none';
+document.getElementById('tPrev').onclick=()=>{ if(state.tPage>0){state.tPage--;loadTable();} };
+document.getElementById('tNext').onclick=()=>{ state.tPage++; loadTable(); };
+['tSearch','tBairro','tStatus'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{state.tPage=0;loadTable();}));
+
+// ---------- Auth ----------
+function podeEditar(){ return ['admin','editor'].includes(state.userRole); }
+async function setUser(u){
+  state.user=u; state.userRole=null;
+  document.getElementById('btnLogin').textContent = u?'Sair':'Entrar';
+  if(u){ try{ const {data}=await sb.from('profiles').select('role').eq('id',u.id).single(); state.userRole=data?.role||'leitura'; }
+         catch(e){ state.userRole='leitura'; } }
+  document.getElementById('btnNovo').style.display = podeEditar()?'inline-block':'none';
+  document.getElementById('btnAdminConsole').style.display = state.userRole==='admin'?'inline-block':'none';
+  document.getElementById('exportContainer').style.display = u?'block':'none';
+}
+document.getElementById('btnLogin').onclick=async ()=>{
+  if(state.user){ await sb.auth.signOut(); setUser(null); toast('Sessão encerrada'); return; }
+  document.getElementById('loginModal').style.display='flex'; };
+document.getElementById('liCancel').onclick=()=>document.getElementById('loginModal').style.display='none';
+document.getElementById('liSubmit').onclick=async ()=>{
+  const email=document.getElementById('liEmail').value, password=document.getElementById('liPass').value;
+  const {data,error}=await sb.auth.signInWithPassword({email,password});
+  const err=document.getElementById('liErr');
+  if(error){ err.style.display='block'; err.textContent='Falha no login: '+error.message; return; }
+  err.style.display='none'; document.getElementById('loginModal').style.display='none'; setUser(data.user); toast('Bem-vindo, '+email); };
+sb.auth.getSession().then(({data})=>setUser(data.session?.user||null));
+
+// ---------- Painel admin ----------
+function acShow(sec){
+  document.querySelectorAll('.acsec').forEach(s=>s.style.display='none');
+  document.getElementById('sec-'+sec).style.display='block';
+  document.querySelectorAll('.acnav').forEach(b=>b.classList.toggle('on', b.dataset.sec===sec));
+  if(sec==='visao') loadVisaoGeral();
+  else if(sec==='usuarios') loadAdminUsers();
+  else if(sec==='aparencia') fillConfigForm();
+  else if(sec==='modelos') loadAdminModelos();
+}
+document.getElementById('btnAdminConsole').onclick = ()=>{ document.getElementById('adminConsole').style.display='flex'; acShow('visao'); };
+document.getElementById('acVoltar').onclick = ()=>document.getElementById('adminConsole').style.display='none';
+document.querySelectorAll('.acnav').forEach(b=>b.onclick=()=>acShow(b.dataset.sec));
+document.getElementById('sec-dados').addEventListener('click',e=>{ const b=e.target.closest('[data-exp]'); if(!b)return;
+  ({csv:()=>exportData('csv'),geojson:()=>exportData('geojson'),bairros:exportBairros,serie:exportSerie,grade:exportGrade})[b.dataset.exp]?.(); });
+function qcard(label,n,fila,nota){
+  return `<div class="chip" style="border-radius:10px;padding:12px;min-width:160px">
+    <div style="color:#9ca3af;font-size:11px">${label}</div>
+    <div style="font-weight:700;font-size:20px">${(n||0).toLocaleString('pt-BR')}</div>
+    ${fila?`<button class="btn" style="margin-top:6px;padding:3px 8px;font-size:11px" onclick="window._filaMapa('${fila}')">abrir no mapa</button>`:`<div style="color:#6b7280;font-size:11px;margin-top:6px">${nota||''}</div>`}</div>`;
+}
+async function loadVisaoGeral(){
+  const box=document.getElementById('sec-visao');
+  box.innerHTML='<div style="color:#6b7280"><span class="spin"></span> Carregando…</div>';
+  const [s,serie,q]=await Promise.all([ rpc('ip_estatisticas',{p_bairro:null}), rpc('ip_serie_metricas'), rpc('ip_qualidade_dado') ]);
+  const S=s||{}, Q=q||{};
+  const kv=(k,v,c)=>`<div class="chip" style="border-radius:10px;padding:12px;min-width:120px"><div style="color:#9ca3af;font-size:11px">${k}</div><div style="font-weight:700;font-size:20px;color:${c||'#e5e7eb'}">${v}</div></div>`;
+  box.innerHTML = `<h3 style="margin:0 0 12px;font-size:15px">Visão geral</h3>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+      ${kv('Luminárias',(S.total||0).toLocaleString('pt-BR'))}
+      ${kv('LED',(S.pct_led||0)+'%','#4ade80')}
+      ${kv('Pendentes',(S.pendente||0).toLocaleString('pt-BR'),'#fbbf24')}
+      ${kv('Pot. LED',(S.potencia_kw||0)+' kW')}
+      ${kv('LED censo',(S.led_censo||0).toLocaleString('pt-BR'))}
+      ${kv('LED SECONSER',(S.led_seconser||0).toLocaleString('pt-BR'))}
+    </div>
+    <div style="font-size:13px;color:#9ca3af;margin:6px 0">Evolução do % LED</div>${sparkline(serie)}
+    <div style="font-size:13px;color:#9ca3af;margin:16px 0 6px">Qualidade do dado · filas de auditoria</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      ${qcard('Marcados p/ revisão', Q.revisao, 'revisao')}
+      ${qcard('LED suspeito (>400 W)', Q.suspeito, 'suspeito')}
+      ${qcard('Resíduo da conciliação', Q.residuo, null, 'conferência de campo')}
+    </div>`;
+}
+window._filaMapa=(fila)=>{
+  state.fila=fila; const sel=document.getElementById('fFila'); if(sel) sel.value=fila;
+  updateFCount(); document.getElementById('adminConsole').style.display='none';
+  state.choroData=null; refresh();
+  toast('Filtro aplicado: '+(fila==='revisao'?'marcados p/ revisão':fila==='suspeito'?'LED suspeito':fila));
+};
+// Approval workflow removed - editors now have autonomous authority
+// (maintained in git history for reference)
+async function loadAdminUsers(){
+  const body=document.getElementById('admBody');
+  body.innerHTML='<tr><td colspan="3" style="text-align:center;color:#6b7280;padding:14px"><span class="spin"></span> Carregando…</td></tr>';
+  const {data,error}=await sb.from('profiles').select('id,email,role').order('email');
+  if(error){ toast('Erro ao listar: '+error.message,true); body.innerHTML=''; return; }
+  const roles=['leitura','editor','admin'];
+  body.innerHTML=(data||[]).map(u=>{
+    const eu=u.id===state.user.id;
+    return `<tr><td>${esc(u.email)}</td>
+      <td><select ${eu?'disabled':''} onchange="window._setRole('${u.id}',this.value)">${roles.map(r=>`<option value="${r}" ${u.role===r?'selected':''}>${r}</option>`).join('')}</select></td>
+      <td style="text-align:right">${eu?'<span style="color:#6b7280;font-size:11px">você</span>':`<button class="btn" style="padding:2px 8px;color:#f87171" onclick="window._delUser('${u.id}','${esc(u.email).replace(/'/g,"\\'")}')">remover</button>`}</td></tr>`;
+  }).join('') || '<tr><td colspan="3" style="text-align:center;color:#6b7280;padding:14px">Nenhum usuário</td></tr>';
+}
+window._setRole = async (id,role)=>{ const {error}=await sb.from('profiles').update({role,atualizado_em:new Date().toISOString()}).eq('id',id);
+  toast(error?('Erro: '+error.message):'Papel atualizado',!!error); };
+window._delUser = async (id,email)=>{ if(!confirm('Remover '+email+'? Isso exclui o acesso do usuário.')) return;
+  setBusy(true); const {data,error}=await sb.functions.invoke('admin-users',{body:{action:'delete',userId:id}}); setBusy(false);
+  if(error||data?.error){ toast('Erro ao remover: '+(data?.error||error.message),true); return; }
+  toast('Usuário removido'); loadAdminUsers(); };
+document.getElementById('admCreate').onclick = async ()=>{
+  const email=document.getElementById('admEmail').value.trim(), password=document.getElementById('admPass').value.trim(), role=document.getElementById('admRole').value;
+  if(!email){ toast('Informe o e-mail',true); return; }
+  setBusy(true);
+  const {data,error}=await sb.functions.invoke('admin-users',{body:{action:'create',email,password:password||undefined,role}});
+  setBusy(false);
+  if(error||data?.error){ toast('Erro ao criar: '+(data?.error||error.message),true); return; }
+  document.getElementById('admEmail').value=''; document.getElementById('admPass').value='';
+  if(data.senha_temporaria) alert('Usuário criado.\nE-mail: '+email+'\nSenha temporária: '+data.senha_temporaria+'\n\nComunique ao operador e peça que troque depois.');
+  else toast('Usuário criado');
+  loadAdminUsers();
+};
+
+// ---------- Administração de Modelos ----------
+function initModelosForm(){
+  const selLum=document.getElementById('modTipoLum');
+  if(selLum.options.length<=1){
+    TIPO_LUM.forEach(t=>selLum.add(new Option(t,t)));
+    const selLamp=document.getElementById('modTipoLamp');
+    TIPOS.forEach(t=>selLamp.add(new Option(t,t)));
+    selLamp.value='led';
+  }
+}
+async function loadAdminModelos(){
+  initModelosForm();
+  const body=document.getElementById('modBody');
+  body.innerHTML='<tr><td colspan="8" style="text-align:center;color:#6b7280;padding:14px"><span class="spin"></span> Carregando…</td></tr>';
+  const data = await rpc('ip_listar_modelos');
+  state.modelosCache = data||[];
+  body.innerHTML=state.modelosCache.map(m=>`
+    <tr>
+      <td>${esc(m.fabricante)}</td>
+      <td>${esc(m.modelo)}${m.descricao?`<div style="color:#6b7280;font-size:10.5px">${esc(m.descricao)}</div>`:''}</td>
+      <td style="text-align:right">${m.potencia_w} W</td>
+      <td>${esc(m.tipo_luminaria||'—')}</td>
+      <td>${esc(m.tipo_lampada||'—')}</td>
+      <td>${esc(m.classe_nbr||'—')}</td>
+      <td>${esc(m.ip||'—')}</td>
+      <td style="text-align:right"><button class="btn" style="padding:2px 8px;color:#f87171;font-size:11px" onclick="window._delModelo('${m.id}')">remover</button></td>
+    </tr>
+  `).join('') || '<tr><td colspan="8" style="text-align:center;color:#6b7280;padding:14px">Nenhum modelo cadastrado ainda</td></tr>';
+}
+window._delModelo = async (id)=>{
+  if(!confirm('Remover este modelo do catálogo? Os pontos já cadastrados com ele não serão afetados.')) return;
+  setBusy(true);
+  const {error}=await sb.rpc('ip_deletar_modelo',{p_id:id});
+  setBusy(false);
+  if(error){ toast('Erro ao remover: '+error.message,true); return; }
+  toast('Modelo removido');
+  loadAdminModelos();
+};
+document.getElementById('modCreate').onclick = async ()=>{
+  const fab=document.getElementById('modFabricante').value.trim();
+  const mod=document.getElementById('modModelo').value.trim();
+  const pot=parseInt(document.getElementById('modPotencia').value);
+  const temp=document.getElementById('modTemperatura').value.trim()?parseInt(document.getElementById('modTemperatura').value):null;
+
+  if(!fab || !mod || isNaN(pot) || pot<=0 || pot>2000){
+    toast('Preencha: Fabricante, Modelo e Potência (1–2000 W)',true);
+    return;
+  }
+
+  setBusy(true);
+  const {error}=await sb.rpc('ip_criar_modelo',{
+    p_fabricante:fab, p_modelo:mod, p_potencia_w:pot,
+    p_temperatura_cor_k:temp,
+    p_tensao:document.getElementById('modTensao').value||null,
+    p_ip:document.getElementById('modIp').value.trim()||null,
+    p_classe_nbr:document.getElementById('modClasse').value.trim()||null,
+    p_tecnologia:document.getElementById('modTecnologia').value.trim()||'LED',
+    p_tipo_luminaria:document.getElementById('modTipoLum').value||null,
+    p_tipo_lampada:document.getElementById('modTipoLamp').value||'led',
+    p_foto_url:document.getElementById('modFoto').value.trim()||null,
+    p_descricao:document.getElementById('modDescricao').value.trim()||null
+  });
+  setBusy(false);
+  if(error){ toast('Erro ao criar: '+error.message,true); return; }
+
+  ['modFabricante','modModelo','modPotencia','modTemperatura','modTensao','modIp','modClasse','modFoto','modDescricao'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('modTecnologia').value='LED';
+  document.getElementById('modTipoLum').value='';
+  document.getElementById('modTipoLamp').value='led';
+
+  toast('Modelo adicionado ao catálogo');
+  loadAdminModelos();
+};
+
+// ---------- Exportação ----------
+function baixar(nome, conteudo, mime){
+  const blob = conteudo instanceof Blob ? conteudo : new Blob([conteudo],{type:mime||'text/plain;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=nome;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+}
+function toCSV(rows){
+  if(!rows||!rows.length) return '';
+  const cols=Object.keys(rows[0]);
+  const cell=v=>{ if(v==null)return''; v=String(v); return /[";\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
+  return cols.join(';')+'\n'+rows.map(r=>cols.map(c=>cell(r[c])).join(';')).join('\n');
+}
+function stamp(){ return new Date().toISOString().slice(0,10).replace(/-/g,''); }
+async function fetchFiltrado(){
+  setBusy(true); let rows=[], from=0; const page=1000;
+  try{
+    while(true){
+      let q=sb.from('v_parque_export').select('*').order('id').range(from,from+page-1);
+      if(state.bairro) q=q.eq('bairro_nome',state.bairro);
+      if(state.tipo) q=q.eq('tipo_lampada',state.tipo);
+      if(state.estado==='led') q=q.eq('modernizado_led',true);
+      if(state.estado==='pendente') q=q.eq('modernizado_led',false);
+      if(state.pot) q=q.gte('potencia_w',parseInt(state.pot));
+      q=aplicaFila(q);
+      const {data,error}=await q; if(error) throw error;
+      rows=rows.concat(data||[]); if(!data||data.length<page) break; from+=page;
+    }
+    return rows;
+  }catch(e){ toast('Erro no export: '+e.message,true); return null; } finally{ setBusy(false); }
+}
+async function exportData(fmt){
+  const rows=await fetchFiltrado(); if(!rows) return;
+  if(!rows.length){ toast('Nenhum ponto no filtro atual',true); return; }
+  const suf=state.bairro?('_'+state.bairro.replace(/\s+/g,'')):'';
+  if(fmt==='csv') baixar(`parque${suf}_${stamp()}.csv`, '\uFEFF'+toCSV(rows),'text/csv;charset=utf-8');
+  else { const fc={type:'FeatureCollection',features:rows.filter(r=>r.lat!=null).map(r=>{
+      const {lat,lon,...p}=r; return {type:'Feature',geometry:{type:'Point',coordinates:[lon,lat]},properties:p}; })};
+    baixar(`parque${suf}_${stamp()}.geojson`, JSON.stringify(fc),'application/geo+json'); }
+  toast(`Exportado: ${rows.length.toLocaleString('pt-BR')} pontos`);
+}
+async function exportBairros(){ const d=await rpc('ip_por_bairro'); if(!d)return;
+  baixar(`passivo_por_bairro_${stamp()}.csv`,'\uFEFF'+toCSV(d),'text/csv;charset=utf-8'); toast('Passivo por bairro exportado'); }
+async function exportSerie(){ const d=await rpc('ip_serie_metricas'); if(!d)return;
+  if(!d.length){ toast('Sem série ainda (o cron grava diariamente)',true); return; }
+  baixar(`serie_metricas_${stamp()}.csv`,'\uFEFF'+toCSV(d),'text/csv;charset=utf-8'); toast('Série exportada'); }
+async function exportGrade(){
+  const d=state.densData || await rpc('ip_grid_densidade',{p_cell_m:250});
+  if(!d||!d.length){ toast('Grade indisponível',true); return; }
+  state.densData=d;
+  const rows=d.map(r=>{
+    const ring=(r.gj&&r.gj.coordinates&&r.gj.coordinates[0])||null;
+    const lon=ring?((ring[0][0]+ring[2][0])/2).toFixed(6):'';
+    const lat=ring?((ring[0][1]+ring[2][1])/2).toFixed(6):'';
+    return { lon_centro:lon, lat_centro:lat, luminarias:r.n, led:r.n_led, pct_led:r.pct_led,
+      potencia_kw:r.kw, fluxo_klm:r.klm, lm_w_medio:r.lm_w, cobertura_pot_pct:r.cobertura_pot };
+  });
+  baixar(`grade_densidade_250m_${stamp()}.csv`,'\uFEFF'+toCSV(rows),'text/csv;charset=utf-8');
+  toast('Grade exportada: '+rows.length.toLocaleString('pt-BR')+' células');
+}
+async function capturarMapa(){
+  const c=map.getContainer(), rect=c.getBoundingClientRect();
+  const out=document.createElement('canvas'); out.width=Math.round(rect.width); out.height=Math.round(rect.height);
+  const ctx=out.getContext('2d'); ctx.fillStyle='#0b0f14'; ctx.fillRect(0,0,out.width,out.height);
+  c.querySelectorAll('img.leaflet-tile').forEach(img=>{
+    if(!img.complete || !img.naturalWidth) return;
+    const r=img.getBoundingClientRect();
+    try{ ctx.drawImage(img, r.left-rect.left, r.top-rect.top, r.width, r.height); }catch(e){}
+  });
+  c.querySelectorAll('canvas').forEach(cv=>{
+    const r=cv.getBoundingClientRect();
+    try{ ctx.drawImage(cv, r.left-rect.left, r.top-rect.top, r.width, r.height); }catch(e){}
+  });
+  const svgs=[...c.querySelectorAll('.leaflet-marker-pane svg')];
+  await Promise.all(svgs.map(sv=>new Promise(res=>{
+    const r=sv.getBoundingClientRect();
+    const img=new Image();
+    img.onload=()=>{ try{ ctx.drawImage(img, r.left-rect.left, r.top-rect.top, r.width, r.height); }catch(e){} res(); };
+    img.onerror=()=>res();
+    img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(sv));
+  })));
+  return out;
+}
+async function comMapa(cb){
+  setBusy(true);
+  try{ const canvas=await capturarMapa(); await cb(canvas); }
+  catch(e){ toast('Falha ao capturar o mapa: '+(e.message||e),true); }
+  finally{ setBusy(false); }
+}
+function exportPNG(){ comMapa(canvas=>{ try{
+    canvas.toBlob(b=>{ if(b){ baixar(`mapa_ip_${stamp()}.png`,b,'image/png'); toast('Mapa exportado'); } else toast('Não foi possível gerar o PNG',true); },'image/png');
+  }catch(e){ toast('Mapa protegido por CORS; imagem indisponível',true); } }); }
+async function exportPDF(){
+  const jsPDF=(window.jspdf||{}).jsPDF; if(!jsPDF){ toast('Gerador de PDF não carregou',true); return; }
+  const [s,porBairro]=await Promise.all([ rpc('ip_estatisticas',{p_bairro:state.bairro||null}), rpc('ip_por_bairro') ]);
+  comMapa(canvas=>{ try{
+    const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+    doc.setFontSize(14); doc.text('Iluminação Pública — Niterói / SECONSER',14,14);
+    doc.setFontSize(9); doc.setTextColor(120);
+    doc.text(`Emitido em ${new Date().toLocaleString('pt-BR')} · Escopo: ${state.bairro||'Niterói'}`,14,20);
+    doc.setTextColor(20); doc.setFontSize(10);
+    doc.text(`Luminárias ${s.total}   |   LED ${s.led} (${s.pct_led}%)   |   Pendentes ${s.pendente}   |   Pot. LED ${s.potencia_kw} kW`,14,27);
+    try{ const img=canvas.toDataURL('image/png'); const w=140,h=Math.min(w*canvas.height/canvas.width,150);
+      doc.addImage(img,'PNG',14,32,w,h); }catch(e){}
+    if(doc.autoTable) doc.autoTable({ startY:32, margin:{left:160}, tableWidth:122,
+      head:[['Bairro','Total','LED','Pend','%']],
+      body:(porBairro||[]).map(b=>[b.bairro_nome,b.total,b.led,b.pendente,b.pct_led+'%']),
+      styles:{fontSize:6.5,cellPadding:1}, headStyles:{fillColor:[29,78,216]} });
+    doc.save(`relatorio_ip_${stamp()}.pdf`); toast('Relatório PDF gerado');
+  }catch(e){ toast('Falha no PDF: '+e.message,true); } });
+}
+document.getElementById('btnExport').addEventListener('mouseenter',()=>{ document.getElementById('exportPop').style.display='flex'; });
+document.getElementById('exportPop').addEventListener('mouseleave',()=>{ document.getElementById('exportPop').style.display='none'; });
+document.getElementById('exportPop').addEventListener('click',e=>{ const b=e.target.closest('[data-exp]'); if(!b)return;
+  document.getElementById('exportPop').style.display='none';
+  ({csv:()=>exportData('csv'),geojson:()=>exportData('geojson'),bairros:exportBairros,
+    serie:exportSerie,grade:exportGrade,png:exportPNG,pdf:exportPDF})[b.dataset.exp]?.(); });
+
+// ---------- Aparência (config do site) ----------
+const FONTS={ system:{stack:"ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif"},
+  inter:{stack:"'Inter',sans-serif",url:"https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"},
+  roboto:{stack:"'Roboto',sans-serif",url:"https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"},
+  georgia:{stack:"Georgia,'Times New Roman',serif"},
+  mono:{stack:"ui-monospace,'Cascadia Code',Consolas,monospace"} };
+let cfgLogoUrl=null;
+function applyConfig(cfg){
+  cfg=cfg||{}; state.config=cfg;
+  const titulo=cfg.titulo||'Iluminação Pública', sub=cfg.subtitulo||'Niterói · SECONSER';
+  const t=document.getElementById('cfgTitulo'), s=document.getElementById('cfgSub');
+  if(t) t.textContent=titulo; if(s) s.textContent=' · '+sub;
+  document.title=titulo+' · '+sub;
+  document.documentElement.style.setProperty('--accent',cfg.accent||'#1d4ed8');
+  document.documentElement.style.setProperty('--panel',cfg.panelBg||'#0f151c');
+  document.body.dataset.density=cfg.density||'normal';
+  const f=FONTS[cfg.fonte]||FONTS.system;
+  if(f.url){ let l=document.getElementById('cfgFontLink'); if(!l){ l=document.createElement('link'); l.id='cfgFontLink'; l.rel='stylesheet'; document.head.appendChild(l);} l.href=f.url; }
+  document.body.style.fontFamily=f.stack;
+  const lg=document.getElementById('cfgLogo');
+  if(lg){ if(cfg.logo){ lg.src=cfg.logo; lg.style.display='block'; } else { lg.style.display='none'; lg.removeAttribute('src'); } }
+  const fav=document.getElementById('favicon');
+  if(fav && cfg.logo) fav.href=cfg.logo;
+  const stt=document.getElementById('splashTitle'); if(stt) stt.textContent=titulo+' · '+((sub.split('·')[0]||'').trim()||'Niterói');
+  const sl=document.getElementById('splashLogo'); if(sl){ if(cfg.logo){ sl.src=cfg.logo; sl.style.display='block'; } else sl.style.display='none'; }
+}
+async function loadConfig(){ try{ const {data}=await sb.from('site_config').select('dados').eq('id',1).single(); if(data) applyConfig(data.dados); }catch(e){} }
+function fillConfigForm(){ const c=state.config||{};
+  document.getElementById('cfgTit').value=c.titulo||'Iluminação Pública';
+  document.getElementById('cfgSubIn').value=c.subtitulo||'Niterói · SECONSER';
+  document.getElementById('cfgAccent').value=c.accent||'#1d4ed8';
+  document.getElementById('cfgFonte').value=c.fonte||'system';
+  document.getElementById('cfgPanel').value=c.panelBg||'#0f151c';
+  document.getElementById('cfgDensity').value=c.density||'normal';
+  cfgLogoUrl=c.logo||null;
+  const pv=document.getElementById('cfgLogoPrev');
+  if(cfgLogoUrl){ pv.src=cfgLogoUrl; pv.style.display='inline-block'; } else { pv.style.display='none'; pv.removeAttribute('src'); }
+}
+document.getElementById('cfgLogoFile').onchange=async(e)=>{
+  const file=e.target.files[0]; if(!file) return;
+  if(file.size>1024*1024){ toast('Logo muito grande (máx. 1 MB)',true); return; }
+  setBusy(true);
+  const ext=(file.name.split('.').pop()||'png').toLowerCase();
+  const path=`logo_${Date.now()}.${ext}`;
+  const {error}=await sb.storage.from('branding').upload(path,file,{upsert:true,cacheControl:'3600'});
+  setBusy(false);
+  if(error){ toast('Falha no upload: '+error.message,true); return; }
+  cfgLogoUrl=sb.storage.from('branding').getPublicUrl(path).data.publicUrl;
+  const pv=document.getElementById('cfgLogoPrev'); pv.src=cfgLogoUrl; pv.style.display='inline-block';
+  toast('Logo enviado — clique em Salvar aparência');
+};
+document.getElementById('cfgLogoRemove').onclick=()=>{ cfgLogoUrl=null;
+  const pv=document.getElementById('cfgLogoPrev'); pv.style.display='none'; pv.removeAttribute('src');
+  document.getElementById('cfgLogoFile').value=''; };
+document.getElementById('cfgSave').onclick=async()=>{
+  const dados={ titulo:document.getElementById('cfgTit').value.trim()||'Iluminação Pública',
+    subtitulo:document.getElementById('cfgSubIn').value.trim()||'Niterói · SECONSER',
+    accent:document.getElementById('cfgAccent').value, fonte:document.getElementById('cfgFonte').value,
+    panelBg:document.getElementById('cfgPanel').value, density:document.getElementById('cfgDensity').value,
+    logo:cfgLogoUrl||null };
+  setBusy(true); const {error}=await sb.from('site_config').update({dados,atualizado_em:new Date().toISOString()}).eq('id',1); setBusy(false);
+  if(error){ toast('Erro ao salvar aparência: '+error.message,true); return; }
+  applyConfig(dados); toast('Aparência atualizada — vale para todos os visitantes'); };
+
+// ---------- Theme Management (Dark/Light) ----------
+let currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+function setTheme(theme) {
+  currentTheme = theme;
+  localStorage.setItem('theme', theme);
+  document.documentElement.setAttribute('data-theme', theme);
+  document.body.setAttribute('data-theme', theme);
+  const btn = document.getElementById('themeToggle');
+  if(btn){ btn.textContent = (theme === 'dark' ? '🌙' : '☀️'); btn.title = theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'; }
+  const htmlBg = theme === 'dark' ? '#0b0f14' : '#f5f5f5';
+  document.documentElement.style.background = htmlBg;
+}
+// Initialize theme on page load
+setTheme(currentTheme);
+// Bind theme toggle button with proper timing
+function setupThemeToggle() {
+  const btn = document.getElementById('themeToggle');
+  if(btn) {
+    btn.onclick = () => setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+  }
+}
+// Ensure button is bound after DOM is ready
+if(document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', setupThemeToggle);
+} else {
+  setupThemeToggle();
+}
+// Listen for system theme preference changes
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+  if(!localStorage.getItem('theme')) setTheme(e.matches ? 'dark' : 'light');
+});
+
+// ---------- Rate Limiting para RPC calls ----------
+const rpcQueue = [];
+let rpcBusy = false;
+async function rpcQueued(fn, args) {
+  return new Promise(resolve => {
+    rpcQueue.push(async () => {
+      const result = await rpc(fn, args);
+      resolve(result);
+    });
+    if(!rpcBusy) processRpcQueue();
+  });
+}
+async function processRpcQueue() {
+  if(rpcBusy || rpcQueue.length === 0) return;
+  rpcBusy = true;
+  try {
+    const fn = rpcQueue.shift();
+    if(fn) await fn();
+  } finally {
+    rpcBusy = false;
+    if(rpcQueue.length > 0) setTimeout(processRpcQueue, 100);
+  }
+}
+
+// ---------- acessibilidade ----------
+{ const arias={fBairro:'Filtrar por bairro',fTipo:'Filtrar por tipo de lâmpada',fEstado:'Filtrar por estado',
+    fPot:'Filtrar por potência mínima',fFila:'Fila de auditoria',fLimpar:'Limpar filtros',btnFiltros:'Abrir filtros',btnVis:'Alternar visualizações',
+    btnExport:'Abrir menu de exportação',btnChoro:'Alternar mapa coroplético',btnDens:'Alternar grade de densidade luminotécnica',btnTabela:'Abrir tabela de registros',
+    btnStats:'Abrir indicadores',btnNovo:'Cadastrar novo ponto',btnAdminConsole:'Abrir administração',btnLogin:'Entrar ou sair',
+    tSearch:'Buscar por endereço ou patrimônio',tBairro:'Filtrar tabela por bairro',tStatus:'Filtrar tabela por estado',
+    tPrev:'Página anterior',tNext:'Próxima página',tClose:'Fechar tabela'};
+  Object.entries(arias).forEach(([id,l])=>{const el=document.getElementById(id); if(el) el.setAttribute('aria-label',l);}); }
+
+// ---------- splash ----------
+function dismissSplash(){ const s=document.getElementById('splash'); if(!s||s.style.display==='none') return; s.style.opacity='0'; setTimeout(()=>{ s.style.display='none'; },500); }
+document.getElementById('splashSkip').onclick=dismissSplash;
+document.getElementById('splash').addEventListener('click',e=>{ if(e.target.id==='splash') dismissSplash(); });
+setTimeout(dismissSplash, 2200);
+
+// ---------- init ----------
+loadConfig(); loadBairroOptions(); renderMunicipioLimites(); loadStatsChips(); refresh();
+</script>
+</body>
+</html>
