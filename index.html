@@ -405,6 +405,63 @@ async function _refresh(){
 const refresh = debounce(_refresh, 120);
 map.on('moveend', refresh);
 
+// ---------- Novo ponto via mapa (click) ----------
+map.on('click', function(e){
+  if(!state.user || !podeEditar()) return;
+  const lat = e.latlng.lat, lng = e.latlng.lng;
+  if(lat < -23.05 || lat > -22.80 || lng < -43.20 || lng > -42.90){
+    toast('Clique dentro dos limites de Niterói', true);
+    return;
+  }
+  const d = document.getElementById('detail'); d.style.display = 'block';
+  const ativoOpts = TIPO_ATIVO.map(([v,l]) => '<option value="' + v + '">' + l + '</option>').join('');
+  const tipoLumOpts = TIPO_LUM.map(t => '<option>' + t + '</option>').join('');
+  const tipoOpts = TIPOS.map(t => '<option>' + t + '</option>').join('');
+  const statusOpts = STATUS.map(s => '<option>' + s + '</option>').join('');
+  d.innerHTML = `
+    <b style="font-size:13px">Novo ativo (mapa)</b>
+    <div style="font-size:11px;color:#6b7280;margin-top:2px">O código IPNIT é gerado automaticamente.</div>
+    <div style="display:flex;flex-direction:column;gap:7px;margin-top:8px">
+      <div style="display:flex;gap:6px">
+        <label style="font-size:11px;color:#9ca3af;flex:1">Latitude<input id="nLat" type="number" step="0.000001" value="${lat.toFixed(6)}"/></label>
+        <label style="font-size:11px;color:#9ca3af;flex:1">Longitude<input id="nLng" type="number" step="0.000001" value="${lng.toFixed(6)}"/></label>
+      </div>
+      <label style="font-size:11px;color:#9ca3af">Tipo de ativo<select id="nAtivo">${ativoOpts}</select></label>
+      <input id="nPatr" placeholder="Referência ENEL (opcional)"/>
+      <input id="nEnd" placeholder="Endereço"/>
+      <div id="nLumFields" style="display:flex;flex-direction:column;gap:7px">
+        <label style="font-size:11px;color:#9ca3af">Tipo de luminária<select id="nTipoLum"><option value="">—</option>${tipoLumOpts}</select></label>
+        <input id="nClasse" placeholder="Classe NBR (V3, P2, C4…)"/>
+        <select id="nTipo">${tipoOpts}</select>
+        <input id="nPot" type="number" placeholder="Potência (W)"/>
+        <select id="nStatus">${statusOpts}</select>
+        <label style="font-size:12px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="nMod" style="width:auto"/> LED</label>
+      </div>
+      <div style="display:flex;gap:8px"><button class="btn btn-accent" style="flex:1" id="nSave">Cadastrar</button><button class="btn" onclick="document.getElementById('detail').style.display='none'">Cancelar</button></div>
+    </div>`;
+  const nAtivo = document.getElementById('nAtivo');
+  const toggleLum = () => { document.getElementById('nLumFields').style.display = nAtivo.value === 'luminaria' ? 'flex' : 'none'; };
+  nAtivo.onchange = toggleLum; toggleLum();
+  document.getElementById('nSave').onclick = async () => {
+    const lat2 = parseFloat(document.getElementById('nLat').value), lng2 = parseFloat(document.getElementById('nLng').value);
+    if(isNaN(lat2) || isNaN(lng2) || lat2 < -23.05 || lat2 > -22.80 || lng2 < -43.20 || lng2 > -42.90){ toast('Coordenadas fora de Niterói', true); return; }
+    const ehLum = nAtivo.value === 'luminaria';
+    const pot = parseInt(document.getElementById('nPot').value);
+    if(ehLum && !isNaN(pot) && (pot < 0 || pot > 2000)){ toast('Potência fora da faixa (0–2000 W)', true); return; }
+    setBusy(true);
+    const {data,error} = await sb.rpc('ip_inserir_ponto', { p_lat: +lat2.toFixed(6), p_lng: +lng2.toFixed(6),
+      p_tipo: ehLum ? document.getElementById('nTipo').value : 'desconhecido', p_potencia: ehLum && !isNaN(pot) ? pot : null,
+      p_status: ehLum ? document.getElementById('nStatus').value : 'a_verificar', p_modernizado: ehLum ? document.getElementById('nMod').checked : false,
+      p_endereco: document.getElementById('nEnd').value || null, p_patrimonio: document.getElementById('nPatr').value || null, p_obs: 'cadastro via mapa',
+      p_tipo_ativo: nAtivo.value, p_tipo_luminaria: ehLum ? (document.getElementById('nTipoLum').value || null) : null,
+      p_classe_nbr: ehLum ? (document.getElementById('nClasse').value || null) : null });
+    setBusy(false);
+    if(error){ toast('Falha ao cadastrar: ' + error.message, true); return; }
+    toast('Cadastrado: ' + (data || 'ok')); d.style.display = 'none'; state.choroData = null; state.densData = null; refresh(); loadStatsChips();
+    map.setView([lat2, lng2], Math.max(map.getZoom(), 17));
+  };
+});
+
 // ---------- Coroplético ----------
 async function renderChoropleth(){
   state.layer.clearLayers();
