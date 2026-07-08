@@ -740,7 +740,9 @@ window._edit = function(){
       <label style="font-size:11px;color:#9ca3af">Classe NBR<input id="eClasse" value="${esc(p.classe_nbr)}" placeholder="V3, P2, C4…"/></label>
       <label style="font-size:11px;color:#9ca3af">Observações<textarea id="eObs" rows="2">${esc(p.observacoes)}</textarea></label>
       <div style="display:flex;gap:8px"><button class="btn btn-accent" style="flex:1" id="eSave">Salvar</button><button class="btn" onclick="window._reopen()">Cancelar</button></div>
+      <button class="btn" id="eDelete" style="border-color:#ef4444;color:#f87171">🗑 Excluir ativo</button>
     </div>`;
+  document.getElementById('eDelete').onclick = ()=>window._excluirPonto(p);
   document.getElementById('eSave').onclick = async ()=>{
     const pot=parseInt(document.getElementById('ePot').value);
     if(!isNaN(pot) && (pot<0||pot>2000)){ toast('Potência fora da faixa (0–2000 W)',true); return; }
@@ -763,6 +765,23 @@ window._edit = function(){
   };
 };
 window._reopen = ()=>openDetail(state.current);
+window._excluirPonto = async (p)=>{
+  if(!podeEditar()) return;
+  const cod = p.numero_patrimonio || p.id;
+  const motivo = prompt('Excluir o ativo '+cod+'?\n\nInforme o motivo da exclusão (obrigatório):','');
+  if(motivo===null) return; // cancelou
+  if(!motivo.trim()){ toast('Informe o motivo da exclusão',true); return; }
+  if(!confirm('Confirmar exclusão de '+cod+'?\n\nUm backup completo fica guardado e a exclusão é registrada no histórico com seu usuário.')) return;
+  setBusy(true);
+  const {data,error}=await sb.rpc('ip_remover_ponto',{ p_id:p.id, p_motivo:motivo.trim() });
+  setBusy(false);
+  if(error){ toast('Falha ao excluir: '+error.message,true); return; }
+  if(data && data.error){ toast(data.error,true); return; }
+  toast('Ativo '+cod+' removido');
+  document.getElementById('detail').style.display='none';
+  state.current=null; state.choroData=null; state.densData=null;
+  refresh(); loadStatsChips();
+};
 window._interv = async (id)=>{
   const box=document.getElementById('histBox'); if(!box) return;
   box.innerHTML='<div style="color:#6b7280;font-size:11px;padding:6px 0"><span class="spin"></span> Carregando…</div>';
