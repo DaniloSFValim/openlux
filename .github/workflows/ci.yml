@@ -43,7 +43,7 @@ jobs:
       - name: Validate Markdown
         run: |
           npm install -g markdownlint-cli
-          markdownlint "*.md" || echo "Markdown linting skipped"
+          markdownlint "*.md" || true
         continue-on-error: true
 
   build:
