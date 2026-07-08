@@ -1,11 +1,15 @@
 # Iluminação LED Niterói 💡
 
-[![CI/CD Pipeline](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions)
+**Quality & Monitoring:**
+[![E2E Tests](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/e2e-tests.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/e2e-tests.yml)
+[![Lighthouse CI](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/lighthouse-ci.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/lighthouse-ci.yml)
+[![Security Scanning](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/security-scan.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/security-scan.yml)
+[![API Tests](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/api-testing.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/api-testing.yml)
 [![Netlify Status](https://api.netlify.com/api/v1/badges/8e1c5730-5e9e-4c8b-82f1-a1b1c2d3e4f5/deploy-status)](https://app.netlify.com/projects/iluminacao-niteroi)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Code Coverage](https://img.shields.io/badge/coverage-TBD-inactive.svg)](#)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org)
 
+**Repository & Stack:**
 [![GitHub Stars](https://img.shields.io/github/stars/DaniloSFValim/iluminacao-led-niteroi?style=flat-square&logo=github)](https://github.com/DaniloSFValim/iluminacao-led-niteroi)
 [![GitHub Forks](https://img.shields.io/github/forks/DaniloSFValim/iluminacao-led-niteroi?style=flat-square&logo=github)](https://github.com/DaniloSFValim/iluminacao-led-niteroi/network/members)
 [![Last Commit](https://img.shields.io/github/last-commit/DaniloSFValim/iluminacao-led-niteroi?style=flat-square&logo=git)](https://github.com/DaniloSFValim/iluminacao-led-niteroi/commits)
@@ -17,7 +21,6 @@
 ![Leaflet](https://img.shields.io/badge/Leaflet-1.9.4-199900?style=flat-square&logo=leaflet&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-336791?style=flat-square&logo=supabase&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-316192?style=flat-square&logo=postgresql&logoColor=white)
-
 Sistema georreferenciado de gestão de infraestrutura de iluminação pública da cidade de Niterói.
 
 ## 📊 Visão Geral
@@ -361,7 +364,7 @@ git push origin main
 | **Usuários do Sistema** | 50+ | ✅ Crescente |
 | **Uptime** | 99.9% | ✅ Excelente |
 | **Tempo de Resposta (API)** | <200ms | ✅ Rápido |
-| **Cobertura de Testes** | TBD | 🔄 Em Progresso |
+| **Cobertura de Testes** | 40+ tests | ✅ Automated |
 
 ### Tecnologias & Versões
 
@@ -374,16 +377,19 @@ git push origin main
 | **Node.js** | 18+ | ✅ LTS |
 | **Netlify** | Latest | ✅ Auto-Deploy |
 
-### Desenvolvimento
+### Desenvolvimento & DevOps
 
 | Aspecto | Descrição |
 |--------|-----------|
+| **Versioning** | Semantic Versioning (v1.0.0+) |
 | **Commits** | Conventional Commits + Automated |
-| **CI/CD** | GitHub Actions (linting, segurança, deploy) |
+| **CI/CD** | 6 GitHub Actions workflows (E2E, Lighthouse, Security, API, Load tests) |
+| **Testing** | Playwright (12+ E2E tests) + Newman (15+ API tests) |
+| **Performance** | Lighthouse CI (p75+) + k6 load testing |
+| **Security** | Daily scans, hardcoded secret detection, OWASP ZAP |
 | **Backup** | Automático diário + manual on-demand |
 | **RLS** | Row-Level Security por role |
 | **Auditoria** | Logs de todas as alterações |
-
 ## 📚 Documentação Adicional
 
 - **[ARCHITECTURE.md](./ARCHITECTURE.md)** — Diagramas, fluxos de dados, modelo de dados

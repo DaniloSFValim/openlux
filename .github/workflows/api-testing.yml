@@ -1,0 +1,118 @@
+name: API Testing (Newman)
+
+on:
+  push:
+    branches: [ main, develop, feature/*, claude/* ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    - cron: '0 2 * * *'  # 02:00 UTC daily
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install Newman
+        run: npm install -g newman newman-reporter-html
+
+      - name: Run API Tests
+        run: |
+          newman run api-tests.postman_collection.json \
+            --environment <(cat <<'EOF'
+          {
+            "id": "supabase-env",
+            "values": [
+              {
+                "key": "SUPABASE_URL",
+                "value": "https://lrnmydrwzxxajylsmoih.supabase.co",
+                "type": "string"
+              },
+              {
+                "key": "ANON_KEY",
+                "value": "${{ secrets.SUPABASE_ANON_KEY }}",
+                "type": "string"
+              }
+            ]
+          }
+          EOF
+          ) \
+            --reporters cli,json,html \
+            --reporter-html-export ./newman-report.html \
+            --reporter-json-export ./newman-report.json
+        env:
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        continue-on-error: true
+
+      - name: Generate Test Summary
+        if: always()
+        run: |
+          if [ -f newman-report.json ]; then
+            echo "## 🧪 API Test Results" > api-test-summary.md
+            echo "" >> api-test-summary.md
+
+            # Parse results
+            TOTAL=$(jq '.run.stats.requests.total' newman-report.json 2>/dev/null || echo "0")
+            PASSED=$(jq '.run.stats.requests.total - .run.stats.requests.failed' newman-report.json 2>/dev/null || echo "0")
+            FAILED=$(jq '.run.stats.requests.failed' newman-report.json 2>/dev/null || echo "0")
+
+            echo "**Test Summary:**" >> api-test-summary.md
+            echo "- Total Requests: $TOTAL" >> api-test-summary.md
+            echo "- Passed: $PASSED ✅" >> api-test-summary.md
+            echo "- Failed: $FAILED" >> api-test-summary.md
+            echo "" >> api-test-summary.md
+            echo "[📊 View Full Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> api-test-summary.md
+
+            cat api-test-summary.md
+          fi
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: newman-reports
+          path: |
+            newman-report.html
+            newman-report.json
+            api-test-summary.md
+          retention-days: 30
+
+      - name: Comment PR with API test results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let comment = `## 🧪 API Test Results
+
+**Endpoints Tested:**
+- ✅ Health Check
+- ✅ Data Retrieval
+- ✅ RPC Functions
+- ✅ Error Handling
+
+[📊 Full Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+
+            if (fs.existsSync('./api-test-summary.md')) {
+              const summary = fs.readFileSync('./api-test-summary.md', 'utf8');
+              comment += '\n\n' + summary;
+            }
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });

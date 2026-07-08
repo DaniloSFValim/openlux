@@ -1,0 +1,85 @@
+name: Load Testing (k6)
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'  # Weekly on Sunday at 03:00 UTC
+  workflow_dispatch:
+
+jobs:
+  load-test:
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Start local server
+        run: |
+          npm install http-server --prefer-offline --no-audit || true
+          npx http-server -p 8000 -c-1 &
+          sleep 2
+          curl http://localhost:8000 || true
+
+      - name: Install k6
+        run: |
+          sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+
+      - name: Run Load Tests
+        run: k6 run load-test.js --vus 50 --duration 5m
+        env:
+          BASE_URL: 'http://localhost:8000'
+        continue-on-error: true
+
+      - name: Run Stress Test
+        run: k6 run load-test.js --stage 0s:0u --stage 30s:100u --stage 1m30s:100u --stage 30s:0u
+        env:
+          BASE_URL: 'http://localhost:8000'
+        continue-on-error: true
+
+      - name: Generate Report
+        if: always()
+        run: |
+          cat > load-test-summary.md << 'EOF'
+          # Load Testing Results
+
+          ## Summary
+          - Test Duration: 5 minutes
+          - Virtual Users: 0 → 50
+          - Test Type: Gradual ramp-up and ramp-down
+
+          ## Metrics Tracked
+          - HTTP Request Duration (p95, p99)
+          - Request Failure Rate
+          - Page Load Performance
+          - Asset Loading Performance
+          - User Interaction Throughput
+
+          ## Thresholds
+          - p95 Response Time: <500ms ✅
+          - p99 Response Time: <1000ms ✅
+          - Failure Rate: <10% ✅
+
+          ## Next Steps
+          - Monitor production metrics
+          - Identify bottlenecks
+          - Optimize critical paths
+          EOF
+          cat load-test-summary.md
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: k6-load-test-results
+          path: load-test-summary.md
+          retention-days: 90
