@@ -405,6 +405,131 @@ async function _refresh(){
 const refresh = debounce(_refresh, 120);
 map.on('moveend', refresh);
 
+// ---------- Map click to create new point ----------
+map.on('click', function(e) {
+  if (!podeEditar()) { toast('Sem permissão para criar pontos', true); return; }
+  if (!state.user) { toast('Autentique-se primeiro', true); return; }
+  
+  const lat = e.latlng.lat.toFixed(6), lng = e.latlng.lng.toFixed(6);
+  
+  // Validate coordinates are within Niterói bounds
+  if (lat < -23.05 || lat > -22.80 || lng < -43.20 || lng > -42.90) {
+    toast('Clique dentro dos limites de Niterói', true);
+    return;
+  }
+  
+  // Open new point form with clicked coordinates
+  const c = { lat: parseFloat(lat), lng: parseFloat(lng) };
+  const d = document.getElementById('detail');
+  d.style.display = 'block';
+  d.innerHTML = `
+    <b style="font-size:13px">Novo ativo (mapa)</b>
+    <div style="font-size:11px;color:#6b7280;margin-top:2px">Criado ao clicar no mapa. O código IPNIT é gerado automaticamente.</div>
+    <div style="display:flex;flex-direction:column;gap:7px;margin-top:8px">
+      <div style="display:flex;gap:6px">
+        <label style="font-size:11px;color:#9ca3af;flex:1">Latitude<input id="nLat" type="number" step="0.000001" value="${c.lat.toFixed(6)}"/></label>
+        <label style="font-size:11px;color:#9ca3af;flex:1">Longitude<input id="nLng" type="number" step="0.000001" value="${c.lng.toFixed(6)}"/></label>
+      </div>
+      <button class="btn" style="font-size:11px;padding:4px 8px;background:#16233a" onclick="window._adjustCoords()">Ajustar localização próxima</button>
+      <label style="font-size:11px;color:#9ca3af">Tipo de ativo<select id="nAtivo">${TIPO_ATIVO.map(([v,l])=>\`<option value="\${v}">\${l}</option>\`).join('')}</select></label>
+      <input id="nPatr" placeholder="Referência ENEL (opcional)"/>
+      <input id="nEnd" placeholder="Endereço"/>
+      <div id="nLumFields" style="display:flex;flex-direction:column;gap:7px">
+        <label style="font-size:11px;color:#9ca3af">Tipo de luminária<select id="nTipoLum"><option value="">—</option>${TIPO_LUM.map(t=>\`<option>\${t}</option>\`).join('')}</select></label>
+        <input id="nClasse" placeholder="Classe NBR (V3, P2, C4…)"/>
+        <select id="nTipo">${TIPOS.map(t=>\`<option>\${t}</option>\`).join('')}</select>
+        <input id="nPot" type="number" placeholder="Potência (W)"/>
+        <select id="nStatus">${STATUS.map(s=>\`<option>\${s}</option>\`).join('')}</select>
+        <label style="font-size:12px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="nMod" style="width:auto"/> LED</label>
+      </div>
+      <div style="display:flex;gap:8px"><button class="btn btn-accent" style="flex:1" id="nSave">Cadastrar</button><button class="btn" onclick="document.getElementById('detail').style.display='none'">Cancelar</button></div>
+    </div>`;
+  const nAtivo = document.getElementById('nAtivo');
+  const toggleLum = () => { document.getElementById('nLumFields').style.display = nAtivo.value === 'luminaria' ? 'flex' : 'none'; };
+  nAtivo.onchange = toggleLum;
+  toggleLum();
+  
+  document.getElementById('nSave').onclick = async () => {
+    const lat = parseFloat(document.getElementById('nLat').value), lng = parseFloat(document.getElementById('nLng').value);
+    if (isNaN(lat) || isNaN(lng) || lat < -23.05 || lat > -22.80 || lng < -43.20 || lng > -42.90) { toast('Coordenadas fora de Niterói', true); return; }
+    const ehLum = nAtivo.value === 'luminaria';
+    const pot = parseInt(document.getElementById('nPot').value);
+    if (ehLum && !isNaN(pot) && (pot < 0 || pot > 2000)) { toast('Potência fora da faixa (0–2000 W)', true); return; }
+    setBusy(true);
+    const {data, error} = await sb.rpc('ip_inserir_ponto', {
+      p_lat: +lat.toFixed(6), p_lng: +lng.toFixed(6),
+      p_tipo: ehLum ? document.getElementById('nTipo').value : 'desconhecido',
+      p_potencia: ehLum && !isNaN(pot) ? pot : null,
+      p_status: ehLum ? document.getElementById('nStatus').value : 'a_verificar',
+      p_modernizado: ehLum ? document.getElementById('nMod').checked : false,
+      p_endereco: document.getElementById('nEnd').value || null,
+      p_patrimonio: document.getElementById('nPatr').value || null,
+      p_obs: 'cadastro via mapa',
+      p_tipo_ativo: nAtivo.value,
+      p_tipo_luminaria: ehLum ? (document.getElementById('nTipoLum').value || null) : null,
+      p_classe_nbr: ehLum ? (document.getElementById('nClasse').value || null) : null,
+      p_requer_aprovacao: state.userRole !== 'admin'
+    });
+    setBusy(false);
+    if (error) { toast('Falha ao cadastrar: ' + error.message, true); return; }
+    toast('Cadastrado: ' + (data ? data.message : 'ok'));
+    d.style.display = 'none';
+    state.choroData = null;
+    state.densData = null;
+    refresh();
+    loadStatsChips();
+    map.setView([lat, lng], Math.max(map.getZoom(), 17));
+  };
+});
+
+window._adjustCoords = () => {
+  const d = document.getElementById('detail');
+  const lat = parseFloat(document.getElementById('nLat').value);
+  const lng = parseFloat(document.getElementById('nLng').value);
+  if (isNaN(lat) || isNaN(lng)) { toast('Coordenadas inválidas', true); return; }
+  
+  // Add a simple instruction
+  d.innerHTML = `<b style="font-size:13px">Ajustar localização</b>
+    <div style="font-size:11px;color:#6b7280;margin-top:8px">Clique no mapa para escolher a localização correta. Suas alterações serão descartadas.</div>
+    <div style="margin-top:12px">
+      <button class="btn" onclick="window._cancelAdjust()">Cancelar</button>
+    </div>`;
+  
+  // Temporary marker on map to show click adjustment
+  let tempMarker = null;
+  const tempHandler = (e) => {
+    const newLat = e.latlng.lat.toFixed(6);
+    const newLng = e.latlng.lng.toFixed(6);
+    if (newLat < -23.05 || newLat > -22.80 || newLng < -43.20 || newLng > -42.90) {
+      toast('Fora de Niterói', true);
+      return;
+    }
+    document.getElementById('nLat').value = newLat;
+    document.getElementById('nLng').value = newLng;
+    map.off('click', tempHandler);
+    window._revertAdjust();
+    toast('Localização ajustada');
+  };
+  
+  map.on('click', tempHandler);
+  window._cancelAdjust = () => {
+    map.off('click', tempHandler);
+    const nAtivo = document.getElementById('nAtivo');
+    const toggleLum = () => { document.getElementById('nLumFields').style.display = nAtivo.value === 'luminaria' ? 'flex' : 'none'; };
+    // Re-render form
+    window._revertAdjust();
+  };
+  window._revertAdjust = () => {
+    // Manually re-open the form (simplified - user clicks "Ajustar localização próxima" again to see full form)
+    const savedLat = document.getElementById('nLat').value;
+    const savedLng = document.getElementById('nLng').value;
+    d.style.display = 'block';
+    // Don't fully re-render to avoid losing other form data
+    toast('Use o botão "Ajustar localização próxima" novamente ou "Cancelar"');
+    map.off('click', tempHandler);
+  };
+};
+
 // ---------- Coroplético ----------
 async function renderChoropleth(){
   state.layer.clearLayers();
