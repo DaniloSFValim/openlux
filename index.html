@@ -143,6 +143,17 @@
 <div id="stats" class="panel" role="complementary" aria-label="Indicadores" style="position:absolute;top:64px;left:10px;width:360px;z-index:1000;border-radius:10px;padding:12px;display:none;max-height:calc(100% - 90px);overflow:auto"></div>
 <div id="toast"></div>
 
+<div id="modeloModal" style="position:absolute;inset:0;z-index:1150;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center">
+  <div class="panel" style="width:min(600px,95vw);height:min(70vh,600px);border-radius:12px;display:flex;flex-direction:column;overflow:hidden">
+    <div style="display:flex;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid #1f2a37">
+      <b>Selecionar modelo de equipamento</b>
+      <div style="flex:1"></div>
+      <button class="btn" onclick="document.getElementById('modeloModal').style.display='none'" style="padding:4px 8px">✕</button>
+    </div>
+    <div id="modeloList" style="flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:6px"></div>
+  </div>
+</div>
+
 <div id="tableModal" style="position:absolute;inset:0;z-index:1100;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center">
   <div class="panel" style="width:min(1050px,95vw);height:min(80vh,760px);border-radius:12px;display:flex;flex-direction:column;overflow:hidden">
     <div style="display:flex;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid #1f2a37;flex-wrap:wrap">
@@ -176,9 +187,9 @@
   <div style="flex:1;display:flex;min-height:0">
     <nav role="navigation" aria-label="Seções da administração" style="width:180px;border-right:1px solid #1f2a37;padding:12px;display:flex;flex-direction:column;gap:4px">
       <button class="btn acnav on" data-sec="visao" style="text-align:left">Visão geral</button>
-      <button class="btn acnav" data-sec="aprovacoes" style="text-align:left">Aprovações</button>
       <button class="btn acnav" data-sec="usuarios" style="text-align:left">Usuários</button>
       <button class="btn acnav" data-sec="aparencia" style="text-align:left">Aparência</button>
+      <button class="btn acnav" data-sec="modelos" style="text-align:left">Modelos de equipamento</button>
       <button class="btn acnav" data-sec="dados" style="text-align:left">Dados</button>
     </nav>
     <div style="flex:1;overflow:auto;padding:18px">
@@ -221,6 +232,35 @@
           </div>
           <button class="btn btn-accent" id="cfgSave" style="margin-top:4px">Salvar aparência</button>
         </div>
+      </section>
+
+      <section id="sec-modelos" class="acsec" style="display:none">
+        <h3 style="margin:0 0 12px;font-size:15px">Modelos de equipamento</h3>
+        <div class="chip" style="border-radius:8px;padding:10px;margin-bottom:12px;max-width:680px">
+          <div style="font-size:12px;color:#9ca3af;margin-bottom:6px">Novo modelo</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;flex-direction:column">
+            <div style="display:flex;gap:6px">
+              <input id="modFabricante" placeholder="Fabricante" style="flex:1;min-width:150px"/>
+              <input id="modModelo" placeholder="Modelo" style="flex:1;min-width:150px"/>
+            </div>
+            <div style="display:flex;gap:6px">
+              <input id="modPotencia" type="number" placeholder="Potência (W)" style="flex:1;min-width:120px"/>
+              <input id="modTemperatura" type="number" placeholder="Temperatura (K)" style="flex:1;min-width:120px"/>
+              <input id="modTensao" placeholder="Tensão (110/220)" style="flex:1;min-width:100px"/>
+            </div>
+            <div style="display:flex;gap:6px">
+              <input id="modIp" placeholder="IP (ex: IP65)" style="flex:1;min-width:100px"/>
+              <input id="modClasse" placeholder="Classe NBR (ex: V3)" style="flex:1;min-width:100px"/>
+              <input id="modTecnologia" placeholder="Tecnologia (ex: LED)" style="flex:1;min-width:100px"/>
+            </div>
+            <textarea id="modDescricao" placeholder="Descrição (opcional)" rows="2" style="font-size:11px"></textarea>
+            <button class="btn btn-accent" id="modCreate">Adicionar modelo</button>
+          </div>
+        </div>
+        <table style="width:100%;border-collapse:collapse;max-width:900px">
+          <thead><tr><th>Fabricante</th><th>Modelo</th><th>Potência</th><th>Tecnologia</th><th>Classe</th><th></th></tr></thead>
+          <tbody id="modBody"></tbody>
+        </table>
       </section>
 
       <section id="sec-dados" class="acsec" style="display:none">
@@ -804,6 +844,7 @@ document.getElementById('btnNovo').onclick = ()=>{
       <input id="nPatr" placeholder="Referência ENEL (opcional)"/>
       <input id="nEnd" placeholder="Endereço"/>
       <div id="nLumFields" style="display:flex;flex-direction:column;gap:7px">
+        <button class="btn" style="width:100%;margin-bottom:8px;border-color:var(--accent);color:var(--accent)" id="nBtnModelo">📋 Inserir com modelo</button>
         <label style="font-size:11px;color:#9ca3af">Tipo de luminária<select id="nTipoLum"><option value="">—</option>${TIPO_LUM.map(t=>`<option>${t}</option>`).join('')}</select></label>
         <input id="nClasse" placeholder="Classe NBR (V3, P2, C4…)"/>
         <select id="nTipo">${TIPOS.map(t=>`<option>${t}</option>`).join('')}</select>
@@ -816,6 +857,10 @@ document.getElementById('btnNovo').onclick = ()=>{
   const nAtivo=document.getElementById('nAtivo');
   const toggleLum=()=>{ document.getElementById('nLumFields').style.display = nAtivo.value==='luminaria'?'flex':'none'; };
   nAtivo.onchange=toggleLum; toggleLum();
+
+  // Modelo selection
+  document.getElementById('nBtnModelo').onclick = ()=>{ window._selecionarModelo(); };
+
   document.getElementById('nSave').onclick = async ()=>{
     const lat=parseFloat(document.getElementById('nLat').value), lng=parseFloat(document.getElementById('nLng').value);
     if(isNaN(lat)||isNaN(lng)||lat<-23.05||lat>-22.80||lng<-43.20||lng>-42.90){ toast('Coordenadas fora de Niterói',true); return; }
@@ -834,6 +879,39 @@ document.getElementById('btnNovo').onclick = ()=>{
     toast('Cadastrado: '+(data||'ok')); d.style.display='none'; state.choroData=null; state.densData=null; refresh(); loadStatsChips();
     map.setView([lat,lng], Math.max(map.getZoom(),17));
   };
+};
+
+// ---------- Equipamentos Modelo ----------
+window._selecionarModelo = async ()=>{
+  const modal = document.getElementById('modeloModal');
+  const list = document.getElementById('modeloList');
+  modal.style.display='flex';
+  list.innerHTML='<div style="color:#6b7280;font-size:11px;padding:6px 0"><span class="spin"></span> Carregando modelos…</div>';
+
+  const data = await rpc('ip_listar_modelos');
+  if(!data || !data.length){ list.innerHTML='<div style="color:#6b7280;font-size:11px">Nenhum modelo disponível.</div>'; return; }
+
+  list.innerHTML = data.map(m=>`
+    <div class="chip" style="border-radius:8px;padding:10px;cursor:pointer;border:1px solid var(--accent);display:flex;flex-direction:column;gap:4px" onclick="window._aplicarModelo('${m.id}','${esc(m.tipo).replace(/'/g,"\\'")}','${m.potencia_w}','${esc(m.classe_nbr||'').replace(/'/g,"\\'")}','${esc(m.tecnologia||'LED').replace(/'/g,"\\'")}')" title="Clique para preencher os campos com os valores deste modelo">
+      <div style="font-weight:600;font-size:12px">${esc(m.fabricante)} · ${esc(m.modelo)}</div>
+      <div style="color:#9ca3af;font-size:11px">${m.potencia_w}W ${m.temperatura_cor_k?'· '+m.temperatura_cor_k+'K':''} ${m.ip?'· '+esc(m.ip):''}</div>
+      ${m.descricao?`<div style="color:#6b7280;font-size:10px">${esc(m.descricao)}</div>`:''}
+    </div>
+  `).join('');
+};
+
+window._aplicarModelo = (id, tipo, potencia, classe, tecnologia)=>{
+  // Preencher campos do formulário
+  if(tipo && tipo!=='undefined') document.getElementById('nTipo').value = tipo;
+  if(potencia && potencia!=='undefined') document.getElementById('nPot').value = potencia;
+  if(classe && classe!=='undefined' && classe!=='null') document.getElementById('nClasse').value = classe;
+  if(tecnologia && tecnologia!=='undefined' && tecnologia!=='null') {
+    document.getElementById('nMod').checked = tecnologia.toLowerCase().includes('led');
+  }
+
+  // Fechar modal
+  document.getElementById('modeloModal').style.display='none';
+  toast('Modelo aplicado');
 };
 
 // ---------- Estatísticas ----------
@@ -981,7 +1059,7 @@ function acShow(sec){
   if(sec==='visao') loadVisaoGeral();
   else if(sec==='usuarios') loadAdminUsers();
   else if(sec==='aparencia') fillConfigForm();
-  else if(sec==='dados') {} // Dados section doesn't need loading
+  else if(sec==='modelos') loadAdminModelos();
 }
 document.getElementById('btnAdminConsole').onclick = ()=>{ document.getElementById('adminConsole').style.display='flex'; acShow('visao'); };
 document.getElementById('acVoltar').onclick = ()=>document.getElementById('adminConsole').style.display='none';
@@ -1055,6 +1133,71 @@ document.getElementById('admCreate').onclick = async ()=>{
   if(data.senha_temporaria) alert('Usuário criado.\nE-mail: '+email+'\nSenha temporária: '+data.senha_temporaria+'\n\nComunique ao operador e peça que troque depois.');
   else toast('Usuário criado');
   loadAdminUsers();
+};
+
+// ---------- Administração de Modelos ----------
+async function loadAdminModelos(){
+  const body=document.getElementById('modBody');
+  body.innerHTML='<tr><td colspan="6" style="text-align:center;color:#6b7280;padding:14px"><span class="spin"></span> Carregando…</td></tr>';
+  const data = await rpc('ip_listar_modelos');
+  if(!data){ body.innerHTML=''; return; }
+  body.innerHTML=(data||[]).map(m=>`
+    <tr>
+      <td>${esc(m.fabricante)}</td>
+      <td>${esc(m.modelo)}</td>
+      <td style="text-align:right">${m.potencia_w}W</td>
+      <td>${esc(m.tecnologia)}</td>
+      <td>${esc(m.classe_nbr||'—')}</td>
+      <td style="text-align:right"><button class="btn" style="padding:2px 8px;color:#f87171;font-size:11px" onclick="window._delModelo('${m.id}')">remover</button></td>
+    </tr>
+  `).join('') || '<tr><td colspan="6" style="text-align:center;color:#6b7280;padding:14px">Nenhum modelo</td></tr>';
+}
+window._delModelo = async (id)=>{
+  if(!confirm('Remover este modelo? Os pontos já cadastrados com este modelo não serão afetados.')) return;
+  setBusy(true);
+  const {error}=await sb.rpc('ip_deletar_modelo',{p_id:id});
+  setBusy(false);
+  if(error){ toast('Erro ao remover: '+error.message,true); return; }
+  toast('Modelo removido');
+  loadAdminModelos();
+};
+document.getElementById('modCreate').onclick = async ()=>{
+  const fab=document.getElementById('modFabricante').value.trim();
+  const mod=document.getElementById('modModelo').value.trim();
+  const pot=parseInt(document.getElementById('modPotencia').value);
+  const temp=document.getElementById('modTemperatura').value.trim()?parseInt(document.getElementById('modTemperatura').value):null;
+  const tens=document.getElementById('modTensao').value.trim()||null;
+  const ip=document.getElementById('modIp').value.trim()||null;
+  const classe=document.getElementById('modClasse').value.trim()||null;
+  const tec=document.getElementById('modTecnologia').value.trim()||'LED';
+  const desc=document.getElementById('modDescricao').value.trim()||null;
+
+  if(!fab || !mod || isNaN(pot) || pot<=0 || pot>2000){
+    toast('Preencha: Fabricante, Modelo, Potência (1–2000 W)',true);
+    return;
+  }
+
+  setBusy(true);
+  const {error}=await sb.rpc('ip_criar_modelo',{
+    p_fabricante:fab, p_modelo:mod, p_potencia_w:pot,
+    p_temperatura_cor_k:temp, p_tensao_v:tens, p_ip:ip,
+    p_classe_nbr:classe, p_tecnologia:tec, p_descricao:desc
+  });
+  setBusy(false);
+  if(error){ toast('Erro ao criar: '+error.message,true); return; }
+
+  document.getElementById('modFabricante').value='';
+  document.getElementById('modModelo').value='';
+  document.getElementById('modPotencia').value='';
+  document.getElementById('modTemperatura').value='';
+  document.getElementById('modTensao').value='';
+  document.getElementById('modIp').value='';
+  document.getElementById('modClasse').value='';
+  document.getElementById('modTecnologia').value='LED';
+  document.getElementById('modDescricao').value='';
+
+  toast('Modelo criado');
+  loadAdminModelos();
 };
 
 // ---------- Exportação ----------

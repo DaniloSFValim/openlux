@@ -53,6 +53,29 @@
 --   (gen_random_uuid(), 'LUM004', 'luminaria', 'sinaleira', 'led', 100, true, -22.895, -43.045, 'Centro', 'manutencao');
 
 -- ============================================
+-- EXEMPLO: Modelos de Equipamento LED
+-- ============================================
+-- Dados de exemplo para o catálogo de modelos
+-- Descomentar para testar a feature de seleção de modelos
+
+-- INSERT INTO public.equipamentos_modelo (
+--   fabricante,
+--   modelo,
+--   potencia_w,
+--   temperatura_cor_k,
+--   tensao_v,
+--   ip,
+--   classe_nbr,
+--   tecnologia,
+--   descricao
+-- ) VALUES
+--   ('Philips', 'CorePro LED 150W', 150, 4000, 220, 'IP54', 'V3', 'LED', 'Luminária para iluminação viária'),
+--   ('Osram', 'SylvaniaStreetEdge 250W', 250, 5000, 220, 'IP65', 'P2', 'LED Smart', 'Com controle de intensidade'),
+--   ('Avant', 'LED RGB Pro 400W', 400, 6500, 110, 'IP67', 'C4', 'LED RGB', 'Para ambientes especiais'),
+--   ('Intelbras', 'LED UFN-F150', 150, 4000, 220, 'IP54', 'V3', 'LED', 'Econômica e confiável'),
+--   ('Elgin', 'LED 250W Branco Frio', 250, 6500, 220, 'IP65', 'P2', 'LED', 'Ideal para avenidas');
+
+-- ============================================
 -- NOTAS
 -- ============================================
 -- 1. Para criar usuários no Supabase local:
