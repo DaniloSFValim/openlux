@@ -74,7 +74,7 @@ git commit -m "chore: atualizar dependências"
 git push -u origin feature/meu-recurso
 ```
 
-Depois abra PR no GitHub. Use o [template](./pull_request_template.md).
+Depois abra PR no GitHub. Use o [template](./.github/pull_request_template.md).
 
 **Na PR:**
 - Descreva o que foi feito e por quê
