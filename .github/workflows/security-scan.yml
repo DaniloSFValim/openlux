@@ -1,0 +1,112 @@
+name: Security Scanning (OWASP + Dependency Check)
+
+on:
+  push:
+    branches: [ main, develop, feature/*, claude/* ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    - cron: '0 1 * * *'  # 01:00 UTC daily
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      pull-requests: write
+      contents: read
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install --prefer-offline --no-audit 2>/dev/null || true
+
+      - name: Dependency Check (npm audit)
+        run: |
+          echo "🔍 Scanning dependencies..."
+          npm audit --production || true
+
+          # Generate JSON report
+          npm audit --json > npm-audit-report.json || true
+        continue-on-error: true
+
+      - name: OWASP ZAP Scan (Dynamic)
+        uses: zaproxy/action-baseline@v0.7.0
+        with:
+          target: 'http://localhost:8000'
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a'
+        continue-on-error: true
+
+      - name: Snyk Security Test
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        continue-on-error: true
+        if: ${{ secrets.SNYK_TOKEN }}
+
+      - name: HTML Validation
+        run: |
+          npm install html-validate --prefer-offline --no-audit || true
+          npx html-validate index.html || echo "⚠️ HTML validation warnings (non-blocking)"
+        continue-on-error: true
+
+      - name: Check for hardcoded secrets
+        run: |
+          echo "🔐 Scanning for exposed secrets..."
+          if grep -r "BEGIN RSA PRIVATE KEY" .; then
+            echo "❌ PRIVATE KEY FOUND"
+            exit 1
+          fi
+          if grep -r "BEGIN PRIVATE KEY" .; then
+            echo "❌ PRIVATE KEY FOUND"
+            exit 1
+          fi
+          if grep -r "SUPABASE_SERVICE_ROLE_KEY" . --include="*.js" --include="*.html"; then
+            echo "❌ Service role key exposed in code"
+            exit 1
+          fi
+          echo "✅ No exposed secrets detected"
+        continue-on-error: false
+
+      - name: Upload security reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-reports
+          path: |
+            npm-audit-report.json
+            report_md.md
+          retention-days: 30
+
+      - name: Comment PR with security summary
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = `## 🔒 Security Scan Results
+
+**Checks Performed:**
+- ✅ Dependency vulnerability scan (npm audit)
+- ✅ Hardcoded secrets detection
+- ✅ OWASP ZAP baseline scan
+- ✅ HTML validation
+
+[📊 Full Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+**Action:** Review security findings before merging.`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });

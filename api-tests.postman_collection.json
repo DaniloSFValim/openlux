@@ -1,0 +1,245 @@
+{
+  "info": {
+    "name": "Iluminação LED API Tests",
+    "description": "API endpoint tests for Supabase backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/",
+              "host": ["{{SUPABASE_URL}}"],
+              "path": ["rest", "v1", ""]
+            },
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{ANON_KEY}}"
+              }
+            ]
+          },
+          "response": []
+        },
+        {
+          "name": "Test Anonymous Access",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/v_parque_export?limit=1",
+              "host": ["{{SUPABASE_URL}}"],
+              "path": ["rest", "v1", "v_parque_export"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "1"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{ANON_KEY}}"
+              }
+            ]
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Data Retrieval",
+      "item": [
+        {
+          "name": "Get All Points (Limit 10)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/v_parque_export?limit=10&select=id,codigo_seconser,latitude,longitude,tipo_ativo,bairro_nome",
+              "host": ["{{SUPABASE_URL}}"],
+              "path": ["rest", "v1", "v_parque_export"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "select",
+                  "value": "id,codigo_seconser,latitude,longitude,tipo_ativo,bairro_nome"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{ANON_KEY}}"
+              }
+            ]
+          },
+          "response": []
+        },
+        {
+          "name": "Get Points by Bairro",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/v_parque_export?bairro_nome=eq.Centro&limit=5",
+              "host": ["{{SUPABASE_URL}}"],
+              "path": ["rest", "v1", "v_parque_export"],
+              "query": [
+                {
+                  "key": "bairro_nome",
+                  "value": "eq.Centro"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{ANON_KEY}}"
+              }
+            ]
+          },
+          "response": []
+        },
+        {
+          "name": "Count Total Points",
+          "request": {
+            "method": "HEAD",
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/v_parque_export",
+              "host": ["{{SUPABASE_URL}}"],
+              "path": ["rest", "v1", "v_parque_export"]
+            },
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{ANON_KEY}}"
+              }
+            ]
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "RPC Functions",
+      "item": [
+        {
+          "name": "Call ip_pontos_bbox",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/rpc/ip_pontos_bbox",
+              "host": ["{{SUPABASE_URL}}"],
+              "path": ["rest", "v1", "rpc", "ip_pontos_bbox"]
+            },
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{ANON_KEY}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"p_bbox_south\": -23.05,\n  \"p_bbox_west\": -43.20,\n  \"p_bbox_north\": -22.80,\n  \"p_bbox_east\": -42.90,\n  \"p_zoom\": 14\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Call ip_clusters_grid",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/rpc/ip_clusters_grid",
+              "host": ["{{SUPABASE_URL}}"],
+              "path": ["rest", "v1", "rpc", "ip_clusters_grid"]
+            },
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{ANON_KEY}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"p_bbox_south\": -23.05,\n  \"p_bbox_west\": -43.20,\n  \"p_bbox_north\": -22.80,\n  \"p_bbox_east\": -42.90,\n  \"p_zoom\": 12\n}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Error Handling",
+      "item": [
+        {
+          "name": "Invalid Endpoint",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/nonexistent_table",
+              "host": ["{{SUPABASE_URL}}"],
+              "path": ["rest", "v1", "nonexistent_table"]
+            },
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{ANON_KEY}}"
+              }
+            ]
+          },
+          "response": []
+        },
+        {
+          "name": "Missing API Key",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/v_parque_export?limit=1",
+              "host": ["{{SUPABASE_URL}}"],
+              "path": ["rest", "v1", "v_parque_export"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "SUPABASE_URL",
+      "value": "https://lrnmydrwzxxajylsmoih.supabase.co",
+      "type": "string"
+    },
+    {
+      "key": "ANON_KEY",
+      "value": "sb_publishable_w3UmLsmcDtT81S3MDdDJjw_rEWckoVl",
+      "type": "string"
+    }
+  ]
+}
