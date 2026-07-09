@@ -514,7 +514,7 @@
               </div>
             </div>
 
-            <!-- Row 3: IP, NBR, Technology -->
+            <!-- Row 3: IP, NBR, Technology (now select) -->
             <div class="flex gap-4 flex-wrap">
               <div class="flex-1 min-w-[110px]">
                 <label class="text-xs font-medium text-slate-400 block mb-1">Grau IP</label>
@@ -526,11 +526,20 @@
               </div>
               <div class="flex-1 min-w-[110px]">
                 <label class="text-xs font-medium text-slate-400 block mb-1">Tecnologia</label>
-                <input id="modTecnologia" placeholder="LED" value="LED" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                <select id="modTecnologia" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">—</option>
+                  <option value="LED" selected>LED</option>
+                  <option value="vapor_sodio">Vapor de Sódio</option>
+                  <option value="metalico">Metálico</option>
+                  <option value="vapor_mercurio">Vapor de Mercúrio</option>
+                  <option value="fluorescente">Fluorescente</option>
+                  <option value="sem_lampada">Sem Lâmpada</option>
+                  <option value="desconhecido">Desconhecido</option>
+                </select>
               </div>
             </div>
 
-            <!-- Row 4: Luminary & Lamp Types -->
+            <!-- Row 4: Luminary & Lamp Types (lamp type now conditional) -->
             <div class="flex gap-4 flex-wrap">
               <div class="flex-1 min-w-[150px]">
                 <label class="text-xs font-medium text-slate-400 block mb-1">Tipo de luminária</label>
@@ -538,7 +547,7 @@
                   <option value="">—</option>
                 </select>
               </div>
-              <div class="flex-1 min-w-[150px]">
+              <div id="modTipoLampRow" class="flex-1 min-w-[150px]" style="display:none">
                 <label class="text-xs font-medium text-slate-400 block mb-1">Tipo de lâmpada</label>
                 <select id="modTipoLamp" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></select>
               </div>
@@ -556,8 +565,65 @@
               <textarea id="modDescricao" placeholder="Aplicação, observações… (opcional)" rows="2" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
             </div>
 
+            <!-- TIER 2: Performance Section -->
+            <div class="border-t border-slate-700 pt-4 mt-4">
+              <h4 class="text-sm font-semibold text-slate-300 mb-3">Desempenho Energético (Opcional)</h4>
+              <div class="flex gap-4 flex-wrap">
+                <div class="flex-1 min-w-[110px]">
+                  <label class="text-xs font-medium text-slate-400 block mb-1">Fluxo Luminoso (lm)</label>
+                  <input id="modFluxo" type="number" min="0" placeholder="12000" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Lumens - flux total independente da potência"/>
+                </div>
+                <div class="flex-1 min-w-[110px]">
+                  <label class="text-xs font-medium text-slate-400 block mb-1">Eficácia (lm/W)</label>
+                  <input id="modEficacia" type="number" step="0.01" min="0" placeholder="80.0" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Lumens por Watt - razão de eficiência"/>
+                </div>
+                <div class="flex-1 min-w-[110px]">
+                  <label class="text-xs font-medium text-slate-400 block mb-1">Fator de Potência</label>
+                  <input id="modFP" type="number" step="0.01" min="0.90" max="1.0" placeholder="0.95" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" title="0.90-1.0 - conformidade de energia reativa"/>
+                </div>
+                <div class="flex-1 min-w-[110px]">
+                  <label class="text-xs font-medium text-slate-400 block mb-1">THD (%)</label>
+                  <input id="modTHD" type="number" step="0.1" min="0" max="100" placeholder="7" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Distorção Harmônica Total 0-100%"/>
+                </div>
+              </div>
+            </div>
+
+            <!-- TIER 2: Protection & Connectivity Section -->
+            <div class="border-t border-slate-700 pt-4 mt-4">
+              <h4 class="text-sm font-semibold text-slate-300 mb-3">Proteção & Conectividade (Opcional)</h4>
+              <div class="flex gap-4 flex-wrap">
+                <div class="flex-1 min-w-[110px]">
+                  <label class="text-xs font-medium text-slate-400 block mb-1">Grau IK</label>
+                  <select id="modGrauIK" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" title="Resistência a impacto/vandalismo">
+                    <option value="">—</option>
+                    <option value="IK08">IK08 (2J)</option>
+                    <option value="IK09">IK09 (5J)</option>
+                    <option value="IK10">IK10 (20J)</option>
+                  </select>
+                </div>
+                <div class="flex-1 min-w-[140px]">
+                  <label class="text-xs font-medium text-slate-400 block mb-1">Protetor de Surto</label>
+                  <input id="modDPS" placeholder="10kV/10kA" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Especificação DPS ex: 10kV/10kA"/>
+                </div>
+                <div class="flex-1 min-w-[140px]">
+                  <label class="text-xs font-medium text-slate-400 block mb-1">Conectividade</label>
+                  <select id="modConectividade" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" title="Tipo de tomada para célula fotoelétrica">
+                    <option value="">—</option>
+                    <option value="sem_tomada">Sem Tomada</option>
+                    <option value="ansi_3pin">ANSI 3-pin</option>
+                    <option value="ansi_7pin">ANSI 7-pin (NEMA)</option>
+                    <option value="zhaga">Zhaga</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mt-4">
+                <label class="text-xs font-medium text-slate-400 block mb-1">Arquivo Fotométrico (.IES)</label>
+                <input id="modArquivoIES" type="file" accept=".ies" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Upload arquivo .IES para importação Dialux"/>
+              </div>
+            </div>
+
             <!-- Add Button -->
-            <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium transition-colors" id="modCreate">Adicionar modelo</button>
+            <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium transition-colors mt-4" id="modCreate">Adicionar modelo</button>
           </div>
         </div>
 
@@ -1505,6 +1571,48 @@ function initModelosForm(){
     TIPOS.forEach(t=>selLamp.add(new Option(t,t)));
     selLamp.value='led';
   }
+  setupTecnologiaCondicional();
+}
+
+function setupTecnologiaCondicional(){
+  const tecSelect=document.getElementById('modTecnologia');
+  const lampRow=document.getElementById('modTipoLampRow');
+  if(!tecSelect || !lampRow) return;
+
+  const updateVisibility=()=>{
+    if(tecSelect.value==='LED' || tecSelect.value===''){
+      lampRow.style.display='none';
+      document.getElementById('modTipoLamp').value='led';
+    }else{
+      lampRow.style.display='block';
+    }
+  };
+
+  tecSelect.addEventListener('change', updateVisibility);
+  updateVisibility();
+}
+
+async function uploadArquivoIES(file){
+  if(!file) return null;
+  if(!file.name.toLowerCase().endsWith('.ies')){
+    toast('Arquivo deve ser .ies',true);
+    return null;
+  }
+  if(file.size > 5*1024*1024){
+    toast('Arquivo .IES maior que 5 MB',true);
+    return null;
+  }
+  try{
+    const fileName=`${Date.now()}-${file.name}`;
+    const {data,error}=await sb.storage.from('luminarias-ies').upload(fileName,file,{cacheControl:'3600',upsert:false});
+    if(error) throw error;
+    const {data:{publicUrl}}=sb.storage.from('luminarias-ies').getPublicUrl(fileName);
+    return publicUrl;
+  }catch(err){
+    console.error('Erro upload IES:',err);
+    toast('Erro ao fazer upload do .IES',true);
+    return null;
+  }
 }
 async function loadAdminModelos(){
   initModelosForm();
@@ -1545,6 +1653,27 @@ document.getElementById('modCreate').onclick = async ()=>{
     return;
   }
 
+  // Validate Tier 2 fields
+  const fluxo=document.getElementById('modFluxo').value.trim()?parseInt(document.getElementById('modFluxo').value):null;
+  const eficacia=document.getElementById('modEficacia').value.trim()?parseFloat(document.getElementById('modEficacia').value):null;
+  const fp=document.getElementById('modFP').value.trim()?parseFloat(document.getElementById('modFP').value):null;
+  const thd=document.getElementById('modTHD').value.trim()?parseFloat(document.getElementById('modTHD').value):null;
+
+  if(fluxo!==null && fluxo<=0){ toast('Fluxo luminoso deve ser > 0',true); return; }
+  if(eficacia!==null && eficacia<=0){ toast('Eficácia deve ser > 0',true); return; }
+  if(fp!==null && (fp<0.90 || fp>1.0)){ toast('Fator de potência deve estar entre 0.90 e 1.0',true); return; }
+  if(thd!==null && (thd<0 || thd>100)){ toast('THD deve estar entre 0 e 100%',true); return; }
+
+  // Handle .IES file upload if provided
+  let iesUrl=null;
+  const iesFile=document.getElementById('modArquivoIES').files[0];
+  if(iesFile){
+    setBusy(true);
+    iesUrl=await uploadArquivoIES(iesFile);
+    if(!iesUrl){ setBusy(false); return; }
+    setBusy(false);
+  }
+
   setBusy(true);
   const {error}=await sb.rpc('ip_criar_modelo',{
     p_fabricante:fab, p_modelo:mod, p_potencia_w:pot,
@@ -1556,15 +1685,29 @@ document.getElementById('modCreate').onclick = async ()=>{
     p_tipo_luminaria:document.getElementById('modTipoLum').value||null,
     p_tipo_lampada:document.getElementById('modTipoLamp').value||'led',
     p_foto_url:document.getElementById('modFoto').value.trim()||null,
-    p_descricao:document.getElementById('modDescricao').value.trim()||null
+    p_descricao:document.getElementById('modDescricao').value.trim()||null,
+    // Tier 2 fields
+    p_fluxo_luminoso_lm:fluxo,
+    p_eficacia_luminosa_lm_w:eficacia,
+    p_fator_potencia_fp:fp,
+    p_thd_percentual:thd,
+    p_grau_ik:document.getElementById('modGrauIK').value||null,
+    p_dps_especificacao:document.getElementById('modDPS').value.trim()||null,
+    p_tipo_conectividade:document.getElementById('modConectividade').value||null,
+    p_arquivo_ies_url:iesUrl
   });
   setBusy(false);
   if(error){ toast('Erro ao criar: '+error.message,true); return; }
 
-  ['modFabricante','modModelo','modPotencia','modTemperatura','modTensao','modIp','modClasse','modFoto','modDescricao'].forEach(id=>document.getElementById(id).value='');
+  // Clear form
+  ['modFabricante','modModelo','modPotencia','modTemperatura','modTensao','modIp','modClasse','modFoto','modDescricao','modFluxo','modEficacia','modFP','modTHD','modDPS'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('modTecnologia').value='LED';
   document.getElementById('modTipoLum').value='';
   document.getElementById('modTipoLamp').value='led';
+  document.getElementById('modGrauIK').value='';
+  document.getElementById('modConectividade').value='';
+  document.getElementById('modArquivoIES').value='';
+  setupTecnologiaCondicional();
 
   toast('Modelo adicionado ao catálogo');
   loadAdminModelos();
