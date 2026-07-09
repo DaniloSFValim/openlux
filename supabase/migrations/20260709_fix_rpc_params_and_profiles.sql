@@ -36,10 +36,10 @@ AS $function$
     SELECT
       ST_GeoHash(
         ST_PointOnSurface(geom),
-        CASE WHEN grid_deg > 0.01 THEN 3
-             WHEN grid_deg > 0.005 THEN 4
-             WHEN grid_deg > 0.002 THEN 5
-             ELSE 6 END
+        CASE WHEN grid_deg > 0.05 THEN 4
+             WHEN grid_deg > 0.02 THEN 5
+             WHEN grid_deg > 0.01 THEN 6
+             ELSE 7 END
       ) as hash,
       COUNT(*) as cnt,
       SUM(CASE WHEN modernizado_led THEN 1 ELSE 0 END)::float / COUNT(*) * 100 as led_pct,
