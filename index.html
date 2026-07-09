@@ -8,6 +8,7 @@
 <link id="favicon" rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Crect%20width%3D%2732%27%20height%3D%2732%27%20rx%3D%276%27%20fill%3D%27%230b0f14%27/%3E%3Ccircle%20cx%3D%2716%27%20cy%3D%2714%27%20r%3D%276%27%20fill%3D%27%23fbbf24%27/%3E%3Crect%20x%3D%2713%27%20y%3D%2719.5%27%20width%3D%276%27%20height%3D%274%27%20rx%3D%271%27%20fill%3D%27%239ca3af%27/%3E%3Cg%20stroke%3D%27%23fbbf24%27%20stroke-width%3D%271.6%27%20stroke-linecap%3D%27round%27%3E%3Cline%20x1%3D%2716%27%20y1%3D%272.5%27%20x2%3D%2716%27%20y2%3D%275.5%27/%3E%3Cline%20x1%3D%275.5%27%20y1%3D%2714%27%20x2%3D%272.5%27%20y2%3D%2714%27/%3E%3Cline%20x1%3D%2729.5%27%20y1%3D%2714%27%20x2%3D%2726.5%27%20y2%3D%2714%27/%3E%3Cline%20x1%3D%278%27%20y1%3D%276.5%27%20x2%3D%276%27%20y2%3D%274.5%27/%3E%3Cline%20x1%3D%2724%27%20y1%3D%276.5%27%20x2%3D%2726%27%20y2%3D%274.5%27/%3E%3C/g%3E%3C/svg%3E"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-heat@0.2.0/dist/leaflet-heat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -190,8 +191,11 @@
     <div x-show="showVis" @click.away="showVis = false" class="absolute top-10 right-0 w-48 bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-2 flex flex-col gap-1.5 z-[1001]" id="visPop" style="display:none">
       <button id="btnChoro" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Colorir bairros por % LED">🎨 Coroplético</button>
       <button id="btnDens" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Grade 250 m de densidade">📊 Densidade</button>
+      <button id="btnHeatmap" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Mapa de calor com intensidade de distribuição">🔥 Mapa de Calor</button>
+      <button id="btnTimeline" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Filtrar dados por período de intervalo">📅 Timeline</button>
       <button id="btnTabela" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors">📋 Tabela</button>
       <button id="btnStats" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors">📈 Indicadores</button>
+      <button id="btnAdvancedFilters" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Filtros avançados por múltiplos critérios">🎯 Filtros Avançados</button>
     </div>
   </div>
 
@@ -216,6 +220,66 @@
 
 <div id="detail" role="complementary" aria-label="Detalhe do ativo" class="absolute top-16 right-2.5 w-80 z-[1000] bg-slate-800/95 border border-slate-700 rounded-xl p-3 hidden max-h-[calc(100%-90px)] overflow-auto backdrop-blur"></div>
 <div id="stats" role="complementary" aria-label="Indicadores" class="absolute top-16 left-2.5 w-96 z-[1000] bg-slate-800/95 border border-slate-700 rounded-xl p-3 hidden max-h-[calc(100%-90px)] overflow-auto backdrop-blur"></div>
+
+<!-- Advanced Map Features Panels -->
+<div id="heatmapCtl" role="complementary" aria-label="Controle do mapa de calor" class="absolute bottom-3.5 left-2.5 z-[1000] bg-slate-800/95 border border-slate-700 rounded-xl p-3 text-xs max-w-xs hidden backdrop-blur">
+  <div class="font-medium text-slate-200 mb-2">🔥 Mapa de Calor</div>
+  <div class="flex gap-2 mb-2">
+    <label class="text-xs text-slate-400">Métrica:</label>
+    <select id="heatmapMetric" class="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs">
+      <option value="led">LED %</option>
+      <option value="density">Densidade</option>
+      <option value="age">Idade</option>
+    </select>
+  </div>
+  <div class="flex gap-2">
+    <label class="text-xs text-slate-400">Raio (m):</label>
+    <input id="heatmapRadius" type="range" min="10" max="100" value="30" class="w-24"/>
+    <span id="heatmapRadiusValue">30</span>
+  </div>
+</div>
+
+<div id="timelineCtl" role="complementary" aria-label="Timeline de dados" class="absolute bottom-3.5 left-2.5 z-[1000] bg-slate-800/95 border border-slate-700 rounded-xl p-3 text-xs max-w-xs hidden backdrop-blur">
+  <div class="font-medium text-slate-200 mb-2">📅 Timeline Interativa</div>
+  <div class="mb-2">
+    <label class="text-xs text-slate-400 block mb-1">Período:</label>
+    <input id="timelineStart" type="date" class="w-full px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs mb-1"/>
+    <input id="timelineEnd" type="date" class="w-full px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs"/>
+  </div>
+  <div class="flex gap-2">
+    <button id="timelineReset" class="px-2 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs w-full">Reset</button>
+    <button id="timelineApply" class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs w-full">Aplicar</button>
+  </div>
+</div>
+
+<div id="advancedFiltersCtl" role="complementary" aria-label="Filtros avançados" class="absolute bottom-3.5 left-2.5 z-[1000] bg-slate-800/95 border border-slate-700 rounded-xl p-3 text-xs max-w-sm hidden backdrop-blur max-h-[calc(100%-120px)] overflow-auto">
+  <div class="font-medium text-slate-200 mb-2">🎯 Filtros Avançados</div>
+  <div class="space-y-2">
+    <div>
+      <label class="text-xs text-slate-400 block mb-1">LED %:</label>
+      <input id="filterLedMin" type="number" min="0" max="100" placeholder="Min" class="w-full px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs mb-1"/>
+      <input id="filterLedMax" type="number" min="0" max="100" placeholder="Max" class="w-full px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs"/>
+    </div>
+    <div>
+      <label class="text-xs text-slate-400 block mb-1">Potência (W):</label>
+      <input id="filterPowerMin" type="number" min="0" placeholder="Min" class="w-full px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs mb-1"/>
+      <input id="filterPowerMax" type="number" placeholder="Max" class="w-full px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs"/>
+    </div>
+    <div>
+      <label class="text-xs text-slate-400 block mb-1">Status:</label>
+      <select id="filterStatus" class="w-full px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs">
+        <option value="">Todos</option>
+        <option value="ok">OK</option>
+        <option value="pending">Pendente</option>
+        <option value="error">Erro</option>
+      </select>
+    </div>
+  </div>
+  <div class="flex gap-2 mt-2">
+    <button id="advancedFiltersClear" class="px-2 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs w-full">Limpar</button>
+    <button id="advancedFiltersApply" class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs w-full">Aplicar</button>
+  </div>
+</div>
 <div id="toast"></div>
 
 <div id="modeloModal" class="fixed inset-0 z-[1150] bg-black/60 flex items-center justify-center hidden">
@@ -753,10 +817,33 @@ function filtros(){
   else if(state.estado==='pendente') p_modernizado=false;
   else if(state.estado==='sem_lampada') p_tipo='sem_lampada';
   const f=state.fila;
-  return { p_bairro:state.bairro||null, p_tipo, p_modernizado, p_pot_min: state.pot?parseInt(state.pot):null,
+
+  // Advanced filters
+  const af = state.advancedFilters || {};
+  const p_led_min = af.ledMin !== undefined ? af.ledMin : null;
+  const p_led_max = af.ledMax !== undefined ? af.ledMax : null;
+  const p_power_min = af.powerMin !== undefined ? af.powerMin : null;
+  const p_power_max = af.powerMax !== undefined ? af.powerMax : null;
+
+  // Timeline filters
+  const p_data_inicio = state.timelineFilterStart ? state.timelineFilterStart.toISOString().split('T')[0] : null;
+  const p_data_fim = state.timelineFilterEnd ? state.timelineFilterEnd.toISOString().split('T')[0] : null;
+
+  return {
+    p_bairro:state.bairro||null,
+    p_tipo,
+    p_modernizado,
+    p_pot_min: state.pot?parseInt(state.pot):null,
     p_revisao: f==='revisao'?true:null,
     p_fonte_mod: f==='mod_censo'?'censo_enel':f==='mod_seconser'?'seconser_pos_censo':f==='mod_campo'?'campo':null,
-    p_suspeito: f==='suspeito'?true:null };
+    p_suspeito: f==='suspeito'?true:null,
+    p_led_min,
+    p_led_max,
+    p_power_min,
+    p_power_max,
+    p_data_inicio,
+    p_data_fim
+  };
 }
 function aplicaFila(q){ const f=state.fila;
   if(f==='revisao') q=q.eq('flag_revisao_censo',true);
@@ -769,6 +856,8 @@ function aplicaFila(q){ const f=state.fila;
 function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
 
 async function _refresh(){
+  if(state.heatmap){ renderHeatmap(); return; }
+  if(state.heatmapLayer){ map.removeLayer(state.heatmapLayer); state.heatmapLayer=null; }
   if(state.densidade){ if(!state.densLayer) renderDensidade(); return; }
   if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; document.getElementById('densCtl').style.display='none'; }
   if(state.choropleth){ renderChoropleth(); return; }
@@ -1014,6 +1103,138 @@ document.getElementById('btnDens').onclick = ()=>{
   }
   refresh();
 };
+
+// ---------- Heat Map Visualization ----------
+state.heatmap = false;
+state.heatmapLayer = null;
+state.heatmapData = [];
+async function renderHeatmap() {
+  if(state.heatmapLayer) { map.removeLayer(state.heatmapLayer); state.heatmapLayer = null; }
+  if(!state.heatmap) return;
+
+  // Load heatmap data from full bbox
+  if(state.heatmapData.length === 0) {
+    const b = map.getBounds();
+    const box = { min_lng:b.getWest(), min_lat:b.getSouth(), max_lng:b.getEast(), max_lat:b.getNorth() };
+    const data = await rpc('ip_pontos_bbox', {...box, limite:10000, ...filtros()}) || [];
+    state.heatmapData = data;
+  }
+
+  const metric = document.getElementById('heatmapMetric')?.value || 'led';
+  const pts = state.heatmapData;
+  const heatData = pts.map(p => {
+    let intensity = 0.5;
+    if(metric === 'led') intensity = Math.max(0, Math.min(1, (p.percentual_led || 0) / 100));
+    else if(metric === 'density') intensity = Math.max(0, Math.min(1, (p.potencia || 100) / 250));
+    else if(metric === 'age') {
+      const age = new Date().getFullYear() - (p.ano_instalacao || 2000);
+      intensity = Math.max(0, Math.min(1, age / 30));
+    }
+    return [p.lat, p.lon, intensity];
+  });
+
+  const radius = parseInt(document.getElementById('heatmapRadius')?.value || 30);
+  state.heatmapLayer = L.heatLayer(heatData, { radius, blur: 20, maxZoom: 18, max: 1.0, minOpacity: 0.2, gradient: {0.2: '#0284c7', 0.4: '#06b6d4', 0.6: '#10b981', 0.8: '#f59e0b', 1.0: '#ef4444'} }).addTo(map);
+  toast(`Mapa de calor renderizado com ${pts.length} pontos`);
+}
+
+document.getElementById('btnHeatmap').onclick = () => {
+  state.heatmap = !state.heatmap;
+  if(state.heatmap && state.densidade) {
+    state.densidade = false;
+    document.getElementById('btnDens').classList.remove('on');
+    if(state.densLayer) { map.removeLayer(state.densLayer); state.densLayer = null; }
+  }
+  if(state.heatmap && state.choropleth) {
+    state.choropleth = false;
+    document.getElementById('btnChoro').classList.remove('on');
+    if(state.choroLayer) { map.removeLayer(state.choroLayer); state.choroLayer = null; }
+  }
+  document.getElementById('btnHeatmap').classList.toggle('on', state.heatmap);
+  document.getElementById('heatmapCtl').style.display = state.heatmap ? 'block' : 'none';
+  document.getElementById('legend').style.display = state.heatmap ? 'none' : 'block';
+  state.heatmapData = []; // Reset data to reload on next render
+  if(state.heatmap) renderHeatmap();
+};
+
+document.getElementById('heatmapMetric')?.addEventListener('change', () => {
+  state.heatmapData = [];
+  renderHeatmap();
+});
+document.getElementById('heatmapRadius')?.addEventListener('input', (e) => {
+  document.getElementById('heatmapRadiusValue').textContent = e.target.value;
+  renderHeatmap();
+});
+
+// ---------- Timeline Visualization ----------
+state.timeline = false;
+state.timelineFilterStart = null;
+state.timelineFilterEnd = null;
+
+document.getElementById('btnTimeline').onclick = () => {
+  state.timeline = !state.timeline;
+  document.getElementById('btnTimeline').classList.toggle('on', state.timeline);
+  document.getElementById('timelineCtl').style.display = state.timeline ? 'block' : 'none';
+
+  if(state.timeline) {
+    const now = new Date();
+    const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+    document.getElementById('timelineStart').valueAsDate = oneYearAgo;
+    document.getElementById('timelineEnd').valueAsDate = now;
+  }
+};
+
+document.getElementById('timelineReset')?.addEventListener('click', () => {
+  state.timelineFilterStart = null;
+  state.timelineFilterEnd = null;
+  document.getElementById('timelineStart').value = '';
+  document.getElementById('timelineEnd').value = '';
+  toast('Filtro de timeline removido');
+  refresh();
+});
+
+document.getElementById('timelineApply')?.addEventListener('click', () => {
+  const start = document.getElementById('timelineStart').valueAsDate;
+  const end = document.getElementById('timelineEnd').valueAsDate;
+  if(!start || !end) { toast('Selecione ambas as datas', true); return; }
+  if(start > end) { toast('Data inicial deve ser anterior à final', true); return; }
+  state.timelineFilterStart = start;
+  state.timelineFilterEnd = end;
+  toast(`Timeline: ${start.toLocaleDateString('pt-BR')} a ${end.toLocaleDateString('pt-BR')}`);
+  refresh();
+});
+
+// ---------- Advanced Filters ----------
+state.advancedFilters = {};
+
+document.getElementById('btnAdvancedFilters').onclick = () => {
+  const showing = document.getElementById('advancedFiltersCtl').style.display !== 'none';
+  document.getElementById('advancedFiltersCtl').style.display = showing ? 'none' : 'block';
+  document.getElementById('btnAdvancedFilters').classList.toggle('on', !showing);
+};
+
+document.getElementById('advancedFiltersClear')?.addEventListener('click', () => {
+  document.getElementById('filterLedMin').value = '';
+  document.getElementById('filterLedMax').value = '';
+  document.getElementById('filterPowerMin').value = '';
+  document.getElementById('filterPowerMax').value = '';
+  document.getElementById('filterStatus').value = '';
+  state.advancedFilters = {};
+  toast('Filtros avançados removidos');
+  refresh();
+});
+
+document.getElementById('advancedFiltersApply')?.addEventListener('click', () => {
+  state.advancedFilters = {
+    ledMin: parseFloat(document.getElementById('filterLedMin').value) || 0,
+    ledMax: parseFloat(document.getElementById('filterLedMax').value) || 100,
+    powerMin: parseFloat(document.getElementById('filterPowerMin').value) || 0,
+    powerMax: parseFloat(document.getElementById('filterPowerMax').value) || Infinity,
+    status: document.getElementById('filterStatus').value || null
+  };
+  toast('Filtros avançados aplicados');
+  refresh();
+});
 
 // ---------- Realce do bairro ----------
 async function highlightBairro(name){
