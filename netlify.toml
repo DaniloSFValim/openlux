@@ -1,6 +1,11 @@
+# O site publica APENAS o index.html (copiado para dist/ no build).
+# Antes era `publish = "."`, o que servia publicamente o repositório inteiro:
+# supabase/migrations/*.sql (schema do banco), docs internos, versões POC
+# antigas do app, coleção Postman etc. — divulgação desnecessária da
+# superfície de ataque. Ver auditoria de 2026-07-09, item C4.
 [build]
-  publish = "."
-  command = ""
+  publish = "dist"
+  command = "mkdir -p dist && cp index.html dist/index.html"
 
 [[headers]]
   for = "/*"

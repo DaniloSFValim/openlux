@@ -58,6 +58,8 @@ registro histórico das intenções de cada PR.
 |--------|------|----------|
 | `20260709182342` | `sync_rpc_hotfixes_fix_atualizar_ponto` | Estado final de `ip_inserir_ponto` (geom/fonte/modernizado_led), fix de `ip_atualizar_ponto` (UPDATE na tabela, não na view), `v_parque_export` com `health_status` |
 | `20260709182416` | `create_storage_buckets_luminarias` | Buckets `luminarias-fotos` / `luminarias-ies` + policies |
+| `20260709183525` | `drop_dead_rpc_overloads` | Remove 10 overloads mortas (clusters_grid ×4, pontos_bbox ×2, atualizar_ponto ×2, criar/atualizar_modelo ×1 cada) |
+| `20260709183630` | `harden_write_rpc_grants` | REVOKE EXECUTE de `anon`/`PUBLIC` nas 10 funções de escrita; `search_path` fixado em `aprovar_mudanca` e `ip_registrar_intervencao` |
 
 Versões anteriores a essas existem no histórico do banco mas não têm arquivo
 neste diretório (foram aplicadas pelo dashboard/MCP antes desta organização).
