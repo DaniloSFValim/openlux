@@ -1136,6 +1136,7 @@ async function renderHeatmap() {
   const radius = parseInt(document.getElementById('heatmapRadius')?.value || 30);
   state.heatmapLayer = L.heatLayer(heatData, { radius, blur: 20, maxZoom: 18, max: 1.0, minOpacity: 0.2, gradient: {0.2: '#0284c7', 0.4: '#06b6d4', 0.6: '#10b981', 0.8: '#f59e0b', 1.0: '#ef4444'} }).addTo(map);
   toast(`Mapa de calor renderizado com ${pts.length} pontos`);
+}
 
 document.getElementById('btnHeatmap').onclick = () => {
   state.heatmap = !state.heatmap;
