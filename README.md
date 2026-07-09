@@ -19,6 +19,27 @@
 
 Sistema georreferenciado de gestão de infraestrutura de iluminação pública da cidade de Niterói.
 
+## 📈 Status Recente (v1.1)
+
+### ✨ Features Implementadas (Julho 2026)
+- 🔥 **Heat Maps** — Visualização de intensidade com gradiente azul→vermelho (3 métricas: LED %, Densidade, Idade)
+- 📅 **Timeline Interativa** — Filtro por período de data (data_modernizacao)
+- 🎯 **Filtros Avançados** — LED % (min/max), Potência em watts (min/max), Status (OK/Pendente/Erro)
+- 📊 **Clustering Inteligente** — Múltiplos clusters distribuídos com tamanhos e cores diferentes (zoom-dependent)
+- 🧪 **CI/CD Completo** — E2E tests (Playwright), Lighthouse CI, API tests (Newman), Security scan
+
+### 🔧 Correções Aplicadas
+- ✅ Atualizar parâmetros RPC (`ip_pontos_bbox`, `ip_clusters_grid`) para suportar novos filtros
+- ✅ Adicionar coluna `created_at` em tabela `profiles`
+- ✅ Aumentar precision de geohash para clustering correto (13 clusters em Niterói)
+- ✅ Aplicar Supabase Security Hardening Phase 2 (42+ recomendações implementadas)
+
+### 📋 Relação de PRs Mergeadas
+| PR | Título | Status | Merge |
+|-------|--------|--------|-------|
+| #20 | feat: PR #4 - Mapa Avançado com Heat-Maps, Timeline e Filtros | ✅ Produção | 2026-07-09 |
+| #21 | fix: Hotfix RPC Advanced Filters | ✅ Produção | 2026-07-09 |
+
 ## 📊 Visão Geral
 
 - **Descrição:** Sistema web para visualizar, gerenciar e auditar a infraestrutura de iluminação pública
