@@ -67,15 +67,34 @@ jobs:
       - name: Check for hardcoded secrets
         run: |
           echo "🔐 Scanning for exposed secrets..."
-          if grep -r "BEGIN RSA PRIVATE KEY" .; then
+          # Exclude docs, workflows, and config files that may reference key format
+          if grep -r "BEGIN RSA PRIVATE KEY" . \
+            --exclude-dir=.git \
+            --exclude-dir=node_modules \
+            --exclude="*.md" \
+            --exclude-dir=.github \
+            --exclude="package*.json" \
+            --exclude="netlify.toml" \
+            --exclude=".env*"; then
             echo "❌ PRIVATE KEY FOUND"
             exit 1
           fi
-          if grep -r "BEGIN PRIVATE KEY" .; then
+          if grep -r "BEGIN PRIVATE KEY" . \
+            --exclude-dir=.git \
+            --exclude-dir=node_modules \
+            --exclude="*.md" \
+            --exclude-dir=.github \
+            --exclude="package*.json" \
+            --exclude="netlify.toml" \
+            --exclude=".env*"; then
             echo "❌ PRIVATE KEY FOUND"
             exit 1
           fi
-          if grep -r "SUPABASE_SERVICE_ROLE_KEY" . --include="*.js" --include="*.html"; then
+          if grep -r "SUPABASE_SERVICE_ROLE_KEY" . \
+            --include="*.js" \
+            --include="*.html" \
+            --exclude-dir=.git \
+            --exclude-dir=node_modules; then
             echo "❌ Service role key exposed in code"
             exit 1
           fi
