@@ -1,42 +1,27 @@
 ---
 name: Feature Request
-about: Solicitar uma nova feature ou melhoria
-title: "[FEATURE] "
-labels: enhancement, needs-triage
+about: Solicitar uma nova feature
+title: '[FEAT] '
+labels: 'enhancement'
+assignees: ''
 ---
 
 ## 📝 Descrição
 
-<!-- Descreva a feature desejada de forma clara -->
+<!-- Descreva a feature desejada -->
 
-## 🎯 Problema que Resolve
+## 🎯 Caso de Uso
 
-<!-- Qual problema ou necessidade esta feature resolve? -->
+<!-- Por que é necessário? Quem vai usar? -->
 
-## 💡 Solução Proposta
+## 🤔 Solução Proposta
 
 <!-- Como você imagina que funcione? -->
 
-## 🤔 Alternativas Consideradas
+## 🔄 Alternativas
 
-<!-- Outras abordagens que foram consideradas -->
+<!-- Alguma solução alternativa? -->
 
-## 📊 Impacto
+## 📝 Contexto Adicional
 
-- **Usuários afetados:** [ex: Técnicos de campo, Administradores, Todos]
-- **Frequência de uso:** [ex: Diariamente, Ocasionalmente]
-- **Prioridade:** Alta / Média / Baixa
-
-## 📋 Checklist
-
-- [ ] Feature não duplicate de issue existente
-- [ ] Feature segue padrão do projeto
-- [ ] Feature não quebra funcionalidade existente
-
-## 📚 Contexto Adicional
-
-<!-- Screenshots, referências, links úteis -->
-
----
-
-**Dica:** Descrever o "porquê" ajuda na priorização!
+<!-- Informações adicionais -->

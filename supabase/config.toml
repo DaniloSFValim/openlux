@@ -1,52 +1,38 @@
-# Configuração Supabase Local
-# Para desenvolvimento offline e testes sem afetar produção
-# Documentação: https://supabase.com/docs/guides/local-development
+# Supabase Local Configuration
 
-[project]
 project_id = "lrnmydrwzxxajylsmoih"
-region = "us-east-1"
 
 [api]
-# Porta da API (PostgREST)
+enabled = true
 port = 54321
-schemas = ["public", "graphql_public"]
-extra_search_path = ["public", "extensions"]
+schemas = ["public", "extensions"]
+extra_search_path = ["public"]
 max_rows = 1000
 
 [db]
-# PostgreSQL local
 port = 54322
-# As credenciais padrão são:
-# user: postgres
-# password: postgres
-# host: localhost
+major_version = 14
 
 [auth]
-# Supabase Auth local
-enabled = true
-email = { enable_signup = true, double_confirm_changes = true, enable_confirmations = true }
-external = { apple = { enabled = false }, google = { enabled = false }, github = { enabled = false } }
-
-[analytics]
-enabled = false
-
-[vector]
-# pgvector para embeddings (opcional)
-enabled = false
-
-[realtime]
-# Supabase Realtime (WebSockets)
-enabled = true
-max_bytes_per_second = 1000000
+enable_signup = true
+jwt_exp_seconds = 3600
+refresh_token_rotation_enabled = true
+refresh_token_reuse_interval = 10
+max_enrolled_factors = 10
 
 [storage]
 file_size_limit = 52428800
+s3_host = "http://localhost:9000"
+s3_region = "local"
+s3_access_key = "minioadmin"
+s3_secret_key = "minioadmin"
+s3_bucket = "stub"
 
-[functions]
-# Supabase Edge Functions
+[realtime]
 enabled = true
+max_bytes_per_second = 1048576
 
-[scripts]
-# SQL scripts a executar ao inicializar
-# Descomentar para usar seed.sql
-# before_reset = []
+[edge_runtime]
+enabled = true
+policy_mode = "wasm"
+policy_error_mode = "log_error"

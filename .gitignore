@@ -1,77 +1,38 @@
-# Environment Variables (NUNCA COMMITAR CREDENTIALS)
+# Environment
 .env
 .env.local
 .env.*.local
-.env.*.example
 
-# Supabase Local Development
+# Supabase Local
 supabase/.temp/
-supabase/.branches/
 supabase/functions/.env
-supabase/functions/.env.local
 .supabase/
 
-# Node.js (se usar CLI/dependencies)
+# Node (se usar CLI)
 node_modules/
+package-lock.json
 yarn.lock
-npm-debug.log*
-yarn-error.log*
 
-# IDE & Editor
+# IDE
 .vscode/
 .idea/
-.DS_Store
 *.swp
 *.swo
-*~
-.vim/
-.sublime-project
-.sublime-workspace
+*.sublime-workspace
 
 # OS
+.DS_Store
 Thumbs.db
-desktop.ini
 
-# Backups (manter localmente, não no git)
+# Backups (manter localmente)
 backups/*.sql
-backups/*.dump
 !backups/.gitkeep
 
 # Logs
 *.log
-logs/
-*.log.gz
+npm-debug.log*
 
-# Secrets (NUNCA COMMITAR)
+# Secrets (nunca commitado)
 *.key
 *.pem
 secrets.json
-.env.prod
-credentials.json
-
-# Database
-*.db
-*.sqlite
-*.sqlite3
-
-# Temporary files
-*.tmp
-*.temp
-.DS_Store
-.AppleDouble
-.LSOverride
-
-# Build outputs (se tiver build step futuro)
-dist/
-build/
-.next/
-out/
-
-# Testing
-coverage/
-.nyc_output/
-test-results/
-playwright-report/
-
-# IDE local config
-.editorconfig.local
