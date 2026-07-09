@@ -1009,6 +1009,7 @@ async function renderChoropleth(){
 }
 document.getElementById('btnChoro').onclick = ()=>{
   state.choropleth=!state.choropleth;
+  document.getElementById('detail').style.display='none'; // Fechar painel de detalhes
   if(state.choropleth && state.densidade){ state.densidade=false;
     document.getElementById('btnDens').classList.remove('on');
     if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; }
@@ -1090,6 +1091,7 @@ function buildDensCtl(breaks,cfg){
 window._densMetric=(m)=>{ state.densMetric=m; renderDensidade(); };
 document.getElementById('btnDens').onclick = ()=>{
   state.densidade=!state.densidade;
+  document.getElementById('detail').style.display='none'; // Fechar painel de detalhes
   if(state.densidade && state.choropleth){ state.choropleth=false;
     document.getElementById('btnChoro').classList.remove('on');
     if(state.choroLayer){ map.removeLayer(state.choroLayer); state.choroLayer=null; } }
@@ -1167,6 +1169,7 @@ async function renderHeatmap() {
 
 document.getElementById('btnHeatmap').onclick = async () => {
   state.heatmap = !state.heatmap;
+  document.getElementById('detail').style.display='none'; // Fechar painel de detalhes
   if(state.heatmap && state.densidade) {
     state.densidade = false;
     document.getElementById('btnDens').classList.remove('on');
@@ -1201,6 +1204,7 @@ state.timelineFilterEnd = null;
 
 document.getElementById('btnTimeline').onclick = () => {
   state.timeline = !state.timeline;
+  document.getElementById('detail').style.display='none'; // Fechar painel de detalhes
   document.getElementById('btnTimeline').classList.toggle('on', state.timeline);
   document.getElementById('timelineCtl').style.display = state.timeline ? 'block' : 'none';
 
