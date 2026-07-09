@@ -1300,19 +1300,59 @@ async function loadStatsPanel(){
   const [porBairro, serie] = await Promise.all([ rpc('ip_por_bairro'), rpc('ip_serie_metricas') ]);
   if(!state.stats){ state.stats = await rpc('ip_estatisticas',{p_bairro:state.bairro||null}); }
   const s=state.stats||{};
-  const kv=(k,v)=>`<div class="chip" style="border-radius:8px;padding:6px 9px"><div style="color:#9ca3af;font-size:11px">${k}</div><div style="font-weight:700;font-size:14px">${v}</div></div>`;
-  const bd=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
-    ${kv('Luminárias',(s.total||0).toLocaleString('pt-BR'))}${kv('% LED',(s.pct_led||0)+'%')}${kv('Pot. LED',(s.potencia_kw||0)+' kW')}
-    ${kv('LED censo',(s.led_censo||0).toLocaleString('pt-BR'))}${kv('LED SECONSER',(s.led_seconser||0).toLocaleString('pt-BR'))}${kv('Pendentes',(s.pendente||0).toLocaleString('pt-BR'))}</div>`;
-  const rows=(porBairro||[]).map(b=>`<tr style="cursor:pointer" onclick="window._zoomBairro('${esc(b.bairro_nome).replace(/'/g,"\\'")}')">
-    <td>${esc(b.bairro_nome)}</td><td style="text-align:right">${b.total}</td>
-    <td style="text-align:right;color:#4ade80">${b.led}</td><td style="text-align:right;color:#fbbf24">${b.pendente}</td>
-    <td style="text-align:right">${b.pct_led}%</td></tr>`).join('');
+
+  const renderKPICard = (icon, label, value, color='text-slate-300', bgColor='bg-slate-800/50', subtext='') => {
+    const colorClass = color === 'text-green-400' ? 'border-green-900/50' : color === 'text-amber-400' ? 'border-amber-900/50' : 'border-slate-700';
+    return `<div class="relative overflow-hidden rounded-lg border ${colorClass} ${bgColor} p-4 hover:shadow-lg hover:${bgColor.replace('800', '700')} transition-all duration-300">
+      <div style="font-size:28px;opacity:0.3;position:absolute;right:-8px;top:-8px">${icon}</div>
+      <div style="color:#9ca3af;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">${label}</div>
+      <div style="font-size:24px;font-weight:700;margin-bottom:2px" class="${color}">${value}</div>
+      ${subtext ? `<div style="font-size:10px;color:#6b7280">${subtext}</div>` : ''}
+    </div>`;
+  };
+
+  const total = s.total || 0;
+  const pctLed = s.pct_led || 0;
+  const pendente = s.pendente || 0;
+  const ledStatus = pctLed >= 60 ? 'text-green-400' : pctLed >= 30 ? 'text-amber-400' : 'text-red-400';
+  const pendenteBg = pendente > total * 0.3 ? 'bg-red-950/20' : 'bg-slate-800/50';
+
+  const kpiGrid = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      ${renderKPICard('💡', 'Total de Luminárias', total.toLocaleString('pt-BR'), 'text-blue-400', 'bg-blue-950/20')}
+      ${renderKPICard('⚡', 'Modernização LED', pctLed + '%', ledStatus, pctLed >= 60 ? 'bg-green-950/20' : pctLed >= 30 ? 'bg-amber-950/20' : 'bg-red-950/20')}
+      ${renderKPICard('🔋', 'Potência LED', (s.potencia_kw || 0) + ' kW', 'text-indigo-400', 'bg-indigo-950/20')}
+      ${renderKPICard('⏳', 'Pendentes de Troca', pendente.toLocaleString('pt-BR'), pendente > 0 ? 'text-amber-400' : 'text-green-400', pendenteBg)}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      ${renderKPICard('📋', 'LED Censo', (s.led_censo || 0).toLocaleString('pt-BR'), 'text-slate-300', 'bg-slate-800/50')}
+      ${renderKPICard('✅', 'LED SECONSER', (s.led_seconser || 0).toLocaleString('pt-BR'), 'text-green-400', 'bg-slate-800/50')}
+    </div>`;
+
+  const rows=(porBairro||[]).map(b=>`<tr style="cursor:pointer;border-bottom:1px solid #1f2a37;transition:background-color 0.2s" class="hover:bg-slate-700/30" onclick="window._zoomBairro('${esc(b.bairro_nome).replace(/'/g,"\\'")}')">
+    <td style="padding:8px;font-size:13px">${esc(b.bairro_nome)}</td><td style="text-align:right;padding:8px;font-size:13px">${b.total}</td>
+    <td style="text-align:right;padding:8px;font-size:13px;color:#4ade80;font-weight:600">${b.led}</td><td style="text-align:right;padding:8px;font-size:13px;color:#fbbf24">${b.pendente}</td>
+    <td style="text-align:right;padding:8px;font-size:13px;font-weight:600">${b.pct_led}%</td></tr>`).join('');
+
   document.getElementById('stats').innerHTML = `
-    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>Indicadores${state.bairro?' · '+esc(state.bairro):''}</b><button class="btn" onclick="document.getElementById('stats').style.display='none'">✕</button></div>
-    ${bd}${sparkline(serie)}
-    <div style="margin:10px 0 4px;color:#9ca3af;font-size:12px">Passivo de troca por bairro</div>
-    <table style="width:100%;border-collapse:collapse"><thead><tr><th>Bairro</th><th style="text-align:right">Total</th><th style="text-align:right">LED</th><th style="text-align:right">Pend.</th><th style="text-align:right">%</th></tr></thead><tbody>${rows}</tbody></table>`;
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #1f2a37">
+      <div>
+        <div style="font-weight:700;font-size:15px;color:#e5e7eb">Indicadores</div>
+        ${state.bairro ? `<div style="font-size:12px;color:#9ca3af;margin-top:2px">📍 ${esc(state.bairro)}</div>` : ''}
+      </div>
+      <button class="btn" style="padding:6px 10px;font-size:16px" onclick="document.getElementById('stats').style.display='none'">✕</button>
+    </div>
+    ${kpiGrid}
+    ${sparkline(serie)}
+    <div style="margin:12px 0 8px;color:#9ca3af;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px">Passivo por Bairro</div>
+    <div style="border-radius:8px;border:1px solid #1f2a37;overflow:hidden">
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead style="background:#0f151c/50;border-bottom:1px solid #1f2a37">
+          <tr><th style="text-align:left;padding:8px;color:#9ca3af">Bairro</th><th style="text-align:right;padding:8px;color:#9ca3af">Total</th><th style="text-align:right;padding:8px;color:#9ca3af">LED</th><th style="text-align:right;padding:8px;color:#9ca3af">Pend.</th><th style="text-align:right;padding:8px;color:#9ca3af">%</th></tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
 }
 window._zoomBairro = (b)=>{ document.getElementById('fBairro').value=b; state.bairro=b; loadStatsChips(); highlightBairro(b); };
 
