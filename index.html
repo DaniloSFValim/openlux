@@ -1113,8 +1113,22 @@ state.heatmapLayer = null;
 state.heatmapData = [];
 async function renderHeatmap() {
   try {
+    // Remover layer anterior
     if(state.heatmapLayer) { map.removeLayer(state.heatmapLayer); state.heatmapLayer = null; }
-    if(!state.heatmap) return;
+
+    // Ocultar pontos normais quando heatmap está ativo
+    if(state.heatmap) {
+      state.layer.clearLayers();
+    } else {
+      return;
+    }
+
+    // Aguardar até que leaflet-heat esteja disponível
+    let attempts = 0;
+    while(!window.L?.heatLayer && attempts < 10) {
+      await new Promise(r => setTimeout(r, 50));
+      attempts++;
+    }
 
     // Load heatmap data from full bbox
     if(state.heatmapData.length === 0) {
@@ -1148,55 +1162,58 @@ async function renderHeatmap() {
       return [p.lat, p.lon, intensity];
     });
 
-    const radius = parseInt(document.getElementById('heatmapRadius')?.value || 40);
+    const radius = parseInt(document.getElementById('heatmapRadius')?.value || 50);
 
-    // Usar leaflet-heat se disponível, senão fallback para circulos coloridos
-    if(window.L && window.L.heatLayer) {
+    // Usar leaflet-heat com validação
+    if(window.L?.heatLayer && typeof L.heatLayer === 'function') {
       state.heatmapLayer = L.heatLayer(heatData, {
         radius,
-        blur: 30,
+        blur: 40,
         maxZoom: 18,
         max: 1.0,
-        minOpacity: 0.1,
+        minOpacity: 0.05,
         gradient: {
-          0.1: '#0284c7',
-          0.3: '#06b6d4',
-          0.5: '#10b981',
-          0.7: '#f59e0b',
-          0.9: '#ef4444',
-          1.0: '#991b1b'
+          0.05: '#0284c7',
+          0.25: '#06b6d4',
+          0.45: '#10b981',
+          0.65: '#f59e0b',
+          0.85: '#ef4444',
+          1.0: '#7f1d1d'
         }
       }).addTo(map);
-      console.log('✅ Heatmap renderizado com leaflet-heat');
-      toast(`🔥 Heatmap ativo (real)`);
+      console.log('✅ Heatmap renderizado com leaflet-heat real');
+      toast(`🔥 Heatmap ativo (gradiente suave)`);
     } else {
-      console.warn('⚠️ L.heatLayer não disponível, usando fallback com circulos');
+      console.warn('⚠️ leaflet-heat não carregou, tentando modo canvas simulado');
       state.heatmapLayer = L.featureGroup();
-      const gradient = ['#0284c7', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#991b1b'];
+      const gradient = ['#0284c7', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#7f1d1d'];
+
+      // Agregar pontos por grade para criar efeito de nuvem
+      const gridSize = radius / 111000;
+      const grid = {};
       pts.forEach(p => {
-        let intensity = 0.5;
-        if(metric === 'led') {
-          intensity = p.modernizado_led ? 0.9 : 0.3;
-        } else if(metric === 'power') {
-          const normalized = Math.max(0, Math.min(1, (p.potencia_w || 50) / 400));
-          intensity = 0.2 + (normalized * 0.8);
-        } else if(metric === 'density') {
-          const normalized = Math.max(0, Math.min(1, (p.potencia_w || 50) / 400));
-          intensity = 0.2 + (normalized * 0.8);
-        }
+        const key = Math.floor(p.lat / gridSize) + ',' + Math.floor(p.lon / gridSize);
+        if(!grid[key]) grid[key] = [];
+        grid[key].push(p);
+      });
+
+      Object.values(grid).forEach(cluster => {
+        if(cluster.length === 0) return;
+        const lat = cluster.reduce((s, p) => s + p.lat, 0) / cluster.length;
+        const lon = cluster.reduce((s, p) => s + p.lon, 0) / cluster.length;
+        const intensity = Math.min(1, cluster.length / 10);
         const colorIdx = Math.floor(intensity * (gradient.length - 1));
         const color = gradient[colorIdx];
-        const markerRadius = Math.max(3, radius / 4);
-        L.circleMarker([p.lat, p.lon], {
-          radius: markerRadius,
+        const size = Math.max(8, Math.min(30, cluster.length));
+        L.circleMarker([lat, lon], {
+          radius: size,
           fillColor: color,
-          color: '#0b0f14',
-          weight: 0.5,
-          fillOpacity: 0.7
+          color: 'none',
+          fillOpacity: 0.6
         }).addTo(state.heatmapLayer);
       });
       state.heatmapLayer.addTo(map);
-      toast(`🔥 Heatmap ativo (fallback - circulos)`);
+      toast(`🔥 Heatmap ativo (modo agregado)`);
     }
     toast(`🔥 Mapa de calor: ${pts.length} pontos`);
   } catch(err) {
@@ -1222,8 +1239,12 @@ document.getElementById('btnHeatmap').onclick = async () => {
   document.getElementById('heatmapCtl').style.display = state.heatmap ? 'block' : 'none';
   document.getElementById('legend').style.display = state.heatmap ? 'none' : 'block';
   state.heatmapData = []; // Reset data to reload on next render
-  if(state.heatmap) await renderHeatmap();
-  else if(state.heatmapLayer) { map.removeLayer(state.heatmapLayer); state.heatmapLayer = null; }
+  if(state.heatmap) {
+    await renderHeatmap();
+  } else {
+    if(state.heatmapLayer) { map.removeLayer(state.heatmapLayer); state.heatmapLayer = null; }
+    refresh(); // Recarregar pontos normais
+  }
 };
 
 document.getElementById('heatmapMetric')?.addEventListener('change', async () => {
