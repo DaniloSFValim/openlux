@@ -44,7 +44,6 @@ AS $function$
       COUNT(*) as cnt,
       SUM(CASE WHEN modernizado_led THEN 1 ELSE 0 END)::float / COUNT(*) * 100 as led_pct,
       AVG(CAST(potencia_w AS float)) as avg_power,
-      ST_AsText(ST_PointOnSurface(geom)) as pt,
       AVG(ST_Y(geom)) as lat,
       AVG(ST_X(geom)) as lon
     FROM pontos_luminaria
@@ -62,7 +61,7 @@ AS $function$
       AND (p_power_max IS NULL OR potencia_w <= p_power_max)
       AND (p_data_inicio IS NULL OR data_modernizacao >= p_data_inicio)
       AND (p_data_fim IS NULL OR data_modernizacao <= p_data_fim)
-    GROUP BY hash, ST_PointOnSurface(geom)
+    GROUP BY hash
   )
   SELECT coalesce(json_agg(
     json_build_object(
