@@ -407,6 +407,35 @@ git push origin main
 | **Backup** | Automático diário + manual on-demand |
 | **RLS** | Row-Level Security por role |
 | **Auditoria** | Logs de todas as alterações |
+
+## 🗺️ Roadmap 2026
+
+O projeto segue um roadmap planejado em quarters. Veja [Issue #4 - Roadmap 2026](https://github.com/DaniloSFValim/iluminacao-led-niteroi/issues/4) para detalhes completos.
+
+### Q2 2026 ✅ Concluído
+- ✅ **P1 (P1):** Dark/Light theme, Analytics, Rate limiting
+- ✅ **P2 (P2):** E2E tests, Lighthouse CI, Dynamic badges
+- ✅ **P3 (P3):** Security scanning, Load testing, API testing
+- ✅ **Versionamento:** Semantic versioning (v1.0.0+)
+
+### Q3 2026 🔄 Em Desenvolvimento
+- 🔄 **[P4: Observabilidade Avançada](https://github.com/DaniloSFValim/iluminacao-led-niteroi/issues/5)** — Sentry, LogRocket, RUM
+- 🔄 **[Mapas Inteligentes](https://github.com/DaniloSFValim/iluminacao-led-niteroi/issues/6)** — Padrões, previsão de falhas, heatmaps
+- 🔄 **Relatórios Avançados** — PDFs customizáveis, agendamento automático
+
+### Q4 2026 📅 Planejado
+- 📅 **Performance Otimizada** — Service workers, lazy loading, otimizações de query
+- 📅 **[Suporte Multi-Municípios](https://github.com/DaniloSFValim/iluminacao-led-niteroi/issues/7)** — Multi-tenancy, data isolation, subdomain routing
+- 📅 **Integrações Externas** — IoT sensors, Weather API, Traffic data
+
+### Issues Abertos
+| # | Título | Prioridade | ETA |
+|---|--------|-----------|-----|
+| [#7](https://github.com/DaniloSFValim/iluminacao-led-niteroi/issues/7) | Escalabilidade - Suporte a Múltiplos Municípios | Média | Q4 2026 |
+| [#6](https://github.com/DaniloSFValim/iluminacao-led-niteroi/issues/6) | Mapas Inteligentes - Análise de Padrões e Previsão | Média | Q3 2026 |
+| [#5](https://github.com/DaniloSFValim/iluminacao-led-niteroi/issues/5) | P4: Observabilidade Avançada | Baixa | Q3 2026 |
+| [#4](https://github.com/DaniloSFValim/iluminacao-led-niteroi/issues/4) | Roadmap 2026 - Desenvolvimento Futuro | - | Master |
+
 ## 📚 Documentação Adicional
 
 - **[ARCHITECTURE.md](./ARCHITECTURE.md)** — Diagramas, fluxos de dados, modelo de dados
@@ -459,6 +488,7 @@ Veja [CONTRIBUTING.md](./CONTRIBUTING.md) para guidelines de contribuição.
 
 ---
 
-**Última atualização:** 2026-07-07  
-**Versão:** 1.0.0  
+**Última atualização:** 2026-07-09  
+**Versão:** 1.1.0  
+**Status:** Production-Ready (DevOps & Reproducibility Audit Completed)  
 **Mantido por:** [@danilosfvalim](https://github.com/danilosfvalim)
