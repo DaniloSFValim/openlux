@@ -372,36 +372,57 @@
       <section id="sec-visao" :style="{ display: activeTab === 'visao' ? 'block' : 'none' }" class="acsec"></section>
 
       <section id="sec-usuarios" :style="{ display: activeTab === 'usuarios' ? 'block' : 'none' }" class="acsec">
-        <h3 class="text-lg font-semibold text-white mb-5">Usuários</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <h3 class="text-lg font-semibold text-white">Usuários</h3>
+          <div id="userCount" style="background:#1f2a37;padding:4px 12px;border-radius:12px;font-size:12px;color:#9ca3af;font-weight:600">0 usuários</div>
+        </div>
 
         <!-- New User Form -->
-        <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4 mb-6 max-w-2xl">
-          <label class="block text-xs font-medium text-slate-400 mb-3">Novo operador</label>
-          <div class="flex flex-col gap-3">
-            <div class="flex gap-3 flex-wrap">
-              <input id="admEmail" type="email" placeholder="E-mail" class="flex-1 min-w-[150px] px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-              <input id="admPass" type="text" placeholder="Senha (opcional)" class="flex-1 min-w-[120px] px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-              <select id="admRole" class="flex-1 min-w-[100px] px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="leitura">Leitura</option>
-                <option value="editor">Editor</option>
-                <option value="admin">Admin</option>
-              </select>
-              <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium transition-colors btn-accent" id="admCreate">Adicionar</button>
+        <div class="bg-blue-950/20 border border-blue-900/50 rounded-lg p-4 mb-6 max-w-3xl">
+          <label style="display:flex;align-items:center;gap:8px;color:#9ca3af;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">
+            <span style="font-size:18px">➕</span>
+            Novo operador
+          </label>
+          <div style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr;gap:10px;align-items:end">
+            <div>
+              <label style="display:block;font-size:11px;color:#9ca3af;margin-bottom:4px;font-weight:600">E-mail</label>
+              <input id="admEmail" type="email" placeholder="usuario@example.com" class="w-full px-3 py-2 bg-slate-900 border border-blue-800/50 rounded-lg text-white text-sm placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"/>
+              <div id="emailError" style="font-size:10px;color:#ef4444;margin-top:2px;display:none"></div>
             </div>
+            <div>
+              <label style="display:block;font-size:11px;color:#9ca3af;margin-bottom:4px;font-weight:600">Senha (opt.)</label>
+              <input id="admPass" type="password" placeholder="•••••••" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+            </div>
+            <div>
+              <label style="display:block;font-size:11px;color:#9ca3af;margin-bottom:4px;font-weight:600">Papel</label>
+              <select id="admRole" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="leitura">👁️ Leitura</option>
+                <option value="editor">✏️ Editor</option>
+                <option value="admin">🔑 Admin</option>
+              </select>
+            </div>
+            <button class="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm rounded-lg font-semibold transition-all shadow-lg hover:shadow-blue-900/50" id="admCreate">Adicionar</button>
           </div>
+          <div id="formStatus" style="font-size:11px;color:#4ade80;margin-top:6px;display:none;font-weight:600"></div>
+        </div>
+
+        <!-- Search Bar -->
+        <div style="margin-bottom:12px">
+          <input id="userSearch" type="text" placeholder="🔍 Buscar por e-mail..." class="w-full max-w-md px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-600"/>
         </div>
 
         <!-- Users Table -->
-        <div class="max-w-2xl overflow-x-auto">
-          <table class="w-full border-collapse">
-            <thead class="bg-slate-800/50 border-b border-slate-700">
+        <div style="border-radius:12px;border:1px solid #1f2a37;overflow:hidden;max-width:100%">
+          <table class="w-full border-collapse" style="font-size:13px">
+            <thead style="background:#0f151c/70;border-bottom:1px solid #1f2a37">
               <tr>
-                <th class="px-4 py-2 text-left text-xs font-semibold text-slate-300">E-mail</th>
-                <th class="px-4 py-2 text-left text-xs font-semibold text-slate-300">Papel</th>
-                <th class="px-4 py-2 text-right text-xs font-semibold text-slate-300"></th>
+                <th class="px-4 py-3 text-left font-semibold text-slate-400">👤 E-mail</th>
+                <th class="px-4 py-3 text-left font-semibold text-slate-400">Papel</th>
+                <th class="px-4 py-3 text-center font-semibold text-slate-400">Criado</th>
+                <th class="px-4 py-3 text-right font-semibold text-slate-400">Ações</th>
               </tr>
             </thead>
-            <tbody id="admBody" class="divide-y divide-slate-700"></tbody>
+            <tbody id="admBody" style="divide-y divide-slate-800/50"></tbody>
           </table>
         </div>
       </section>
@@ -1506,16 +1527,35 @@ window._filaMapa=(fila)=>{
 // (maintained in git history for reference)
 async function loadAdminUsers(){
   const body=document.getElementById('admBody');
-  body.innerHTML='<tr><td colspan="3" style="text-align:center;color:#6b7280;padding:14px"><span class="spin"></span> Carregando…</td></tr>';
-  const {data,error}=await sb.from('profiles').select('id,email,role').order('email');
+  body.innerHTML='<tr><td colspan="4" style="text-align:center;color:#6b7280;padding:16px"><span class="spin"></span> Carregando…</td></tr>';
+  const {data,error}=await sb.from('profiles').select('id,email,role,created_at').order('email');
   if(error){ toast('Erro ao listar: '+error.message,true); body.innerHTML=''; return; }
+
+  state.adminUsers = data || [];
+  document.getElementById('userCount').textContent = state.adminUsers.length + ' usuário' + (state.adminUsers.length !== 1 ? 's' : '');
+
+  const roleBadge = (role) => {
+    const icons = { leitura: '👁️', editor: '✏️', admin: '🔑' };
+    const colors = { leitura: 'bg-slate-700/50 text-slate-200', editor: 'bg-blue-900/50 text-blue-200', admin: 'bg-amber-900/50 text-amber-200' };
+    return `<span style="display:inline-block;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600" class="${colors[role]}">${icons[role]} ${role}</span>`;
+  };
+
+  const formatDate = (date) => {
+    if (!date) return '—';
+    const d = new Date(date);
+    return d.toLocaleDateString('pt-BR', { year: '2-digit', month: '2-digit', day: '2-digit' });
+  };
+
   const roles=['leitura','editor','admin'];
-  body.innerHTML=(data||[]).map(u=>{
+  body.innerHTML=(state.adminUsers||[]).map(u=>{
     const eu=u.id===state.user.id;
-    return `<tr><td>${esc(u.email)}</td>
-      <td><select ${eu?'disabled':''} onchange="window._setRole('${u.id}',this.value)">${roles.map(r=>`<option value="${r}" ${u.role===r?'selected':''}>${r}</option>`).join('')}</select></td>
-      <td style="text-align:right">${eu?'<span style="color:#6b7280;font-size:11px">você</span>':`<button class="btn" style="padding:2px 8px;color:#f87171" onclick="window._delUser('${u.id}','${esc(u.email).replace(/'/g,"\\'")}')">remover</button>`}</td></tr>`;
-  }).join('') || '<tr><td colspan="3" style="text-align:center;color:#6b7280;padding:14px">Nenhum usuário</td></tr>';
+    return `<tr style="border-bottom:1px solid #1f2a37;transition:background 0.2s" class="hover:bg-slate-800/30">
+      <td style="padding:12px 16px">${esc(u.email)}</td>
+      <td style="padding:12px 16px">${eu ? roleBadge(u.role) : `<select style="background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;padding:4px 8px;border-radius:4px;font-size:12px;cursor:pointer" onchange="window._setRole('${u.id}',this.value)">${roles.map(r=>'<option value="'+r+'" '+(u.role===r?'selected':'')+'>'+r+'</option>').join('')}</select>`}</td>
+      <td style="padding:12px 16px;text-align:center;color:#9ca3af;font-size:12px">${formatDate(u.created_at)}</td>
+      <td style="padding:12px 16px;text-align:right">${eu?'<span style="color:#6b7280;font-size:11px;font-weight:600">VOCÊ</span>':`<button class="btn" style="padding:4px 10px;background:#1f2a37;color:#f87171;font-size:12px;border-radius:4px;cursor:pointer;border:1px solid #374151;transition:all 0.2s" onmouseover="this.style.background='#7f1d1d'" onmouseout="this.style.background='#1f2a37'" onclick="window._delUser('${u.id}','${esc(u.email).replace(/'/g,"\\'")}')">🗑️ Remover</button>`}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="4" style="text-align:center;color:#6b7280;padding:24px">Nenhum usuário cadastrado</td></tr>';
 }
 window._setRole = async (id,role)=>{ const {error}=await sb.from('profiles').update({role,atualizado_em:new Date().toISOString()}).eq('id',id);
   toast(error?('Erro: '+error.message):'Papel atualizado',!!error); };
@@ -1524,17 +1564,45 @@ window._delUser = async (id,email)=>{ if(!confirm('Remover '+email+'? Isso exclu
   if(error||data?.error){ toast('Erro ao remover: '+(data?.error||error.message),true); return; }
   toast('Usuário removido'); loadAdminUsers(); };
 document.getElementById('admCreate').onclick = async ()=>{
-  const email=document.getElementById('admEmail').value.trim(), password=document.getElementById('admPass').value.trim(), role=document.getElementById('admRole').value;
-  if(!email){ toast('Informe o e-mail',true); return; }
+  const emailInput=document.getElementById('admEmail');
+  const email=emailInput.value.trim(), password=document.getElementById('admPass').value.trim(), role=document.getElementById('admRole').value;
+  const emailError=document.getElementById('emailError'), formStatus=document.getElementById('formStatus');
+
+  if(!email){ emailError.textContent='E-mail obrigatório'; emailError.style.display='block'; emailInput.style.borderColor='#dc2626'; return; }
+  const emailRegex=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(!emailRegex.test(email)){ emailError.textContent='E-mail inválido'; emailError.style.display='block'; emailInput.style.borderColor='#dc2626'; return; }
+  if(state.adminUsers && state.adminUsers.some(u=>u.email===email)){ emailError.textContent='E-mail já existe'; emailError.style.display='block'; emailInput.style.borderColor='#dc2626'; return; }
+
+  emailError.style.display='none'; emailInput.style.borderColor='';
+  formStatus.textContent='⏳ Criando usuário…'; formStatus.style.display='block'; formStatus.style.color='#9ca3af';
+
   setBusy(true);
   const {data,error}=await sb.functions.invoke('admin-users',{body:{action:'create',email,password:password||undefined,role}});
   setBusy(false);
-  if(error||data?.error){ toast('Erro ao criar: '+(data?.error||error.message),true); return; }
+
+  if(error||data?.error){
+    formStatus.textContent='❌ Erro: '+(data?.error||error.message); formStatus.style.color='#ef4444'; formStatus.style.display='block';
+    return;
+  }
+
   document.getElementById('admEmail').value=''; document.getElementById('admPass').value='';
+  formStatus.textContent='✅ Usuário criado com sucesso!'; formStatus.style.color='#4ade80'; formStatus.style.display='block';
+
   if(data.senha_temporaria) alert('Usuário criado.\nE-mail: '+email+'\nSenha temporária: '+data.senha_temporaria+'\n\nComunique ao operador e peça que troque depois.');
   else toast('Usuário criado');
+
+  setTimeout(()=>{ formStatus.style.display='none'; }, 3000);
   loadAdminUsers();
 };
+
+document.getElementById('userSearch').addEventListener('input', (e)=>{
+  const query=e.target.value.toLowerCase();
+  const rows=document.querySelectorAll('#admBody tr');
+  rows.forEach(row=>{
+    const email=row.querySelector('td:first-child')?.textContent.toLowerCase() || '';
+    row.style.display=email.includes(query)?'':'none';
+  });
+});
 
 // ---------- Administração de Modelos ----------
 function initModelosForm(){
