@@ -8,8 +8,6 @@
 <link id="favicon" rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Crect%20width%3D%2732%27%20height%3D%2732%27%20rx%3D%276%27%20fill%3D%27%230b0f14%27/%3E%3Ccircle%20cx%3D%2716%27%20cy%3D%2714%27%20r%3D%276%27%20fill%3D%27%23fbbf24%27/%3E%3Crect%20x%3D%2713%27%20y%3D%2719.5%27%20width%3D%276%27%20height%3D%274%27%20rx%3D%271%27%20fill%3D%27%239ca3af%27/%3E%3Cg%20stroke%3D%27%23fbbf24%27%20stroke-width%3D%271.6%27%20stroke-linecap%3D%27round%27%3E%3Cline%20x1%3D%2716%27%20y1%3D%272.5%27%20x2%3D%2716%27%20y2%3D%275.5%27/%3E%3Cline%20x1%3D%275.5%27%20y1%3D%2714%27%20x2%3D%272.5%27%20y2%3D%2714%27/%3E%3Cline%20x1%3D%2729.5%27%20y1%3D%2714%27%20x2%3D%2726.5%27%20y2%3D%2714%27/%3E%3Cline%20x1%3D%278%27%20y1%3D%276.5%27%20x2%3D%276%27%20y2%3D%274.5%27/%3E%3Cline%20x1%3D%2724%27%20y1%3D%276.5%27%20x2%3D%2726%27%20y2%3D%274.5%27/%3E%3C/g%3E%3C/svg%3E"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/simpleheat@1.3.1/dist/simpleheat.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/leaflet-heat@0.2.0/dist/leaflet-heat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -192,7 +190,6 @@
     <div x-show="showVis" @click.away="showVis = false" class="absolute top-10 right-0 w-48 bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-2 flex flex-col gap-1.5 z-[1001]" id="visPop" style="display:none">
       <button id="btnChoro" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Colorir bairros por % LED">🎨 Coroplético</button>
       <button id="btnDens" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Grade 250 m de densidade">📊 Densidade</button>
-      <button id="btnHeatmap" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Mapa de calor com intensidade de distribuição">🔥 Mapa de Calor</button>
       <button id="btnTimeline" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Filtrar dados por período de intervalo">📅 Timeline</button>
       <button id="btnTabela" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors">📋 Tabela</button>
       <button id="btnStats" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors">📈 Indicadores</button>
@@ -221,24 +218,6 @@
 
 <div id="detail" role="complementary" aria-label="Detalhe do ativo" class="absolute top-16 right-2.5 w-80 z-[1000] bg-slate-800/95 border border-slate-700 rounded-xl p-3 hidden max-h-[calc(100%-90px)] overflow-auto backdrop-blur"></div>
 <div id="stats" role="complementary" aria-label="Indicadores" class="absolute top-16 left-2.5 w-96 z-[1000] bg-slate-800/95 border border-slate-700 rounded-xl p-3 hidden max-h-[calc(100%-90px)] overflow-auto backdrop-blur"></div>
-
-<!-- Advanced Map Features Panels -->
-<div id="heatmapCtl" role="complementary" aria-label="Controle do mapa de calor" class="absolute bottom-3.5 left-2.5 z-[1000] bg-slate-800/95 border border-slate-700 rounded-xl p-3 text-xs max-w-xs hidden backdrop-blur">
-  <div class="font-medium text-slate-200 mb-2">🔥 Mapa de Calor</div>
-  <div class="flex gap-2 mb-2">
-    <label class="text-xs text-slate-400">Métrica:</label>
-    <select id="heatmapMetric" class="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs">
-      <option value="led">LED (Modernização)</option>
-      <option value="power">Potência (W)</option>
-      <option value="density">Densidade</option>
-    </select>
-  </div>
-  <div class="flex gap-2">
-    <label class="text-xs text-slate-400">Raio (m):</label>
-    <input id="heatmapRadius" type="range" min="10" max="100" value="30" class="w-24"/>
-    <span id="heatmapRadiusValue">30</span>
-  </div>
-</div>
 
 <div id="timelineCtl" role="complementary" aria-label="Timeline de dados" class="absolute bottom-3.5 left-2.5 z-[1000] bg-slate-800/95 border border-slate-700 rounded-xl p-3 text-xs max-w-xs hidden backdrop-blur">
   <div class="font-medium text-slate-200 mb-2">📅 Timeline Interativa</div>
@@ -857,8 +836,6 @@ function aplicaFila(q){ const f=state.fila;
 function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
 
 async function _refresh(){
-  if(state.heatmap){ await renderHeatmap(); return; }
-  if(state.heatmapLayer){ map.removeLayer(state.heatmapLayer); state.heatmapLayer=null; }
   if(state.densidade){ if(!state.densLayer) renderDensidade(); return; }
   if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; document.getElementById('densCtl').style.display='none'; }
   if(state.choropleth){ renderChoropleth(); return; }
@@ -1106,155 +1083,6 @@ document.getElementById('btnDens').onclick = ()=>{
   }
   refresh();
 };
-
-// ---------- Heat Map Visualization ----------
-state.heatmap = false;
-state.heatmapLayer = null;
-state.heatmapData = [];
-async function renderHeatmap() {
-  try {
-    // Remover layer anterior
-    if(state.heatmapLayer) { map.removeLayer(state.heatmapLayer); state.heatmapLayer = null; }
-
-    // Ocultar pontos normais quando heatmap está ativo
-    if(state.heatmap) {
-      state.layer.clearLayers();
-    } else {
-      return;
-    }
-
-    // Aguardar até que leaflet-heat esteja disponível
-    let attempts = 0;
-    while(!window.L?.heatLayer && attempts < 10) {
-      await new Promise(r => setTimeout(r, 50));
-      attempts++;
-    }
-
-    // Load heatmap data from full bbox
-    if(state.heatmapData.length === 0) {
-      const b = map.getBounds();
-      const box = { min_lng:b.getWest(), min_lat:b.getSouth(), max_lng:b.getEast(), max_lat:b.getNorth() };
-      const data = await rpc('ip_pontos_bbox', {...box, limite:10000, ...filtros()}) || [];
-      state.heatmapData = data;
-      console.log('Heatmap data loaded:', state.heatmapData.length, 'pontos');
-    }
-
-    const metric = document.getElementById('heatmapMetric')?.value || 'led';
-    const pts = state.heatmapData;
-    console.log('Renderizando heatmap com metrica:', metric, 'pontos:', pts.length);
-
-    if(pts.length === 0) {
-      toast('Nenhum ponto para renderizar heatmap');
-      return;
-    }
-
-    const heatData = pts.map(p => {
-      let intensity = 0.5;
-      if(metric === 'led') {
-        intensity = p.modernizado_led ? 0.9 : 0.3;
-      } else if(metric === 'power') {
-        const normalized = Math.max(0, Math.min(1, (p.potencia_w || 50) / 400));
-        intensity = 0.2 + (normalized * 0.8);
-      } else if(metric === 'density') {
-        const normalized = Math.max(0, Math.min(1, (p.potencia_w || 50) / 400));
-        intensity = 0.2 + (normalized * 0.8);
-      }
-      return [p.lat, p.lon, intensity];
-    });
-
-    const radius = parseInt(document.getElementById('heatmapRadius')?.value || 50);
-
-    // Usar leaflet-heat com validação
-    if(window.L?.heatLayer && typeof L.heatLayer === 'function') {
-      state.heatmapLayer = L.heatLayer(heatData, {
-        radius,
-        blur: 40,
-        maxZoom: 18,
-        max: 1.0,
-        minOpacity: 0.05,
-        gradient: {
-          0.05: '#0284c7',
-          0.25: '#06b6d4',
-          0.45: '#10b981',
-          0.65: '#f59e0b',
-          0.85: '#ef4444',
-          1.0: '#7f1d1d'
-        }
-      }).addTo(map);
-      console.log('✅ Heatmap renderizado com leaflet-heat real');
-      toast(`🔥 Heatmap ativo (gradiente suave)`);
-    } else {
-      console.warn('⚠️ leaflet-heat não carregou, tentando modo canvas simulado');
-      state.heatmapLayer = L.featureGroup();
-      const gradient = ['#0284c7', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#7f1d1d'];
-
-      // Agregar pontos por grade para criar efeito de nuvem
-      const gridSize = radius / 111000;
-      const grid = {};
-      pts.forEach(p => {
-        const key = Math.floor(p.lat / gridSize) + ',' + Math.floor(p.lon / gridSize);
-        if(!grid[key]) grid[key] = [];
-        grid[key].push(p);
-      });
-
-      Object.values(grid).forEach(cluster => {
-        if(cluster.length === 0) return;
-        const lat = cluster.reduce((s, p) => s + p.lat, 0) / cluster.length;
-        const lon = cluster.reduce((s, p) => s + p.lon, 0) / cluster.length;
-        const intensity = Math.min(1, cluster.length / 10);
-        const colorIdx = Math.floor(intensity * (gradient.length - 1));
-        const color = gradient[colorIdx];
-        const size = Math.max(8, Math.min(30, cluster.length));
-        L.circleMarker([lat, lon], {
-          radius: size,
-          fillColor: color,
-          color: 'none',
-          fillOpacity: 0.6
-        }).addTo(state.heatmapLayer);
-      });
-      state.heatmapLayer.addTo(map);
-      toast(`🔥 Heatmap ativo (modo agregado)`);
-    }
-    toast(`🔥 Mapa de calor: ${pts.length} pontos`);
-  } catch(err) {
-    console.error('Erro ao renderizar heatmap:', err);
-    toast('Erro ao renderizar heatmap: ' + err.message, true);
-  }
-}
-
-document.getElementById('btnHeatmap').onclick = async () => {
-  state.heatmap = !state.heatmap;
-  document.getElementById('detail').style.display='none'; // Fechar painel de detalhes
-  if(state.heatmap && state.densidade) {
-    state.densidade = false;
-    document.getElementById('btnDens').classList.remove('on');
-    if(state.densLayer) { map.removeLayer(state.densLayer); state.densLayer = null; }
-  }
-  if(state.heatmap && state.choropleth) {
-    state.choropleth = false;
-    document.getElementById('btnChoro').classList.remove('on');
-    if(state.choroLayer) { map.removeLayer(state.choroLayer); state.choroLayer = null; }
-  }
-  document.getElementById('btnHeatmap').classList.toggle('on', state.heatmap);
-  document.getElementById('heatmapCtl').style.display = state.heatmap ? 'block' : 'none';
-  document.getElementById('legend').style.display = state.heatmap ? 'none' : 'block';
-  state.heatmapData = []; // Reset data to reload on next render
-  if(state.heatmap) {
-    await renderHeatmap();
-  } else {
-    if(state.heatmapLayer) { map.removeLayer(state.heatmapLayer); state.heatmapLayer = null; }
-    refresh(); // Recarregar pontos normais
-  }
-};
-
-document.getElementById('heatmapMetric')?.addEventListener('change', async () => {
-  state.heatmapData = [];
-  await renderHeatmap();
-});
-document.getElementById('heatmapRadius')?.addEventListener('input', async (e) => {
-  document.getElementById('heatmapRadiusValue').textContent = e.target.value;
-  await renderHeatmap();
-});
 
 // ---------- Timeline Visualization ----------
 state.timeline = false;
