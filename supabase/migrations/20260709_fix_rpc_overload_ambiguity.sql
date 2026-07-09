@@ -23,7 +23,7 @@ DROP FUNCTION IF EXISTS public.ip_inserir_ponto(
 ) CASCADE;
 
 -- Versão consolidada: APENAS numeric com p_requer_aprovacao
--- (Já criada em 20260709_fix_rpc_enum_type_casting.sql, apenas confirmando unicidade)
+-- Usa coluna 'geom' (PostGIS geometry) para lat/lng, não latitude/longitude
 CREATE OR REPLACE FUNCTION public.ip_inserir_ponto(
   p_lat numeric, p_lng numeric, p_tipo text, p_potencia integer,
   p_status text, p_modernizado boolean, p_endereco text, p_patrimonio text, p_obs text,
@@ -47,19 +47,20 @@ BEGIN
   v_id := gen_random_uuid();
 
   INSERT INTO public.pontos_luminaria (
-    id, latitude, longitude, tipo_ativo, tipo_luminaria,
-    potencia, led_instalado, tipo_iluminacao, status, observacoes,
-    endereco, patrimonio_enel, criado_em, criado_por
+    id, geom, tipo_ativo, tipo_luminaria, potencia_w,
+    modernizado_led, tipo_lampada, status, observacoes,
+    endereco, numero_patrimonio, criado_em, criado_por, classe_nbr
   ) VALUES (
     v_id,
-    p_lat::double precision, p_lng::double precision, p_tipo_ativo::ativo_tipo,
+    ST_SetSRID(ST_MakePoint(p_lng::double precision, p_lat::double precision), 4326),
+    p_tipo_ativo::ativo_tipo,
     CASE WHEN p_tipo_luminaria IS NOT NULL THEN p_tipo_luminaria::luminaria_tipo ELSE NULL END,
     CASE WHEN p_tipo_ativo = 'luminaria' THEN p_potencia ELSE NULL END,
     CASE WHEN p_tipo_ativo = 'luminaria' THEN p_modernizado ELSE NULL END,
-    CASE WHEN p_tipo_ativo = 'luminaria' THEN p_tipo ELSE NULL END,
-    COALESCE(p_status, 'a_verificar'),
+    CASE WHEN p_tipo_ativo = 'luminaria' THEN p_tipo::tipo_lampada ELSE NULL END,
+    COALESCE(p_status, 'a_verificar')::status_luminaria,
     COALESCE(p_obs, ''),
-    p_endereco, p_patrimonio, NOW(), auth.uid()
+    p_endereco, p_patrimonio, NOW(), auth.uid(), p_classe_nbr
   );
 
   RETURN v_id::TEXT;
