@@ -227,9 +227,9 @@
   <div class="flex gap-2 mb-2">
     <label class="text-xs text-slate-400">Métrica:</label>
     <select id="heatmapMetric" class="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs">
-      <option value="led">LED %</option>
+      <option value="led">LED (Modernização)</option>
+      <option value="power">Potência (W)</option>
       <option value="density">Densidade</option>
-      <option value="age">Idade</option>
     </select>
   </div>
   <div class="flex gap-2">
@@ -1124,12 +1124,9 @@ async function renderHeatmap() {
   const pts = state.heatmapData;
   const heatData = pts.map(p => {
     let intensity = 0.5;
-    if(metric === 'led') intensity = Math.max(0, Math.min(1, (p.percentual_led || 0) / 100));
-    else if(metric === 'density') intensity = Math.max(0, Math.min(1, (p.potencia || 100) / 250));
-    else if(metric === 'age') {
-      const age = new Date().getFullYear() - (p.ano_instalacao || 2000);
-      intensity = Math.max(0, Math.min(1, age / 30));
-    }
+    if(metric === 'led') intensity = p.modernizado_led ? 1.0 : 0.2;
+    else if(metric === 'density') intensity = Math.max(0.1, Math.min(1, (p.potencia_w || 100) / 400));
+    else if(metric === 'power') intensity = Math.max(0.1, Math.min(1, (p.potencia_w || 100) / 400));
     return [p.lat, p.lon, intensity];
   });
 
