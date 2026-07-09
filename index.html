@@ -1056,7 +1056,7 @@ map.on('click', function(e){
       p_status: ehLum ? document.getElementById('nStatus').value : 'a_verificar', p_modernizado: ehLum ? document.getElementById('nMod').checked : false,
       p_endereco: document.getElementById('nEnd').value || null, p_patrimonio: document.getElementById('nPatr').value || null, p_obs: 'cadastro via mapa',
       p_tipo_ativo: nAtivo.value, p_tipo_luminaria: ehLum ? (document.getElementById('nTipoLum').value || null) : null,
-      p_classe_nbr: ehLum ? (document.getElementById('nClasse').value || null) : null });
+      p_classe_nbr: ehLum ? (document.getElementById('nClasse').value || null) : null, p_requer_aprovacao: false });
     setBusy(false);
     if(error){ toast('Falha ao cadastrar: ' + error.message, true); return; }
     toast('Cadastrado: ' + (data || 'ok')); d.style.display = 'none'; state.choroData = null; state.densData = null; refresh(); loadStatsChips();
@@ -1583,7 +1583,7 @@ document.getElementById('btnNovo').onclick = ()=>{
       p_status: ehLum?document.getElementById('nStatus').value:'a_verificar', p_modernizado: ehLum?document.getElementById('nMod').checked:false,
       p_endereco:document.getElementById('nEnd').value||null, p_patrimonio:document.getElementById('nPatr').value||null, p_obs:'cadastro manual',
       p_tipo_ativo:nAtivo.value, p_tipo_luminaria: ehLum?(document.getElementById('nTipoLum').value||null):null,
-      p_classe_nbr: ehLum?(document.getElementById('nClasse').value||null):null });
+      p_classe_nbr: ehLum?(document.getElementById('nClasse').value||null):null, p_requer_aprovacao: false });
     setBusy(false);
     if(error){ toast('Falha ao cadastrar: '+error.message,true); return; }
     toast('Cadastrado: '+(data||'ok')); d.style.display='none'; state.choroData=null; state.densData=null; refresh(); loadStatsChips();
@@ -1799,7 +1799,7 @@ async function setUser(u){
   if(u){ try{ const {data}=await sb.from('profiles').select('role').eq('id',u.id).single(); state.userRole=data?.role||'leitura'; }
          catch(e){ state.userRole='leitura'; } }
   document.getElementById('btnNovo').style.display = podeEditar()?'inline-block':'none';
-  document.getElementById('btnAdminConsole').style.display = state.userRole==='admin'?'inline-block':'none';
+  document.getElementById('btnAdminConsole').style.display = podeEditar()?'inline-block':'none';
   document.getElementById('exportContainer').style.display = u?'block':'none';
 }
 document.getElementById('btnLogin').onclick=async ()=>{
