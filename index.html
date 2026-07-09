@@ -856,7 +856,7 @@ function aplicaFila(q){ const f=state.fila;
 function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
 
 async function _refresh(){
-  if(state.heatmap){ renderHeatmap(); return; }
+  if(state.heatmap){ await renderHeatmap(); return; }
   if(state.heatmapLayer){ map.removeLayer(state.heatmapLayer); state.heatmapLayer=null; }
   if(state.densidade){ if(!state.densLayer) renderDensidade(); return; }
   if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; document.getElementById('densCtl').style.display='none'; }
@@ -1109,33 +1109,47 @@ state.heatmap = false;
 state.heatmapLayer = null;
 state.heatmapData = [];
 async function renderHeatmap() {
-  if(state.heatmapLayer) { map.removeLayer(state.heatmapLayer); state.heatmapLayer = null; }
-  if(!state.heatmap) return;
+  try {
+    if(state.heatmapLayer) { map.removeLayer(state.heatmapLayer); state.heatmapLayer = null; }
+    if(!state.heatmap) return;
 
-  // Load heatmap data from full bbox
-  if(state.heatmapData.length === 0) {
-    const b = map.getBounds();
-    const box = { min_lng:b.getWest(), min_lat:b.getSouth(), max_lng:b.getEast(), max_lat:b.getNorth() };
-    const data = await rpc('ip_pontos_bbox', {...box, limite:10000, ...filtros()}) || [];
-    state.heatmapData = data;
+    // Load heatmap data from full bbox
+    if(state.heatmapData.length === 0) {
+      const b = map.getBounds();
+      const box = { min_lng:b.getWest(), min_lat:b.getSouth(), max_lng:b.getEast(), max_lat:b.getNorth() };
+      const data = await rpc('ip_pontos_bbox', {...box, limite:10000, ...filtros()}) || [];
+      state.heatmapData = data;
+      console.log('Heatmap data loaded:', state.heatmapData.length, 'pontos');
+    }
+
+    const metric = document.getElementById('heatmapMetric')?.value || 'led';
+    const pts = state.heatmapData;
+    console.log('Renderizando heatmap com metrica:', metric, 'pontos:', pts.length);
+
+    if(pts.length === 0) {
+      toast('Nenhum ponto para renderizar heatmap');
+      return;
+    }
+
+    const heatData = pts.map(p => {
+      let intensity = 0.5;
+      if(metric === 'led') intensity = p.modernizado_led ? 1.0 : 0.2;
+      else if(metric === 'density') intensity = Math.max(0.1, Math.min(1, (p.potencia_w || 100) / 400));
+      else if(metric === 'power') intensity = Math.max(0.1, Math.min(1, (p.potencia_w || 100) / 400));
+      return [p.lat, p.lon, intensity];
+    });
+
+    const radius = parseInt(document.getElementById('heatmapRadius')?.value || 30);
+    state.heatmapLayer = L.heatLayer(heatData, { radius, blur: 20, maxZoom: 18, max: 1.0, minOpacity: 0.2, gradient: {0.2: '#0284c7', 0.4: '#06b6d4', 0.6: '#10b981', 0.8: '#f59e0b', 1.0: '#ef4444'} }).addTo(map);
+    console.log('Heatmap renderizado com sucesso');
+    toast(`🔥 Mapa de calor: ${pts.length} pontos`);
+  } catch(err) {
+    console.error('Erro ao renderizar heatmap:', err);
+    toast('Erro ao renderizar heatmap: ' + err.message, true);
   }
-
-  const metric = document.getElementById('heatmapMetric')?.value || 'led';
-  const pts = state.heatmapData;
-  const heatData = pts.map(p => {
-    let intensity = 0.5;
-    if(metric === 'led') intensity = p.modernizado_led ? 1.0 : 0.2;
-    else if(metric === 'density') intensity = Math.max(0.1, Math.min(1, (p.potencia_w || 100) / 400));
-    else if(metric === 'power') intensity = Math.max(0.1, Math.min(1, (p.potencia_w || 100) / 400));
-    return [p.lat, p.lon, intensity];
-  });
-
-  const radius = parseInt(document.getElementById('heatmapRadius')?.value || 30);
-  state.heatmapLayer = L.heatLayer(heatData, { radius, blur: 20, maxZoom: 18, max: 1.0, minOpacity: 0.2, gradient: {0.2: '#0284c7', 0.4: '#06b6d4', 0.6: '#10b981', 0.8: '#f59e0b', 1.0: '#ef4444'} }).addTo(map);
-  toast(`Mapa de calor renderizado com ${pts.length} pontos`);
 }
 
-document.getElementById('btnHeatmap').onclick = () => {
+document.getElementById('btnHeatmap').onclick = async () => {
   state.heatmap = !state.heatmap;
   if(state.heatmap && state.densidade) {
     state.densidade = false;
@@ -1151,16 +1165,17 @@ document.getElementById('btnHeatmap').onclick = () => {
   document.getElementById('heatmapCtl').style.display = state.heatmap ? 'block' : 'none';
   document.getElementById('legend').style.display = state.heatmap ? 'none' : 'block';
   state.heatmapData = []; // Reset data to reload on next render
-  if(state.heatmap) renderHeatmap();
+  if(state.heatmap) await renderHeatmap();
+  else if(state.heatmapLayer) { map.removeLayer(state.heatmapLayer); state.heatmapLayer = null; }
 };
 
-document.getElementById('heatmapMetric')?.addEventListener('change', () => {
+document.getElementById('heatmapMetric')?.addEventListener('change', async () => {
   state.heatmapData = [];
-  renderHeatmap();
+  await renderHeatmap();
 });
-document.getElementById('heatmapRadius')?.addEventListener('input', (e) => {
+document.getElementById('heatmapRadius')?.addEventListener('input', async (e) => {
   document.getElementById('heatmapRadiusValue').textContent = e.target.value;
-  renderHeatmap();
+  await renderHeatmap();
 });
 
 // ---------- Timeline Visualization ----------
