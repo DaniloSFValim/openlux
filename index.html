@@ -164,6 +164,10 @@
         <label class="block text-xs font-medium text-gray-400 mb-1.5">📋 Fila de auditoria</label>
         <select id="fFila" class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"><option value="">— nenhuma —</option><option value="revisao">Marcados p/ revisão</option><option value="suspeito">LED suspeito (&gt;400 W)</option><option value="mod_seconser">Origem: SECONSER</option><option value="mod_censo">Origem: censo ENEL</option><option value="mod_campo">Origem: campo</option></select>
       </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">🏥 Status de Saúde</label>
+        <select id="fSaude" class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"><option value="">Qualquer</option><option value="verde">🟢 Bom</option><option value="amarelo">🟡 Manutenção</option><option value="vermelho">🔴 Crítico</option><option value="cinza">⚫ Não mapeado</option></select>
+      </div>
       <button id="fLimpar" class="w-full px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-medium transition-colors">Limpar filtros</button>
     </div>
   </div>
@@ -297,6 +301,7 @@
             <th class="px-3 py-2 text-left text-xs font-semibold text-slate-300">Tipo</th>
             <th class="px-3 py-2 text-right text-xs font-semibold text-slate-300">Pot.</th>
             <th class="px-3 py-2 text-left text-xs font-semibold text-slate-300">Estado</th>
+            <th class="px-3 py-2 text-left text-xs font-semibold text-slate-300">🏥 Saúde</th>
             <th class="px-3 py-2 text-left text-xs font-semibold text-slate-300">Origem mod.</th>
             <th class="px-3 py-2 text-right text-xs font-semibold text-slate-300"></th>
           </tr>
@@ -761,6 +766,22 @@ state.layer = L.layerGroup().addTo(map);
 const POINT_ZOOM = 16;
 function gridForZoom(z){ return Math.max(0.0015, 0.05/Math.pow(2, z-11)); }
 function colorFor(p){ if((p.tipo_ativo||'luminaria')!=='luminaria') return '#38bdf8'; if(p.modernizado_led) return '#22c55e'; if(p.tipo_lampada==='sem_lampada') return '#6b7280'; return '#f59e0b'; }
+function colorForHealth(p){
+  if((p.tipo_ativo||'luminaria')!=='luminaria') return '#38bdf8';
+  if(p.health_status==='verde') return '#10b981';
+  if(p.health_status==='amarelo') return '#f59e0b';
+  if(p.health_status==='vermelho') return '#ef4444';
+  return '#6b7280';
+}
+function healthStatusBadge(status){
+  const badges = {
+    'verde': { emoji: '🟢', label: 'Bom', color: '#10b981' },
+    'amarelo': { emoji: '🟡', label: 'Manutenção', color: '#f59e0b' },
+    'vermelho': { emoji: '🔴', label: 'Crítico', color: '#ef4444' },
+    'cinza': { emoji: '⚫', label: 'Não mapeado', color: '#6b7280' }
+  };
+  return badges[status] || badges['cinza'];
+}
 function svgLamp(color, hollow){
   const fill = hollow?'#141b24':color;
   return `<svg width="20" height="24" viewBox="0 0 20 24" xmlns="http://www.w3.org/2000/svg">`
@@ -822,7 +843,8 @@ function filtros(){
     p_power_min,
     p_power_max,
     p_data_inicio,
-    p_data_fim
+    p_data_fim,
+    p_health_status: state.saude||null
   };
 }
 function aplicaFila(q){ const f=state.fila;
@@ -851,7 +873,7 @@ async function _refresh(){
       let mk;
       if(usarIcones){ mk = L.marker([p.lat,p.lon],{icon:iconFor(p),keyboard:false}); }
       else { const rad = z>=18?9:(z>=17?7:6);
-        mk = L.circleMarker([p.lat,p.lon],{radius:rad,weight:1,color:'#0b0f14',fillColor:colorFor(p),fillOpacity:.95,bubblingMouseEvents:false}); }
+        mk = L.circleMarker([p.lat,p.lon],{radius:rad,weight:1,color:'#0b0f14',fillColor:colorForHealth(p),fillOpacity:.95,bubblingMouseEvents:false}); }
       mk.on('click',()=>openDetail(p)).addTo(state.layer);
     });
     const mh=document.getElementById('modeHint');
@@ -1183,11 +1205,13 @@ function openDetail(p){
   state.current=p;
   const d=document.getElementById('detail'); d.style.display='block';
   const badge=p.modernizado_led?`<span class="badge" style="background:#0d3d24;color:#4ade80">LED</span>`:`<span class="badge" style="background:#3d2f0d;color:#fbbf24">Pendente</span>`;
+  const healthBadge = healthStatusBadge(p.health_status);
+  const healthSpan=`<span class="badge" style="background:${healthBadge.color}33;color:${healthBadge.color};border:1px solid ${healthBadge.color}">${healthBadge.emoji} ${healthBadge.label}</span>`;
   const origem=p.fonte_modernizacao==='censo_enel'?'Censo ENEL':p.fonte_modernizacao==='seconser_pos_censo'?'SECONSER (pós-censo)':p.fonte_modernizacao==='campo'?'Campo':'—';
   const ehLum=(p.tipo_ativo||'luminaria')==='luminaria';
   d.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <b style="font-size:13px">${esc(p.codigo_seconser)||'—'}</b> ${ehLum?badge:''}</div>
+      <b style="font-size:13px">${esc(p.codigo_seconser)||'—'}</b> ${ehLum?badge+' '+healthSpan:healthSpan}</div>
     ${fld('Referência ENEL', p.numero_patrimonio)}
     ${fld('Tipo de ativo', ativoLabel(p.tipo_ativo||'luminaria'))}
     ${ehLum?fld('Tipo de luminária', p.tipo_luminaria):''}
@@ -1196,6 +1220,7 @@ function openDetail(p){
     ${ehLum?fld('Lâmpada', p.tipo_lampada):''}
     ${ehLum?fld('Potência', p.potencia_w? p.potencia_w+' W':null):''}
     ${ehLum?fld('Estado', p.status):''}
+    ${ehLum?fld('Status de Saúde', healthBadge.emoji + ' ' + healthBadge.label):''}
     ${ehLum?fld('Origem modernização', origem):''}
     ${p.flag_revisao_censo?`<div style="color:#fbbf24;font-size:11px;margin-top:4px">⚑ marcado para revisão</div>`:''}
     ${p.observacoes?`<div style="color:#9ca3af;font-size:11px;margin-top:6px">${esc(p.observacoes)}</div>`:''}
@@ -1640,8 +1665,8 @@ document.addEventListener('click', e=>{
 document.getElementById('btnVis').addEventListener('mouseenter',()=>{ document.getElementById('visPop').style.display='flex'; });
 document.getElementById('visPop').addEventListener('mouseleave',()=>{ document.getElementById('visPop').style.display='none'; });
 document.getElementById('fLimpar').onclick = ()=>{
-  state.bairro=state.tipo=state.estado=state.pot=state.fila='';
-  ['fBairro','fTipo','fEstado','fPot','fFila'].forEach(id=>document.getElementById(id).value='');
+  state.bairro=state.tipo=state.estado=state.pot=state.fila=state.saude='';
+  ['fBairro','fTipo','fEstado','fPot','fFila','fSaude'].forEach(id=>document.getElementById(id).value='');
   updateFCount(); loadStatsChips(); if(state.bairroLayer){map.removeLayer(state.bairroLayer);state.bairroLayer=null;}
   state.choroData=null; refresh();
 };
@@ -1652,13 +1677,14 @@ document.getElementById('fPot').onchange = e=>{ state.pot=e.target.value; update
 document.getElementById('fFila').onchange = async e=>{ state.fila=e.target.value; updateFCount(); state.choroData=null; refresh();
   if(e.target.value){ let q=sb.from('v_parque_export').select('id',{count:'exact',head:true}); q=aplicaFila(q);
     const {count}=await q; toast('Fila: '+((count||0).toLocaleString('pt-BR'))+' ponto(s)'); } };
+document.getElementById('fSaude').onchange = e=>{ state.saude=e.target.value; updateFCount(); refresh(); };
 document.getElementById('btnStats').onclick = ()=>{ const s=document.getElementById('stats'); if(s.style.display==='block'){s.style.display='none';} else {s.style.display='block'; loadStatsPanel();} };
 
 // ---------- Tabela ----------
 async function loadTable(){
   setBusy(true);
   document.getElementById('tBody').innerHTML='<tr><td colspan="8" style="text-align:center;color:#6b7280;padding:18px"><span class="spin"></span> Carregando…</td></tr>';
-  let q=sb.from('v_parque_export').select('id,codigo_seconser,numero_patrimonio,endereco,bairro_nome,tipo_lampada,potencia_w,modernizado_led,fonte_modernizacao,status,observacoes,lat,lon,tipo_ativo,tipo_luminaria,classe_nbr',{count:'exact'});
+  let q=sb.from('v_parque_export').select('id,codigo_seconser,numero_patrimonio,endereco,bairro_nome,tipo_lampada,potencia_w,modernizado_led,fonte_modernizacao,status,observacoes,lat,lon,tipo_ativo,tipo_luminaria,classe_nbr,health_status',{count:'exact'});
   const s=document.getElementById('tSearch').value.trim();
   const bb=document.getElementById('tBairro').value, st=document.getElementById('tStatus').value;
   if(s) q=q.or(`codigo_seconser.ilike.%${s}%,endereco.ilike.%${s}%,numero_patrimonio.ilike.%${s}%`);
@@ -1678,7 +1704,8 @@ async function loadTable(){
   const linhas=(data||[]).map(p=>{
     const origem=p.fonte_modernizacao==='censo_enel'?'censo':p.fonte_modernizacao==='seconser_pos_censo'?'SECONSER':p.fonte_modernizacao==='campo'?'campo':'—';
     const est=p.modernizado_led?`<span class="badge" style="background:#0d3d24;color:#4ade80">LED</span>`:`<span class="badge" style="background:#3d2f0d;color:#fbbf24">Pend.</span>`;
-    return `<tr><td>${esc(p.codigo_seconser)||'—'}</td><td>${esc(p.endereco)||'—'}</td><td>${esc(p.bairro_nome)||'—'}</td><td>${p.tipo_lampada}</td><td>${p.potencia_w||'—'}</td><td>${est}</td><td style="color:#9ca3af">${origem}</td>
+    const healthBadge = healthStatusBadge(p.health_status);
+    return `<tr><td>${esc(p.codigo_seconser)||'—'}</td><td>${esc(p.endereco)||'—'}</td><td>${esc(p.bairro_nome)||'—'}</td><td>${p.tipo_lampada}</td><td>${p.potencia_w||'—'}</td><td>${est}</td><td style="color:${healthBadge.color}">${healthBadge.emoji} ${healthBadge.label}</td><td style="color:#9ca3af">${origem}</td>
       <td>${podeEditar()?`<button class="btn" style="padding:2px 8px" onclick="window._editId('${p.id}')" aria-label="Editar luminária">editar</button>`:''}</td></tr>`;
   }).join('');
   document.getElementById('tBody').innerHTML = linhas || '<tr><td colspan="8" style="text-align:center;color:#6b7280;padding:18px">Nenhum registro encontrado</td></tr>';
