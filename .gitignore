@@ -36,3 +36,6 @@ npm-debug.log*
 *.key
 *.pem
 secrets.json
+
+# Netlify build output
+dist/
