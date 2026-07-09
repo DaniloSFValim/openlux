@@ -1070,33 +1070,131 @@ function openDetail(p){
 window._edit = function(){
   const p=state.current; if(!p) return;
   const d=document.getElementById('detail');
+
+  const initialValues = {
+    lat: p.lat??'', lng: p.lon??'', tipo: p.tipo_lampada, pot: p.potencia_w||'',
+    status: p.status, mod: p.modernizado_led, tipoLum: p.tipo_luminaria||'', classe: p.classe_nbr||'', obs: p.observacoes||''
+  };
+
   d.innerHTML = `
-    <b style="font-size:13px">Editar · ${esc(p.numero_patrimonio)}</b>
-    <div style="margin-top:8px;display:flex;flex-direction:column;gap:7px">
-      <div style="display:flex;gap:6px">
-        <label style="font-size:11px;color:#9ca3af;flex:1">Latitude<input id="eLat" type="number" step="0.000001" value="${p.lat??''}"/></label>
-        <label style="font-size:11px;color:#9ca3af;flex:1">Longitude<input id="eLng" type="number" step="0.000001" value="${p.lon??''}"/></label>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #1f2a37">
+      <div>
+        <b style="font-size:13px">✏️ Editar Ativo</b>
+        <div style="font-size:11px;color:#9ca3af;margin-top:2px">${esc(p.numero_patrimonio)}</div>
       </div>
-      <label style="font-size:11px;color:#9ca3af">Tipo<select id="eTipo">${TIPOS.map(t=>`<option ${t===p.tipo_lampada?'selected':''}>${t}</option>`).join('')}</select></label>
-      <label style="font-size:11px;color:#9ca3af">Potência (W)<input id="ePot" type="number" value="${p.potencia_w||''}"/></label>
-      <label style="font-size:11px;color:#9ca3af">Estado<select id="eStatus">${STATUS.map(s=>`<option ${s===p.status?'selected':''}>${s}</option>`).join('')}</select></label>
-      <label style="font-size:12px;display:flex;gap:8px;align-items:center;color:#e5e7eb"><input type="checkbox" id="eMod" ${p.modernizado_led?'checked':''} style="width:auto"/> Modernizado para LED</label>
-      <label style="font-size:11px;color:#9ca3af">Tipo de luminária<select id="eTipoLum"><option value="">—</option>${TIPO_LUM.map(t=>`<option ${t===p.tipo_luminaria?'selected':''}>${t}</option>`).join('')}</select></label>
-      <label style="font-size:11px;color:#9ca3af">Classe NBR<input id="eClasse" value="${esc(p.classe_nbr)}" placeholder="V3, P2, C4…"/></label>
-      <label style="font-size:11px;color:#9ca3af">Observações<textarea id="eObs" rows="2">${esc(p.observacoes)}</textarea></label>
-      <div style="display:flex;gap:8px"><button class="btn btn-accent" style="flex:1" id="eSave">Salvar</button><button class="btn" onclick="window._reopen()">Cancelar</button></div>
-      <button class="btn" id="eDelete" style="border-color:#ef4444;color:#f87171">🗑 Excluir ativo</button>
-    </div>`;
+      <div id="editChangedCount" style="background:#1f2a37;padding:4px 8px;border-radius:8px;font-size:11px;color:#9ca3af;font-weight:600;display:none">0 campos</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">📍 Latitude</label>
+        <input id="eLat" type="number" step="0.000001" value="${initialValues.lat}" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;transition:all 0.2s" placeholder="-22.90"/>
+        <div id="latError" style="font-size:9px;color:#ef4444;margin-top:2px;display:none"></div>
+      </div>
+      <div>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">📍 Longitude</label>
+        <input id="eLng" type="number" step="0.000001" value="${initialValues.lng}" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;transition:all 0.2s" placeholder="-43.10"/>
+        <div id="lngError" style="font-size:9px;color:#ef4444;margin-top:2px;display:none"></div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">💡 Tipo</label>
+        <select id="eTipo" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;cursor:pointer">${TIPOS.map(t=>'<option '+((t===initialValues.tipo)?'selected':'')+'>'+t+'</option>').join('')}</select>
+      </div>
+      <div>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">⚡ Potência (W)</label>
+        <input id="ePot" type="number" value="${initialValues.pot}" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px" placeholder="0-2000"/>
+        <div id="potError" style="font-size:9px;color:#ef4444;margin-top:2px;display:none"></div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">🔧 Estado</label>
+        <select id="eStatus" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;cursor:pointer">${STATUS.map(s=>'<option '+(s===initialValues.status?'selected':'')+'>'+s+'</option>').join('')}</select>
+      </div>
+      <div style="display:flex;align-items:flex-end">
+        <label style="font-size:11px;color:#e5e7eb;display:flex;gap:8px;align-items:center;cursor:pointer;padding:6px;border-radius:4px;flex:1">
+          <input type="checkbox" id="eMod" ${initialValues.mod?'checked':''} style="width:16px;height:16px;cursor:pointer;accent-color:#3b82f6"/>
+          ⚡ LED
+        </label>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">🏷️ Tipo Luminária</label>
+        <select id="eTipoLum" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;cursor:pointer"><option value="">—</option>${TIPO_LUM.map(t=>'<option '+(t===initialValues.tipoLum?'selected':'')+'>'+t+'</option>').join('')}</select>
+      </div>
+      <div>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">📋 Classe NBR</label>
+        <input id="eClasse" value="${initialValues.classe}" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px" placeholder="V3, P2…"/>
+      </div>
+    </div>
+
+    <div style="margin-bottom:8px">
+      <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">📝 Observações</label>
+      <textarea id="eObs" rows="2" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;font-family:monospace;resize:vertical">${esc(initialValues.obs)}</textarea>
+    </div>
+
+    <div id="editStatus" style="font-size:11px;padding:6px;border-radius:4px;margin-bottom:8px;display:none;font-weight:600"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
+      <button class="btn" style="background:linear-gradient(to right, #3b82f6, #2563eb);border:none;color:white;padding:8px;border-radius:4px;font-weight:600;cursor:pointer" id="eSave">💾 Salvar</button>
+      <button class="btn" style="background:#1f2a37;border:1px solid #374151;color:#cbd5e1;padding:8px;border-radius:4px;cursor:pointer" onclick="window._reopen()">Cancel</button>
+    </div>
+    <button class="btn" id="eDelete" style="width:100%;border-color:#7f1d1d;background:#1f0f0f;color:#f87171;padding:6px;border-radius:4px;cursor:pointer;font-weight:600">🗑️ Excluir Ativo</button>`;
+
+  const trackChanges = () => {
+    const changed = Object.keys(initialValues).filter(k => {
+      const el = document.getElementById({lat:'eLat',lng:'eLng',tipo:'eTipo',pot:'ePot',status:'eStatus',mod:'eMod',tipoLum:'eTipoLum',classe:'eClasse',obs:'eObs'}[k]);
+      if (!el) return false;
+      const current = el.type === 'checkbox' ? el.checked : el.value;
+      return current != initialValues[k];
+    });
+    const counter = document.getElementById('editChangedCount');
+    if (changed.length > 0) {
+      counter.textContent = changed.length + ' campo' + (changed.length !== 1 ? 's' : '');
+      counter.style.display = 'block';
+    } else {
+      counter.style.display = 'none';
+    }
+  };
+
+  ['eLat','eLng','ePot','eTipo','eStatus','eMod','eTipoLum','eClasse','eObs'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('change', trackChanges);
+      el.addEventListener('input', trackChanges);
+    }
+  });
+
   document.getElementById('eDelete').onclick = ()=>window._excluirPonto(p);
   document.getElementById('eSave').onclick = async ()=>{
     const pot=parseInt(document.getElementById('ePot').value);
-    if(!isNaN(pot) && (pot<0||pot>2000)){ toast('Potência fora da faixa (0–2000 W)',true); return; }
+    if(!isNaN(pot) && (pot<0||pot>2000)){ document.getElementById('potError').textContent='Fora da faixa (0-2000 W)'; document.getElementById('potError').style.display='block'; return; }
+    document.getElementById('potError').style.display='none';
+
     const lat=parseFloat(document.getElementById('eLat').value), lng=parseFloat(document.getElementById('eLng').value);
     let pLat=null,pLng=null;
     if(!(isNaN(lat)&&isNaN(lng))){
-      if(isNaN(lat)||isNaN(lng)||lat<-23.05||lat>-22.80||lng<-43.20||lng>-42.90){ toast('Coordenadas inválidas ou fora de Niterói',true); return; }
+      if(isNaN(lat)||isNaN(lng)||lat<-23.05||lat>-22.80||lng<-43.20||lng>-42.90){
+        document.getElementById('latError').textContent=isNaN(lat)?'Inválido':'Fora de Niterói';
+        document.getElementById('lngError').textContent=isNaN(lng)?'Inválido':'Fora de Niterói';
+        document.getElementById('latError').style.display='block';
+        document.getElementById('lngError').style.display='block';
+        return;
+      }
+      document.getElementById('latError').style.display='none';
+      document.getElementById('lngError').style.display='none';
       pLat=+lat.toFixed(6); pLng=+lng.toFixed(6);
     }
+
+    const status = document.getElementById('editStatus');
+    status.textContent='⏳ Salvando…'; status.style.color='#9ca3af'; status.style.display='block';
+
     setBusy(true);
     const {error}=await sb.rpc('ip_atualizar_ponto',{ p_id:p.id, p_tipo:document.getElementById('eTipo').value,
       p_potencia:isNaN(pot)?null:pot, p_status:document.getElementById('eStatus').value,
@@ -1104,8 +1202,10 @@ window._edit = function(){
       p_lat:pLat, p_lng:pLng,
       p_tipo_luminaria:document.getElementById('eTipoLum').value||null, p_classe_nbr:document.getElementById('eClasse').value||null });
     setBusy(false);
-    if(error){ toast('Falha ao salvar: '+error.message,true); return; }
-    toast('Ponto atualizado'); document.getElementById('detail').style.display='none';
+
+    if(error){ status.textContent='❌ Erro: '+error.message; status.style.color='#ef4444'; status.style.display='block'; return; }
+    status.textContent='✅ Ponto atualizado!'; status.style.color='#4ade80'; status.style.display='block';
+    setTimeout(()=>{ document.getElementById('detail').style.display='none'; }, 1500);
     state.choroData=null; state.densData=null; refresh(); loadStatsChips();
   };
 };
