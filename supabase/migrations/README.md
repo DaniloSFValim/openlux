@@ -50,7 +50,7 @@ ex.: `20260709_fix_...`). Eles foram movidos para fora deste diretório porque:
 **Não execute os arquivos do archive.** Eles estão preservados apenas como
 registro histórico das intenções de cada PR.
 
-## Estado em 2026-07-09
+## Estado em 2026-07-10
 
 Últimas versões aplicadas e espelhadas aqui:
 
@@ -60,6 +60,7 @@ registro histórico das intenções de cada PR.
 | `20260709182416` | `create_storage_buckets_luminarias` | Buckets `luminarias-fotos` / `luminarias-ies` + policies |
 | `20260709183525` | `drop_dead_rpc_overloads` | Remove 10 overloads mortas (clusters_grid ×4, pontos_bbox ×2, atualizar_ponto ×2, criar/atualizar_modelo ×1 cada) |
 | `20260709183630` | `harden_write_rpc_grants` | REVOKE EXECUTE de `anon`/`PUBLIC` nas 10 funções de escrita; `search_path` fixado em `aprovar_mudanca` e `ip_registrar_intervencao` |
+| `20260710160356` | `expand_pontos_tier3_photometry` | Tier 3 fotometria: tabela `ref_material_piso` + colunas `angulo_inclinacao_graus`/`material_piso`; `ip_inserir_ponto` (15 args) e `ip_atualizar_ponto` (13 args) recriadas com `p_angulo`/`p_material` (assinatura única, grants re-hardened); `v_parque_export` e `ip_pontos_bbox` expõem as 2 colunas |
 
 Versões anteriores a essas existem no histórico do banco mas não têm arquivo
 neste diretório (foram aplicadas pelo dashboard/MCP antes desta organização).

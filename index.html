@@ -843,6 +843,64 @@ const TIPO_ATIVO = [['luminaria','Luminária'],['caixa_comando','Caixa de comand
 const TIPO_LUM = ["viaria","globo","petala","projetor","balizador","orla","ornamental","piso","outro"];
 const INTERV = [['instalacao','Instalação'],['substituicao','Substituição'],['manutencao','Manutenção'],['vistoria','Vistoria'],['remocao','Remoção']];
 function ativoLabel(t){ return (TIPO_ATIVO.find(x=>x[0]===t)||[t,t])[1]; }
+
+// ---------- Tier 3 · Fotometria de instalação (ângulo + material do piso) ----------
+// Ângulo de apontamento do facho medido a partir da vertical descendente (nadir):
+// 0° = reto para baixo (full-cutoff, ideal) · 90° = horizontal · 120° = uplight.
+// Modelo, fórmulas e referências: docs/FIELD_REFERENCE_TIER3_PHOTOMETRY.md
+const ANGULOS_INCLINACAO = [
+  [0,   '0° — Prumo · reto p/ baixo (full-cutoff)'],
+  [15,  '15° — Quase vertical'],
+  [30,  '30° — Inclinação leve'],
+  [45,  '45° — Inclinação média'],
+  [60,  '60° — Inclinação acentuada'],
+  [75,  '75° — Muito rasante'],
+  [90,  '90° — Horizontal (paralelo ao solo)'],
+  [120, '120° — Uplight (acima da horizontal)']
+];
+// Materiais de piso com refletância difusa média ρ (espelho do ref_material_piso do banco).
+// Fontes: CIE 144, CIE 30.2, ABNT NBR 5101, IESNA.
+const MATERIAIS_PISO = [
+  ['asfalto_novo',       'Asfalto novo (escuro)',       0.07],
+  ['asfalto_desgastado', 'Asfalto desgastado (claro)',  0.12],
+  ['concreto',           'Concreto / cimento',          0.30],
+  ['paralelepipedo',     'Paralelepípedo / pedra',      0.18],
+  ['terra',              'Terra batida',                0.20],
+  ['vegetacao',          'Vegetação / grama',           0.08],
+  ['areia',              'Areia',                       0.25],
+  ['agua',               "Água (espelho d'água)",       0.06]
+];
+function materialLabel(k){ return (MATERIAIS_PISO.find(m=>m[0]===k)||[k,k])[1]; }
+function materialRho(k){ const m=MATERIAIS_PISO.find(x=>x[0]===k); return m?m[2]:null; }
+// Índices de primeira ordem (proxy geométrico documentado — ver doc Tier 3).
+//  η_piso  = aproveitamento direto no piso   = max(0, cos θ)
+//  P       = poluição luminosa (proxy 0..1)  = (1-η_piso) + ρ·η_piso·f_up
+//  L_rel   = luminância relativa da superfície (percepção) = η_piso·ρ
+function fotometriaIndices(anguloDeg, materialKey){
+  if(anguloDeg==null || anguloDeg==='' || !materialKey) return null;
+  const rho = materialRho(materialKey);
+  if(rho==null) return null;
+  const th = Number(anguloDeg)*Math.PI/180;
+  const etaPiso = Math.max(0, Math.cos(th));   // fração útil incidente no piso
+  const fUp = 0.5;                             // fração da reflexão difusa que retorna ao hemisfério superior
+  const P = Math.min(1, (1-etaPiso) + rho*etaPiso*fUp);
+  const Lrel = etaPiso*rho;
+  return { etaPiso, P, Lrel, rho };
+}
+// Bloco HTML resumindo os índices (usado no painel de detalhe e no preview de edição).
+function fotoIdxHtml(anguloDeg, materialKey){
+  const r = fotometriaIndices(anguloDeg, materialKey);
+  if(!r) return '';
+  const pct = x => Math.round(x*100)+'%';
+  const cor = (v,bom) => bom ? (v>=0.66?'#4ade80':v>=0.33?'#fbbf24':'#f87171')
+                             : (v<=0.33?'#4ade80':v<=0.66?'#fbbf24':'#f87171');
+  const bar = (v,bom) => `<div style="height:5px;border-radius:3px;background:#1f2a37;overflow:hidden;margin-top:2px"><div style="height:100%;width:${pct(v)};background:${cor(v,bom)}"></div></div>`;
+  return `<div style="font-weight:600;color:#cbd5e1;margin-bottom:4px">📐 Índices fotométricos (proxy 1ª ordem)</div>
+    <div style="display:flex;justify-content:space-between"><span>Aproveitamento no piso</span><b style="color:${cor(r.etaPiso,true)}">${pct(r.etaPiso)}</b></div>${bar(r.etaPiso,true)}
+    <div style="display:flex;justify-content:space-between;margin-top:5px"><span>Poluição luminosa</span><b style="color:${cor(r.P,false)}">${pct(r.P)}</b></div>${bar(r.P,false)}
+    <div style="display:flex;justify-content:space-between;margin-top:5px"><span>Luminância relativa (percepção)</span><b>${pct(r.Lrel)}</b></div>${bar(r.Lrel,true)}
+    <div style="color:#6b7280;margin-top:5px;font-size:9.5px">ρ=${r.rho.toFixed(2)} · modelo geométrico documentado em docs/FIELD_REFERENCE_TIER3_PHOTOMETRY.md</div>`;
+}
 function intervLabel(t){ return (INTERV.find(x=>x[0]===t)||[t,t])[1]; }
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
@@ -1053,6 +1111,11 @@ map.on('click', function(e){
         <input id="nPot" type="number" placeholder="Potência (W)"/>
         <select id="nStatus">${statusOpts}</select>
         <label style="font-size:12px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="nMod" style="width:auto"/> LED</label>
+        <div style="margin-top:2px;padding-top:6px;border-top:1px solid #1f2a37;display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.4px">📐 Fotometria da instalação (opcional)</div>
+          <label style="font-size:11px;color:#9ca3af">Ângulo de apontamento<select id="nAngulo"><option value="">— não classificado</option>${ANGULOS_INCLINACAO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
+          <label style="font-size:11px;color:#9ca3af">Material do piso<select id="nMaterial"><option value="">— não classificado</option>${MATERIAIS_PISO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
+        </div>
       </div>
       <div style="display:flex;gap:8px"><button class="btn btn-accent" style="flex:1" id="nSave">Cadastrar</button><button class="btn" onclick="document.getElementById('detail').style.display='none'">Cancelar</button></div>
     </div>`;
@@ -1089,7 +1152,9 @@ map.on('click', function(e){
       p_status: ehLum ? document.getElementById('nStatus').value : 'a_verificar', p_modernizado: ehLum ? document.getElementById('nMod').checked : false,
       p_endereco: document.getElementById('nEnd').value || null, p_patrimonio: document.getElementById('nPatr').value || null, p_obs: 'cadastro via mapa',
       p_tipo_ativo: nAtivo.value, p_tipo_luminaria: ehLum ? (document.getElementById('nTipoLum').value || null) : null,
-      p_classe_nbr: ehLum ? (document.getElementById('nClasse').value || null) : null, p_requer_aprovacao: false });
+      p_classe_nbr: ehLum ? (document.getElementById('nClasse').value || null) : null, p_requer_aprovacao: false,
+      p_angulo: ehLum ? (document.getElementById('nAngulo').value!==''?parseInt(document.getElementById('nAngulo').value):null) : null,
+      p_material: ehLum ? (document.getElementById('nMaterial').value || null) : null });
     setBusy(false);
     if(error){ toast('Falha ao cadastrar: ' + error.message, true); return; }
     toast('Cadastrado: ' + (data || 'ok')); d.style.display = 'none'; state.choroData = null; state.densData = null; refresh(); loadStatsChips();
@@ -1329,6 +1394,9 @@ function openDetail(p){
     ${ehLum?fld('Estado', p.status):''}
     ${ehLum?fld('Status de Saúde', healthBadge.emoji + ' ' + healthBadge.label):''}
     ${ehLum?fld('Origem modernização', origem):''}
+    ${ehLum&&p.angulo_inclinacao_graus!=null?fld('Ângulo (nadir)', p.angulo_inclinacao_graus+'°'):''}
+    ${ehLum&&p.material_piso?fld('Material do piso', materialLabel(p.material_piso)):''}
+    ${ehLum&&fotometriaIndices(p.angulo_inclinacao_graus, p.material_piso)?`<div style="font-size:10.5px;color:#9ca3af;background:#0f151c;border:1px solid #1f2a37;border-radius:6px;padding:7px;margin-top:6px">${fotoIdxHtml(p.angulo_inclinacao_graus, p.material_piso)}</div>`:''}
     ${p.flag_revisao_censo?`<div style="color:#fbbf24;font-size:11px;margin-top:4px">⚑ marcado para revisão</div>`:''}
     ${p.observacoes?`<div style="color:#9ca3af;font-size:11px;margin-top:6px">${esc(p.observacoes)}</div>`:''}
     ${state.user?`<div style="display:flex;gap:6px;margin-top:8px">
@@ -1345,7 +1413,8 @@ window._edit = function(){
 
   const initialValues = {
     lat: p.lat??'', lng: p.lon??'', tipo: p.tipo_lampada, pot: p.potencia_w||'',
-    status: p.status, mod: p.modernizado_led, tipoLum: p.tipo_luminaria||'', classe: p.classe_nbr||'', obs: p.observacoes||''
+    status: p.status, mod: p.modernizado_led, tipoLum: p.tipo_luminaria||'', classe: p.classe_nbr||'', obs: p.observacoes||'',
+    angulo: (p.angulo_inclinacao_graus??'')===''?'':String(p.angulo_inclinacao_graus), material: p.material_piso||''
   };
 
   d.innerHTML = `
@@ -1406,6 +1475,18 @@ window._edit = function(){
       </div>
     </div>
 
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">📐 Ângulo (nadir)</label>
+        <select id="eAngulo" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;cursor:pointer"><option value="">— não classificado</option>${ANGULOS_INCLINACAO.map(([v,l])=>'<option value="'+v+'"'+(String(v)===initialValues.angulo?' selected':'')+'>'+l+'</option>').join('')}</select>
+      </div>
+      <div>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">🧱 Material do piso</label>
+        <select id="eMaterial" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;cursor:pointer"><option value="">— não classificado</option>${MATERIAIS_PISO.map(([v,l])=>'<option value="'+v+'"'+(v===initialValues.material?' selected':'')+'>'+l+'</option>').join('')}</select>
+      </div>
+    </div>
+    <div id="eFotoIdx" style="font-size:10.5px;color:#9ca3af;background:#0f151c;border:1px solid #1f2a37;border-radius:4px;padding:6px;margin-bottom:8px;display:none"></div>
+
     <div style="margin-bottom:8px">
       <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">📝 Observações</label>
       <textarea id="eObs" rows="2" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;font-family:monospace;resize:vertical">${esc(initialValues.obs)}</textarea>
@@ -1419,9 +1500,17 @@ window._edit = function(){
     </div>
     <button class="btn" id="eDelete" style="width:100%;border-color:#7f1d1d;background:#1f0f0f;color:#f87171;padding:6px;border-radius:4px;cursor:pointer;font-weight:600">🗑️ Excluir Ativo</button>`;
 
+  const renderFotoIdx = () => {
+    const box = document.getElementById('eFotoIdx'); if(!box) return;
+    const av = document.getElementById('eAngulo').value;
+    const mv = document.getElementById('eMaterial').value;
+    box.innerHTML = fotoIdxHtml(av, mv);
+    box.style.display = (av!=='' && mv!=='') ? 'block' : 'none';
+  };
+
   const trackChanges = () => {
     const changed = Object.keys(initialValues).filter(k => {
-      const el = document.getElementById({lat:'eLat',lng:'eLng',tipo:'eTipo',pot:'ePot',status:'eStatus',mod:'eMod',tipoLum:'eTipoLum',classe:'eClasse',obs:'eObs'}[k]);
+      const el = document.getElementById({lat:'eLat',lng:'eLng',tipo:'eTipo',pot:'ePot',status:'eStatus',mod:'eMod',tipoLum:'eTipoLum',classe:'eClasse',obs:'eObs',angulo:'eAngulo',material:'eMaterial'}[k]);
       if (!el) return false;
       const current = el.type === 'checkbox' ? el.checked : el.value;
       return current != initialValues[k];
@@ -1435,13 +1524,15 @@ window._edit = function(){
     }
   };
 
-  ['eLat','eLng','ePot','eTipo','eStatus','eMod','eTipoLum','eClasse','eObs'].forEach(id => {
+  ['eLat','eLng','ePot','eTipo','eStatus','eMod','eTipoLum','eClasse','eObs','eAngulo','eMaterial'].forEach(id => {
     const el = document.getElementById(id);
     if (el) {
       el.addEventListener('change', trackChanges);
       el.addEventListener('input', trackChanges);
     }
   });
+  ['eAngulo','eMaterial'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('change', renderFotoIdx); });
+  renderFotoIdx();
 
   document.getElementById('eDelete').onclick = ()=>window._excluirPonto(p);
   document.getElementById('eSave').onclick = async ()=>{
@@ -1472,7 +1563,9 @@ window._edit = function(){
       p_potencia:isNaN(pot)?null:pot, p_status:document.getElementById('eStatus').value,
       p_modernizado:document.getElementById('eMod').checked, p_obs:document.getElementById('eObs').value||null,
       p_lat:pLat, p_lng:pLng,
-      p_tipo_luminaria:document.getElementById('eTipoLum').value||null, p_classe_nbr:document.getElementById('eClasse').value||null });
+      p_tipo_luminaria:document.getElementById('eTipoLum').value||null, p_classe_nbr:document.getElementById('eClasse').value||null,
+      p_angulo:document.getElementById('eAngulo').value!==''?parseInt(document.getElementById('eAngulo').value):null,
+      p_material:document.getElementById('eMaterial').value||null });
     setBusy(false);
 
     if(error){ status.textContent='❌ Erro: '+error.message; status.style.color='#ef4444'; status.style.display='block'; return; }
@@ -1594,6 +1687,11 @@ document.getElementById('btnNovo').onclick = ()=>{
         <input id="nPot" type="number" placeholder="Potência (W)"/>
         <select id="nStatus">${STATUS.map(s=>`<option>${s}</option>`).join('')}</select>
         <label style="font-size:12px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="nMod" style="width:auto"/> LED</label>
+        <div style="margin-top:2px;padding-top:6px;border-top:1px solid #1f2a37;display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.4px">📐 Fotometria da instalação (opcional)</div>
+          <label style="font-size:11px;color:#9ca3af">Ângulo de apontamento<select id="nAngulo"><option value="">— não classificado</option>${ANGULOS_INCLINACAO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
+          <label style="font-size:11px;color:#9ca3af">Material do piso<select id="nMaterial"><option value="">— não classificado</option>${MATERIAIS_PISO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
+        </div>
       </div>
       <div style="display:flex;gap:8px"><button class="btn btn-accent" style="flex:1" id="nSave">Cadastrar</button><button class="btn" onclick="document.getElementById('detail').style.display='none'">Cancelar</button></div>
     </div>`;
@@ -1616,7 +1714,9 @@ document.getElementById('btnNovo').onclick = ()=>{
       p_status: ehLum?document.getElementById('nStatus').value:'a_verificar', p_modernizado: ehLum?document.getElementById('nMod').checked:false,
       p_endereco:document.getElementById('nEnd').value||null, p_patrimonio:document.getElementById('nPatr').value||null, p_obs:'cadastro manual',
       p_tipo_ativo:nAtivo.value, p_tipo_luminaria: ehLum?(document.getElementById('nTipoLum').value||null):null,
-      p_classe_nbr: ehLum?(document.getElementById('nClasse').value||null):null, p_requer_aprovacao: false });
+      p_classe_nbr: ehLum?(document.getElementById('nClasse').value||null):null, p_requer_aprovacao: false,
+      p_angulo: ehLum ? (document.getElementById('nAngulo').value!==''?parseInt(document.getElementById('nAngulo').value):null) : null,
+      p_material: ehLum ? (document.getElementById('nMaterial').value||null) : null });
     setBusy(false);
     if(error){ toast('Falha ao cadastrar: '+error.message,true); return; }
     toast('Cadastrado: '+(data||'ok')); d.style.display='none'; state.choroData=null; state.densData=null; refresh(); loadStatsChips();
