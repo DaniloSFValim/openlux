@@ -59,6 +59,7 @@ comando georreferenciados, com histórico de intervenções e indicadores em tem
 - 4 mapas-base (escuro, claro, ruas, satélite)
 - Coroplético por bairro e grid de densidade
 - 🔥 **Heat maps**: % LED, densidade e idade
+- ✏️ **Seleção por área** (polígono): contagem, densidade, % LED e export só da região (PostGIS)
 
 </td>
 <td width="50%" valign="top">

@@ -61,6 +61,7 @@ registro histórico das intenções de cada PR.
 | `20260709183525` | `drop_dead_rpc_overloads` | Remove 10 overloads mortas (clusters_grid ×4, pontos_bbox ×2, atualizar_ponto ×2, criar/atualizar_modelo ×1 cada) |
 | `20260709183630` | `harden_write_rpc_grants` | REVOKE EXECUTE de `anon`/`PUBLIC` nas 10 funções de escrita; `search_path` fixado em `aprovar_mudanca` e `ip_registrar_intervencao` |
 | `20260710160356` | `expand_pontos_tier3_photometry` | Tier 3 fotometria: tabela `ref_material_piso` + colunas `angulo_inclinacao_graus`/`material_piso`; `ip_inserir_ponto` (15 args) e `ip_atualizar_ponto` (13 args) recriadas com `p_angulo`/`p_material` (assinatura única, grants re-hardened); `v_parque_export` e `ip_pontos_bbox` expõem as 2 colunas |
+| `20260710191925` | `add_polygon_selection_rpcs` | Seleção por polígono: `ip_pontos_poligono(geojson,limite)` e `ip_stats_poligono(geojson)` (ST_Contains sobre índice GIST); leitura pública. Contagem/densidade/%LED/potência/fotometria média restritos à área desenhada |
 
 Versões anteriores a essas existem no histórico do banco mas não têm arquivo
 neste diretório (foram aplicadas pelo dashboard/MCP antes desta organização).
