@@ -172,21 +172,6 @@
     </div>
   </div>
 
-  <!-- EXPORT -->
-  <div class="relative">
-    <button @click="showExport = !showExport" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 hover:border-blue-500 rounded-lg text-sm font-medium transition-colors" id="btnExport">📥 Exportar</button>
-    <div x-show="showExport" @click.away="showExport = false" class="absolute top-10 right-0 w-52 bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-2 flex flex-col gap-1.5 z-[1001]" id="exportPop" style="display:none">
-      <div class="px-2 py-1 text-xs text-gray-400">Conforme filtros ativos</div>
-      <button class="btn-export px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" data-exp="csv">📊 Dados (CSV)</button>
-      <button class="btn-export px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" data-exp="geojson">🗺️ GeoJSON (GIS)</button>
-      <button class="btn-export px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" data-exp="bairros">📈 Passivo/bairro</button>
-      <button class="btn-export px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" data-exp="serie">📉 Série de métricas</button>
-      <button class="btn-export px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" data-exp="grade">🔲 Grade de densidade</button>
-      <button class="btn-export px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" data-exp="png">🖼️ Mapa (PNG)</button>
-      <button class="btn-export px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" data-exp="pdf">📄 Relatório (PDF)</button>
-      <button class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors border-t border-slate-700 mt-1 pt-1.5" id="btnExportCustom">⚙️ Personalizar colunas...</button>
-    </div>
-  </div>
 
   <!-- VISUALIZE -->
   <div class="relative">
@@ -726,18 +711,66 @@
       </section>
 
       <section id="sec-dados" :style="{ display: activeTab === 'dados' ? 'block' : 'none' }" class="acsec">
-        <h3 class="text-lg font-semibold text-white mb-5">Dados</h3>
+        <h3 class="text-lg font-semibold text-white mb-5">📤 Exportação de Dados</h3>
 
-        <div class="max-w-2xl space-y-4">
-          <!-- Export Card -->
-          <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
-            <label class="text-xs font-medium text-slate-400 block mb-3">Exportar — parque completo ou conforme os filtros ativos no mapa</label>
+        <div class="max-w-3xl space-y-4">
+          <!-- Export Card - Advanced Options -->
+          <div class="bg-gradient-to-r from-slate-800/50 to-slate-800/30 border border-slate-700 rounded-lg p-5">
+            <div class="mb-4">
+              <label class="text-xs font-bold text-slate-300 block mb-2 uppercase tracking-wide">📊 Escopo de Dados</label>
+              <div class="flex gap-2 flex-wrap">
+                <label class="flex items-center gap-2 px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg cursor-pointer transition-colors text-sm">
+                  <input type="radio" name="exportScope" value="all" class="w-3 h-3" checked/>
+                  <span class="text-slate-100">Todos os pontos</span>
+                </label>
+                <label class="flex items-center gap-2 px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg cursor-pointer transition-colors text-sm">
+                  <input type="radio" name="exportScope" value="filtered" class="w-3 h-3"/>
+                  <span class="text-slate-100">Conforme filtros do mapa</span>
+                </label>
+              </div>
+              <p class="text-xs text-slate-400 mt-1.5">Selecione "filtros do mapa" para exportar apenas pontos que atendem aos critérios ativos (bairro, tipo, estado, etc)</p>
+            </div>
+
+            <div class="border-t border-slate-700 my-4"></div>
+
+            <div class="mb-4">
+              <label class="text-xs font-bold text-slate-300 block mb-2 uppercase tracking-wide">📋 Formato & Tipo</label>
+              <div class="grid grid-cols-2 gap-2 mb-3">
+                <div>
+                  <p class="text-xs text-slate-400 mb-1.5">Formato</p>
+                  <select id="exportFormat" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="csv">📊 CSV (Tabular)</option>
+                    <option value="geojson">🗺️ GeoJSON (SIG)</option>
+                    <option value="pdf">📄 PDF (Relatório)</option>
+                  </select>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-400 mb-1.5">Tipo de Dados</p>
+                  <select id="exportType" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="luminárias">💡 Luminárias (completo)</option>
+                    <option value="bairros">📈 Passivo por bairro</option>
+                    <option value="série">📉 Série de métricas</option>
+                    <option value="grade">🔲 Grade de densidade (250m)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="border-t border-slate-700 my-4"></div>
+
+            <div class="mb-4">
+              <label class="text-xs font-bold text-slate-300 block mb-2 uppercase tracking-wide">🎯 Seleção de Colunas (CSV)</label>
+              <p class="text-xs text-slate-400 mb-2">Clique no botão "Personalizar colunas" para escolher quais campos incluir na exportação CSV:</p>
+              <button class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-100 text-sm rounded-lg border border-slate-600 transition-colors" id="btnExportCustomAdvanced">⚙️ Personalizar colunas...</button>
+            </div>
+
+            <div class="border-t border-slate-700 my-4"></div>
+
             <div class="flex gap-3 flex-wrap">
-              <button class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-xs rounded-lg border border-slate-600 transition-colors btn" data-exp="csv">Dados (CSV)</button>
-              <button class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-xs rounded-lg border border-slate-600 transition-colors btn" data-exp="geojson">Dados (GeoJSON)</button>
-              <button class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-xs rounded-lg border border-slate-600 transition-colors btn" data-exp="bairros">Passivo por bairro (CSV)</button>
-              <button class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-xs rounded-lg border border-slate-600 transition-colors btn" data-exp="serie">Série de métricas (CSV)</button>
-              <button class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-xs rounded-lg border border-slate-600 transition-colors btn" data-exp="grade">Grade de densidade (CSV)</button>
+              <button class="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm rounded-lg font-medium transition-all shadow-lg hover:shadow-blue-900/50" id="btnExportAdvanced">📥 Executar Exportação</button>
+              <button class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-100 text-sm rounded-lg border border-slate-600 transition-colors" id="btnExportBairros">📈 Passivo/bairro</button>
+              <button class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-100 text-sm rounded-lg border border-slate-600 transition-colors" id="btnExportSerie">📉 Série de métricas</button>
+              <button class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-100 text-sm rounded-lg border border-slate-600 transition-colors" id="btnExportGrade">🔲 Grade de densidade</button>
             </div>
           </div>
 
@@ -1731,7 +1764,7 @@ function updateFCount(){
 document.getElementById('btnFiltros').addEventListener('mouseenter',()=>{ document.getElementById('filtrosPop').style.display='flex'; });
 document.getElementById('filtrosPop').addEventListener('mouseleave',()=>{ document.getElementById('filtrosPop').style.display='none'; });
 document.addEventListener('click', e=>{
-  [['filtrosPop','btnFiltros'],['exportPop','btnExport'],['visPop','btnVis']].forEach(([pid,bid])=>{
+  [['filtrosPop','btnFiltros'],['visPop','btnVis']].forEach(([pid,bid])=>{
     const p=document.getElementById(pid);
     if(p && p.style.display==='flex' && !p.contains(e.target) && e.target.id!==bid) p.style.display='none';
   });
@@ -1800,7 +1833,6 @@ async function setUser(u){
          catch(e){ state.userRole='leitura'; } }
   document.getElementById('btnNovo').style.display = podeEditar()?'inline-block':'none';
   document.getElementById('btnAdminConsole').style.display = podeEditar()?'inline-block':'none';
-  document.getElementById('exportContainer').style.display = u?'block':'none';
 }
 document.getElementById('btnLogin').onclick=async ()=>{
   if(state.user){ await sb.auth.signOut(); setUser(null); toast('Sessão encerrada'); return; }
@@ -1827,8 +1859,43 @@ function acShow(sec){
 document.getElementById('btnAdminConsole').onclick = ()=>{ document.getElementById('adminConsole').style.display='flex'; acShow('visao'); };
 document.getElementById('acVoltar').onclick = ()=>document.getElementById('adminConsole').style.display='none';
 document.querySelectorAll('.acnav').forEach(b=>b.onclick=()=>acShow(b.dataset.sec));
+// Legacy export handlers (if any data-exp buttons remain)
 document.getElementById('sec-dados').addEventListener('click',e=>{ const b=e.target.closest('[data-exp]'); if(!b)return;
   ({csv:()=>exportData('csv'),geojson:()=>exportData('geojson'),bairros:exportBairros,serie:exportSerie,grade:exportGrade})[b.dataset.exp]?.(); });
+
+// Advanced export handlers
+function applyExportFilters(){
+  const scope = document.querySelector('input[name="exportScope"]:checked')?.value || 'all';
+  const fmt = document.getElementById('exportFormat')?.value || 'csv';
+  const type = document.getElementById('exportType')?.value || 'luminárias';
+
+  // Temporarily apply scope (all vs filtered)
+  const origBairro = state.bairro, origTipo = state.tipo, origEstado = state.estado, origPot = state.pot, origFila = state.fila;
+  if(scope === 'all'){
+    state.bairro = ''; state.tipo = ''; state.estado = ''; state.pot = ''; state.fila = '';
+  }
+
+  // Export based on type
+  if(type === 'luminárias'){
+    exportData(fmt === 'pdf' ? 'pdf' : fmt);
+  } else if(type === 'bairros'){
+    exportBairros();
+  } else if(type === 'série'){
+    exportSerie();
+  } else if(type === 'grade'){
+    exportGrade();
+  }
+
+  // Restore filters
+  state.bairro = origBairro; state.tipo = origTipo; state.estado = origEstado;
+  state.pot = origPot; state.fila = origFila;
+}
+
+document.getElementById('btnExportAdvanced').onclick = applyExportFilters;
+document.getElementById('btnExportCustomAdvanced').onclick = ()=>document.getElementById('exportCustomModal').style.display='block';
+document.getElementById('btnExportBairros').onclick = ()=>{ const scope = document.querySelector('input[name="exportScope"]:checked')?.value || 'all'; if(scope==='all') state.bairro=''; exportBairros(); state.bairro=''; };
+document.getElementById('btnExportSerie').onclick = exportSerie;
+document.getElementById('btnExportGrade').onclick = exportGrade;
 function qcard(label,n,fila,nota){
   return `<div class="chip" style="border-radius:10px;padding:12px;min-width:160px">
     <div style="color:#9ca3af;font-size:11px">${label}</div>
@@ -2277,17 +2344,8 @@ async function exportPDF(){
     doc.save(`relatorio_ip_${stamp()}.pdf`); toast('Relatório PDF gerado');
   }catch(e){ toast('Falha no PDF: '+e.message,true); } });
 }
-document.getElementById('btnExport').addEventListener('mouseenter',()=>{ document.getElementById('exportPop').style.display='flex'; });
-document.getElementById('exportPop').addEventListener('mouseleave',()=>{ document.getElementById('exportPop').style.display='none'; });
-document.getElementById('exportPop').addEventListener('click',e=>{ const b=e.target.closest('[data-exp]'); if(!b)return;
-  document.getElementById('exportPop').style.display='none';
-  ({csv:()=>exportData('csv'),geojson:()=>exportData('geojson'),bairros:exportBairros,
-    serie:exportSerie,grade:exportGrade,png:exportPNG,pdf:exportPDF})[b.dataset.exp]?.(); });
-
-// ---------- Custom Export (Seletor de Colunas) ----------
-document.getElementById('btnExportCustom').addEventListener('click',()=>{
-  document.getElementById('exportCustomModal').style.display='flex';
-});
+// Nota: Exportação movida para Admin Console (seção Dados)
+// Botões de exportação da barra principal foram removidos por segurança
 
 function toCSVCustom(rows, selectedCols){
   if(!rows||!rows.length) return '';
@@ -2540,7 +2598,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ---------- acessibilidade ----------
 { const arias={fBairro:'Filtrar por bairro',fTipo:'Filtrar por tipo de lâmpada',fEstado:'Filtrar por estado',
     fPot:'Filtrar por potência mínima',fFila:'Fila de auditoria',fLimpar:'Limpar filtros',btnFiltros:'Abrir filtros',btnVis:'Alternar visualizações',
-    btnExport:'Abrir menu de exportação',btnChoro:'Alternar mapa coroplético',btnDens:'Alternar grade de densidade luminotécnica',btnTabela:'Abrir tabela de registros',
+    btnChoro:'Alternar mapa coroplético',btnDens:'Alternar grade de densidade luminotécnica',btnTabela:'Abrir tabela de registros',
     btnStats:'Abrir indicadores',btnNovo:'Cadastrar novo ponto',btnAdminConsole:'Abrir administração',btnLogin:'Entrar ou sair',
     tSearch:'Buscar por endereço ou patrimônio',tBairro:'Filtrar tabela por bairro',tStatus:'Filtrar tabela por estado',
     tPrev:'Página anterior',tNext:'Próxima página',tClose:'Fechar tabela'};
