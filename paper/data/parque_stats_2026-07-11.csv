@@ -1,0 +1,26 @@
+indicador;valor;observacao
+data_consulta;2026-07-11;consulta em produção (Supabase)
+total_pontos;42765;todos luminárias
+luminarias;42765;
+led;16667;modernizado_led = true
+pct_led;39.0;% de luminárias LED
+potencia_total_kw;5825;soma potencia_w / 1000
+n_bairros;52;bairros distintos com pontos
+lampada_vapor_sodio;21207;
+lampada_led;16667;
+lampada_metalico;4462;
+lampada_fluorescente;273;
+lampada_sem_lampada;55;
+lampada_desconhecido;51;
+lampada_vapor_mercurio;50;
+fonte_censo_enel;10235;luminárias
+fonte_seconser_pos_censo;6430;luminárias
+fonte_nao_modernizado;26100;sem fonte_modernizacao
+potencia_faixa_menor70;6694;
+potencia_faixa_70_99;14819;
+potencia_faixa_100_149;3245;
+potencia_faixa_150_249;10723;
+potencia_faixa_250_399;4121;
+potencia_faixa_maior400;3107;
+potencia_faixa_sem_dado;56;
+classificados_tier3;1;pontos com ângulo/material (coleta em andamento)

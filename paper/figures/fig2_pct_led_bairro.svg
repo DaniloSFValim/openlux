@@ -1,0 +1,52 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='660' height='470' viewBox='0 0 660 470' font-size='13'>
+<rect width='660' height='470' fill='#ffffff'/>
+<text x='330.0' y='24' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='15' font-weight='700' fill='#1a1a1a'>Taxa de modernização LED nos 15 maiores bairros</text>
+<line x1='306.0' y1='40' x2='306.0' y2='436' stroke='#D55E00' stroke-width='1.5' stroke-dasharray='4,3'/>
+<text x='306.0' y='36' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#D55E00'>média 39%</text>
+<text x='142' y='60.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='12' fill='#1a1a1a'>Fonseca</text>
+<rect x='150' y='46' width='197.6' height='20' rx='3' fill='#009E73'/>
+<text x='353.6' y='60.0' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>49.4%</text>
+<text x='142' y='86.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='12' fill='#1a1a1a'>Piratininga</text>
+<rect x='150' y='72' width='191.2' height='20' rx='3' fill='#009E73'/>
+<text x='347.2' y='86.0' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>47.8%</text>
+<text x='142' y='112.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='12' fill='#1a1a1a'>Icaraí</text>
+<rect x='150' y='98' width='155.6' height='20' rx='3' fill='#009E73'/>
+<text x='311.6' y='112.0' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>38.9%</text>
+<text x='142' y='138.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='12' fill='#1a1a1a'>Centro</text>
+<rect x='150' y='124' width='283.6' height='20' rx='3' fill='#009E73'/>
+<text x='439.6' y='138.0' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>70.9%</text>
+<text x='142' y='164.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='12' fill='#1a1a1a'>São Francisco</text>
+<rect x='150' y='150' width='232.8' height='20' rx='3' fill='#009E73'/>
+<text x='388.8' y='164.0' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>58.2%</text>
+<text x='142' y='190.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='12' fill='#1a1a1a'>Engenhoca</text>
+<rect x='150' y='176' width='154.0' height='20' rx='3' fill='#009E73'/>
+<text x='310.0' y='190.0' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>38.5%</text>
+<text x='142' y='216.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='12' fill='#1a1a1a'>Itaipu</text>
+<rect x='150' y='202' width='109.6' height='20' rx='3' fill='#009E73'/>
+<text x='265.6' y='216.0' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>27.4%</text>
+<text x='142' y='242.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='12' fill='#1a1a1a'>Barreto</text>
+<rect x='150' y='228' width='216.0' height='20' rx='3' fill='#009E73'/>
+<text x='372.0' y='242.0' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>54.0%</text>
+<text x='142' y='268.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='12' fill='#1a1a1a'>Engenho do Mato</text>
+<rect x='150' y='254' width='2.0' height='20' rx='3' fill='#009E73'/>
+<text x='158' y='268.0' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>0.2%</text>
+<text x='142' y='294.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='12' fill='#1a1a1a'>Santa Rosa</text>
+<rect x='150' y='280' width='96.0' height='20' rx='3' fill='#009E73'/>
+<text x='252.0' y='294.0' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>24.0%</text>
+<text x='142' y='320.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='12' fill='#1a1a1a'>Maravista</text>
+<rect x='150' y='306' width='96.0' height='20' rx='3' fill='#009E73'/>
+<text x='252.0' y='320.0' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>24.0%</text>
+<text x='142' y='346.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='12' fill='#1a1a1a'>Serra Grande</text>
+<rect x='150' y='332' width='3.2' height='20' rx='3' fill='#009E73'/>
+<text x='159.2' y='346.0' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>0.8%</text>
+<text x='142' y='372.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='12' fill='#1a1a1a'>Largo da Batalha</text>
+<rect x='150' y='358' width='194.8' height='20' rx='3' fill='#009E73'/>
+<text x='350.8' y='372.0' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>48.7%</text>
+<text x='142' y='398.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='12' fill='#1a1a1a'>Santo Antônio</text>
+<rect x='150' y='384' width='171.6' height='20' rx='3' fill='#009E73'/>
+<text x='327.6' y='398.0' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>42.9%</text>
+<text x='142' y='424.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='12' fill='#1a1a1a'>Cantagalo</text>
+<rect x='150' y='410' width='255.2' height='20' rx='3' fill='#009E73'/>
+<text x='411.2' y='424.0' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>63.8%</text>
+<text x='150' y='458' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>Barra = % de pontos modernizados; rótulo à direita. Heterogeneidade de 0,2% a 70,9%.</text>
+</svg>

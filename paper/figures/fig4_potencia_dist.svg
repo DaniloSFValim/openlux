@@ -1,0 +1,33 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='660' height='340' viewBox='0 0 660 340' font-size='13'>
+<rect width='660' height='340' fill='#ffffff'/>
+<text x='330.0' y='24' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='15' font-weight='700' fill='#1a1a1a'>Distribuição da potência instalada por luminária (W)</text>
+<line x1='60' y1='280.0' x2='620' y2='280.0' stroke='#e6e6e6' stroke-width='1'/>
+<text x='52' y='284.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>0k</text>
+<line x1='60' y1='222.5' x2='620' y2='222.5' stroke='#e6e6e6' stroke-width='1'/>
+<text x='52' y='226.5' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>3k</text>
+<line x1='60' y1='165.0' x2='620' y2='165.0' stroke='#e6e6e6' stroke-width='1'/>
+<text x='52' y='169.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>7k</text>
+<line x1='60' y1='107.5' x2='620' y2='107.5' stroke='#e6e6e6' stroke-width='1'/>
+<text x='52' y='111.5' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>11k</text>
+<line x1='60' y1='50.0' x2='620' y2='50.0' stroke='#e6e6e6' stroke-width='1'/>
+<text x='52' y='54.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>14k</text>
+<rect x='74.0' y='176.1' width='65.3' height='103.9' rx='4' fill='#0072B2'/>
+<text x='106.7' y='170.1' text-anchor='middle' font-family='Helvetica.Arial.sans-serif' font-size='11' fill='#1a1a1a'>6.694</text>
+<text x='106.7' y='298' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>&lt;70</text>
+<rect x='167.3' y='50.0' width='65.3' height='230.0' rx='4' fill='#0072B2'/>
+<text x='200.0' y='44.0' text-anchor='middle' font-family='Helvetica.Arial.sans-serif' font-size='11' fill='#1a1a1a'>14.819</text>
+<text x='200.0' y='298' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>70–99</text>
+<rect x='260.7' y='229.6' width='65.3' height='50.4' rx='4' fill='#0072B2'/>
+<text x='293.3' y='223.6' text-anchor='middle' font-family='Helvetica.Arial.sans-serif' font-size='11' fill='#1a1a1a'>3.245</text>
+<text x='293.3' y='298' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>100–149</text>
+<rect x='354.0' y='113.6' width='65.3' height='166.4' rx='4' fill='#0072B2'/>
+<text x='386.7' y='107.6' text-anchor='middle' font-family='Helvetica.Arial.sans-serif' font-size='11' fill='#1a1a1a'>10.723</text>
+<text x='386.7' y='298' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>150–249</text>
+<rect x='447.3' y='216.0' width='65.3' height='64.0' rx='4' fill='#0072B2'/>
+<text x='480.0' y='210.0' text-anchor='middle' font-family='Helvetica.Arial.sans-serif' font-size='11' fill='#1a1a1a'>4.121</text>
+<text x='480.0' y='298' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>250–399</text>
+<rect x='540.7' y='231.8' width='65.3' height='48.2' rx='4' fill='#0072B2'/>
+<text x='573.3' y='225.8' text-anchor='middle' font-family='Helvetica.Arial.sans-serif' font-size='11' fill='#1a1a1a'>3.107</text>
+<text x='573.3' y='298' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>≥400</text>
+<text x='340.0' y='332' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='12' fill='#1a1a1a'>Faixa de potência (W)</text>
+</svg>

@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "Se você usar este software ou método, por favor cite conforme abaixo."
+title: "Iluminação LED Niterói — sistema georreferenciado de gestão do parque de iluminação pública com índices fotométricos de instalação"
+abstract: >-
+  Sistema web georreferenciado para gestão do parque de iluminação pública de
+  Niterói/RJ (42.765 pontos), incluindo um método de índices fotométricos de
+  instalação de primeira ordem (ângulo de apontamento e refletância do piso) e
+  análise espacial por seleção de polígono sobre PostGIS.
+type: software
+authors:
+  - family-names: Valim
+    given-names: Danilo
+    # orcid: "https://orcid.org/0000-0000-0000-0000"   # preencha com seu ORCID
+    affiliation: "SECONSER — Diretoria de Iluminação Pública, Prefeitura de Niterói"
+repository-code: "https://github.com/DaniloSFValim/iluminacao-led-niteroi"
+url: "https://iluminacao-niteroi.netlify.app"
+license: MIT
+version: "1.3.0"
+date-released: "2026-07-11"
+keywords:
+  - iluminação pública
+  - public lighting
+  - fotometria
+  - poluição luminosa
+  - light pollution
+  - PostGIS
+  - SIG
+  - GIS
+  - modernização LED
+  - smart cities
+# Após conectar o repositório ao Zenodo e publicar o release v1.3.0, adicione o DOI:
+# doi: "10.5281/zenodo.XXXXXXX"

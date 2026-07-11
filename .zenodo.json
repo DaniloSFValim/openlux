@@ -1,0 +1,25 @@
+{
+  "title": "Iluminação LED Niterói — sistema georreferenciado de gestão do parque de iluminação pública com índices fotométricos de instalação",
+  "description": "Sistema web georreferenciado para gestão do parque de iluminação pública de Niterói/RJ (42.765 pontos), com um método de índices fotométricos de instalação de primeira ordem (ângulo de apontamento e refletância do piso), catálogo fotométrico de modelos (Tier 2) e análise espacial por seleção de polígono sobre PostGIS. Código-fonte, migrations de banco e documentação do modelo.",
+  "upload_type": "software",
+  "language": "por",
+  "license": "MIT",
+  "access_right": "open",
+  "creators": [
+    {
+      "name": "Valim, Danilo",
+      "affiliation": "SECONSER — Diretoria de Iluminação Pública, Prefeitura de Niterói"
+    }
+  ],
+  "keywords": [
+    "iluminação pública",
+    "public lighting",
+    "fotometria",
+    "poluição luminosa",
+    "light pollution",
+    "PostGIS",
+    "GIS",
+    "modernização LED",
+    "smart cities"
+  ]
+}
