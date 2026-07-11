@@ -20,6 +20,7 @@ mapa interativo, edição em campo, indicadores de modernização LED e auditori
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL_+_PostGIS-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white)
 ![Netlify](https://img.shields.io/badge/Netlify-Deploy_cont%C3%ADnuo-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)
 
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21305310-blue.svg?style=flat-square)](https://doi.org/10.5281/zenodo.21305310)
 [![License: MIT](https://img.shields.io/badge/Licen%C3%A7a-MIT-yellow.svg?style=flat-square)](LICENSE)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-FE5196?style=flat-square&logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](CONTRIBUTING.md)
@@ -269,16 +270,16 @@ Vulnerabilidades de segurança: siga a [política de segurança](SECURITY.md) �
 ## 📝 Como citar
 
 **Autor:** Danilo Valim — ORCID [`0009-0009-7250-6151`](https://orcid.org/0009-0009-7250-6151)
+· **DOI:** [`10.5281/zenodo.21305310`](https://doi.org/10.5281/zenodo.21305310)
 
 Se você usar este software ou o método de índices fotométricos, cite:
 
 > Valim, D. (2026). *Iluminação LED Niterói — sistema georreferenciado de gestão do
 > parque de iluminação pública com índices fotométricos de instalação* (v1.3.0)
-> [Software]. GitHub. https://github.com/DaniloSFValim/iluminacao-led-niteroi
+> [Software]. Zenodo. https://doi.org/10.5281/zenodo.21305310
 
 O GitHub também gera a citação a partir do [`CITATION.cff`](CITATION.cff) (botão
-*"Cite this repository"*, com o iD do ORCID). Após o arquivamento no Zenodo, cite
-pelo **DOI** — veja [`docs/INTELLECTUAL_PROPERTY.md`](docs/INTELLECTUAL_PROPERTY.md).
+*"Cite this repository"*, com o iD do ORCID e o DOI).
 
 ## 📄 Licença
 
