@@ -10,7 +10,7 @@ type: software
 authors:
   - family-names: Valim
     given-names: Danilo
-    # orcid: "https://orcid.org/0000-0000-0000-0000"   # preencha com seu ORCID
+    orcid: "https://orcid.org/0009-0009-7250-6151"
     affiliation: "SECONSER — Diretoria de Iluminação Pública, Prefeitura de Niterói"
 repository-code: "https://github.com/DaniloSFValim/iluminacao-led-niteroi"
 url: "https://iluminacao-niteroi.netlify.app"
