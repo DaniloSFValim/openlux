@@ -30,7 +30,7 @@ O DOI é o "dois em um": **prova de autoria datada** e **citação acadêmica**.
 
 1. Acesse <https://zenodo.org> e faça login **com a conta do GitHub**.
 2. Em **Account → GitHub**, ligue o *toggle* do repositório
-   `DaniloSFValim/iluminacao-led-niteroi`.
+   `DaniloSFValim/openlux`.
 3. No GitHub, publique um **Release** a partir da tag `v1.3.0` (ver §5).
 4. O Zenodo captura o release automaticamente e **emite um DOI**.
 5. Copie o DOI e adicione em `CITATION.cff` (campo `doi:`) e no `README`.

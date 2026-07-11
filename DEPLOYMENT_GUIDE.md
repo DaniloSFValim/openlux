@@ -91,7 +91,7 @@ supabase projects describe
 # 1. Ir em https://app.netlify.com
 # 2. Clique em "New site from Git"
 # 3. Selecionar GitHub
-# 4. Localizar repositório: DaniloSFValim/iluminacao-led-niteroi
+# 4. Localizar repositório: DaniloSFValim/openlux
 # 5. Conectar
 ```
 
@@ -216,7 +216,7 @@ Supabase Logs:
   https://app.supabase.com → seu projeto → Logs → PostgreSQL
 
 GitHub Actions:
-  https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions
+  https://github.com/DaniloSFValim/openlux/actions
   Verificar status dos workflows (CI, Security, E2E Tests)
 ```
 
@@ -316,7 +316,7 @@ MONITORAMENTO:
 
 ## 📞 Suporte
 
-- **GitHub Issues:** https://github.com/DaniloSFValim/iluminacao-led-niteroi/issues
+- **GitHub Issues:** https://github.com/DaniloSFValim/openlux/issues
 - **Documentação:** README.md, ARCHITECTURE.md, TROUBLESHOOTING.md
 - **Email:** danilosfvalim@gmail.com
 

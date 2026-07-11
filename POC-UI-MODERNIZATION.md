@@ -66,7 +66,7 @@ Prova de conceito (POC) de modernização visual e funcional do sistema sem alte
 # https://deploy-preview-XX--iluminacao-niteroi.netlify.app/index-poc.html
 
 # Opção 2: Localmente
-cd /home/user/iluminacao-led-niteroi
+cd /home/user/openlux
 npx http-server
 # http://localhost:8080/index-poc.html
 ```
@@ -185,7 +185,7 @@ git mv index-poc.html index.html
 ## 📁 Estrutura de Arquivos
 
 ```
-iluminacao-led-niteroi/
+openlux/
 ├── index.html                    (Original - manter intacto)
 ├── index-poc.html               (POC - Tailwind + Alpine + HTMX)
 ├── POC-UI-MODERNIZATION.md      (Este arquivo)

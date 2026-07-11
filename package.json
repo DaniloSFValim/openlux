@@ -1,5 +1,5 @@
 {
-  "name": "iluminacao-led-niteroi",
+  "name": "openlux",
   "version": "1.1.0",
   "description": "Sistema georreferenciado de gestão de infraestrutura de iluminação pública da cidade de Niterói",
   "private": true,
@@ -31,10 +31,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/DaniloSFValim/iluminacao-led-niteroi.git"
+    "url": "https://github.com/DaniloSFValim/openlux.git"
   },
   "bugs": {
-    "url": "https://github.com/DaniloSFValim/iluminacao-led-niteroi/issues"
+    "url": "https://github.com/DaniloSFValim/openlux/issues"
   },
-  "homepage": "https://github.com/DaniloSFValim/iluminacao-led-niteroi#readme"
+  "homepage": "https://github.com/DaniloSFValim/openlux#readme"
 }

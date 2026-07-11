@@ -13,10 +13,10 @@ espacial e auditoria completa. Código MIT; os dados pertencem a cada município
 <br/>
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/fad767e1-972b-40e7-995d-f0c38b287c8e/deploy-status)](https://app.netlify.com/projects/iluminacao-niteroi)
-[![E2E Tests](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/e2e-tests.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/e2e-tests.yml)
-[![API Tests](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/api-testing.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/api-testing.yml)
-[![Lighthouse CI](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/lighthouse-ci.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/lighthouse-ci.yml)
-[![Security Scanning](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/security-scan.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/security-scan.yml)
+[![E2E Tests](https://github.com/DaniloSFValim/openlux/actions/workflows/e2e-tests.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/openlux/actions/workflows/e2e-tests.yml)
+[![API Tests](https://github.com/DaniloSFValim/openlux/actions/workflows/api-testing.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/openlux/actions/workflows/api-testing.yml)
+[![Lighthouse CI](https://github.com/DaniloSFValim/openlux/actions/workflows/lighthouse-ci.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/openlux/actions/workflows/lighthouse-ci.yml)
+[![Security Scanning](https://github.com/DaniloSFValim/openlux/actions/workflows/security-scan.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/openlux/actions/workflows/security-scan.yml)
 
 ![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla_ES6+-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 ![Leaflet](https://img.shields.io/badge/Leaflet-1.9.4-199900?style=for-the-badge&logo=leaflet&logoColor=white)
@@ -33,7 +33,7 @@ espacial e auditoria completa. Código MIT; os dados pertencem a cada município
 **[🌍 Visão do projeto](VISION.md)** ·
 **[🌐 Demo (Niterói)](https://iluminacao-niteroi.netlify.app)** ·
 **[🏙️ Implante na sua cidade](docs/DEPLOY_YOUR_CITY.md)** ·
-**[🐛 Reportar Bug](https://github.com/DaniloSFValim/iluminacao-led-niteroi/issues/new?template=bug.md)**
+**[🐛 Reportar Bug](https://github.com/DaniloSFValim/openlux/issues/new?template=bug.md)**
 
 </div>
 
@@ -197,8 +197,8 @@ A implantação hoje é manual (~1 dia); o roadmap a leva a ~1 hora.
 
 ```bash
 # 1. Clone o repositório
-git clone https://github.com/DaniloSFValim/iluminacao-led-niteroi.git
-cd iluminacao-led-niteroi
+git clone https://github.com/DaniloSFValim/openlux.git
+cd openlux
 
 # 2. Sirva o index.html
 npx http-server .
@@ -271,7 +271,7 @@ O roadmap completo, por fases, vive na **[visão](VISION.md#6-roadmap-por-fases)
 - [ ] **Fase 4 · Região** — painel agregado multi-cidade, PWA offline para campo
 - [ ] **Fase 5 · Comunidade** — federação de instâncias, datasets abertos
 
-Veja as [issues abertas](https://github.com/DaniloSFValim/iluminacao-led-niteroi/issues) para a lista completa.
+Veja as [issues abertas](https://github.com/DaniloSFValim/openlux/issues) para a lista completa.
 
 ## 🤝 Contribuindo
 
