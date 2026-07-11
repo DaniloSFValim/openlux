@@ -188,6 +188,7 @@
 
   <!-- ACTION BUTTONS -->
   <div class="flex gap-2 items-center ml-auto">
+    <button id="btnArea" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-sky-500/50 text-sky-300 rounded-lg text-sm font-medium transition-colors" title="Selecionar uma área desenhando um polígono no mapa">✏️ Área</button>
     <button id="btnNovo" class="hidden px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors">+ Ponto</button>
     <button id="btnAdminConsole" class="hidden px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-red-500/50 text-red-400 rounded-lg text-sm font-medium transition-colors">⚙️ Admin</button>
     <button id="btnLogin" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">🔑 Entrar</button>
@@ -205,6 +206,16 @@
 
 <div id="densCtl" role="complementary" aria-label="Controle da grade de densidade" class="absolute bottom-3.5 left-2.5 z-[1000] bg-slate-800/95 border border-slate-700 rounded-xl p-2.5 text-xs max-w-xs hidden backdrop-blur"></div>
 
+<div id="drawCtl" class="absolute top-16 left-1/2 -translate-x-1/2 z-[1100] bg-slate-900/95 border border-sky-600 rounded-xl px-4 py-2.5 text-xs backdrop-blur hidden">
+  <div class="text-sky-300 font-semibold mb-1">✏️ Selecionando área</div>
+  <div class="text-slate-300 mb-2">Clique no mapa para adicionar vértices · duplo-clique ou <b>Concluir</b> para fechar (mín. 3).</div>
+  <div class="flex gap-2 items-center">
+    <button id="drawDone" class="px-3 py-1 bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-medium transition-colors">Concluir</button>
+    <button id="drawCancel" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg transition-colors">Cancelar</button>
+    <span id="drawCount" class="text-slate-400">0 vértices</span>
+  </div>
+</div>
+<div id="poligonoPanel" role="complementary" aria-label="Estatísticas da área selecionada" class="absolute top-16 left-2.5 w-80 z-[1000] bg-slate-800/95 border border-sky-700 rounded-xl p-3 hidden max-h-[calc(100%-90px)] overflow-auto backdrop-blur"></div>
 <div id="detail" role="complementary" aria-label="Detalhe do ativo" class="absolute top-16 right-2.5 w-80 z-[1000] bg-slate-800/95 border border-slate-700 rounded-xl p-3 hidden max-h-[calc(100%-90px)] overflow-auto backdrop-blur"></div>
 <div id="stats" role="complementary" aria-label="Indicadores" class="absolute top-16 left-2.5 w-96 z-[1000] bg-slate-800/95 border border-slate-700 rounded-xl p-3 hidden max-h-[calc(100%-90px)] overflow-auto backdrop-blur"></div>
 
@@ -1023,6 +1034,7 @@ function aplicaFila(q){ const f=state.fila;
 function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
 
 async function _refresh(){
+  if(state.poligono){ return; } // área desenhada fixa o conteúdo; pan/zoom não recarrega
   if(state.densidade){ if(!state.densLayer) renderDensidade(); return; }
   if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; document.getElementById('densCtl').style.display='none'; }
   if(state.choropleth){ renderChoropleth(); return; }
@@ -1081,6 +1093,7 @@ map.on('mouseup', () => {
 
 // ---------- Novo ponto via mapa (click) ----------
 map.on('click', function(e){
+  if(state.drawing){ _addVertice(e.latlng); return; } // modo desenho de área
   if(!state.user || !podeEditar()) return;
   if(map.getZoom() < 18){ toast('Zoom mínimo necessário: 18', true); return; }
   const lat = e.latlng.lat, lng = e.latlng.lng;
@@ -1179,6 +1192,7 @@ async function renderChoropleth(){
   document.getElementById('modeHint').textContent = 'Coroplético: cor = % LED do bairro';
 }
 document.getElementById('btnChoro').onclick = ()=>{
+  if(state.poligono) limparPoligono(true);
   state.choropleth=!state.choropleth;
   document.getElementById('detail').style.display='none'; // Fechar painel de detalhes
   if(state.choropleth && state.densidade){ state.densidade=false;
@@ -1261,6 +1275,7 @@ function buildDensCtl(breaks,cfg){
 }
 window._densMetric=(m)=>{ state.densMetric=m; renderDensidade(); };
 document.getElementById('btnDens').onclick = ()=>{
+  if(state.poligono) limparPoligono(true);
   state.densidade=!state.densidade;
   document.getElementById('detail').style.display='none'; // Fechar painel de detalhes
   if(state.densidade && state.choropleth){ state.choropleth=false;
@@ -1296,6 +1311,137 @@ document.getElementById('btnTimeline').onclick = () => {
     document.getElementById('timelineEnd').valueAsDate = now;
   }
 };
+
+// ---------- Seleção por polígono (área desenhada) ----------
+let _drawPts = [], _drawLayer = null, _drawVerts = null;
+function _drawCtl(show){ const c=document.getElementById('drawCtl'); if(c) c.style.display=show?'block':'none'; }
+function _updDrawCount(){ const el=document.getElementById('drawCount'); if(el) el.textContent=_drawPts.length+' vértice'+(_drawPts.length!==1?'s':''); }
+
+function iniciarDesenhoArea(){
+  if(state.drawing) return;
+  limparPoligono(true); // remove seleção anterior sem recarregar o mapa
+  if(state.choropleth) document.getElementById('btnChoro').click();
+  if(state.densidade)  document.getElementById('btnDens').click();
+  state.drawing = true; _drawPts = [];
+  _drawLayer = L.polygon([], {color:'#38bdf8',weight:2,dashArray:'6,5',fillColor:'#38bdf8',fillOpacity:0.06}).addTo(map);
+  _drawVerts = L.layerGroup().addTo(map);
+  map.doubleClickZoom.disable();
+  map.getContainer().style.cursor = 'crosshair';
+  document.getElementById('btnArea').classList.add('on');
+  _drawCtl(true); _updDrawCount();
+  const mh=document.getElementById('modeHint'); if(mh){ mh.textContent='Desenhando área…'; mh.style.color='#38bdf8'; }
+}
+function _addVertice(latlng){
+  _drawPts.push([latlng.lat, latlng.lng]);
+  if(_drawLayer) _drawLayer.setLatLngs(_drawPts);
+  if(_drawVerts) L.circleMarker(latlng,{radius:3,weight:1,color:'#0b0f14',fillColor:'#38bdf8',fillOpacity:1,interactive:false}).addTo(_drawVerts);
+  _updDrawCount();
+}
+function _encerraDesenho(){
+  state.drawing=false;
+  if(_drawVerts){ map.removeLayer(_drawVerts); _drawVerts=null; }
+  if(_drawLayer){ map.removeLayer(_drawLayer); _drawLayer=null; }
+  _drawPts=[]; map.doubleClickZoom.enable(); map.getContainer().style.cursor='';
+  _drawCtl(false);
+}
+function cancelarDesenhoArea(){
+  _encerraDesenho();
+  document.getElementById('btnArea').classList.remove('on');
+  if(!state.poligono) refresh();
+}
+function concluirDesenhoArea(){
+  if(!state.drawing) return;
+  if(_drawPts.length < 3){ toast('Desenhe ao menos 3 vértices',true); return; }
+  const pts = _drawPts.slice();
+  const ring = pts.map(p=>[+p[1].toFixed(6), +p[0].toFixed(6)]); // [lng,lat]
+  ring.push(ring[0]);                                            // fecha o anel
+  state.poligono = JSON.stringify({ type:'Polygon', coordinates:[ring] });
+  _encerraDesenho();
+  state.poligonoLayer = L.polygon(pts, {color:'#38bdf8',weight:2,fillColor:'#38bdf8',fillOpacity:0.05}).addTo(map);
+  aplicarPoligono();
+}
+async function aplicarPoligono(){
+  document.getElementById('detail').style.display='none';
+  document.getElementById('stats').style.display='none';
+  setBusy(true);
+  const [pontos, stats] = await Promise.all([
+    rpc('ip_pontos_poligono', { p_geojson: state.poligono, limite: 5000 }),
+    rpc('ip_stats_poligono',  { p_geojson: state.poligono })
+  ]);
+  setBusy(false);
+  state.poligonoPontos = pontos || [];
+  state.layer.clearLayers();
+  (pontos||[]).forEach(p=>{
+    L.circleMarker([p.lat,p.lon],{radius:7,weight:1,color:'#0b0f14',fillColor:colorForHealth(p),fillOpacity:.95,bubblingMouseEvents:false})
+      .on('click',()=>openDetail(p)).addTo(state.layer);
+  });
+  if(state.poligonoLayer){ try{ map.fitBounds(state.poligonoLayer.getBounds(),{padding:[40,40]}); }catch(e){} }
+  document.getElementById('btnArea').classList.add('on');
+  renderPoligonoPanel(stats);
+  const mh=document.getElementById('modeHint');
+  if(mh){ mh.textContent = (stats && stats.total>5000) ? `Área: ${stats.total.toLocaleString('pt-BR')} pontos (mapa mostra 5.000)` : 'Área selecionada'; mh.style.color='#38bdf8'; }
+}
+function renderPoligonoPanel(s){
+  const box=document.getElementById('poligonoPanel'); if(!box) return;
+  if(!s){ box.style.display='none'; return; }
+  const fmt=n=>(n||0).toLocaleString('pt-BR');
+  const tipoRows=Object.entries(s.por_tipo_lampada||{}).map(([k,v])=>`<div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">${esc(k)}</span><b>${fmt(v)}</b></div>`).join('');
+  const foto = (s.aproveitamento_medio!=null)
+    ? `<div style="margin-top:8px;padding-top:8px;border-top:1px solid #1f2a37">
+         <div style="color:#9ca3af;margin-bottom:3px">📐 Fotometria média (${fmt(s.classificados_foto)} classificados)</div>
+         <div style="display:flex;justify-content:space-between"><span>Aproveitamento no piso</span><b style="color:#4ade80">${Math.round(s.aproveitamento_medio*100)}%</b></div>
+         <div style="display:flex;justify-content:space-between"><span>Poluição luminosa</span><b style="color:#fbbf24">${Math.round((s.poluicao_media||0)*100)}%</b></div>
+       </div>`
+    : `<div style="margin-top:8px;color:#6b7280;font-size:10.5px">Sem pontos classificados por fotometria nesta área.</div>`;
+  const exportar = podeEditar()
+    ? `<div style="display:flex;gap:6px;margin-top:10px">
+         <button class="btn" style="flex:1;font-size:11px" onclick="exportarPoligono('csv')">⬇️ CSV da área</button>
+         <button class="btn" style="flex:1;font-size:11px" onclick="exportarPoligono('geojson')">⬇️ GeoJSON</button>
+       </div>` : '';
+  box.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <b style="font-size:13px;color:#38bdf8">🗺️ Área selecionada</b>
+      <button class="btn" style="padding:2px 8px;font-size:11px" onclick="limparPoligono()">✕ Limpar</button>
+    </div>
+    <div style="font-size:12px;display:flex;flex-direction:column;gap:3px">
+      <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Luminárias</span><b>${fmt(s.total)}</b></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Área</span><b>${s.area_km2} km²</b></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Densidade</span><b>${s.densidade_km2} /km²</b></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">LED</span><b style="color:#4ade80">${fmt(s.led)} (${s.pct_led}%)</b></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Pendentes</span><b style="color:#fbbf24">${fmt(s.pendente)}</b></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Potência instalada</span><b>${s.potencia_kw} kW</b></div>
+    </div>
+    <div style="margin-top:8px;padding-top:8px;border-top:1px solid #1f2a37;font-size:11px">
+      <div style="color:#9ca3af;margin-bottom:3px">Por tipo de lâmpada</div>${tipoRows||'<span style="color:#6b7280">—</span>'}
+    </div>
+    ${foto}
+    ${exportar}`;
+  box.style.display='block';
+}
+function limparPoligono(silencioso){
+  if(state.poligonoLayer){ map.removeLayer(state.poligonoLayer); state.poligonoLayer=null; }
+  state.poligono=null; state.poligonoPontos=null;
+  const box=document.getElementById('poligonoPanel'); if(box) box.style.display='none';
+  const ba=document.getElementById('btnArea'); if(ba) ba.classList.remove('on');
+  if(!silencioso) refresh();
+}
+async function exportarPoligono(fmt){
+  if(!state.poligono || !podeEditar()) return;
+  setBusy(true);
+  const rows = await rpc('ip_pontos_poligono', { p_geojson: state.poligono, limite: 100000 });
+  setBusy(false);
+  if(!rows || !rows.length){ toast('Nenhum ponto na área',true); return; }
+  if(fmt==='csv') baixar(`area_${stamp()}.csv`, '﻿'+toCSV(rows), 'text/csv;charset=utf-8');
+  else { const fc={type:'FeatureCollection',features:rows.filter(r=>r.lat!=null).map(r=>{ const {lat,lon,...p}=r; return {type:'Feature',geometry:{type:'Point',coordinates:[lon,lat]},properties:p}; })};
+    baixar(`area_${stamp()}.geojson`, JSON.stringify(fc), 'application/geo+json'); }
+  toast(`Área exportada: ${rows.length.toLocaleString('pt-BR')} pontos`);
+}
+document.getElementById('btnArea').onclick = ()=>{ if(state.drawing) cancelarDesenhoArea(); else if(state.poligono) limparPoligono(); else iniciarDesenhoArea(); };
+document.getElementById('drawDone').onclick = concluirDesenhoArea;
+document.getElementById('drawCancel').onclick = cancelarDesenhoArea;
+map.on('dblclick', ()=>{ if(state.drawing) concluirDesenhoArea(); });
+window.limparPoligono = limparPoligono;
+window.exportarPoligono = exportarPoligono;
 
 document.getElementById('timelineReset')?.addEventListener('click', () => {
   state.timelineFilterStart = null;
