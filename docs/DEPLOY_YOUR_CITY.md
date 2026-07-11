@@ -23,9 +23,11 @@
    (o banco é a fonte de verdade — leia antes).
 3. **Dados**: importe seus pontos para `pontos_luminaria`
    (geometria em SRID 4326; campos mínimos: `geom`, `tipo_ativo`, `status`, `fonte`).
-4. **Frontend**: em `index.html`, ajuste ①credenciais do Supabase, ②limites
-   geográficos da cidade (validações de lat/lng), ③título/identidade visual
-   (configurável pelo painel Admin → Aparência).
+4. **Frontend**: copie `config/cities/niteroi.json` para `config/cities/<sua-cidade>.json`,
+   ajuste os valores e replique-os no bloco **`CITY`** no topo do script do `index.html`
+   (nome, centro, zoom, limites geográficos) — é o único ponto do código com dados da
+   cidade. Credenciais do Supabase ficam logo acima (`URL_SB`/`ANON`); título e
+   identidade visual são configuráveis pelo painel Admin → Aparência.
 5. **Deploy**: conecte o repositório ao Netlify (o `netlify.toml` já publica somente
    o `dist/index.html`).
 6. **Papéis**: crie os usuários (leitura/editor/admin) — ver
@@ -44,8 +46,8 @@ histórico e auditoria · CI/CD e backups.
 
 | Fase | O passo manual que desaparece |
 |---|---|
-| **1 — Desacoplar** | Editar `index.html` → vira `config/cities/<cidade>.json` |
-| **2 — Recenseamento** | Import único → campanhas de levantamento versionadas |
+| ~~**1 — Desacoplar**~~ ✅ | Feito: dados da cidade concentrados no bloco `CITY` + `config/cities/` |
+| ~~**2 — Recenseamento**~~ ✅ | Feito: campanhas versionadas (Admin → 🧭 Campanhas), estado herdado/verificado |
 | **3 — Multi-cidade** | Projeto Supabase próprio → opção de entrar num consórcio (tenant) com onboarding guiado |
 
 ## Precisa de ajuda?

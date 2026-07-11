@@ -162,7 +162,7 @@
       </div>
       <div>
         <label class="block text-xs font-medium text-gray-400 mb-1.5">📋 Fila de auditoria</label>
-        <select id="fFila" class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"><option value="">— nenhuma —</option><option value="revisao">Marcados p/ revisão</option><option value="suspeito">LED suspeito (&gt;400 W)</option><option value="mod_seconser">Origem: SECONSER</option><option value="mod_censo">Origem: censo ENEL</option><option value="mod_campo">Origem: campo</option></select>
+        <select id="fFila" class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"><option value="">— nenhuma —</option><option value="nao_verificado">🧭 Não verificados (recenseamento)</option><option value="revisao">Marcados p/ revisão</option><option value="suspeito">LED suspeito (&gt;400 W)</option><option value="mod_seconser">Origem: SECONSER</option><option value="mod_censo">Origem: censo ENEL</option><option value="mod_campo">Origem: campo</option></select>
       </div>
       <div>
         <label class="block text-xs font-medium text-gray-400 mb-1.5">🏥 Status de Saúde</label>
@@ -409,6 +409,7 @@
       <button @click="activeTab = 'usuarios'" :class="{ 'bg-slate-700 text-white': activeTab === 'usuarios', 'text-slate-300 hover:bg-slate-700/50': activeTab !== 'usuarios' }" class="text-left px-3 py-2 rounded-lg transition-colors text-sm font-medium acnav" data-sec="usuarios">👥 Usuários</button>
       <button @click="activeTab = 'modelos'" :class="{ 'bg-slate-700 text-white': activeTab === 'modelos', 'text-slate-300 hover:bg-slate-700/50': activeTab !== 'modelos' }" class="text-left px-3 py-2 rounded-lg transition-colors text-sm font-medium acnav" data-sec="modelos">💡 Modelos</button>
       <button @click="activeTab = 'aparencia'" :class="{ 'bg-slate-700 text-white': activeTab === 'aparencia', 'text-slate-300 hover:bg-slate-700/50': activeTab !== 'aparencia' }" class="text-left px-3 py-2 rounded-lg transition-colors text-sm font-medium acnav" data-sec="aparencia">🎨 Aparência</button>
+      <button @click="activeTab = 'campanhas'" :class="{ 'bg-slate-700 text-white': activeTab === 'campanhas', 'text-slate-300 hover:bg-slate-700/50': activeTab !== 'campanhas' }" class="text-left px-3 py-2 rounded-lg transition-colors text-sm font-medium acnav" data-sec="campanhas">🧭 Campanhas</button>
       <button @click="activeTab = 'dados'" :class="{ 'bg-slate-700 text-white': activeTab === 'dados', 'text-slate-300 hover:bg-slate-700/50': activeTab !== 'dados' }" class="text-left px-3 py-2 rounded-lg transition-colors text-sm font-medium acnav" data-sec="dados">📦 Dados</button>
     </nav>
 
@@ -721,6 +722,14 @@
         </div>
       </section>
 
+      <section id="sec-campanhas" :style="{ display: activeTab === 'campanhas' ? 'block' : 'none' }" class="acsec">
+        <h3 class="text-lg font-semibold text-white mb-2">🧭 Campanhas de Recenseamento</h3>
+        <p class="text-xs text-slate-400 mb-5 max-w-2xl">Com uma campanha <b>ativa</b>, toda edição em campo e o botão
+          "✓ Confirmar em campo" carimbam o ponto como <b>verificado</b>. Pontos nunca verificados são o dado
+          <b>herdado</b> (censo/base histórica) — filtráveis no mapa por "🧭 Não verificados".</p>
+        <div id="campBox" class="max-w-2xl"></div>
+      </section>
+
       <section id="sec-dados" :style="{ display: activeTab === 'dados' ? 'block' : 'none' }" class="acsec">
         <h3 class="text-lg font-semibold text-white mb-5">📤 Exportação de Dados</h3>
 
@@ -925,9 +934,25 @@ async function rpc(fn,args){ setBusy(true); try{
     const {data,error}=await sb.rpc(fn,args); if(error) throw error; return data;
   }catch(e){ toast('Erro ao carregar: '+(e.message||e),true); return null; } finally{ setBusy(false); } }
 
-const map = L.map('map',{zoomControl:false,attributionControl:false,preferCanvas:true,minZoom:11,maxBoundsViscosity:1}).setView([-22.905,-43.055],12);
+// ---------- OpenLux · Configuração da cidade (Fase 1) ----------
+// Espelho documentado: config/cities/niteroi.json. Para implantar outra cidade,
+// edite este bloco (ou injete window.__CONFIG__.city no deploy) — mais nada no código.
+const CITY = Object.assign({
+  slug: 'niteroi',
+  nome: 'Niterói',
+  centro: [-22.905, -43.055],
+  zoomInicial: 12,
+  maxBounds: [[-23.03, -43.20], [-22.80, -42.90]],
+  bounds: { latMin: -23.05, latMax: -22.80, lngMin: -43.20, lngMax: -42.90 }
+}, (window.__CONFIG__ && window.__CONFIG__.city) || {});
+function dentroDaCidade(lat, lng){
+  const b = CITY.bounds;
+  return !(isNaN(lat) || isNaN(lng) || lat < b.latMin || lat > b.latMax || lng < b.lngMin || lng > b.lngMax);
+}
+
+const map = L.map('map',{zoomControl:false,attributionControl:false,preferCanvas:true,minZoom:11,maxBoundsViscosity:1}).setView(CITY.centro, CITY.zoomInicial);
 L.control.zoom({position:'bottomright'}).addTo(map); // canto inferior direito: a barra superior cobre a posição padrão
-map.setMaxBounds([[-23.03,-43.20],[-22.80,-42.90]]);
+map.setMaxBounds(CITY.maxBounds);
 state.munLayer = L.layerGroup().addTo(map);
 const bases = {
   'Escuro': L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',crossOrigin:true}),
@@ -1020,11 +1045,13 @@ function filtros(){
     p_power_max,
     p_data_inicio,
     p_data_fim,
-    p_health_status: state.saude||null
+    p_health_status: state.saude||null,
+    p_nao_verificado: f==='nao_verificado'?true:null
   };
 }
 function aplicaFila(q){ const f=state.fila;
-  if(f==='revisao') q=q.eq('flag_revisao_censo',true);
+  if(f==='nao_verificado') q=q.is('verificado_em',null);
+  else if(f==='revisao') q=q.eq('flag_revisao_censo',true);
   else if(f==='suspeito') q=q.eq('modernizado_led',true).gt('potencia_w',400);
   else if(f==='mod_censo') q=q.eq('fonte_modernizacao','censo_enel');
   else if(f==='mod_seconser') q=q.eq('fonte_modernizacao','seconser_pos_censo');
@@ -1097,8 +1124,8 @@ map.on('click', function(e){
   if(!state.user || !podeEditar()) return;
   if(map.getZoom() < 18){ toast('Zoom mínimo necessário: 18', true); return; }
   const lat = e.latlng.lat, lng = e.latlng.lng;
-  if(lat < -23.05 || lat > -22.80 || lng < -43.20 || lng > -42.90){
-    toast('Clique dentro dos limites de Niterói', true);
+  if(!dentroDaCidade(lat, lng)){
+    toast('Clique dentro dos limites de ' + CITY.nome, true);
     return;
   }
   const d = document.getElementById('detail'); d.style.display = 'block';
@@ -1155,7 +1182,7 @@ map.on('click', function(e){
   })();
   document.getElementById('nSave').onclick = async () => {
     const lat2 = parseFloat(document.getElementById('nLat').value), lng2 = parseFloat(document.getElementById('nLng').value);
-    if(isNaN(lat2) || isNaN(lng2) || lat2 < -23.05 || lat2 > -22.80 || lng2 < -43.20 || lng2 > -42.90){ toast('Coordenadas fora de Niterói', true); return; }
+    if(!dentroDaCidade(lat2, lng2)){ toast('Coordenadas fora de ' + CITY.nome, true); return; }
     const ehLum = nAtivo.value === 'luminaria';
     const pot = parseInt(document.getElementById('nPot').value);
     if(ehLum && !isNaN(pot) && (pot < 0 || pot > 2000)){ toast('Potência fora da faixa (0–2000 W)', true); return; }
@@ -1540,6 +1567,7 @@ function openDetail(p){
     ${ehLum?fld('Estado', p.status):''}
     ${ehLum?fld('Status de Saúde', healthBadge.emoji + ' ' + healthBadge.label):''}
     ${ehLum?fld('Origem modernização', origem):''}
+    ${fld('Dado de campo', p.verificado_em ? ('✅ verificado em '+new Date(p.verificado_em).toLocaleDateString('pt-BR')) : '🕓 herdado — não verificado')}
     ${ehLum&&p.angulo_inclinacao_graus!=null?fld('Ângulo (nadir)', p.angulo_inclinacao_graus+'°'):''}
     ${ehLum&&p.material_piso?fld('Material do piso', materialLabel(p.material_piso)):''}
     ${ehLum&&fotometriaIndices(p.angulo_inclinacao_graus, p.material_piso)?`<div style="font-size:10.5px;color:#9ca3af;background:#0f151c;border:1px solid #1f2a37;border-radius:6px;padding:7px;margin-top:6px">${fotoIdxHtml(p.angulo_inclinacao_graus, p.material_piso)}</div>`:''}
@@ -1549,10 +1577,22 @@ function openDetail(p){
         <button class="btn" style="flex:1" onclick="window._interv('${p.id}')">Intervenções</button>
         <button class="btn" style="flex:1" onclick="window._hist('${p.id}')">Histórico</button>
       </div><div id="histBox"></div>`:''}
+    ${podeEditar()?`<button class="btn" style="width:100%;margin-top:8px;border-color:#14532d;color:#4ade80" onclick="window._confirmarPonto('${p.id}')" title="Recenseamento: confirma que os dados conferem com a realidade em campo, sem alterá-los">✓ Confirmar em campo (dados corretos)</button>`:''}
     <div style="margin-top:10px;display:flex;gap:8px">
       ${podeEditar()?`<button class="btn btn-accent" style="flex:1" onclick="window._edit()">Editar</button>`:''}
       <button class="btn" onclick="document.getElementById('detail').style.display='none'">Fechar</button></div>`;
 }
+window._confirmarPonto = async (id)=>{
+  if(!podeEditar()) return;
+  setBusy(true);
+  const {data,error} = await sb.rpc('ip_confirmar_ponto', { p_id: id });
+  setBusy(false);
+  if(error){ toast('Falha ao confirmar: '+error.message, true); return; }
+  if(data && data.error){ toast(data.error, true); return; }
+  toast('✓ Ponto verificado em campo'+(data&&data.campanha?(' — '+data.campanha):''));
+  if(state.current && state.current.id===id){ state.current.verificado_em = new Date().toISOString(); openDetail(state.current); }
+  refresh();
+};
 window._edit = function(){
   const p=state.current; if(!p) return;
   const d=document.getElementById('detail');
@@ -1689,9 +1729,9 @@ window._edit = function(){
     const lat=parseFloat(document.getElementById('eLat').value), lng=parseFloat(document.getElementById('eLng').value);
     let pLat=null,pLng=null;
     if(!(isNaN(lat)&&isNaN(lng))){
-      if(isNaN(lat)||isNaN(lng)||lat<-23.05||lat>-22.80||lng<-43.20||lng>-42.90){
-        document.getElementById('latError').textContent=isNaN(lat)?'Inválido':'Fora de Niterói';
-        document.getElementById('lngError').textContent=isNaN(lng)?'Inválido':'Fora de Niterói';
+      if(!dentroDaCidade(lat,lng)){
+        document.getElementById('latError').textContent=isNaN(lat)?'Inválido':'Fora de '+CITY.nome;
+        document.getElementById('lngError').textContent=isNaN(lng)?'Inválido':'Fora de '+CITY.nome;
         document.getElementById('latError').style.display='block';
         document.getElementById('lngError').style.display='block';
         return;
@@ -1850,7 +1890,7 @@ document.getElementById('btnNovo').onclick = ()=>{
 
   document.getElementById('nSave').onclick = async ()=>{
     const lat=parseFloat(document.getElementById('nLat').value), lng=parseFloat(document.getElementById('nLng').value);
-    if(isNaN(lat)||isNaN(lng)||lat<-23.05||lat>-22.80||lng<-43.20||lng>-42.90){ toast('Coordenadas fora de Niterói',true); return; }
+    if(!dentroDaCidade(lat,lng)){ toast('Coordenadas fora de '+CITY.nome,true); return; }
     const ehLum=nAtivo.value==='luminaria';
     const pot=parseInt(document.getElementById('nPot').value);
     if(ehLum && !isNaN(pot) && (pot<0||pot>2000)){ toast('Potência fora da faixa (0–2000 W)',true); return; }
@@ -2037,7 +2077,7 @@ document.getElementById('btnStats').onclick = ()=>{ const s=document.getElementB
 async function loadTable(){
   setBusy(true);
   document.getElementById('tBody').innerHTML='<tr><td colspan="8" style="text-align:center;color:#6b7280;padding:18px"><span class="spin"></span> Carregando…</td></tr>';
-  let q=sb.from('v_parque_export').select('id,codigo_seconser,numero_patrimonio,endereco,bairro_nome,tipo_lampada,potencia_w,modernizado_led,fonte_modernizacao,status,observacoes,lat,lon,tipo_ativo,tipo_luminaria,classe_nbr,health_status',{count:'exact'});
+  let q=sb.from('v_parque_export').select('id,codigo_seconser,numero_patrimonio,endereco,bairro_nome,tipo_lampada,potencia_w,modernizado_led,fonte_modernizacao,status,observacoes,lat,lon,tipo_ativo,tipo_luminaria,classe_nbr,health_status,verificado_em,angulo_inclinacao_graus,material_piso',{count:'exact'});
   const s=document.getElementById('tSearch').value.trim();
   const bb=document.getElementById('tBairro').value, st=document.getElementById('tStatus').value;
   if(s) q=q.or(`codigo_seconser.ilike.%${s}%,endereco.ilike.%${s}%,numero_patrimonio.ilike.%${s}%`);
@@ -2101,6 +2141,7 @@ function acShow(sec){
   else if(sec==='usuarios') loadAdminUsers();
   else if(sec==='aparencia') fillConfigForm();
   else if(sec==='modelos') loadAdminModelos();
+  else if(sec==='campanhas') loadCampanhas();
 }
 document.getElementById('btnAdminConsole').onclick = ()=>{ document.getElementById('adminConsole').style.display='flex'; acShow('visao'); };
 document.getElementById('acVoltar').onclick = ()=>document.getElementById('adminConsole').style.display='none';
@@ -2142,6 +2183,58 @@ document.getElementById('btnExportCustomAdvanced').onclick = ()=>document.getEle
 document.getElementById('btnExportBairros').onclick = ()=>{ const scope = document.querySelector('input[name="exportScope"]:checked')?.value || 'all'; if(scope==='all') state.bairro=''; exportBairros(); state.bairro=''; };
 document.getElementById('btnExportSerie').onclick = exportSerie;
 document.getElementById('btnExportGrade').onclick = exportGrade;
+// ---------- Campanhas de recenseamento ----------
+async function loadCampanhas(){
+  const box=document.getElementById('campBox');
+  box.innerHTML='<div style="color:#6b7280"><span class="spin"></span> Carregando…</div>';
+  const d=await rpc('ip_listar_campanhas'); if(d===null){ box.innerHTML='<div style="color:#f87171;font-size:12px">Falha ao carregar campanhas.</div>'; return; }
+  const ativa=(d||[]).find(c=>c.status==='ativa');
+  const isAdmin=state.userRole==='admin';
+  const criar = isAdmin && !ativa ? `
+    <div class="bg-blue-950/20 border border-blue-900/50 rounded-lg p-4 mb-5">
+      <div style="font-size:11px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">➕ Nova campanha</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input id="campNome" placeholder="Nome (ex.: Recenseamento ${CITY.nome} ${new Date().getFullYear()})" style="flex:2;min-width:220px" class="px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm"/>
+        <input id="campDesc" placeholder="Descrição (opcional)" style="flex:2;min-width:180px" class="px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm"/>
+        <button class="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm rounded-lg font-semibold" onclick="window._criarCampanha()">Iniciar</button>
+      </div>
+    </div>` : (isAdmin?'' : '<div style="color:#6b7280;font-size:12px;margin-bottom:12px">Apenas administradores criam/encerram campanhas.</div>');
+  const linhas=(d||[]).map(c=>{
+    const pct = c.total_parque>0 ? Math.round(100*c.verificados/c.total_parque) : 0;
+    const badge = c.status==='ativa' ? '<span class="badge" style="background:#0d3d24;color:#4ade80">ATIVA</span>' : '<span class="badge" style="background:#1f2a37;color:#9ca3af">encerrada</span>';
+    return `<div class="bg-slate-800/50 border ${c.status==='ativa'?'border-emerald-700':'border-slate-700'} rounded-lg p-4 mb-3">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <div><b style="font-size:13px">${esc(c.nome)}</b> ${badge}
+          <div style="font-size:11px;color:#9ca3af;margin-top:2px">${esc(c.descricao)||''} · início ${new Date(c.criado_em).toLocaleDateString('pt-BR')}${c.encerrada_em?(' · fim '+new Date(c.encerrada_em).toLocaleDateString('pt-BR')):''}</div></div>
+        ${c.status==='ativa'&&isAdmin?`<button class="btn" style="border-color:#7f1d1d;color:#f87171;padding:4px 10px;font-size:11px" onclick="window._encerrarCampanha('${c.id}')">Encerrar</button>`:''}
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#9ca3af;margin-top:10px">
+        <span>${(+c.verificados).toLocaleString('pt-BR')} de ${(+c.total_parque).toLocaleString('pt-BR')} pontos verificados</span><b style="color:#4ade80">${pct}%</b></div>
+      <div style="height:6px;border-radius:3px;background:#1f2a37;overflow:hidden;margin-top:4px"><div style="height:100%;width:${pct}%;background:linear-gradient(to right,#059669,#4ade80)"></div></div>
+    </div>`;
+  }).join('');
+  box.innerHTML = criar + (linhas || '<div style="color:#6b7280;font-size:12px">Nenhuma campanha ainda. O parque inteiro está com dado <b>herdado</b>.</div>');
+}
+window._criarCampanha = async ()=>{
+  const nome=document.getElementById('campNome').value.trim();
+  if(!nome){ toast('Informe o nome da campanha',true); return; }
+  setBusy(true);
+  const {data,error}=await sb.rpc('ip_criar_campanha',{ p_nome:nome, p_descricao:document.getElementById('campDesc').value||null });
+  setBusy(false);
+  if(error){ toast('Falha: '+error.message,true); return; }
+  if(data&&data.error){ toast(data.error,true); return; }
+  toast('Campanha iniciada — boas medições! 🧭'); loadCampanhas();
+};
+window._encerrarCampanha = async (id)=>{
+  if(!confirm('Encerrar esta campanha?\n\nEdições futuras deixarão de carimbar verificação até uma nova campanha ser criada.')) return;
+  setBusy(true);
+  const {data,error}=await sb.rpc('ip_encerrar_campanha',{ p_id:id });
+  setBusy(false);
+  if(error){ toast('Falha: '+error.message,true); return; }
+  if(data&&data.error){ toast(data.error,true); return; }
+  toast('Campanha encerrada'); loadCampanhas();
+};
+
 function qcard(label,n,fila,nota){
   return `<div class="chip" style="border-radius:10px;padding:12px;min-width:160px">
     <div style="color:#9ca3af;font-size:11px">${label}</div>

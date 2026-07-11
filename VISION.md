@@ -85,8 +85,8 @@ painel regional/nacional — sem centralizar o dado bruto de ninguém.
 
 - [x] **Fase −1 — Laboratório** · Sistema de Niterói completo, em produção, auditado e com DOI *(concluída, v1.3.0)*
 - [x] **Fase 0 — Identidade** · Visão, governança, registro de cidades, rebranding OpenLux *(este documento)*
-- [ ] **Fase 1 — Desacoplar** · Cidade vira configuração (`config/cities/`), entidade `municipio` no banco; Niterói continua idêntica
-- [ ] **Fase 2 — Recenseamento** · Campanhas de levantamento versionadas, estado herdado/verificado por ponto, fluxo de campo com coleta Tier 3 embutida — *começa pela recoleta de Niterói*
+- [x] **Fase 1 — Desacoplar** · Cidade vira configuração (`config/cities/` + bloco `CITY`), entidade `municipio` no banco; Niterói continua idêntica
+- [x] **Fase 2 — Recenseamento** · Campanhas de levantamento versionadas, estado herdado/verificado por ponto, confirmação e edição em campo carimbam a campanha ativa, filtro "não verificados" no mapa (coleta Tier 3 já embutida no fluxo de edição)
 - [ ] **Fase 3 — Multi-cidade** · RLS por município, onboarding "nova cidade em 1 hora", [guia de implantação](docs/DEPLOY_YOUR_CITY.md) completo
 - [ ] **Fase 4 — Região** · Painel agregado multi-cidade, PWA offline para equipes de campo
 - [ ] **Fase 5 — Comunidade** · Federação de instâncias, datasets abertos, rede de cidades

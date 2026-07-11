@@ -265,8 +265,8 @@ O roadmap completo, por fases, vive na **[visão](VISION.md#6-roadmap-por-fases)
 
 - [x] **Fase −1 · Laboratório** — sistema de Niterói completo em produção (v1.3.0, DOI)
 - [x] **Fase 0 · Identidade** — visão, governança, registro de cidades (OpenLux)
-- [ ] **Fase 1 · Desacoplar** — cidade vira configuração (`config/cities/`)
-- [ ] **Fase 2 · Recenseamento** — campanhas de levantamento versionadas + coleta Tier 3 em campo
+- [x] **Fase 1 · Desacoplar** — cidade vira configuração (`config/cities/` + bloco `CITY`)
+- [x] **Fase 2 · Recenseamento** — campanhas versionadas, estado herdado/verificado, filtro de campo no mapa
 - [ ] **Fase 3 · Multi-cidade** — RLS por município, onboarding "nova cidade em 1 hora"
 - [ ] **Fase 4 · Região** — painel agregado multi-cidade, PWA offline para campo
 - [ ] **Fase 5 · Comunidade** — federação de instâncias, datasets abertos
