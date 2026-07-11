@@ -1,0 +1,26 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='730' height='300' viewBox='0 0 730 300' font-size='13'>
+<rect width='730' height='300' fill='#ffffff'/>
+<text x='365.0' y='24' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='15' font-weight='700' fill='#1a1a1a'>Composição do parque por tipo de lâmpada (n=42.765)</text>
+<text x='162' y='61.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' fill='#1a1a1a'>Vapor de sódio</text>
+<rect x='170' y='44' width='385.0' height='26' rx='4' fill='#0072B2'/>
+<text x='561.0' y='61.0' font-family='Helvetica.Arial.sans-serif' fill='#666666'>21.207 (49.6%)</text>
+<text x='162' y='95.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' fill='#1a1a1a'>LED</text>
+<rect x='170' y='78' width='302.6' height='26' rx='4' fill='#009E73'/>
+<text x='478.57910124015655' y='95.0' font-family='Helvetica.Arial.sans-serif' fill='#666666'>16.667 (39.0%)</text>
+<text x='162' y='129.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' fill='#1a1a1a'>Metálico</text>
+<rect x='170' y='112' width='81.0' height='26' rx='4' fill='#0072B2'/>
+<text x='257.00485688687695' y='129.0' font-family='Helvetica.Arial.sans-serif' fill='#666666'>4.462 (10.4%)</text>
+<text x='162' y='163.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' fill='#1a1a1a'>Fluorescente</text>
+<rect x='170' y='146' width='5.0' height='26' rx='4' fill='#0072B2'/>
+<text x='180.95614655538265' y='163.0' font-family='Helvetica.Arial.sans-serif' fill='#666666'>273 (0.6%)</text>
+<text x='162' y='197.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' fill='#1a1a1a'>Sem lâmpada</text>
+<rect x='170' y='180' width='2.0' height='26' rx='4' fill='#0072B2'/>
+<text x='178' y='197.0' font-family='Helvetica.Arial.sans-serif' fill='#666666'>55 (0.1%)</text>
+<text x='162' y='231.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' fill='#1a1a1a'>Desconhecido</text>
+<rect x='170' y='214' width='2.0' height='26' rx='4' fill='#0072B2'/>
+<text x='178' y='231.0' font-family='Helvetica.Arial.sans-serif' fill='#666666'>51 (0.1%)</text>
+<text x='162' y='265.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' fill='#1a1a1a'>Vapor de mercúrio</text>
+<rect x='170' y='248' width='2.0' height='26' rx='4' fill='#0072B2'/>
+<text x='178' y='265.0' font-family='Helvetica.Arial.sans-serif' fill='#666666'>50 (0.1%)</text>
+<text x='170' y='290' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>Fonte: base SECONSER/Censo ENEL · consulta em 2026-07-11</text>
+</svg>

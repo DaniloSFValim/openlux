@@ -262,7 +262,21 @@ Vulnerabilidades de segurança: siga a [política de segurança](SECURITY.md) �
 | [APPROVAL_WORKFLOW.md](APPROVAL_WORKFLOW.md) | Fila de aprovação de alterações |
 | [docs/FIELD_REFERENCE_TIER2.md](docs/FIELD_REFERENCE_TIER2.md) | Campos de fotometria e conformidade do modelo (Tier 2) |
 | [docs/FIELD_REFERENCE_TIER3_PHOTOMETRY.md](docs/FIELD_REFERENCE_TIER3_PHOTOMETRY.md) | 📐 Fotometria de instalação: ângulo, material do piso e índices de poluição luminosa (Tier 3) |
+| [paper/](paper/) | 📄 Rascunho de artigo científico (PT + EN), dados e figuras reprodutíveis |
+| [docs/INTELLECTUAL_PROPERTY.md](docs/INTELLECTUAL_PROPERTY.md) | 🔒 Propriedade intelectual: DOI Zenodo, registro INPI, como citar |
 | [CHANGELOG.md](CHANGELOG.md) | Histórico de versões |
+
+## 📝 Como citar
+
+Se você usar este software ou o método de índices fotométricos, cite:
+
+> Valim, D. (2026). *Iluminação LED Niterói — sistema georreferenciado de gestão do
+> parque de iluminação pública com índices fotométricos de instalação* (v1.3.0)
+> [Software]. GitHub. https://github.com/DaniloSFValim/iluminacao-led-niteroi
+
+O GitHub também gera a citação a partir do [`CITATION.cff`](CITATION.cff) (botão
+*"Cite this repository"*). Após o arquivamento no Zenodo, cite pelo **DOI** — veja
+[`docs/INTELLECTUAL_PROPERTY.md`](docs/INTELLECTUAL_PROPERTY.md).
 
 ## 📄 Licença
 
