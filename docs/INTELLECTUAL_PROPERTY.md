@@ -20,8 +20,8 @@
 | **Histórico Git** | Autoria + cronologia (commits datados, encadeados por hash SHA) | ✅ contínuo |
 | **`CITATION.cff`** | Metadados de citação (botão "Cite this repository" no GitHub) | ✅ neste repo |
 | **`.zenodo.json`** | Metadados para arquivamento/DOI | ✅ neste repo |
-| **Tag + GitHub Release** | Marco versionado e citável (`v1.3.0`) | ⏳ criar no merge |
-| **DOI no Zenodo** | Arquivo permanente + citação acadêmica + **data comprovada** | ⏳ passo manual (§2) |
+| **Tag + GitHub Release** | Marco versionado e citável (`v1.3.0`) | ✅ publicado |
+| **DOI no Zenodo** | Arquivo permanente + citação acadêmica + **data comprovada** | ✅ [`10.5281/zenodo.21305310`](https://doi.org/10.5281/zenodo.21305310) |
 | **OpenTimestamps** | Carimbo de tempo do hash em blockchain | ⏳ opcional (§3) |
 
 ## 2. Emitir o DOI no Zenodo (10 min, grátis) — recomendado
@@ -74,13 +74,17 @@ git push origin v1.3.0
 # depois publique o Release no GitHub a partir da tag (dispara o Zenodo)
 ```
 
-## 6. Como citar (enquanto o DOI não sai)
+## 6. Como citar
 
 > Valim, D. (2026). *Iluminação LED Niterói — sistema georreferenciado de gestão
 > do parque de iluminação pública com índices fotométricos de instalação* (v1.3.0)
-> [Software]. GitHub. https://github.com/DaniloSFValim/iluminacao-led-niteroi
+> [Software]. Zenodo. https://doi.org/10.5281/zenodo.21305310
 
-Após o Zenodo, troque a URL pelo DOI.
+**DOI:** `10.5281/zenodo.21305310` · **ORCID:** `0009-0009-7250-6151`
+
+> 💡 O Zenodo também gera um **DOI conceitual** (version-agnostic, sempre aponta para
+> a versão mais recente). Use-o em textos gerais e reserve o DOI de versão acima para
+> citar exatamente a v1.3.0.
 
 ---
 
