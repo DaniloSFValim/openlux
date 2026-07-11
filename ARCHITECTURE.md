@@ -174,7 +174,7 @@ Mapa re-renderiza com novos filtros
 ## 📁 Estrutura de Arquivos
 
 ```
-iluminacao-led-niteroi/
+openlux/
 ├── index.html              (Aplicação principal SPA)
 ├── index-poc-working.html  (POC com modernizações)
 ├── netlify.toml            (Configuração deploy Netlify)

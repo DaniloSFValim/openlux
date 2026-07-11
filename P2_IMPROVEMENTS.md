@@ -175,10 +175,10 @@ Audits run automatically on:
 ### Example Badge URLs
 ```markdown
 - E2E Tests: 
-  `https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/e2e-tests.yml/badge.svg`
+  `https://github.com/DaniloSFValim/openlux/actions/workflows/e2e-tests.yml/badge.svg`
 
 - Lighthouse CI:
-  `https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/lighthouse-ci.yml/badge.svg`
+  `https://github.com/DaniloSFValim/openlux/actions/workflows/lighthouse-ci.yml/badge.svg`
 
 - Build (Netlify):
   `https://api.netlify.com/api/v1/badges/{site-id}/deploy-status`

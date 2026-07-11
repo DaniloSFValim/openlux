@@ -172,7 +172,7 @@ Hardens system security and validates capacity:
 ## 📁 Complete File Structure
 
 ```
-iluminacao-led-niteroi/
+openlux/
 ├── index.html                              (MODIFIED - P1 features)
 ├── netlify.toml                            (unchanged)
 ├── .gitignore                              (existing)

@@ -313,4 +313,4 @@ Se nada funcionar:
 3. **Contatos:**
    - Supabase docs: https://supabase.com/docs
    - Leaflet docs: https://leafletjs.com/docs.html
-   - GitHub Issues: https://github.com/danilosfvalim/iluminacao-led-niteroi/issues
+   - GitHub Issues: https://github.com/danilosfvalim/openlux/issues

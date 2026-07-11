@@ -221,7 +221,7 @@ partir de séries de qualidade do ar, corrigindo a eficácia útil e o brilho do
 ## Disponibilidade de dados e código
 
 Código-fonte, *migrations* e documentação do modelo:
-<https://github.com/DaniloSFValim/iluminacao-led-niteroi> (licença MIT). Dados de
+<https://github.com/DaniloSFValim/openlux> (licença MIT). Dados de
 reprodução em `paper/data/`. Após arquivamento, citar pelo DOI do Zenodo (ver
 `docs/INTELLECTUAL_PROPERTY.md`).
 

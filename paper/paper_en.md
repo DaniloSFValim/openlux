@@ -217,7 +217,7 @@ ULR) per CIE 150.
 ## Availability of data and code
 
 Source code, migrations and model documentation:
-<https://github.com/DaniloSFValim/iluminacao-led-niteroi> (MIT license). Reproduction
+<https://github.com/DaniloSFValim/openlux> (MIT license). Reproduction
 data in `paper/data/`. Once archived, cite via the Zenodo DOI (see
 `docs/INTELLECTUAL_PROPERTY.md`).
 
