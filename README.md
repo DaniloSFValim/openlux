@@ -1,5 +1,7 @@
 <div align="center">
 
+**🇧🇷 Português** · **[🇬🇧 English](README.en.md)**
+
 # 💡 OpenLux
 
 ### Plataforma aberta de gestão de iluminação pública
@@ -16,7 +18,7 @@ espacial e auditoria completa. Código MIT; os dados pertencem a cada município
 [![E2E Tests](https://github.com/DaniloSFValim/openlux/actions/workflows/e2e-tests.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/openlux/actions/workflows/e2e-tests.yml)
 [![API Tests](https://github.com/DaniloSFValim/openlux/actions/workflows/api-testing.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/openlux/actions/workflows/api-testing.yml)
 [![Lighthouse CI](https://github.com/DaniloSFValim/openlux/actions/workflows/lighthouse-ci.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/openlux/actions/workflows/lighthouse-ci.yml)
-[![Security Scanning](https://github.com/DaniloSFValim/openlux/actions/workflows/security-scan.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/openlux/actions/workflows/security-scan.yml)
+[![Security Scan](https://github.com/DaniloSFValim/openlux/actions/workflows/security-scan.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/openlux/actions/workflows/security-scan.yml)
 
 ![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla_ES6+-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 ![Leaflet](https://img.shields.io/badge/Leaflet-1.9.4-199900?style=for-the-badge&logo=leaflet&logoColor=white)

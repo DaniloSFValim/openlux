@@ -1,4 +1,4 @@
-name: Security Scanning (OWASP + Dependency Check)
+name: Security Scan
 
 on:
   push:
