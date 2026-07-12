@@ -35,6 +35,13 @@ espacial e auditoria completa. Código MIT; os dados pertencem a cada município
 **[🏙️ Implante na sua cidade](docs/DEPLOY_YOUR_CITY.md)** ·
 **[🐛 Reportar Bug](https://github.com/DaniloSFValim/openlux/issues/new?template=bug.md)**
 
+<br/>
+<br/>
+
+[![OpenLux em produção — instância Niterói: 42.765 luminárias em clusters coloridos por taxa de LED](docs/assets/hero-niteroi.png)](https://iluminacao-niteroi.netlify.app)
+
+*A instância de referência ao vivo: clusters do parque de Niterói coloridos por taxa de modernização LED — clique para abrir.*
+
 </div>
 
 ---
