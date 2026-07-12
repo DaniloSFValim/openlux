@@ -1,9 +1,50 @@
 # Changelog
 
-All notable changes to the Iluminação LED Niterói project are documented in this file.
+All notable changes to the OpenLux project (formerly Iluminação LED Niterói) are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+---
+
+## [1.5.0] - 2026-07-12 — Nasce a plataforma OpenLux
+
+### 🌍 Mudança de paradigma
+- **Rebranding OpenLux**: repositório renomeado (`iluminacao-led-niteroi` → `openlux`,
+  redirects automáticos), `VISION.md` (tese, modelo de expansão, fases), `GOVERNANCE.md`,
+  registro público de cidades (`cities/`) e guia `docs/DEPLOY_YOUR_CITY.md`.
+  Niterói passa a ser a **implantação de referência (laboratório)**.
+- **Fase 1 — Cidade como configuração**: bloco `CITY` único no `index.html` +
+  `config/cities/niteroi.json`; entidade `municipios` no banco com `municipio_id`
+  nos 42.765 pontos (migration `20260711155442`).
+- **Fase 2 — Recenseamento de campo**: campanhas versionadas (Admin → 🧭 Campanhas,
+  com barra de progresso), estado **herdado vs. verificado** por ponto, botão
+  "✓ Confirmar em campo", carimbo automático em edições durante campanha ativa e
+  filtro "🧭 Não verificados" no mapa/tabela/export.
+- **Fase 2.1**: aprovação de mudanças também carimba a verificação (campanha ativa
+  no momento do registro em campo; `verificado_por` = editor original) — e conserto
+  latente de `aprovar_mudanca`, que operava sobre a view com casts de enum errados
+  (mesma classe do item C2 da auditoria; migration `20260712215601`).
+
+### 📐 Engenharia e ciência
+- **Tier 3 — Fotometria de instalação** (migration `20260710160356`): ângulo de
+  apontamento + material do piso por opções pré-classificadas; índices η
+  (aproveitamento), P (poluição luminosa) e L (luminância relativa) no painel;
+  modelo documentado em `docs/FIELD_REFERENCE_TIER3_PHOTOMETRY.md`.
+- **Seleção por polígono** (migration `20260710191925`): desenhar área no mapa →
+  pontos, estatísticas (contagem, km², densidade, %LED, kW, fotometria média) e
+  export restritos à região (PostGIS `ST_Contains` + índice GIST).
+- **Citabilidade**: release v1.3.0 arquivado no Zenodo — **DOI
+  10.5281/zenodo.21305310**; `CITATION.cff` com ORCID; artigo IMRaD (PT/EN) com
+  dados reais e figuras reprodutíveis em `paper/`.
+
+### 🧰 Qualidade e correções
+- **Testes E2E** das features novas (polígono, Tier 3, campanhas, filtro de
+  recenseamento, config de cidade) — `tests/e2e/openlux-features.spec.js`.
+- **fix(ci)**: workflow de segurança falhava na inicialização em toda run de `main`
+  (`secrets` em `if` de step invalida o parse); gate movido para `env` de job.
+- README com screenshot real do app no hero, versão em **inglês** (`README.en.md`)
+  com switch 🇧🇷/🇬🇧, e `FUNDING.yml` só com canais reais.
 
 ---
 
