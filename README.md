@@ -61,12 +61,12 @@ O OpenLux propõe outro paradigma, detalhado no **[documento de visão](VISION.m
 - **Aberto e expansível** — cidade é configuração, não código: consórcios regionais
   multi-tenant ou instâncias soberanas, com federação de indicadores no horizonte.
 
-## 🧪 Niterói — implantação de referência
+## 🧪 Caso de estudo — parque urbano de referência
 
-A plataforma é a generalização de um sistema **em produção** em Niterói/RJ
-(SECONSER · Diretoria de Iluminação Pública), que serve de **laboratório**: cada
-recurso é validado com dados e equipes reais antes de virar plataforma. O marco está
-congelado e citável no DOI [10.5281/zenodo.21305310](https://doi.org/10.5281/zenodo.21305310).
+A plataforma é a generalização de um sistema **em produção** operando um parque urbano
+real, que serve de **laboratório**: cada recurso é validado com dados reais antes de
+virar plataforma. O marco está congelado e citável no DOI
+[10.5281/zenodo.21305310](https://doi.org/10.5281/zenodo.21305310).
 
 <div align="center">
 

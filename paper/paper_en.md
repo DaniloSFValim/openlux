@@ -1,7 +1,7 @@
 # Georeferenced public-lighting asset management with first-order installation photometric indices: the case of Niterói, Brazil
 
 **Danilo Valim**
-SECONSER — Public Lighting Directorate, City of Niterói, RJ, Brazil
+Independent researcher
 `danilosfvalim@gmail.com`
 
 > **Status:** working draft for submission. Park figures queried in production on
@@ -14,18 +14,18 @@ SECONSER — Public Lighting Directorate, City of Niterói, RJ, Brazil
 Modernizing public lighting to LED and controlling light pollution require, beyond
 an inventory of *what* is installed, a record of *how* and *where* each luminaire
 operates. This paper presents a georeferenced web system for managing the public
-lighting park of Niterói, Brazil (**42,765 points, 52 neighborhoods, 39% already
-LED, ~5.8 MW installed**) and proposes a **first-order installation photometric
-index method** combining two low-cost field attributes — the **aiming angle** of the
-beam and the **ground material** (reflectance) — collected through pre-classified
-options. From these, three comparable indicators are derived per point and per area:
-**floor utilization** (η), **light pollution** (P) and **relative luminance** (L). The
-system also provides **polygon-based spatial analysis** on PostGIS, aggregating
-count, density, LED rate and the indices for any arbitrary region. We discuss the
-model's explicit assumptions, its limits, and the path toward radiometric
-calibration (.IES photometry and atmospheric scattering). All source code, the
-database schema, and the model documentation are open and versioned, with
-reproduction data provided.
+lighting park in an urban environment in Brazil (**42,765 points, 52 neighborhoods,
+39% already LED, ~5.8 MW installed**) and proposes a **first-order installation
+photometric index method** combining two low-cost field attributes — the **aiming
+angle** of the beam and the **ground material** (reflectance) — collected through
+pre-classified options. From these, three comparable indicators are derived per
+point and per area: **floor utilization** (η), **light pollution** (P) and
+**relative luminance** (L). The system also provides **polygon-based spatial
+analysis** on PostGIS, aggregating count, density, LED rate and the indices for any
+arbitrary region. We discuss the model's explicit assumptions, its limits, and the
+path toward radiometric calibration (.IES photometry and atmospheric scattering).
+All source code, the database schema, and the model documentation are open and
+versioned, with reproduction data provided.
 
 **Keywords:** public lighting; LED retrofit; light pollution; photometry; pavement
 reflectance; GIS; PostGIS; smart cities.
@@ -43,9 +43,9 @@ lamp type) but rarely the *installation condition* — angle, surroundings, illu
 surface — precisely the variables that determine how much flux is useful and how much
 escapes to the sky.
 
-This paper reports the development and operation of a georeferenced system for the
-Niterói park and proposes a lightweight method to capture and quantify installation
-condition at scale. The **contributions** are:
+This paper reports the development and operation of a georeferenced system deployed
+in an urban public lighting context and proposes a lightweight method to capture and
+quantify installation condition at scale. The **contributions** are:
 
 1. An **open, reproducible park-management system** (map, field data entry, auditing,
    indicators) on a build-free stack (SPA + PostGIS + continuous deployment),
@@ -86,10 +86,10 @@ reproducibility.
 ### 3.2 Data model and park characterization
 
 Each point (`pontos_luminaria`) stores geometry (`geom`, SRID 4326), asset type, lamp
-type and power, modernization status and data provenance. The analyzed park contains
-**42,765 luminaires** across **52 neighborhoods**, of which **16,667 (39.0%)** are
-already LED, totaling **~5,825 kW** installed. Figure 1 shows the composition by lamp
-type and Figure 4 the power distribution.
+type and power, modernization status and data provenance. The case-study park analyzed
+contains **42,765 luminaires** across **52 neighborhoods**, of which **16,667 (39.0%)**
+are already LED, totaling **~5,825 kW** installed. Figure 1 shows the composition by
+lamp type and Figure 4 the power distribution.
 
 ![Figure 1](figures/fig1_tipo_lampada.svg)
 **Figure 1.** Park composition by lamp type (n=42,765). High-pressure sodium still
