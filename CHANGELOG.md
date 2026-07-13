@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Rebranding OpenLux**: repositório renomeado (`iluminacao-led-niteroi` → `openlux`,
   redirects automáticos), `VISION.md` (tese, modelo de expansão, fases), `GOVERNANCE.md`,
   registro público de cidades (`cities/`) e guia `docs/DEPLOY_YOUR_CITY.md`.
-  Niterói passa a ser a **implantação de referência (laboratório)**.
+  Parque urbano de 42.765 pontos passa a ser o **caso de estudo de referência**.
 - **Fase 1 — Cidade como configuração**: bloco `CITY` único no `index.html` +
   `config/cities/niteroi.json`; entidade `municipios` no banco com `municipio_id`
   nos 42.765 pontos (migration `20260711155442`).

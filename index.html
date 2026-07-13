@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Iluminação Pública · Niterói · SECONSER</title>
-<meta name="description" content="Cadastro georreferenciado e gestão da iluminação pública de Niterói — SECONSER. Mapa do parque de luminárias, situação da modernização LED e indicadores por bairro."/>
+<title>OpenLux — Public Lighting Asset Management System</title>
+<meta name="description" content="Open platform for georeferenced public lighting management. Interactive map, field data entry, installation photometry, spatial analysis and full auditing."/>
 <link id="favicon" rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Crect%20width%3D%2732%27%20height%3D%2732%27%20rx%3D%276%27%20fill%3D%27%230b0f14%27/%3E%3Ccircle%20cx%3D%2716%27%20cy%3D%2714%27%20r%3D%276%27%20fill%3D%27%23fbbf24%27/%3E%3Crect%20x%3D%2713%27%20y%3D%2719.5%27%20width%3D%276%27%20height%3D%274%27%20rx%3D%271%27%20fill%3D%27%239ca3af%27/%3E%3Cg%20stroke%3D%27%23fbbf24%27%20stroke-width%3D%271.6%27%20stroke-linecap%3D%27round%27%3E%3Cline%20x1%3D%2716%27%20y1%3D%272.5%27%20x2%3D%2716%27%20y2%3D%275.5%27/%3E%3Cline%20x1%3D%275.5%27%20y1%3D%2714%27%20x2%3D%272.5%27%20y2%3D%2714%27/%3E%3Cline%20x1%3D%2729.5%27%20y1%3D%2714%27%20x2%3D%2726.5%27%20y2%3D%2714%27/%3E%3Cline%20x1%3D%278%27%20y1%3D%276.5%27%20x2%3D%276%27%20y2%3D%274.5%27/%3E%3Cline%20x1%3D%2724%27%20y1%3D%276.5%27%20x2%3D%2726%27%20y2%3D%274.5%27/%3E%3C/g%3E%3C/svg%3E"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -73,13 +73,13 @@
 <div id="map" role="main" aria-label="Mapa de iluminação pública de Niterói"></div>
 <div id="splash" class="fixed inset-0 z-[3000] bg-slate-950 flex flex-col items-center justify-center gap-2 transition-opacity duration-500">
   <img id="splashLogo" alt="" class="h-14 hidden mb-2"/>
-  <div id="splashTitle" style="font-size:23px;font-weight:700;color:#e5e7eb;letter-spacing:.3px">Iluminação Pública · Niterói</div>
-  <div style="font-size:13px;color:#9ca3af">SECONSER · Diretoria de Iluminação Pública</div>
+  <div id="splashTitle" style="font-size:23px;font-weight:700;color:#e5e7eb;letter-spacing:.3px">OpenLux</div>
+  <div style="font-size:13px;color:#9ca3af">Public Lighting Asset Management</div>
   <div style="font-size:12px;color:#6b7280;margin-top:16px">Desenvolvido por <span style="color:#cbd5e1">Danilo Valim</span></div>
   <div style="font-size:11px;color:#5f6b78">v1.1</div>
   <button class="btn" id="splashSkip" style="margin-top:16px">Entrar</button>
 </div>
-<div id="footerBand" role="contentinfo" style="position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:800;max-width:92vw;background:rgba(15,21,28,0.86);border:1px solid #1f2a37;border-radius:8px;padding:5px 14px;font-size:11px;color:#9ca3af;text-align:center;pointer-events:none">SECONSER · Diretoria de Iluminação Pública · Prefeitura de Niterói · Desenvolvido por <span style="color:#cbd5e1">Danilo Valim</span> · v1.1</div>
+<div id="footerBand" role="contentinfo" style="position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:800;max-width:92vw;background:rgba(15,21,28,0.86);border:1px solid #1f2a37;border-radius:8px;padding:5px 14px;font-size:11px;color:#9ca3af;text-align:center;pointer-events:none">OpenLux · Desenvolvido por <span style="color:#cbd5e1">Danilo Valim</span> · v1.1</div>
 
 <!-- TOP BAR - Modernized with Tailwind + Alpine -->
 <div x-data="{ showFilters: false, showExport: false, showVis: false }" class="fixed top-3 left-3 right-3 z-[1000] bg-slate-900/95 backdrop-blur border border-slate-700 rounded-xl shadow-xl p-3 flex items-center gap-3 flex-wrap" role="banner" aria-label="Barra principal">
@@ -162,7 +162,7 @@
       </div>
       <div>
         <label class="block text-xs font-medium text-gray-400 mb-1.5">📋 Fila de auditoria</label>
-        <select id="fFila" class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"><option value="">— nenhuma —</option><option value="nao_verificado">🧭 Não verificados (recenseamento)</option><option value="revisao">Marcados p/ revisão</option><option value="suspeito">LED suspeito (&gt;400 W)</option><option value="mod_seconser">Origem: SECONSER</option><option value="mod_censo">Origem: censo ENEL</option><option value="mod_campo">Origem: campo</option></select>
+        <select id="fFila" class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"><option value="">— nenhuma —</option><option value="nao_verificado">🧭 Não verificados (recenseamento)</option><option value="revisao">Marcados p/ revisão</option><option value="suspeito">LED suspeito (&gt;400 W)</option><option value="mod_seconser">Origem: administrativo</option><option value="mod_censo">Origem: censo ENEL</option><option value="mod_campo">Origem: campo</option></select>
       </div>
       <div>
         <label class="block text-xs font-medium text-gray-400 mb-1.5">🏥 Status de Saúde</label>
@@ -331,7 +331,7 @@
 
       <label class="flex items-center gap-3 p-2 cursor-pointer hover:bg-slate-700/50 rounded-lg transition-colors">
         <input type="checkbox" id="expCol-codigo" class="exp-col-checkbox" value="codigo" checked/>
-        <span class="text-sm text-slate-300">Código SECONSER</span>
+        <span class="text-sm text-slate-300">Código</span>
       </label>
 
       <label class="flex items-center gap-3 p-2 cursor-pointer hover:bg-slate-700/50 rounded-lg transition-colors">
@@ -396,7 +396,7 @@
   <div class="flex items-center justify-between gap-3 px-6 py-4 border-b border-slate-700 bg-slate-800/50">
     <div class="flex-1">
       <h2 class="text-lg font-semibold text-white">Administração</h2>
-      <p class="text-xs text-slate-400 mt-0.5">Iluminação Pública · Niterói · SECONSER</p>
+      <p class="text-xs text-slate-400 mt-0.5">OpenLux — Public Lighting Management</p>
     </div>
     <button class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-100 text-sm rounded-lg border border-slate-600 transition-colors" id="acVoltar">← Voltar ao mapa</button>
   </div>
@@ -2720,7 +2720,7 @@ const FONTS={ system:{stack:"ui-sans-serif,system-ui,-apple-system,Segoe UI,Robo
 let cfgLogoUrl=null;
 function applyConfig(cfg){
   cfg=cfg||{}; state.config=cfg;
-  const titulo=cfg.titulo||'Iluminação Pública', sub=cfg.subtitulo||'Niterói · SECONSER';
+  const titulo=cfg.titulo||'Public Lighting Management', sub=cfg.subtitulo||'Powered by OpenLux';
   const t=document.getElementById('cfgTitulo'), s=document.getElementById('cfgSub');
   if(t) t.textContent=titulo; if(s) s.textContent=' · '+sub;
   document.title=titulo+' · '+sub;
@@ -2739,8 +2739,8 @@ function applyConfig(cfg){
 }
 async function loadConfig(){ try{ const {data}=await sb.from('site_config').select('dados').eq('id',1).single(); if(data) applyConfig(data.dados); }catch(e){} }
 function fillConfigForm(){ const c=state.config||{};
-  document.getElementById('cfgTit').value=c.titulo||'Iluminação Pública';
-  document.getElementById('cfgSubIn').value=c.subtitulo||'Niterói · SECONSER';
+  document.getElementById('cfgTit').value=c.titulo||'Public Lighting Management';
+  document.getElementById('cfgSubIn').value=c.subtitulo||'Powered by OpenLux';
   document.getElementById('cfgAccent').value=c.accent||'#1d4ed8';
   document.getElementById('cfgFonte').value=c.fonte||'system';
   document.getElementById('cfgPanel').value=c.panelBg||'#0f151c';
@@ -2766,8 +2766,8 @@ document.getElementById('cfgLogoRemove').onclick=()=>{ cfgLogoUrl=null;
   const pv=document.getElementById('cfgLogoPrev'); pv.style.display='none'; pv.removeAttribute('src');
   document.getElementById('cfgLogoFile').value=''; };
 document.getElementById('cfgSave').onclick=async()=>{
-  const dados={ titulo:document.getElementById('cfgTit').value.trim()||'Iluminação Pública',
-    subtitulo:document.getElementById('cfgSubIn').value.trim()||'Niterói · SECONSER',
+  const dados={ titulo:document.getElementById('cfgTit').value.trim()||'Public Lighting Management',
+    subtitulo:document.getElementById('cfgSubIn').value.trim()||'Powered by OpenLux',
     accent:document.getElementById('cfgAccent').value, fonte:document.getElementById('cfgFonte').value,
     panelBg:document.getElementById('cfgPanel').value, density:document.getElementById('cfgDensity').value,
     logo:cfgLogoUrl||null };

@@ -42,7 +42,7 @@ and full auditing. MIT-licensed code; the data belongs to each municipality.
 
 [![OpenLux in production — Niterói instance: 42,765 luminaires in clusters colored by LED rate](docs/assets/hero-niteroi.png)](https://iluminacao-niteroi.netlify.app)
 
-*The reference deployment, live: Niterói's park clusters colored by LED modernization rate — click to open.*
+*The reference case study, live: park clusters colored by LED modernization rate — click to open.*
 
 </div>
 
@@ -62,12 +62,11 @@ it's done. OpenLux proposes a different paradigm, detailed in the
 - **Open and expandable** — a city is configuration, not code: multi-tenant
   regional consortia or sovereign instances, with indicator federation on the horizon.
 
-## 🧪 Niterói — reference deployment
+## 🧪 Reference case study — urban park with 42,765 points
 
-The platform is the generalization of a system **in production** in Niterói, RJ,
-Brazil (SECONSER · Public Lighting Directorate), which serves as its **living
-lab**: every feature is validated with real data and real crews before becoming
-platform. The milestone is frozen and citable at DOI
+The platform is the generalization of a system **in production** operating a real
+urban park, which serves as its **living laboratory**: every feature is validated
+with real data before becoming platform. The milestone is frozen and citable at DOI
 [10.5281/zenodo.21305310](https://doi.org/10.5281/zenodo.21305310).
 
 <div align="center">

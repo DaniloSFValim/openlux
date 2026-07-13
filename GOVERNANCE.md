@@ -7,7 +7,7 @@ Como o projeto decide, quem decide, e como cidades e pessoas participam.
 | Papel | Quem | Responsabilidade |
 |---|---|---|
 | **Mantenedor** | [Danilo Valim](https://github.com/DaniloSFValim) ([ORCID 0009-0009-7250-6151](https://orcid.org/0009-0009-7250-6151)) | Direção técnica e científica, merge em `main`, releases/DOIs |
-| **Implantação de referência** | Niterói/RJ (SECONSER) | Laboratório: valida cada recurso com dados e equipes reais |
+| **Caso de estudo** | Parque urbano com 42.765 pontos | Validação de recursos com dados reais antes de lançamento em plataforma |
 | **Cidades implantadoras** | Registradas em [`cities/`](cities/README.md) | Operam suas instâncias/tenants; reportam problemas; propõem recursos |
 | **Contribuidores** | Qualquer pessoa | Issues, PRs, documentação, tradução, pesquisa |
 

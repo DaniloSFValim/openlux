@@ -41,17 +41,18 @@ O OpenLux nasce de três convicções, todas já provadas no laboratório de Nit
    PostgreSQL/PostGIS), que uma prefeitura pequena consegue operar e uma universidade
    consegue auditar. Código MIT; **os dados pertencem a cada município**.
 
-## 3. Niterói — o laboratório
+## 3. Caso de estudo: parque urbano de 42.765 pontos
 
-A plataforma não é uma promessa: é a generalização de um sistema **em produção**, que
-gerencia **42.765 pontos em 52 bairros** (~5,8 MW instalados, 39% LED), com edição em
-campo, fila de aprovação, catálogo fotométrico de modelos (Tier 2), índices de
-instalação (Tier 3), análise espacial por polígono e CI/CD completo.
+A plataforma não é uma promessa: é a generalização de um sistema **em produção**
+operando um parque urbano real com **42.765 pontos em 52 bairros** (~5,8 MW
+instalados, 39% LED), com edição em campo, fila de aprovação, catálogo fotométrico
+de modelos (Tier 2), índices de instalação (Tier 3), análise espacial por polígono e
+CI/CD completo.
 
 Esse marco está congelado e citável: **DOI
 [10.5281/zenodo.21305310](https://doi.org/10.5281/zenodo.21305310)** (v1.3.0, 2026).
-Niterói segue como implantação de referência — o lugar onde cada recurso novo é
-testado com dados e equipes reais antes de virar plataforma.
+Este parque continua como implantação de referência — o lugar onde cada recurso novo
+é testado com dados reais antes de virar plataforma.
 
 ## 4. O modelo de expansão
 

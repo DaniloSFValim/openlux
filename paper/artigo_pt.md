@@ -1,7 +1,7 @@
 # Gestão georreferenciada do parque de iluminação pública com índices fotométricos de instalação de primeira ordem: o caso de Niterói/RJ
 
 **Danilo Valim**
-SECONSER — Diretoria de Iluminação Pública, Prefeitura de Niterói, RJ, Brasil
+Pesquisador Independente
 `danilosfvalim@gmail.com`
 
 > **Status:** rascunho (draft) para submissão. Números do parque consultados em
@@ -14,18 +14,19 @@ SECONSER — Diretoria de Iluminação Pública, Prefeitura de Niterói, RJ, Bra
 A modernização para LED e o controle da poluição luminosa exigem, além de um
 inventário do que está instalado, o registro de **como** e **onde** cada luminária
 opera. Este trabalho apresenta um sistema web georreferenciado de gestão do parque
-de iluminação pública de Niterói/RJ (**42.765 pontos, 52 bairros, 39% já em LED,
-~5,8 MW instalados**) e propõe um **método de índices fotométricos de instalação de
-primeira ordem** que combina dois atributos de campo de baixo custo — o **ângulo de
-apontamento** do facho e o **material do piso** (refletância) — coletados por opções
-pré-classificadas. Desses atributos derivam-se, por ponto e por área, três
-indicadores comparáveis: **aproveitamento no piso** (η), **poluição luminosa** (P) e
-**luminância relativa** (L). O sistema inclui ainda **análise espacial por seleção de
-polígono** sobre PostGIS, permitindo agregar contagem, densidade, taxa de LED e os
-índices para qualquer região arbitrária. Discutem-se as premissas explícitas do
-modelo, seus limites e o caminho para calibração radiométrica (curva .IES e
-espalhamento atmosférico). Todo o código, o esquema de banco e a documentação do
-modelo são abertos e versionados, com dados de reprodução disponibilizados.
+de iluminação pública em contexto urbano (**42.765 pontos, 52 bairros, 39% já em
+LED, ~5,8 MW instalados**) e propõe um **método de índices fotométricos de
+instalação de primeira ordem** que combina dois atributos de campo de baixo custo —
+o **ângulo de apontamento** do facho e o **material do piso** (refletância) —
+coletados por opções pré-classificadas. Desses atributos derivam-se, por ponto e
+por área, três indicadores comparáveis: **aproveitamento no piso** (η), **poluição
+luminosa** (P) e **luminância relativa** (L). O sistema inclui ainda **análise
+espacial por seleção de polígono** sobre PostGIS, permitindo agregar contagem,
+densidade, taxa de LED e os índices para qualquer região arbitrária. Discutem-se as
+premissas explícitas do modelo, seus limites e o caminho para calibração radiométrica
+(curva .IES e espalhamento atmosférico). Todo o código, o esquema de banco e a
+documentação do modelo são abertos e versionados, com dados de reprodução
+disponibilizados.
 
 **Palavras-chave:** iluminação pública; modernização LED; poluição luminosa;
 fotometria; refletância de pavimento; SIG; PostGIS; cidades inteligentes.
@@ -44,8 +45,8 @@ instalação* — ângulo, entorno, superfície iluminada —, justamente as var
 determinam quanto do fluxo é útil e quanto escapa para o céu.
 
 Este artigo relata o desenvolvimento e a operação de um sistema georreferenciado
-para o parque de Niterói/RJ e propõe um método leve para capturar e quantificar a
-condição de instalação em escala. As **contribuições** são:
+em contexto de parque de iluminação pública urbana e propõe um método leve para
+capturar e quantificar a condição de instalação em escala. As **contribuições** são:
 
 1. Um **sistema aberto e reprodutível** de gestão do parque (mapa, cadastro em campo,
    auditoria, indicadores), sobre uma pilha sem *build* (SPA + PostGIS + deploy
@@ -89,9 +90,10 @@ manutenção e favorece a reprodutibilidade.
 
 Cada ponto (`pontos_luminaria`) guarda geometria (`geom`, SRID 4326), tipo de ativo,
 tipo e potência de lâmpada, estado de modernização e proveniência do dado. O parque
-analisado contém **42.765 luminárias** em **52 bairros**, das quais **16.667 (39,0%)**
-já modernizadas para LED, totalizando **~5.825 kW** instalados. A Figura 1 mostra a
-composição por tipo de lâmpada e a Figura 4, a distribuição de potência.
+estudado como caso de aplicação contém **42.765 luminárias** em **52 bairros**, das
+quais **16.667 (39,0%)** já modernizadas para LED, totalizando **~5.825 kW**
+instalados. A Figura 1 mostra a composição por tipo de lâmpada e a Figura 4, a
+distribuição de potência.
 
 ![Figura 1](figures/fig1_tipo_lampada.svg)
 **Figura 1.** Composição do parque por tipo de lâmpada (n=42.765). O vapor de sódio

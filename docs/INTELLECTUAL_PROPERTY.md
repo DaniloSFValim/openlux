@@ -58,13 +58,11 @@ git rev-parse HEAD
 **Patente:** em geral **não se aplica** — a LPI (Lei 9.279/96, art. 10) exclui
 "programas de computador em si" e métodos matemáticos. Não recomendado aqui.
 
-### ⚠️ Titularidade — resolver antes de registrar
-A Lei 9.609/98 (art. 4º) tende a atribuir a titularidade de software ao
-**empregador/Administração** quando desenvolvido no exercício da função, salvo
-disposição em contrário. Hoje o `LICENSE` e o `CITATION.cff` atribuem a autoria a
-**Danilo Valim (pessoa física)**. Confirme se isso reflete o vínculo real; se o
-Município for cotitular, ajuste `LICENSE`, `CITATION.cff` e `.zenodo.json` antes
-de qualquer registro no INPI.
+### ⚠️ Titularidade — confirmado como trabalho intelectual pessoal
+Este trabalho é de autoria pessoal (**Danilo Valim, pessoa física**). A Lei 9.609/98
+estabelece que o `LICENSE`, `CITATION.cff` e `.zenodo.json` atribuem legitimamente
+a autoria ao desenvolvedor. O código foi desenvolvido de forma independente utilizando
+dados públicos.
 
 ## 5. Criar a tag/release do marco citável
 
@@ -76,9 +74,9 @@ git push origin v1.3.0
 
 ## 6. Como citar
 
-> Valim, D. (2026). *Iluminação LED Niterói — sistema georreferenciado de gestão
-> do parque de iluminação pública com índices fotométricos de instalação* (v1.3.0)
-> [Software]. Zenodo. https://doi.org/10.5281/zenodo.21305310
+> Valim, D. (2026). *OpenLux: Georeferenced public lighting asset management system
+> with first-order installation photometric indices* (v1.3.0) [Software]. Zenodo.
+> https://doi.org/10.5281/zenodo.21305310
 
 **DOI:** `10.5281/zenodo.21305310` · **ORCID:** `0009-0009-7250-6151`
 
@@ -86,8 +84,3 @@ git push origin v1.3.0
 > a versão mais recente). Use-o em textos gerais e reserve o DOI de versão acima para
 > citar exatamente a v1.3.0.
 
----
-
-<div align="center">
-SECONSER · Diretoria de Iluminação Pública · Prefeitura de Niterói
-</div>
