@@ -2783,20 +2783,27 @@ async function aplicarPoligono(){
   document.getElementById('detail').style.display='none';
   document.getElementById('stats').style.display='none';
   setBusy(true);
-  const [pontos, stats] = await Promise.all([
-    rpc('ip_pontos_poligono', { p_geojson: state.poligono, limite: 5000 }),
-    rpc('ip_stats_poligono',  { p_geojson: state.poligono })
-  ]);
-  setBusy(false);
-  state.poligonoPontos = pontos || [];
-  state.layer.clearLayers();
-  (pontos||[]).forEach(p=>{
-    L.circleMarker([p.lat,p.lon],{radius:7,weight:1,color:'#0b0f14',fillColor:colorForHealth(p),fillOpacity:.95,bubblingMouseEvents:false})
-      .on('click',()=>openDetail(p)).addTo(state.layer);
-  });
-  if(state.poligonoLayer){ try{ map.fitBounds(state.poligonoLayer.getBounds(),{padding:[40,40]}); }catch(e){} }
-  document.getElementById('btnArea').classList.add('on');
-  renderPoligonoPanel(stats);
+  try {
+    const [pontos, stats] = await Promise.all([
+      rpc('ip_pontos_poligono', { p_geojson: state.poligono, limite: 5000 }),
+      rpc('ip_stats_poligono',  { p_geojson: state.poligono })
+    ]);
+    if (!pontos && !stats) { toast('Erro: dados do polígono incompletos', true); return; }
+    state.poligonoPontos = pontos || [];
+    state.layer.clearLayers();
+    (pontos||[]).forEach(p=>{
+      L.circleMarker([p.lat,p.lon],{radius:7,weight:1,color:'#0b0f14',fillColor:colorForHealth(p),fillOpacity:.95,bubblingMouseEvents:false})
+        .on('click',()=>openDetail(p)).addTo(state.layer);
+    });
+    if(state.poligonoLayer){ try{ map.fitBounds(state.poligonoLayer.getBounds(),{padding:[40,40]}); }catch(e){ console.error('Erro ao centralizar polígono:', e); } }
+    document.getElementById('btnArea').classList.add('on');
+    renderPoligonoPanel(stats);
+  } catch(e) {
+    console.error('Erro ao aplicar polígono:', e);
+    toast('Erro ao processar área: ' + e.message, true);
+  } finally {
+    setBusy(false);
+  }
   const mh=document.getElementById('modeHint');
   if(mh){ mh.textContent = (stats && stats.total>5000) ? `Área: ${stats.total.toLocaleString('pt-BR')} pontos (mapa mostra 5.000)` : 'Área selecionada'; mh.style.color='#38bdf8'; }
 }
@@ -2921,7 +2928,7 @@ async function highlightBairro(name){
   const data = await rpc('ip_bairro_geojson', { p_bairro:name });
   if(data){
     state.bairroLayer = L.geoJSON(data,{style:{color:'#60a5fa',weight:2,fillColor:'#3b82f6',fillOpacity:.14,interactive:false}}).addTo(map);
-    try{ map.fitBounds(state.bairroLayer.getBounds(),{padding:[30,30]}); }catch(e){}
+    try{ map.fitBounds(state.bairroLayer.getBounds(),{padding:[30,30]}); }catch(e){ console.warn('Aviso ao centralizar bairro:', e); }
   }
   refresh();
 }
@@ -3529,7 +3536,9 @@ document.getElementById('liSubmit').onclick=async ()=>{
   const err=document.getElementById('liErr');
   if(error){ err.style.display='block'; err.textContent='Falha no login: '+error.message; return; }
   err.style.display='none'; document.getElementById('loginModal').style.display='none'; setUser(data.user); toast('Bem-vindo, '+email); };
-sb.auth.getSession().then(({data})=>setUser(data.session?.user||null));
+sb.auth.getSession()
+  .then(({data})=>setUser(data.session?.user||null))
+  .catch(e=>{ console.error('Erro ao carregar sessão:', e); setUser(null); });
 
 // ---------- Painel admin ----------
 function acShow(sec){
@@ -4053,7 +4062,7 @@ async function capturarMapa(){
   c.querySelectorAll('img.leaflet-tile').forEach(img=>{
     if(!img.complete || !img.naturalWidth) return;
     const r=img.getBoundingClientRect();
-    try{ ctx.drawImage(img, r.left-rect.left, r.top-rect.top, r.width, r.height); }catch(e){}
+    try{ ctx.drawImage(img, r.left-rect.left, r.top-rect.top, r.width, r.height); }catch(e){ console.warn('Erro ao desenhar imagem em canvas:', e); }
   });
   c.querySelectorAll('canvas').forEach(cv=>{
     const r=cv.getBoundingClientRect();
@@ -4063,7 +4072,7 @@ async function capturarMapa(){
   await Promise.all(svgs.map(sv=>new Promise(res=>{
     const r=sv.getBoundingClientRect();
     const img=new Image();
-    img.onload=()=>{ try{ ctx.drawImage(img, r.left-rect.left, r.top-rect.top, r.width, r.height); }catch(e){} res(); };
+    img.onload=()=>{ try{ ctx.drawImage(img, r.left-rect.left, r.top-rect.top, r.width, r.height); }catch(e){ console.warn('Erro ao renderizar imagem no canvas:', e); } res(); };
     img.onerror=()=>res();
     img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(sv));
   })));
@@ -4089,7 +4098,7 @@ async function exportPDF(){
     doc.setTextColor(20); doc.setFontSize(10);
     doc.text(`Luminárias ${s.total}   |   LED ${s.led} (${s.pct_led}%)   |   Pendentes ${s.pendente}   |   Pot. LED ${s.potencia_kw} kW`,14,27);
     try{ const img=canvas.toDataURL('image/png'); const w=140,h=Math.min(w*canvas.height/canvas.width,150);
-      doc.addImage(img,'PNG',14,32,w,h); }catch(e){}
+      doc.addImage(img,'PNG',14,32,w,h); }catch(e){ console.error('Erro ao adicionar imagem no PDF:', e); toast('Erro ao gerar PDF: ' + e.message, true); }
     if(doc.autoTable) doc.autoTable({ startY:32, margin:{left:160}, tableWidth:122,
       head:[['Bairro','Total','LED','Pend','%']],
       body:(porBairro||[]).map(b=>[b.bairro_nome,b.total,b.led,b.pendente,b.pct_led+'%']),
@@ -4151,7 +4160,7 @@ function applyConfig(cfg){
   const stt=document.getElementById('splashTitle'); if(stt) stt.textContent=titulo+' · '+((sub.split('·')[0]||'').trim()||'Niterói');
   const sl=document.getElementById('splashLogo'); if(sl){ if(cfg.logo){ sl.src=cfg.logo; sl.style.display='block'; } else sl.style.display='none'; }
 }
-async function loadConfig(){ try{ const {data}=await sb.from('site_config').select('dados').eq('id',1).single(); if(data) applyConfig(data.dados); }catch(e){} }
+async function loadConfig(){ try{ const {data}=await sb.from('site_config').select('dados').eq('id',1).single(); if(data) applyConfig(data.dados); }catch(e){ console.warn('Config do site não carregou, usando padrão:', e.message); } }
 function fillConfigForm(){ const c=state.config||{};
   document.getElementById('cfgTit').value=c.titulo||'Public Lighting Management';
   document.getElementById('cfgSubIn').value=c.subtitulo||'Powered by OpenLux';
