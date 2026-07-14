@@ -1514,6 +1514,43 @@
 
   .sb-footer #btnLogin { flex: 1; }
 
+  /* Tier 1 · Busca avançada */
+  .sb-search { padding: 0 16px 14px; position: relative; }
+  #sbSearchResults {
+    position: absolute;
+    left: 16px; right: 16px; top: 100%;
+    z-index: 10;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0,0,0,.4));
+    max-height: 280px;
+    overflow-y: auto;
+  }
+  .sb-result {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+    cursor: pointer;
+  }
+  .sb-result:last-child { border-bottom: none; }
+  .sb-result:hover { background: var(--bg-secondary); }
+  .sb-result-code { display: block; font-size: 12px; font-weight: 600; }
+  .sb-result-addr { display: block; font-size: 11px; color: var(--text-tertiary); }
+  .sb-result-empty { padding: 8px 12px; font-size: 11px; color: var(--text-tertiary); }
+
+  /* Tier 1 · Filtros salvos (presets) */
+  .sb-presets-row { display: flex; gap: 6px; }
+  .sb-presets-row .btn { flex: 1; }
+
+  /* Tier 1 · Edição em massa: checkboxes não herdam width:100% dos inputs */
+  #tblReg input[type="checkbox"], #bulkModal input[type="checkbox"] { width: auto; }
+
   #sidebarToggle {
     position: fixed;
     top: 12px; left: 12px;
@@ -1582,6 +1619,12 @@
   <div class="sb-kpi">
     <div class="sb-kpi-bar"><div id="pctBar"></div></div>
     <span id="kpi" class="text-xs text-muted">—</span>
+  </div>
+
+  <!-- Tier 1: Busca avançada -->
+  <div class="sb-search">
+    <input id="sbSearch" type="search" placeholder="🔎 Código, endereço ou bairro…" autocomplete="off" aria-label="Buscar ponto de iluminação"/>
+    <div id="sbSearchResults" style="display: none;" role="listbox"></div>
   </div>
 
   <!-- Seção: Filtros (aberta por padrão) -->
@@ -1660,6 +1703,17 @@
             </div>
       <button id="fLimpar"
         class="w-full px-3 py-2 rounded-lg text-sm font-medium transition-colors btn-secondary-solid">Limpar</button>
+
+      <!-- Tier 1: Filtros salvos + exportação rápida -->
+      <div>
+        <label class="form-label-inline">💾 Filtros salvos</label>
+        <select id="fPreset" class="input-default"><option value="">— nenhum —</option></select>
+      </div>
+      <div class="sb-presets-row">
+        <button id="fPresetSave" class="btn" title="Salvar filtros atuais como preset">💾 Salvar</button>
+        <button id="fPresetDel" class="btn" title="Excluir preset selecionado">🗑️</button>
+        <button id="fPresetCSV" class="btn" title="Exportar CSV com os filtros atuais">⬇️ CSV</button>
+      </div>
     </div>
   </div>
 
@@ -1798,6 +1852,10 @@
         <option value="sem_lampada">Sem lâmpada</option>
       </select>
       <span id="tCount" class="text-xs ml-auto text-muted"></span>
+      <span id="bulkBar" class="items-center gap-2" style="display: none;">
+        <span class="text-xs text-muted"><b id="bulkCount">0</b> selecionado(s)</span>
+        <button id="bulkEditBtn" class="px-3 py-2 rounded-lg text-xs font-medium transition-all btn-primary-solid">✏️ Editar em massa</button>
+      </span>
       <button class="px-3 py-2 rounded-lg text-xs font-medium transition-all" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);" id="tClose">✕ Fechar</button>
     </div>
 
@@ -1807,6 +1865,7 @@
         <caption class="sr-only">Registro de luminárias de iluminação pública de Niterói, com endereço, bairro, tipo, potência, estado e origem da modernização.</caption>
         <thead style="background: var(--bg-tertiary); border-bottom-color: var(--border-color);">
           <tr>
+            <th class="text-left text-muted"><input type="checkbox" id="bulkAll" onchange="window._bulkToggleAll(this.checked)" aria-label="Selecionar todos da página" title="Selecionar todos da página"/></th>
             <th class="text-left text-muted">Código</th>
             <th class="text-left text-muted">Endereço</th>
             <th class="text-left text-muted">Bairro</th>
@@ -1827,6 +1886,44 @@
       <button class="px-3 py-2 rounded-lg text-xs font-medium transition-all" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);" id="tPrev">‹ Anterior</button>
       <span id="tPage" class="text-xs text-muted"></span>
       <button class="px-3 py-2 rounded-lg text-xs font-medium transition-all" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);" id="tNext">Próxima ›</button>
+    </div>
+  </div>
+</div>
+
+<!-- BULK EDIT MODAL (Tier 1) -->
+<div id="bulkModal" class="fixed inset-0 z-[1250] bg-black/60 items-center justify-center" style="display: none;">
+  <div class="rounded-xl w-[min(420px,95vw)] p-5" style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
+    <h3 class="font-semibold text-sm text-primary" style="margin-bottom: 8px;">✏️ Edição em massa</h3>
+    <p class="text-xs text-muted" style="margin-bottom: 12px;">As alterações serão aplicadas a <b id="bkTotal">—</b> ponto(s) selecionado(s). Campos em "— manter —" não são alterados.</p>
+    <div style="margin-bottom: 10px;">
+      <label class="form-label-inline">🔆 Estado</label>
+      <select id="bkStatus" class="input-default">
+        <option value="">— manter —</option>
+        <option value="led_instalado">led_instalado</option>
+        <option value="pendente_troca">pendente_troca</option>
+        <option value="a_verificar">a_verificar</option>
+      </select>
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label class="form-label-inline">💡 Lâmpada</label>
+      <select id="bkLamp" class="input-default"><option value="">— manter —</option></select>
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label class="form-label-inline">⚡ Potência (W)</label>
+      <input id="bkPot" type="number" min="0" max="2000" placeholder="— manter —" class="input-default"/>
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label class="form-label-inline">✅ Modernizado (LED)</label>
+      <select id="bkMod" class="input-default">
+        <option value="">— manter —</option>
+        <option value="sim">Sim</option>
+        <option value="nao">Não</option>
+      </select>
+    </div>
+    <div id="bkStatusMsg" class="text-xs text-muted" style="display: none; margin-bottom: 8px;"></div>
+    <div class="flex gap-3 justify-end" style="margin-top: 6px;">
+      <button class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-100 text-sm rounded-lg border border-slate-600 transition-colors btn" id="bkCancel">Cancelar</button>
+      <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium transition-colors btn-accent" id="bkApply">Aplicar</button>
     </div>
   </div>
 </div>
@@ -3297,7 +3394,8 @@ function renderPoligonoPanel(s){
        </div>`
     : `<div style="margin-top:8px;color:#6b7280;font-size:10.5px">Sem pontos classificados por fotometria nesta área.</div>`;
   const exportar = podeEditar()
-    ? `<div style="display:flex;gap:6px;margin-top:10px">
+    ? `<button class="btn" style="width:100%;margin-top:10px;font-size:11px;border-color:#1d4ed8;color:#93c5fd" onclick="window._bulkFromPolygon()">✏️ Editar em massa (${fmt(s.total)} pontos)</button>
+       <div style="display:flex;gap:6px;margin-top:6px">
          <button class="btn" style="flex:1;font-size:11px" onclick="exportarPoligono('csv')">⬇️ CSV da área</button>
          <button class="btn" style="flex:1;font-size:11px" onclick="exportarPoligono('geojson')">⬇️ GeoJSON</button>
        </div>` : '';
@@ -3833,10 +3931,10 @@ window._aplicarModelo = (id)=>{
 // ---------- Estatísticas ----------
 async function loadStatsChips(){
   const data = await rpc('ip_estatisticas',{ p_bairro: state.bairro||null });
-  if(!data) return;
+  if(!data || data.total==null) return;
   state.stats=data;
   const scope = state.bairro? esc(state.bairro) : 'Niterói';
-  document.getElementById('kpi').innerHTML = `<b>${data.total.toLocaleString('pt-BR')}</b> lum · <b style="color:#4ade80">${data.pct_led}%</b> LED · <b style="color:#fbbf24">${data.pendente.toLocaleString('pt-BR')}</b> pend · <span class="text-gray">${scope}</span>`;
+  document.getElementById('kpi').innerHTML = `<b>${data.total.toLocaleString('pt-BR')}</b> lum · <b style="color:#4ade80">${data.pct_led}%</b> LED · <b style="color:#fbbf24">${(data.pendente??0).toLocaleString('pt-BR')}</b> pend · <span class="text-gray">${scope}</span>`;
   document.getElementById('pctBar').style.width = (data.pct_led||0)+'%';
 }
 function sparkline(serie){
@@ -3964,7 +4062,7 @@ document.getElementById('btnStats').onclick = ()=>{ const s=document.getElementB
 // ---------- Tabela ----------
 async function loadTable(){
   setBusy(true);
-  document.getElementById('tBody').innerHTML='<tr><td colspan="8" style="text-align:center;color:#6b7280;padding:18px"><span class="spin"></span> Carregando…</td></tr>';
+  document.getElementById('tBody').innerHTML='<tr><td colspan="10" style="text-align:center;color:#6b7280;padding:18px"><span class="spin"></span> Carregando…</td></tr>';
   let q=sb.from('v_parque_export').select('id,codigo_seconser,numero_patrimonio,endereco,bairro_nome,tipo_lampada,potencia_w,modernizado_led,fonte_modernizacao,status,observacoes,lat,lon,tipo_ativo,tipo_luminaria,classe_nbr,health_status,verificado_em,angulo_inclinacao_graus,material_piso',{count:'exact'});
   const s=document.getElementById('tSearch').value.trim();
   const bb=document.getElementById('tBairro').value, st=document.getElementById('tStatus').value;
@@ -3978,7 +4076,7 @@ async function loadTable(){
   const {data,count,error}=await q.order('bairro_nome').range(from,from+state.tSize-1);
   setBusy(false);
   if(error){ toast('Erro na tabela: '+error.message,true);
-    document.getElementById('tBody').innerHTML='<tr><td colspan="8" style="text-align:center;color:#f87171;padding:18px">Falha ao carregar. Tente novamente.</td></tr>'; return; }
+    document.getElementById('tBody').innerHTML='<tr><td colspan="10" style="text-align:center;color:#f87171;padding:18px">Falha ao carregar. Tente novamente.</td></tr>'; return; }
   document.getElementById('tCount').textContent=`${(count||0).toLocaleString('pt-BR')} registros`;
   document.getElementById('tPage').textContent=`Página ${state.tPage+1} de ${Math.max(1,Math.ceil((count||0)/state.tSize))}`;
   state.tCache={}; (data||[]).forEach(p=>state.tCache[p.id]=p);
@@ -3986,10 +4084,11 @@ async function loadTable(){
     const origem=p.fonte_modernizacao==='censo_enel'?'censo':p.fonte_modernizacao==='seconser_pos_censo'?'SECONSER':p.fonte_modernizacao==='campo'?'campo':'—';
     const est=p.modernizado_led?`<span class="badge" style="background:#0d3d24;color:#4ade80">LED</span>`:`<span class="badge" style="background:#3d2f0d;color:#fbbf24">Pend.</span>`;
     const healthBadge = healthStatusBadge(p.health_status);
-    return `<tr><td>${esc(p.codigo_seconser)||'—'}</td><td>${esc(p.endereco)||'—'}</td><td>${esc(p.bairro_nome)||'—'}</td><td>${p.tipo_lampada}</td><td>${p.potencia_w||'—'}</td><td>${est}</td><td style="color:${healthBadge.color}">${healthBadge.emoji} ${healthBadge.label}</td><td class="text-gray">${origem}</td>
+    const cbSel = podeEditar()?`<input type="checkbox" data-bulk="${p.id}"${state.bulkSel&&state.bulkSel.has(p.id)?' checked':''} onchange="window._bulkToggle('${p.id}',this.checked)" aria-label="Selecionar para edição em massa"/>`:'';
+    return `<tr><td>${cbSel}</td><td>${esc(p.codigo_seconser)||'—'}</td><td>${esc(p.endereco)||'—'}</td><td>${esc(p.bairro_nome)||'—'}</td><td>${p.tipo_lampada}</td><td>${p.potencia_w||'—'}</td><td>${est}</td><td style="color:${healthBadge.color}">${healthBadge.emoji} ${healthBadge.label}</td><td class="text-gray">${origem}</td>
       <td>${podeEditar()?`<button class="btn" style="padding:2px 8px" onclick="window._editId('${p.id}')" aria-label="Editar luminária">editar</button>`:''}</td></tr>`;
   }).join('');
-  document.getElementById('tBody').innerHTML = linhas || '<tr><td colspan="8" style="text-align:center;color:#6b7280;padding:18px">Nenhum registro encontrado</td></tr>';
+  document.getElementById('tBody').innerHTML = linhas || '<tr><td colspan="10" style="text-align:center;color:#6b7280;padding:18px">Nenhum registro encontrado</td></tr>';
 }
 window._editId=(id)=>{ const p=state.tCache[id]; if(!p) return; state.current=p; document.getElementById('tableModal').style.display='none'; document.getElementById('detail').style.display='block'; window._edit(); };
 document.getElementById('btnTabela').onclick=()=>{ state.tPage=0; document.getElementById('tableModal').style.display='flex'; loadTable(); };
@@ -3997,6 +4096,157 @@ document.getElementById('tClose').onclick=()=>document.getElementById('tableModa
 document.getElementById('tPrev').onclick=()=>{ if(state.tPage>0){state.tPage--;loadTable();} };
 document.getElementById('tNext').onclick=()=>{ state.tPage++; loadTable(); };
 ['tSearch','tBairro','tStatus'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{state.tPage=0;loadTable();}));
+
+// ---------- Tier 1 · Busca avançada (sidebar) ----------
+let sbSearchTimer=null;
+const SEARCH_COLS='id,codigo_seconser,numero_patrimonio,endereco,bairro_nome,tipo_lampada,potencia_w,modernizado_led,fonte_modernizacao,status,observacoes,lat,lon,tipo_ativo,tipo_luminaria,classe_nbr,health_status,verificado_em,angulo_inclinacao_graus,material_piso';
+document.getElementById('sbSearch').addEventListener('input', ()=>{
+  clearTimeout(sbSearchTimer);
+  const res=document.getElementById('sbSearchResults');
+  const s=document.getElementById('sbSearch').value.replace(/[,%()"']/g,' ').trim();
+  if(s.length<2){ res.style.display='none'; res.innerHTML=''; return; }
+  sbSearchTimer=setTimeout(async ()=>{
+    const {data,error}=await sb.from('v_parque_export').select(SEARCH_COLS)
+      .or(`codigo_seconser.ilike.%${s}%,endereco.ilike.%${s}%,numero_patrimonio.ilike.%${s}%,bairro_nome.ilike.%${s}%`)
+      .limit(8);
+    if(error){ console.error('Busca falhou:', error.message); return; }
+    if(!data||!data.length){ res.innerHTML='<div class="sb-result-empty">Nenhum resultado</div>'; res.style.display='block'; return; }
+    state.searchCache={}; data.forEach(p=>state.searchCache[p.id]=p);
+    res.innerHTML=data.map(p=>`<button class="sb-result" onclick="window._searchGo('${p.id}')" role="option">
+      <span class="sb-result-code">${esc(p.codigo_seconser||p.numero_patrimonio||'—')}</span>
+      <span class="sb-result-addr">${esc(p.endereco||'—')} · ${esc(p.bairro_nome||'—')}</span></button>`).join('');
+    res.style.display='block';
+  },300);
+});
+window._searchGo=(id)=>{
+  const p=state.searchCache&&state.searchCache[id]; if(!p) return;
+  document.getElementById('sbSearchResults').style.display='none';
+  if(p.lat!=null&&p.lon!=null) map.setView([p.lat,p.lon],18);
+  openDetail(p);
+  if(window.innerWidth<1024) document.getElementById('sidebar').classList.remove('open');
+};
+document.addEventListener('click',e=>{ if(!e.target.closest('.sb-search')) document.getElementById('sbSearchResults').style.display='none'; });
+
+// ---------- Tier 1 · Filtros salvos (presets em localStorage) ----------
+const PRESET_KEY='openlux_filter_presets';
+function presetsAll(){ try{ return JSON.parse(localStorage.getItem(PRESET_KEY))||{}; }catch(e){ return {}; } }
+function presetsFill(){
+  const sel=document.getElementById('fPreset'); const cur=sel.value;
+  sel.innerHTML='<option value="">— nenhum —</option>'+Object.keys(presetsAll()).sort((a,b)=>a.localeCompare(b,'pt-BR')).map(n=>`<option${n===cur?' selected':''}>${esc(n)}</option>`).join('');
+}
+document.getElementById('fPresetSave').onclick=()=>{
+  const nome=prompt('Nome do preset de filtros:',''); if(nome===null||!nome.trim()) return;
+  const all=presetsAll();
+  all[nome.trim()]={bairro:state.bairro,tipo:state.tipo,estado:state.estado,pot:state.pot,fila:state.fila,saude:state.saude||''};
+  try{ localStorage.setItem(PRESET_KEY,JSON.stringify(all)); }catch(e){ toast('Não foi possível salvar o preset',true); return; }
+  presetsFill(); document.getElementById('fPreset').value=nome.trim();
+  toast('Preset "'+nome.trim()+'" salvo');
+};
+document.getElementById('fPresetDel').onclick=()=>{
+  const sel=document.getElementById('fPreset'); if(!sel.value){ toast('Selecione um preset para excluir',true); return; }
+  const all=presetsAll(); delete all[sel.value];
+  localStorage.setItem(PRESET_KEY,JSON.stringify(all)); presetsFill(); toast('Preset excluído');
+};
+document.getElementById('fPreset').onchange=e=>{
+  const p=presetsAll()[e.target.value]; if(!p) return;
+  state.bairro=p.bairro||''; state.tipo=p.tipo||''; state.estado=p.estado||'';
+  state.pot=p.pot||''; state.fila=p.fila||''; state.saude=p.saude||'';
+  document.getElementById('fBairro').value=state.bairro;
+  document.getElementById('fTipo').value=state.tipo;
+  document.getElementById('fEstado').value=state.estado;
+  document.getElementById('fPot').value=state.pot;
+  document.getElementById('fFila').value=state.fila;
+  document.getElementById('fSaude').value=state.saude;
+  updateFCount(); loadStatsChips(); state.choroData=null;
+  if(state.bairro) highlightBairro(state.bairro);
+  else if(state.bairroLayer){ map.removeLayer(state.bairroLayer); state.bairroLayer=null; }
+  refresh();
+  toast('Filtros aplicados: '+e.target.value);
+};
+document.getElementById('fPresetCSV').onclick=()=>exportData('csv');
+presetsFill();
+
+// ---------- Tier 1 · Edição em massa (tabela e polígono no mapa) ----------
+state.bulkSel=new Set(); state.bulkCache={};
+function bulkUpdateBar(){
+  const n=state.bulkSel.size;
+  document.getElementById('bulkBar').style.display=(n>0&&podeEditar())?'inline-flex':'none';
+  document.getElementById('bulkCount').textContent=n;
+}
+window._bulkToggle=(id,checked)=>{
+  if(checked){ state.bulkSel.add(id); if(state.tCache[id]) state.bulkCache[id]=state.tCache[id]; }
+  else { state.bulkSel.delete(id); delete state.bulkCache[id]; }
+  bulkUpdateBar();
+};
+window._bulkToggleAll=(checked)=>{
+  document.querySelectorAll('#tBody input[data-bulk]').forEach(cb=>{ cb.checked=checked; window._bulkToggle(cb.dataset.bulk,checked); });
+};
+function bulkOpenModal(origem){
+  if(!state.bulkSel.size) return;
+  state.bulkOrigem=origem||'tabela';
+  document.getElementById('bkTotal').textContent=state.bulkSel.size.toLocaleString('pt-BR');
+  document.getElementById('bulkModal').style.display='flex';
+}
+document.getElementById('bulkEditBtn').onclick=()=>bulkOpenModal('tabela');
+// Edição em massa a partir do polígono desenhado no mapa
+window._bulkFromPolygon=()=>{
+  if(!podeEditar()) return;
+  const pts=state.poligonoPontos||[];
+  if(!pts.length){ toast('Nenhum ponto na área selecionada',true); return; }
+  if(pts.length>1000 && !confirm(`A área tem ${pts.length.toLocaleString('pt-BR')} pontos. A aplicação pode levar alguns minutos. Continuar?`)) return;
+  state.bulkSel=new Set(); state.bulkCache={};
+  pts.forEach(p=>{ state.bulkSel.add(p.id); state.bulkCache[p.id]=p; });
+  bulkOpenModal('poligono');
+};
+document.getElementById('bkCancel').onclick=()=>{
+  document.getElementById('bulkModal').style.display='none';
+  if(state.bulkOrigem==='poligono'){ state.bulkSel.clear(); state.bulkCache={}; bulkUpdateBar(); }
+};
+TIPOS.forEach(tp=>document.getElementById('bkLamp').insertAdjacentHTML('beforeend',`<option value="${tp}">${tp}</option>`));
+document.getElementById('bkApply').onclick=async ()=>{
+  const est=document.getElementById('bkStatus').value, lamp=document.getElementById('bkLamp').value;
+  const potStr=document.getElementById('bkPot').value.trim(), mod=document.getElementById('bkMod').value;
+  const pot=potStr===''?null:parseInt(potStr);
+  if(pot!==null&&(isNaN(pot)||pot<0||pot>2000)){ toast('Potência fora da faixa (0-2000 W)',true); return; }
+  if(!est&&!lamp&&potStr===''&&!mod){ toast('Nenhuma alteração selecionada',true); return; }
+  const ids=[...state.bulkSel]; let ok=0,fail=0,done=0;
+  const msg=document.getElementById('bkStatusMsg'); msg.style.display='block';
+  setBusy(true);
+  const aplicar=async (id)=>{
+    const p=state.bulkCache[id]||state.tCache[id];
+    if(!p){ fail++; return; }
+    const {error}=await sb.rpc('ip_atualizar_ponto',{ p_id:p.id,
+      p_tipo: lamp||p.tipo_lampada||null,
+      p_potencia: potStr!==''?pot:(p.potencia_w??null),
+      p_status: est||p.status||null,
+      p_modernizado: mod===''?!!p.modernizado_led:(mod==='sim'),
+      p_obs: p.observacoes||null,
+      p_lat:null, p_lng:null,
+      p_tipo_luminaria: p.tipo_luminaria||null,
+      p_classe_nbr: p.classe_nbr||null,
+      p_angulo: (p.angulo_inclinacao_graus!=null)?p.angulo_inclinacao_graus:null,
+      p_material: p.material_piso||null });
+    if(error){ fail++; console.error('Bulk falhou em '+p.id+': '+error.message); } else ok++;
+    done++; msg.textContent=`⏳ Aplicando ${done} de ${ids.length}…`;
+  };
+  // lotes de 5 em paralelo para áreas grandes
+  for(let i=0;i<ids.length;i+=5){
+    await Promise.all(ids.slice(i,i+5).map(aplicar));
+  }
+  setBusy(false);
+  msg.style.display='none';
+  document.getElementById('bulkModal').style.display='none';
+  const origem=state.bulkOrigem;
+  state.bulkSel.clear(); state.bulkCache={}; bulkUpdateBar();
+  const selAll=document.getElementById('bulkAll'); if(selAll) selAll.checked=false;
+  ['bkStatus','bkLamp','bkMod'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('bkPot').value='';
+  toast(`Edição em massa: ${ok} atualizado(s)${fail?`, ${fail} falha(s)`:''}`, fail>0);
+  state.choroData=null; state.densData=null;
+  loadStatsChips();
+  if(origem==='poligono' && state.poligono) aplicarPoligono();
+  else { loadTable(); refresh(); }
+};
 
 // ---------- Auth ----------
 function podeEditar(){ return ['admin','editor'].includes(state.userRole); }
