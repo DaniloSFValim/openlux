@@ -21,6 +21,9 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<!-- Charting Libraries: Chart.js + plugins -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 <script defer data-domain="iluminacao-niteroi.netlify.app" src="https://plausible.io/js/script.js"></script>
 
 <!-- POC: Tailwind CSS + Alpine.js + HTMX -->
@@ -1119,6 +1122,31 @@
   </div>
 </div>
 
+<div id="chartsModal" class="fixed inset-0 z-[1150] bg-black/60 flex items-center justify-center hidden">
+  <div class="bg-slate-800 border border-slate-700 rounded-xl w-[min(1000px,95vw)] h-[min(80vh,700px)] flex flex-col overflow-hidden shadow-2xl">
+    <!-- Header -->
+    <div class="flex gap-2 items-center px-4 py-3 border-b border-slate-700 bg-slate-700/50">
+      <h3 class="font-semibold text-white text-sm">📈 Indicadores & Série Temporal</h3>
+      <div class="flex-1"></div>
+      <button class="btn px-1.5 py-1 text-slate-300 hover:text-white text-base" onclick="window._closeCharts()">✕</button>
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 overflow-auto flex flex-col gap-4 p-4">
+      <!-- KPI Cards -->
+      <div id="kpiSparklines" class="flex gap-3 flex-wrap"></div>
+
+      <!-- Time Series Chart -->
+      <div class="flex-1 min-h-0 flex flex-col">
+        <h4 class="text-xs font-semibold text-slate-300 mb-2">Evolução Mensal</h4>
+        <div class="flex-1 relative">
+          <canvas id="chartTimeSeries"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 // Get Supabase credentials from environment or build-time injection
 // In production (Netlify): injected as window.__CONFIG__ by build process
@@ -1136,7 +1164,8 @@ const sb = window.supabase.createClient(URL_SB, ANON);
 const state = { user:null, userRole:null, bairro:"", tipo:"", estado:"", pot:"", fila:"", layer:null, mode:"", tPage:0, tSize:50,
   bairroLayer:null, choropleth:false, choroLayer:null, choroData:null, current:null, tCache:{}, config:null,
   densidade:false, densLayer:null, densMunLayer:null, densData:null, densMetric:'klm', densMode:'grade', heatmap:null, heatmapInstance:null,
-  markerCluster:null }; // FASE 3: Client-side clustering for multi-cidade; Tier 3: heatmap support
+  markerCluster:null,
+  charts: {} }; // FASE 3: Client-side clustering; Tier 3: heatmap; Fase 2: charts (Chart.js instances)
 const TIPOS = ["led","vapor_sodio","metalico","vapor_mercurio","fluorescente","sem_lampada","desconhecido"];
 const STATUS = ["led_instalado","pendente_troca","a_verificar"];
 const TIPO_ATIVO = [['luminaria','Luminária'],['caixa_comando','Caixa de comando'],['chave_magnetica','Chave magnética'],['rele_fotoeletrico','Relé fotoelétrico'],['poste','Poste'],['braco','Braço'],['outro','Outro']];
@@ -1744,6 +1773,161 @@ window._switchDensMode = (mode) => {
 };
 
 window._densMetric=(m)=>{ state.densMetric=m; if(state.densMode==='grade') renderDensidade(); };
+
+// ---------- CHARTS & DASHBOARDS (Fase 2) ----------
+async function loadTimeSeriesData(){
+  try{
+    // RPC returns: { mes: string, total: int, led: int, pct_led: float }
+    const data = await rpc('ip_serie_metricas', {});
+    return data || [];
+  }catch(e){
+    console.error('Erro ao carregar série temporal:', e);
+    return [];
+  }
+}
+
+async function renderTimeSeriesChart(){
+  const container = document.getElementById('chartTimeSeries');
+  if(!container) return;
+
+  const data = await loadTimeSeriesData();
+  if(!data.length){
+    container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-secondary)">Sem dados de série temporal</div>';
+    return;
+  }
+
+  // Destroy existing chart if any
+  if(state.charts.timeSeries){
+    state.charts.timeSeries.destroy();
+  }
+
+  const ctx = container.querySelector('canvas');
+  if(!ctx) return;
+
+  const labels = data.map(d=>d.mes);
+  const totalData = data.map(d=>d.total);
+  const ledData = data.map(d=>d.led);
+  const pctLedData = data.map(d=>Math.round(d.pct_led || 0));
+
+  state.charts.timeSeries = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Total de Luminárias',
+          data: totalData,
+          borderColor: 'var(--primary-600)',
+          backgroundColor: 'rgba(2, 132, 199, 0.1)',
+          borderWidth: 2,
+          tension: 0.4,
+          fill: true,
+          yAxisID: 'y'
+        },
+        {
+          label: 'LED Instaladas',
+          data: ledData,
+          borderColor: 'var(--success)',
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          borderWidth: 2,
+          tension: 0.4,
+          fill: true,
+          yAxisID: 'y'
+        },
+        {
+          label: '% LED',
+          data: pctLedData,
+          borderColor: 'var(--accent)',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          tension: 0.4,
+          borderDash: [5, 5],
+          yAxisID: 'y1'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          display: true,
+          labels: { color: 'var(--text-secondary)', usePointStyle: true, padding: 15 }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          titleColor: 'var(--text)',
+          bodyColor: 'var(--text-secondary)',
+          borderColor: 'var(--border)',
+          borderWidth: 1
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'var(--bg-tertiary)', drawBorder: false },
+          ticks: { color: 'var(--text-secondary)' }
+        },
+        y: {
+          type: 'linear',
+          display: true,
+          position: 'left',
+          grid: { color: 'var(--bg-tertiary)' },
+          ticks: { color: 'var(--text-secondary)' },
+          title: { display: true, text: 'Quantidade', color: 'var(--text-secondary)' }
+        },
+        y1: {
+          type: 'linear',
+          display: true,
+          position: 'right',
+          grid: { drawOnChartArea: false },
+          ticks: { color: 'var(--text-secondary)' },
+          title: { display: true, text: 'Percentual (%)', color: 'var(--text-secondary)' }
+        }
+      }
+    }
+  });
+}
+
+async function renderKPISparklines(){
+  const container = document.getElementById('kpiSparklines');
+  if(!container) return;
+
+  const stats = await rpc('ip_estatisticas_gerais', {});
+  if(!stats){
+    container.innerHTML = '<div style="color:var(--text-secondary)">Carregando estatísticas...</div>';
+    return;
+  }
+
+  const kpis = [
+    { label: 'Total Luminárias', value: stats.total_luminas, unit: '', icon: '💡' },
+    { label: 'LED Instaladas', value: stats.led_total, unit: '%', icon: '⚡', highlight: true },
+    { label: 'Potência Média', value: Math.round(stats.potencia_media || 0), unit: 'W', icon: '⚙️' },
+    { label: 'Eficiência Média', value: Math.round(stats.eficacia_media || 0), unit: 'lm/W', icon: '📊' }
+  ];
+
+  container.innerHTML = kpis.map((kpi,i) => `
+    <div style="flex:1;min-width:120px;padding:12px;border-radius:8px;background:var(--bg-secondary);border:1px solid var(--border);text-align:center">
+      <div style="font-size:20px;margin-bottom:4px">${kpi.icon}</div>
+      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px">${kpi.label}</div>
+      <div style="font-size:20px;font-weight:700;color:${kpi.highlight?'var(--success)':'var(--accent)'}">${kpi.value}<span style="font-size:11px;margin-left:2px">${kpi.unit}</span></div>
+    </div>
+  `).join('');
+}
+
+window._showCharts = async () => {
+  const modal = document.getElementById('chartsModal');
+  if(!modal) return;
+  modal.style.display = 'block';
+  await renderTimeSeriesChart();
+  await renderKPISparklines();
+};
+
+window._closeCharts = () => {
+  const modal = document.getElementById('chartsModal');
+  if(modal) modal.style.display = 'none';
+};
+
 document.getElementById('btnDens').onclick = ()=>{
   if(state.poligono) limparPoligono(true);
   state.densidade=!state.densidade;
