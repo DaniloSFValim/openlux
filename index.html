@@ -441,6 +441,7 @@
       <button id="btnTimeline" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Filtrar dados por período de intervalo">📅 Timeline</button>
       <button id="btnTabela" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors">📋 Tabela</button>
       <button id="btnStats" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors">📈 Indicadores</button>
+      <button id="btnCharts" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Série temporal e KPIs avançados" onclick="window._showCharts()">📈 Gráficos Avançados</button>
       <button id="btnAdvancedFilters" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Filtros avançados por múltiplos critérios">🎯 Filtros Avançados</button>
     </div>
   </div>
@@ -3592,7 +3593,7 @@ document.addEventListener('DOMContentLoaded', () => {
 { const arias={fBairro:'Filtrar por bairro',fTipo:'Filtrar por tipo de lâmpada',fEstado:'Filtrar por estado',
     fPot:'Filtrar por potência mínima',fFila:'Fila de auditoria',fLimpar:'Limpar filtros',btnFiltros:'Abrir filtros',btnVis:'Alternar visualizações',
     btnChoro:'Alternar mapa coroplético',btnDens:'Alternar grade de densidade luminotécnica',btnTabela:'Abrir tabela de registros',
-    btnStats:'Abrir indicadores',btnNovo:'Cadastrar novo ponto',btnAdminConsole:'Abrir administração',btnLogin:'Entrar ou sair',
+    btnStats:'Abrir indicadores',btnCharts:'Abrir série temporal e KPIs avançados',btnNovo:'Cadastrar novo ponto',btnAdminConsole:'Abrir administração',btnLogin:'Entrar ou sair',
     tSearch:'Buscar por endereço ou patrimônio',tBairro:'Filtrar tabela por bairro',tStatus:'Filtrar tabela por estado',
     tPrev:'Página anterior',tNext:'Próxima página',tClose:'Fechar tabela'};
   Object.entries(arias).forEach(([id,l])=>{const el=document.getElementById(id); if(el) el.setAttribute('aria-label',l);}); }
