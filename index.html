@@ -1394,6 +1394,160 @@
     background: rgba(239, 68, 68, 0.1);
   }
 
+  /* =====================================================
+     SIDEBAR — Redesign estilo Electricity Maps
+     Painel fixo à esquerda com marca, KPI e seções em
+     acordeão; o mapa ocupa todo o restante da tela.
+     ===================================================== */
+  :root { --sb-w: 360px; }
+
+  #map { margin-left: var(--sb-w); }
+
+  #sidebar {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: var(--sb-w);
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .sb-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 16px 10px;
+  }
+
+  .sb-title {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--text-primary);
+    line-height: 1.2;
+  }
+
+  .sb-subtitle {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+  }
+
+  .sb-loading { margin-left: auto; }
+
+  .sb-kpi {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 16px 14px;
+  }
+
+  .sb-kpi-bar {
+    flex: 1;
+    height: 6px;
+    border-radius: 9999px;
+    overflow: hidden;
+    background: var(--bg-tertiary);
+  }
+
+  .sb-kpi-bar #pctBar {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(to right, #f59e0b, #22c55e);
+    transition: width .5s;
+  }
+
+  .sb-section { border-top: 1px solid var(--border-color); }
+
+  .sb-section-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  button.sb-section-header:hover { background: var(--bg-tertiary); }
+
+  .sb-chevron {
+    transition: transform .2s;
+    color: var(--text-tertiary);
+  }
+
+  .sb-section-header.sb-open .sb-chevron { transform: rotate(180deg); }
+
+  .sb-section-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 4px 16px 14px;
+  }
+
+  .sb-section-body button.on {
+    background: rgba(37, 99, 235, .18);
+    color: #93c5fd;
+  }
+
+  .sb-actions { flex-direction: row; flex-wrap: wrap; }
+  .sb-actions button { flex: 1 1 45%; }
+
+  .sb-footer {
+    margin-top: auto;
+    display: flex;
+    gap: 8px;
+    padding: 14px 16px;
+    border-top: 1px solid var(--border-color);
+    position: sticky;
+    bottom: 0;
+    background: var(--bg-secondary);
+  }
+
+  .sb-footer #btnLogin { flex: 1; }
+
+  #sidebarToggle {
+    position: fixed;
+    top: 12px; left: 12px;
+    z-index: 1101;
+    display: none;
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 18px;
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0,0,0,.3));
+  }
+
+  /* Overlays reposicionados: a sidebar ocupa a faixa esquerda */
+  #legend, #densCtl, #poligonoPanel, #stats { left: calc(var(--sb-w) + 12px); }
+  #detail { top: 12px; }
+  #drawCtl { left: calc(50% + var(--sb-w) / 2); }
+
+  @media (max-width: 1023px) {
+    #map { margin-left: 0; }
+    /* espaço para o botão hambúrguer não cobrir a marca */
+    .sb-brand { padding-left: 64px; }
+    #sidebar {
+      transform: translateX(-100%);
+      transition: transform .25s ease;
+      width: min(var(--sb-w), 86vw);
+      box-shadow: var(--shadow-xl, 0 20px 25px -5px rgba(0,0,0,.4));
+    }
+    #sidebar.open { transform: none; }
+    #sidebarToggle { display: block; }
+    #legend, #densCtl, #poligonoPanel, #stats { left: 10px; }
+    #drawCtl { left: 50%; }
+  }
 </style>
 </head>
 <body>
@@ -1408,69 +1562,35 @@
 </div>
 <div id="footerBand" role="contentinfo" class="toast-band">OpenLux · Desenvolvido por <span style="color:var(--text-secondary)">Danilo Valim</span> · v1.1</div>
 
-<!-- TOP BAR - Phase 2: Modernized Design with Responsive Layout -->
-<header x-data="{
-  showFilters: false,
-  showVis: false,
-  showMobileMenu: false
-}" class="fixed top-3 left-3 right-3 z-[1000] rounded-xl shadow-lg transition-all duration-300"
-role="banner"
-aria-label="Barra de navegação principal"
-style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
+<!-- SIDEBAR — Redesign estilo Electricity Maps -->
+<button id="sidebarToggle" aria-label="Abrir ou fechar painel" title="Painel">☰</button>
 
-  <div class="flex flex-col gap-3 p-4 sm:p-4 lg:p-5">
-    <!-- Primary Row: Logo/Title + Spacer + Right Actions -->
-    <div class="flex items-center justify-between gap-3">
-      <!-- Logo & Title Section -->
-      <div class="flex items-center gap-2 flex-shrink-0">
-        <img id="cfgLogo" alt="Logo" class="h-6 w-auto rounded hidden mr-1"/>
-        <div class="min-w-0 flex-shrink-0">
-          <div class="font-bold text-sm sm:text-base lg:text-lg leading-tight whitespace-nowrap text-primary">
-            <span id="cfgTitulo">Iluminação Pública</span>
-          </div>
-          <div class="flex items-center gap-2 mt-0.5">
-            <div class="w-20 sm:w-24 h-1 rounded-full overflow-hidden" style="background: var(--bg-tertiary);">
-              <div id="pctBar" class="h-full w-0 bg-gradient-to-r from-amber-400 to-green-500 transition-all duration-500"></div>
-            </div>
-            <span id="kpi" class="text-xs text-muted">—</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Loading Spinner -->
-      <span id="loading" class="hidden">
-        <div class="w-3 h-3 border-2 rounded-full animate-spin" style="border-color: var(--border-color-light); border-top-color: var(--color-primary-600);"></div>
-      </span>
-
-      <!-- Right Actions: Theme Toggle + Login (Always Visible) -->
-      <div class="flex items-center gap-2 ml-auto flex-shrink-0">
-        <button id="themeToggle"
-          class="p-2 rounded-lg transition-all btn-icon"
-          title="Alternar tema claro/escuro"
-          aria-label="Alternar tema">🌙</button>
-        <button id="btnLogin"
-          class="px-3 py-2 rounded-lg font-medium text-sm sm:text-base transition-all btn-primary-solid">🔑 <span class="hidden sm:inline">Entrar</span></button>
-      </div>
+<aside id="sidebar" role="banner" aria-label="Painel principal">
+  <!-- Marca -->
+  <div class="sb-brand">
+    <img id="cfgLogo" alt="Logo" class="h-7 w-auto rounded hidden"/>
+    <div style="min-width:0">
+      <div class="sb-title"><span id="cfgTitulo">Iluminação Pública</span></div>
+      <div class="sb-subtitle">OpenLux · Gestão do parque luminotécnico</div>
     </div>
+    <span id="loading" class="hidden sb-loading">
+      <div class="w-3 h-3 border-2 rounded-full animate-spin" style="border-color: var(--border-color-light); border-top-color: var(--color-primary-600);"></div>
+    </span>
+  </div>
 
-    <!-- Secondary Row: Filters + Visualize + Actions (Responsive Layout) -->
-    <div class="flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
-      <!-- Left: Filters + Visualize (Hidden on very small screens) -->
-      <div class="flex items-center gap-2 w-full sm:w-auto sm:flex-1">
-        <!-- Filters -->
-        <div class="relative">
-          <button @click="showFilters = !showFilters"
-            class="px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 flex-shrink-0 btn-secondary-solid"
-            id="btnFiltros">
-            <span class="hidden sm:inline">⚙️ Filtros</span>
-            <span class="sm:hidden">⚙️</span>
-            <span id="fCount" class="hidden ml-1 btn-badge"></span>
-          </button>
-          <div x-show="showFilters"
-            @click.away="showFilters = false"
-            class="dropdown-panel"
-            id="filtrosPop"
-            style="display: none;">
+  <!-- KPI de modernização -->
+  <div class="sb-kpi">
+    <div class="sb-kpi-bar"><div id="pctBar"></div></div>
+    <span id="kpi" class="text-xs text-muted">—</span>
+  </div>
+
+  <!-- Seção: Filtros (aberta por padrão) -->
+  <div class="sb-section">
+    <button class="sb-section-header sb-open" id="btnFiltros" aria-expanded="true" aria-controls="filtrosPop">
+      <span>⚙️ Filtros <span id="fCount" class="btn-badge" style="display:none"></span></span>
+      <span class="sb-chevron">▾</span>
+    </button>
+    <div class="sb-section-body" id="filtrosPop" style="display: flex;">
             <!-- Bairro Select -->
             <div>
               <label class="form-label-inline">🏢 Bairro</label>
@@ -1538,50 +1658,54 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
                 <option value="vermelho">🔴 Crítico</option>
               </select>
             </div>
-            <button id="fLimpar"
-              class="w-full px-3 py-2 rounded-lg text-sm font-medium transition-colors btn-secondary-solid">Limpar</button>
-          </div>
-        </div>
-
-        <!-- Visualize -->
-        <div class="relative">
-          <button @click="showVis = !showVis"
-            class="px-3 py-2 rounded-lg text-sm font-medium transition-all flex-shrink-0 btn-secondary-solid"
-            id="btnVis">
-            <span class="hidden sm:inline">👁️ Visualizar</span>
-            <span class="sm:hidden">👁️</span>
-          </button>
-          <div x-show="showVis"
-            @click.away="showVis = false"
-            class="dropdown-panel"
-            id="visPop"
-            style="display: none; width: 208px; padding: 8px; gap: 4px;">
-            <button id="btnChoro" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Colorir bairros por % LED">🎨 Coroplético</button>
-            <button id="btnDens" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Grade 250 m">📊 Densidade</button>
-            <button id="btnTimeline" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Filtrar por período">📅 Timeline</button>
-            <button id="btnTabela" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body">📋 Tabela</button>
-            <button id="btnStats" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body">📈 Indicadores</button>
-            <button id="btnAdvancedFilters" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Filtros avançados">🎯 Avançados</button>
-            <button id="btnCharts" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" onclick="window._showCharts()">📈 Gráficos</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right: Action Buttons (Responsive) -->
-      <div class="flex items-center gap-2 w-full sm:w-auto">
-        <button id="btnArea"
-          class="px-3 py-2 rounded-lg text-sm font-medium transition-all flex-1 sm:flex-none btn-info-border"
-          title="Selecionar uma área">✏️ <span class="hidden sm:inline">Área</span></button>
-        <button id="btnNovo"
-          class="px-3 py-2 rounded-lg text-sm font-medium transition-all btn-success-solid"
-          style="display: none;">+ Ponto</button>
-        <button id="btnAdminConsole"
-          class="px-3 py-2 rounded-lg text-sm font-medium transition-all btn-error-border"
-          style="display: none;">⚙️ <span class="hidden sm:inline">Admin</span></button>
-      </div>
+      <button id="fLimpar"
+        class="w-full px-3 py-2 rounded-lg text-sm font-medium transition-colors btn-secondary-solid">Limpar</button>
     </div>
   </div>
-</header>
+
+  <!-- Seção: Visualizações -->
+  <div class="sb-section">
+    <button class="sb-section-header" id="btnVis" aria-expanded="false" aria-controls="visPop">
+      <span>👁️ Visualizações</span>
+      <span class="sb-chevron">▾</span>
+    </button>
+    <div class="sb-section-body" id="visPop" style="display: none;">
+      <button id="btnChoro" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Colorir bairros por % LED">🎨 Coroplético</button>
+      <button id="btnDens" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Grade 250 m">📊 Densidade</button>
+      <button id="btnTimeline" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Filtrar por período">📅 Timeline</button>
+      <button id="btnTabela" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body">📋 Tabela</button>
+      <button id="btnStats" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body">📈 Indicadores</button>
+      <button id="btnAdvancedFilters" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Filtros avançados">🎯 Avançados</button>
+      <button id="btnCharts" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" onclick="window._showCharts()">📈 Gráficos</button>
+    </div>
+  </div>
+
+  <!-- Seção: Ações -->
+  <div class="sb-section">
+    <div class="sb-section-header" style="cursor: default;">🧰 Ações</div>
+    <div class="sb-section-body sb-actions">
+      <button id="btnArea"
+        class="px-3 py-2 rounded-lg text-sm font-medium transition-all btn-info-border"
+        title="Selecionar uma área">✏️ Área</button>
+      <button id="btnNovo"
+        class="px-3 py-2 rounded-lg text-sm font-medium transition-all btn-success-solid"
+        style="display: none;">+ Ponto</button>
+      <button id="btnAdminConsole"
+        class="px-3 py-2 rounded-lg text-sm font-medium transition-all btn-error-border"
+        style="display: none;">⚙️ Admin</button>
+    </div>
+  </div>
+
+  <!-- Rodapé: tema + login -->
+  <div class="sb-footer">
+    <button id="themeToggle"
+      class="p-2 rounded-lg transition-all btn-icon"
+      title="Alternar tema claro/escuro"
+      aria-label="Alternar tema">🌙</button>
+    <button id="btnLogin"
+      class="px-3 py-2 rounded-lg font-medium text-sm transition-all btn-primary-solid">🔑 <span id="btnLoginLabel">Entrar</span></button>
+  </div>
+</aside>
 
 <div id="legend" role="complementary" aria-label="Legenda" class="absolute bottom-3.5 left-2.5 z-[1000] bg-slate-800/95 border border-slate-700 rounded-xl p-2.5 text-xs backdrop-blur">
   <div class="flex items-center gap-1.5 mb-0.5"><svg width="13" height="16" viewBox="0 0 20 24"><path d="M10 1.5a6.5 6.5 0 0 0-3.7 11.8V16h7.4v-2.7A6.5 6.5 0 0 0 10 1.5z" fill="#22c55e" stroke="#0b0f14" stroke-width="1.4"/><rect x="6.8" y="16.3" width="6.4" height="2.6" rx="1" fill="#9ca3af"/></svg> <span class="text-slate-300">LED</span></div>
@@ -3806,16 +3930,21 @@ function updateFCount(){
   const b=document.getElementById('fCount');
   if(n){ b.style.display='inline'; b.textContent=n; } else b.style.display='none';
 }
-document.getElementById('btnFiltros').addEventListener('mouseenter',()=>{ document.getElementById('filtrosPop').style.display='flex'; });
-document.getElementById('filtrosPop').addEventListener('mouseleave',()=>{ document.getElementById('filtrosPop').style.display='none'; });
-document.addEventListener('click', e=>{
-  [['filtrosPop','btnFiltros'],['visPop','btnVis']].forEach(([pid,bid])=>{
-    const p=document.getElementById(pid);
-    if(p && p.style.display==='flex' && !p.contains(e.target) && e.target.id!==bid) p.style.display='none';
+// Sidebar: seções em acordeão (Filtros aberto por padrão)
+[['btnFiltros','filtrosPop'],['btnVis','visPop']].forEach(([bid,pid])=>{
+  const btn=document.getElementById(bid), p=document.getElementById(pid);
+  btn.addEventListener('click', ()=>{
+    const abrir = p.style.display==='none';
+    p.style.display = abrir ? 'flex' : 'none';
+    btn.classList.toggle('sb-open', abrir);
+    btn.setAttribute('aria-expanded', abrir);
   });
 });
-document.getElementById('btnVis').addEventListener('mouseenter',()=>{ document.getElementById('visPop').style.display='flex'; });
-document.getElementById('visPop').addEventListener('mouseleave',()=>{ document.getElementById('visPop').style.display='none'; });
+// Sidebar: toggle em telas pequenas (hambúrguer)
+document.getElementById('sidebarToggle').onclick = ()=>document.getElementById('sidebar').classList.toggle('open');
+// Em mobile, fechar a sidebar ao acionar uma visualização ou ação
+document.querySelectorAll('#visPop button, .sb-actions button').forEach(b=>
+  b.addEventListener('click', ()=>{ if(window.innerWidth<1024) document.getElementById('sidebar').classList.remove('open'); }));
 document.getElementById('fLimpar').onclick = ()=>{
   state.bairro=state.tipo=state.estado=state.pot=state.fila=state.saude='';
   ['fBairro','fTipo','fEstado','fPot','fFila','fSaude'].forEach(id=>document.getElementById(id).value='');
@@ -3873,7 +4002,7 @@ document.getElementById('tNext').onclick=()=>{ state.tPage++; loadTable(); };
 function podeEditar(){ return ['admin','editor'].includes(state.userRole); }
 async function setUser(u){
   state.user=u; state.userRole=null;
-  const labelSpan = document.getElementById('btnLogin').querySelector('span.hidden.sm\\:inline');
+  const labelSpan = document.getElementById('btnLoginLabel');
   if(labelSpan) labelSpan.textContent = u?'Sair':'Entrar';
   if(u){ try{ const {data}=await sb.from('profiles').select('role').eq('id',u.id).single(); state.userRole=data?.role||'leitura'; }
          catch(e){ state.userRole='leitura'; } }
