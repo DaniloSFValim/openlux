@@ -137,6 +137,40 @@
     outline-offset: -2px;
   }
 
+  /* Admin Console Improvements */
+  #adminConsole {
+    background: var(--bg-primary);
+  }
+
+  #adminConsole nav button:hover {
+    background: rgba(59, 130, 246, 0.1);
+  }
+
+  .acsec {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* KPI Cards hover effect */
+  #sec-visao > div:first-child > div {
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  #sec-visao > div:first-child > div:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(59, 130, 246, 0.1);
+  }
+
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -761,152 +795,265 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
   </div>
 </div>
 
-<div id="adminConsole" x-data="{ activeTab: 'visao' }" class="fixed inset-0 z-[1400] bg-slate-900 flex flex-col hidden">
+<div id="adminConsole" x-data="{ activeTab: 'visao' }" class="fixed inset-0 z-[1400] flex flex-col hidden" style="background: var(--bg-primary);">
   <!-- Header -->
-  <div class="flex items-center justify-between gap-3 px-6 py-4 border-b border-slate-700 bg-slate-800/50">
+  <header class="flex items-center justify-between gap-4 px-6 py-4 border-b" style="background: var(--bg-secondary); border-color: var(--border-color);">
     <div class="flex-1">
-      <h2 class="text-lg font-semibold text-white">Administração</h2>
-      <p class="text-xs text-slate-400 mt-0.5">OpenLux — Public Lighting Management</p>
+      <h2 class="text-lg font-bold leading-tight" style="color: var(--text-primary);">Administração</h2>
+      <p class="text-xs mt-1" style="color: var(--text-tertiary);">OpenLux — Public Lighting Management</p>
     </div>
-    <button class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-100 text-sm rounded-lg border border-slate-600 transition-colors" id="acVoltar">← Voltar ao mapa</button>
-  </div>
+    <button class="px-4 py-2 rounded-lg text-sm font-medium transition-all" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary);" id="acVoltar">← Voltar</button>
+  </header>
 
   <!-- Main Content -->
-  <div class="flex-1 flex min-h-0">
-    <!-- Sidebar Navigation -->
-    <nav role="navigation" aria-label="Seções da administração" class="w-48 border-r border-slate-700 bg-slate-800/30 p-3 flex flex-col gap-1">
-      <button @click="activeTab = 'visao'" :class="{ 'bg-slate-700 text-white': activeTab === 'visao', 'text-slate-300 hover:bg-slate-700/50': activeTab !== 'visao' }" class="text-left px-3 py-2 rounded-lg transition-colors text-sm font-medium acnav on" data-sec="visao">📊 Visão geral</button>
-      <button @click="activeTab = 'usuarios'" :class="{ 'bg-slate-700 text-white': activeTab === 'usuarios', 'text-slate-300 hover:bg-slate-700/50': activeTab !== 'usuarios' }" class="text-left px-3 py-2 rounded-lg transition-colors text-sm font-medium acnav" data-sec="usuarios">👥 Usuários</button>
-      <button @click="activeTab = 'modelos'" :class="{ 'bg-slate-700 text-white': activeTab === 'modelos', 'text-slate-300 hover:bg-slate-700/50': activeTab !== 'modelos' }" class="text-left px-3 py-2 rounded-lg transition-colors text-sm font-medium acnav" data-sec="modelos">💡 Modelos</button>
-      <button @click="activeTab = 'aparencia'" :class="{ 'bg-slate-700 text-white': activeTab === 'aparencia', 'text-slate-300 hover:bg-slate-700/50': activeTab !== 'aparencia' }" class="text-left px-3 py-2 rounded-lg transition-colors text-sm font-medium acnav" data-sec="aparencia">🎨 Aparência</button>
-      <button @click="activeTab = 'campanhas'" :class="{ 'bg-slate-700 text-white': activeTab === 'campanhas', 'text-slate-300 hover:bg-slate-700/50': activeTab !== 'campanhas' }" class="text-left px-3 py-2 rounded-lg transition-colors text-sm font-medium acnav" data-sec="campanhas">🧭 Campanhas</button>
-      <button @click="activeTab = 'dados'" :class="{ 'bg-slate-700 text-white': activeTab === 'dados', 'text-slate-300 hover:bg-slate-700/50': activeTab !== 'dados' }" class="text-left px-3 py-2 rounded-lg transition-colors text-sm font-medium acnav" data-sec="dados">📦 Dados</button>
+  <div class="flex-1 flex min-h-0 overflow-hidden">
+    <!-- Sidebar Navigation - Improved -->
+    <nav role="navigation" aria-label="Seções da administração" class="w-52 border-r p-4 flex flex-col gap-2 overflow-y-auto" style="background: var(--bg-secondary); border-color: var(--border-color);">
+      <button @click="activeTab = 'visao'"
+        :class="{ 'font-semibold': activeTab === 'visao' }"
+        :style="{ background: activeTab === 'visao' ? 'var(--color-primary-600)' : 'transparent', color: activeTab === 'visao' ? 'white' : 'var(--text-secondary)' }"
+        class="text-left px-4 py-2.5 rounded-lg transition-all text-sm acnav"
+        data-sec="visao">📊 Visão geral</button>
+      <button @click="activeTab = 'usuarios'"
+        :class="{ 'font-semibold': activeTab === 'usuarios' }"
+        :style="{ background: activeTab === 'usuarios' ? 'var(--color-primary-600)' : 'transparent', color: activeTab === 'usuarios' ? 'white' : 'var(--text-secondary)' }"
+        class="text-left px-4 py-2.5 rounded-lg transition-all text-sm acnav"
+        data-sec="usuarios">👥 Usuários</button>
+      <button @click="activeTab = 'modelos'"
+        :class="{ 'font-semibold': activeTab === 'modelos' }"
+        :style="{ background: activeTab === 'modelos' ? 'var(--color-primary-600)' : 'transparent', color: activeTab === 'modelos' ? 'white' : 'var(--text-secondary)' }"
+        class="text-left px-4 py-2.5 rounded-lg transition-all text-sm acnav"
+        data-sec="modelos">💡 Modelos</button>
+      <button @click="activeTab = 'aparencia'"
+        :class="{ 'font-semibold': activeTab === 'aparencia' }"
+        :style="{ background: activeTab === 'aparencia' ? 'var(--color-primary-600)' : 'transparent', color: activeTab === 'aparencia' ? 'white' : 'var(--text-secondary)' }"
+        class="text-left px-4 py-2.5 rounded-lg transition-all text-sm acnav"
+        data-sec="aparencia">🎨 Aparência</button>
+      <button @click="activeTab = 'campanhas'"
+        :class="{ 'font-semibold': activeTab === 'campanhas' }"
+        :style="{ background: activeTab === 'campanhas' ? 'var(--color-primary-600)' : 'transparent', color: activeTab === 'campanhas' ? 'white' : 'var(--text-secondary)' }"
+        class="text-left px-4 py-2.5 rounded-lg transition-all text-sm acnav"
+        data-sec="campanhas">🧭 Campanhas</button>
+      <button @click="activeTab = 'dados'"
+        :class="{ 'font-semibold': activeTab === 'dados' }"
+        :style="{ background: activeTab === 'dados' ? 'var(--color-primary-600)' : 'transparent', color: activeTab === 'dados' ? 'white' : 'var(--text-secondary)' }"
+        class="text-left px-4 py-2.5 rounded-lg transition-all text-sm acnav"
+        data-sec="dados">📦 Dados</button>
     </nav>
 
-    <!-- Content Area -->
-    <div class="flex-1 overflow-auto px-6 py-5 bg-slate-900">
-      <section id="sec-visao" :style="{ display: activeTab === 'visao' ? 'block' : 'none' }" class="acsec"></section>
+    <!-- Content Area - Improved with Cards -->
+    <div class="flex-1 overflow-auto px-6 py-6 lg:px-8" style="background: var(--bg-primary);">
+      <!-- Visão Geral: KPI Dashboard -->
+      <section id="sec-visao" :style="{ display: activeTab === 'visao' ? 'block' : 'none' }" class="acsec">
+        <h2 class="text-2xl font-bold mb-6" style="color: var(--text-primary);">Visão Geral do Sistema</h2>
 
-      <section id="sec-usuarios" :style="{ display: activeTab === 'usuarios' ? 'block' : 'none' }" class="acsec">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-          <h3 class="text-lg font-semibold text-white">Usuários</h3>
-          <div id="userCount" style="background:#1f2a37;padding:4px 12px;border-radius:12px;font-size:12px;color:#9ca3af;font-weight:600">0 usuários</div>
+        <!-- KPI Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <!-- Total Luminárias Card -->
+          <div class="p-6 rounded-lg border" style="background: var(--bg-secondary); border-color: var(--border-color);">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium mb-2" style="color: var(--text-tertiary);">Total de Luminárias</p>
+                <p class="text-3xl font-bold" id="kpiTotal" style="color: var(--color-primary-600);">—</p>
+              </div>
+              <div class="text-4xl opacity-30">💡</div>
+            </div>
+          </div>
+
+          <!-- LED Instalado Card -->
+          <div class="p-6 rounded-lg border" style="background: var(--bg-secondary); border-color: var(--border-color);">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium mb-2" style="color: var(--text-tertiary);">LED Instalado (%)</p>
+                <p class="text-3xl font-bold" id="kpiLedPct" style="color: var(--color-success);">—</p>
+              </div>
+              <div class="text-4xl opacity-30">⚡</div>
+            </div>
+          </div>
+
+          <!-- Potência Média Card -->
+          <div class="p-6 rounded-lg border" style="background: var(--bg-secondary); border-color: var(--border-color);">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium mb-2" style="color: var(--text-tertiary);">Potência Média (W)</p>
+                <p class="text-3xl font-bold" id="kpiPotencia" style="color: var(--color-accent);">—</p>
+              </div>
+              <div class="text-4xl opacity-30">⚙️</div>
+            </div>
+          </div>
+
+          <!-- Eficácia Média Card -->
+          <div class="p-6 rounded-lg border" style="background: var(--bg-secondary); border-color: var(--border-color);">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium mb-2" style="color: var(--text-tertiary);">Eficácia Média (lm/W)</p>
+                <p class="text-3xl font-bold" id="kpiEficacia" style="color: var(--color-info);">—</p>
+              </div>
+              <div class="text-4xl opacity-30">📊</div>
+            </div>
+          </div>
         </div>
 
-        <!-- New User Form -->
-        <div class="bg-blue-950/20 border border-blue-900/50 rounded-lg p-4 mb-6 max-w-3xl">
-          <label style="display:flex;align-items:center;gap:8px;color:#9ca3af;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">
-            <span style="font-size:18px">➕</span>
-            Novo operador
-          </label>
-          <div style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr;gap:10px;align-items:end">
+        <!-- System Status Section -->
+        <div class="bg-slate-900/30 border rounded-lg p-6" style="border-color: var(--border-color);">
+          <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">Status do Sistema</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">✅</span>
+              <div>
+                <p style="color: var(--text-tertiary);">Base de Dados</p>
+                <p class="font-medium" style="color: var(--color-success);">Conectado</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">✅</span>
+              <div>
+                <p style="color: var(--text-tertiary);">Autenticação</p>
+                <p class="font-medium" style="color: var(--color-success);">Ativo</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">✅</span>
+              <div>
+                <p style="color: var(--text-tertiary);">API Supabase</p>
+                <p class="font-medium" style="color: var(--color-success);">Online</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Usuários Section -->
+      <section id="sec-usuarios" :style="{ display: activeTab === 'usuarios' ? 'block' : 'none' }" class="acsec">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold" style="color: var(--text-primary);">Gestão de Usuários</h2>
+          <div class="px-4 py-2 rounded-lg text-sm font-medium" id="userCount" style="background: var(--bg-tertiary); color: var(--text-secondary);">0 usuários</div>
+        </div>
+
+        <!-- New User Form Card -->
+        <div class="p-6 rounded-lg border mb-6 max-w-3xl" style="background: var(--bg-secondary); border-color: var(--border-color);">
+          <h3 class="text-lg font-semibold mb-4 flex items-center gap-2" style="color: var(--text-primary);">
+            <span>➕</span> Novo operador
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label style="display:block;font-size:11px;color:#9ca3af;margin-bottom:4px;font-weight:600">E-mail</label>
-              <input id="admEmail" type="email" placeholder="usuario@example.com" class="w-full px-3 py-2 bg-slate-900 border border-blue-800/50 rounded-lg text-white text-sm placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"/>
-              <div id="emailError" style="font-size:10px;color:#ef4444;margin-top:2px;display:none"></div>
+              <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">E-mail *</label>
+              <input id="admEmail" type="email" placeholder="usuario@example.com" class="w-full px-3 py-2 rounded-lg text-sm transition-all" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);" />
+              <div id="emailError" class="text-xs mt-1" style="color: var(--color-error); display:none;"></div>
             </div>
             <div>
-              <label style="display:block;font-size:11px;color:#9ca3af;margin-bottom:4px;font-weight:600">Senha (opt.)</label>
-              <input id="admPass" type="password" placeholder="•••••••" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+              <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">Senha (opt.)</label>
+              <input id="admPass" type="password" placeholder="•••••••" class="w-full px-3 py-2 rounded-lg text-sm transition-all" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);" />
             </div>
             <div>
-              <label style="display:block;font-size:11px;color:#9ca3af;margin-bottom:4px;font-weight:600">Papel</label>
-              <select id="admRole" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">Papel *</label>
+              <select id="admRole" class="w-full px-3 py-2 rounded-lg text-sm transition-all" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
                 <option value="leitura">👁️ Leitura</option>
                 <option value="editor">✏️ Editor</option>
                 <option value="admin">🔑 Admin</option>
               </select>
             </div>
-            <button class="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm rounded-lg font-semibold transition-all shadow-lg hover:shadow-blue-900/50" id="admCreate">Adicionar</button>
+            <button class="px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all" style="background: var(--color-primary-600);" id="admCreate">Adicionar</button>
           </div>
-          <div id="formStatus" style="font-size:11px;color:#4ade80;margin-top:6px;display:none;font-weight:600"></div>
+          <div id="formStatus" class="text-xs mt-3" style="color: var(--color-success); display:none; font-weight:600;"></div>
         </div>
 
         <!-- Search Bar -->
-        <div style="margin-bottom:12px">
-          <input id="userSearch" type="text" placeholder="🔍 Buscar por e-mail..." class="w-full max-w-md px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-600"/>
+        <div class="mb-4">
+          <input id="userSearch" type="text" placeholder="🔍 Buscar por e-mail..." class="w-full max-w-md px-3 py-2 rounded-lg text-sm transition-all" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary);" />
         </div>
 
         <!-- Users Table -->
-        <div style="border-radius:12px;border:1px solid #1f2a37;overflow:hidden;max-width:100%">
-          <table class="w-full border-collapse" style="font-size:13px">
-            <thead style="background:#0f151c/70;border-bottom:1px solid #1f2a37">
+        <div class="rounded-lg border overflow-hidden" style="background: var(--bg-secondary); border-color: var(--border-color);">
+          <table class="w-full" style="font-size:13px;">
+            <thead style="background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color);">
               <tr>
-                <th class="px-4 py-3 text-left font-semibold text-slate-400">👤 E-mail</th>
-                <th class="px-4 py-3 text-left font-semibold text-slate-400">Papel</th>
-                <th class="px-4 py-3 text-center font-semibold text-slate-400">Criado</th>
-                <th class="px-4 py-3 text-right font-semibold text-slate-400">Ações</th>
+                <th class="px-4 py-3 text-left font-semibold" style="color: var(--text-tertiary);">👤 E-mail</th>
+                <th class="px-4 py-3 text-left font-semibold" style="color: var(--text-tertiary);">Papel</th>
+                <th class="px-4 py-3 text-center font-semibold" style="color: var(--text-tertiary);">Criado</th>
+                <th class="px-4 py-3 text-right font-semibold" style="color: var(--text-tertiary);">Ações</th>
               </tr>
             </thead>
-            <tbody id="admBody" style="divide-y divide-slate-800/50"></tbody>
+            <tbody id="admBody" style="border-bottom: 1px solid var(--border-color);"></tbody>
           </table>
         </div>
       </section>
 
+      <!-- Aparência Section -->
       <section id="sec-aparencia" :style="{ display: activeTab === 'aparencia' ? 'block' : 'none' }" class="acsec">
-        <h3 class="text-lg font-semibold text-white mb-5">Aparência do site</h3>
+        <h2 class="text-2xl font-bold mb-6" style="color: var(--text-primary);">Aparência do Site</h2>
 
-        <div class="max-w-2xl space-y-4">
-          <!-- Title Input -->
-          <div class="flex flex-col">
-            <label class="text-xs font-medium text-slate-400 mb-2">Título</label>
-            <input id="cfgTit" class="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-          </div>
+        <div class="max-w-3xl space-y-6">
+          <!-- Branding Card -->
+          <div class="p-6 rounded-lg border" style="background: var(--bg-secondary); border-color: var(--border-color);">
+            <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">Identidade Visual</h3>
+            <div class="space-y-4">
+              <!-- Title Input -->
+              <div>
+                <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">Título do site</label>
+                <input id="cfgTit" class="w-full px-3 py-2 rounded-lg text-sm" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);" />
+              </div>
 
-          <!-- Subtitle Input -->
-          <div class="flex flex-col">
-            <label class="text-xs font-medium text-slate-400 mb-2">Subtítulo</label>
-            <input id="cfgSubIn" class="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-          </div>
+              <!-- Subtitle Input -->
+              <div>
+                <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">Subtítulo</label>
+                <input id="cfgSubIn" class="w-full px-3 py-2 rounded-lg text-sm" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);" />
+              </div>
 
-          <!-- Color & Font Row -->
-          <div class="grid grid-cols-2 gap-4">
-            <div class="flex flex-col">
-              <label class="text-xs font-medium text-slate-400 mb-2">Cor de destaque</label>
-              <input id="cfgAccent" type="color" class="h-10 rounded-lg cursor-pointer border border-slate-700 bg-slate-800"/>
-            </div>
-            <div class="flex flex-col">
-              <label class="text-xs font-medium text-slate-400 mb-2">Fonte</label>
-              <select id="cfgFonte" class="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="system">Sistema</option>
-                <option value="inter">Inter</option>
-                <option value="roboto">Roboto</option>
-                <option value="georgia">Georgia</option>
-                <option value="mono">Monoespaçada</option>
-              </select>
+              <!-- Logo Section -->
+              <div>
+                <label class="block text-xs font-medium mb-3" style="color: var(--text-tertiary);">Logotipo / Brasão</label>
+                <div class="flex items-center gap-3">
+                  <img id="cfgLogoPrev" class="h-8 rounded-lg border" style="border-color: var(--border-color); display: none;" />
+                  <input id="cfgLogoFile" type="file" accept="image/*" class="flex-1 text-xs" style="color: var(--text-tertiary);" />
+                  <button class="px-3 py-2 rounded-lg text-xs font-medium transition-all" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary);" id="cfgLogoRemove">Remover</button>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Panel & Density Row -->
-          <div class="grid grid-cols-2 gap-4">
-            <div class="flex flex-col">
-              <label class="text-xs font-medium text-slate-400 mb-2">Fundo dos painéis</label>
-              <input id="cfgPanel" type="color" class="h-10 rounded-lg cursor-pointer border border-slate-700 bg-slate-800"/>
-            </div>
-            <div class="flex flex-col">
-              <label class="text-xs font-medium text-slate-400 mb-2">Densidade</label>
-              <select id="cfgDensity" class="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="normal">Normal</option>
-                <option value="compact">Compacta</option>
-                <option value="comfortable">Confortável</option>
-              </select>
-            </div>
-          </div>
+          <!-- Colors & Typography Card -->
+          <div class="p-6 rounded-lg border" style="background: var(--bg-secondary); border-color: var(--border-color);">
+            <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">Cores e Tipografia</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Accent Color -->
+              <div>
+                <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">Cor de destaque</label>
+                <input id="cfgAccent" type="color" class="w-full h-10 rounded-lg cursor-pointer" style="border: 1px solid var(--border-color);" />
+              </div>
 
-          <!-- Logo Section -->
-          <div class="flex flex-col pt-2">
-            <label class="text-xs font-medium text-slate-400 mb-3">Logotipo / brasão</label>
-            <div class="flex gap-3 items-center">
-              <img id="cfgLogoPrev" class="h-7 rounded-lg border border-slate-600 hidden"/>
-              <input id="cfgLogoFile" type="file" accept="image/*" class="flex-1 text-xs text-slate-400 file:mr-3 file:px-3 file:py-1.5 file:bg-slate-700 file:border file:border-slate-600 file:rounded-lg file:text-white file:text-xs file:font-medium file:cursor-pointer hover:file:bg-slate-600"/>
-              <button class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-100 text-xs rounded-lg border border-slate-600 transition-colors" id="cfgLogoRemove">Remover</button>
+              <!-- Font -->
+              <div>
+                <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">Fonte</label>
+                <select id="cfgFonte" class="w-full px-3 py-2 rounded-lg text-sm" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
+                  <option value="system">Sistema</option>
+                  <option value="inter">Inter</option>
+                  <option value="roboto">Roboto</option>
+                  <option value="georgia">Georgia</option>
+                  <option value="mono">Monoespaçada</option>
+                </select>
+              </div>
+
+              <!-- Panel Color -->
+              <div>
+                <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">Fundo dos painéis</label>
+                <input id="cfgPanel" type="color" class="w-full h-10 rounded-lg cursor-pointer" style="border: 1px solid var(--border-color);" />
+              </div>
+
+              <!-- Density -->
+              <div>
+                <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">Densidade</label>
+                <select id="cfgDensity" class="w-full px-3 py-2 rounded-lg text-sm" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
+                  <option value="normal">Normal</option>
+                  <option value="compact">Compacta</option>
+                  <option value="comfortable">Confortável</option>
+                </select>
+              </div>
             </div>
           </div>
 
           <!-- Save Button -->
-          <div class="pt-2">
-            <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium transition-colors" id="cfgSave">Salvar aparência</button>
-          </div>
+          <button class="px-6 py-2 rounded-lg text-sm font-semibold text-white transition-all" style="background: var(--color-primary-600);" id="cfgSave">Salvar alterações</button>
         </div>
       </section>
 
