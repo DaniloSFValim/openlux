@@ -697,6 +697,29 @@
               </div>
             </div>
 
+            <!-- TIER 1: Regulatory Compliance Section -->
+            <div class="border-t border-slate-700 pt-4 mt-4">
+              <h4 class="text-sm font-semibold text-slate-300 mb-3">Conformidade Regulatória (Opcional)</h4>
+              <div class="flex gap-4 flex-wrap">
+                <div class="flex-1 min-w-[150px]">
+                  <label class="text-xs font-medium text-slate-400 block mb-1">Registro INMETRO</label>
+                  <input id="modINMETRO" placeholder="ex: 01234567890" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Número de registro INMETRO do equipamento"/>
+                </div>
+                <div class="flex-1 min-w-[110px]">
+                  <label class="text-xs font-medium text-slate-400 block mb-1">Vida Útil (anos)</label>
+                  <input id="modVidaUtil" type="number" min="1" max="100" placeholder="10" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Anos de vida útil esperada do equipamento"/>
+                </div>
+                <div class="flex-1 min-w-[110px]">
+                  <label class="text-xs font-medium text-slate-400 block mb-1">Garantia (anos)</label>
+                  <input id="modGarantia" type="number" min="0" max="50" placeholder="3" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Anos de garantia do fabricante"/>
+                </div>
+                <div class="flex-1 min-w-[150px]">
+                  <label class="text-xs font-medium text-slate-400 block mb-1">Manutención Prev. (dias)</label>
+                  <input id="modManutencao" type="number" min="1" max="3650" placeholder="180" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Intervalo recomendado de manutenção preventiva em dias"/>
+                </div>
+              </div>
+            </div>
+
             <!-- Add Button -->
             <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium transition-colors mt-4" id="modCreate">Adicionar modelo</button>
           </div>
@@ -2514,6 +2537,16 @@ document.getElementById('modCreate').onclick = async ()=>{
   if(fp!==null && (fp<0.90 || fp>1.0)){ toast('Fator de potência deve estar entre 0.90 e 1.0',true); return; }
   if(thd!==null && (thd<0 || thd>100)){ toast('THD deve estar entre 0 e 100%',true); return; }
 
+  // Validate Tier 1 fields
+  const inmetro=document.getElementById('modINMETRO').value.trim()||null;
+  const vidaUtil=document.getElementById('modVidaUtil').value.trim()?parseInt(document.getElementById('modVidaUtil').value):null;
+  const garantia=document.getElementById('modGarantia').value.trim()?parseInt(document.getElementById('modGarantia').value):null;
+  const manutencao=document.getElementById('modManutencao').value.trim()?parseInt(document.getElementById('modManutencao').value):null;
+
+  if(vidaUtil!==null && vidaUtil<=0){ toast('Vida útil deve ser > 0',true); return; }
+  if(garantia!==null && garantia<0){ toast('Garantia não pode ser negativa',true); return; }
+  if(manutencao!==null && manutencao<=0){ toast('Manutenção preventiva deve ser > 0',true); return; }
+
   // Handle photo upload with compression if provided
   let fotoUrl=document.getElementById('modFoto').value.trim()||null;
   const fotoFile=document.getElementById('modFotoUpload').files[0];
@@ -2552,13 +2585,18 @@ document.getElementById('modCreate').onclick = async ()=>{
     p_grau_ik:document.getElementById('modGrauIK').value||null,
     p_dps_especificacao:document.getElementById('modDPS').value.trim()||null,
     p_tipo_conectividade:document.getElementById('modConectividade').value||null,
-    p_arquivo_ies_url:iesUrl
+    p_arquivo_ies_url:iesUrl,
+    // Tier 1 fields
+    p_inmetro_registro:inmetro,
+    p_vida_util_anos:vidaUtil,
+    p_garantia_anos:garantia,
+    p_dias_manutencao_preventiva:manutencao
   });
   setBusy(false);
   if(error){ toast('Erro ao criar: '+error.message,true); return; }
 
   // Clear form
-  ['modFabricante','modModelo','modPotencia','modTemperatura','modTensao','modIp','modClasse','modFoto','modDescricao','modFluxo','modEficacia','modFP','modTHD','modDPS'].forEach(id=>document.getElementById(id).value='');
+  ['modFabricante','modModelo','modPotencia','modTemperatura','modTensao','modIp','modClasse','modFoto','modDescricao','modFluxo','modEficacia','modFP','modTHD','modDPS','modINMETRO','modVidaUtil','modGarantia','modManutencao'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('modTecnologia').value='LED';
   document.getElementById('modTipoLum').value='';
   document.getElementById('modTipoLamp').value='led';
