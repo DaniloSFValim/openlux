@@ -104,6 +104,11 @@
     background: var(--bg-secondary);
   }
 
+  .btn:focus-visible {
+    outline: 2px solid var(--color-primary-600);
+    outline-offset: 2px;
+  }
+
   .btn.on {
     border-color: var(--color-primary-700);
     background: #16233a;
@@ -118,6 +123,18 @@
   .btn-accent:hover {
     background: var(--color-primary-600);
     border-color: var(--color-primary-600);
+  }
+
+  /* Header dropdown menu items hover state */
+  #visPop button:hover,
+  #filtrosPop button:hover {
+    background: var(--bg-tertiary);
+  }
+
+  #visPop button:focus-visible,
+  #filtrosPop button:focus-visible {
+    outline: 2px solid var(--color-primary-600);
+    outline-offset: -2px;
   }
 
   ::-webkit-scrollbar {
@@ -362,121 +379,192 @@
 </div>
 <div id="footerBand" role="contentinfo" style="position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:800;max-width:92vw;background:rgba(15,21,28,0.86);border:1px solid var(--border-color-lighter);border-radius:8px;padding:5px 14px;font-size:11px;color:var(--text-tertiary);text-align:center;pointer-events:none">OpenLux · Desenvolvido por <span style="color:var(--text-secondary)">Danilo Valim</span> · v1.1</div>
 
-<!-- TOP BAR - Modernized with Tailwind + Alpine -->
-<div x-data="{ showFilters: false, showExport: false, showVis: false }" class="fixed top-3 left-3 right-3 z-[1000] bg-slate-900/95 backdrop-blur border border-slate-700 rounded-xl shadow-xl p-3 flex items-center gap-3 flex-wrap" role="banner" aria-label="Barra principal">
+<!-- TOP BAR - Phase 2: Modernized Design with Responsive Layout -->
+<header x-data="{
+  showFilters: false,
+  showVis: false,
+  showMobileMenu: false
+}" class="fixed top-3 left-3 right-3 z-[1000] rounded-xl shadow-lg transition-all duration-300"
+role="banner"
+aria-label="Barra de navegação principal"
+style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
 
-  <!-- Logo & Title -->
-  <img id="cfgLogo" alt="Logo" class="h-6 w-auto rounded hidden mr-2"/>
-  <div class="min-w-0 flex-shrink-0">
-    <div class="font-bold text-sm leading-tight whitespace-nowrap"><span id="cfgTitulo">Iluminação Pública</span></div>
-    <div class="flex items-center gap-2 mt-1">
-      <div class="w-28 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-        <div id="pctBar" class="h-full w-0 bg-gradient-to-r from-amber-400 to-green-500 transition-all duration-500"></div>
-      </div>
-      <span id="kpi" class="text-xs text-gray-300 whitespace-nowrap">—</span>
-    </div>
-  </div>
-
-  <!-- Loading Spinner -->
-  <span id="loading" class="hidden ml-2">
-    <div class="inline-block w-3 h-3 border-2 border-slate-600 border-t-blue-500 rounded-full animate-spin"></div>
-  </span>
-
-  <!-- Spacer -->
-  <div class="flex-1 hidden md:block"></div>
-
-  <!-- FILTERS -->
-  <div class="relative">
-    <button @click="showFilters = !showFilters" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 hover:border-blue-500 rounded-lg text-sm font-medium transition-colors flex items-center gap-2" id="btnFiltros">
-      <span>⚙️ Filtros</span>
-      <span id="fCount" class="hidden ml-1 bg-blue-600 text-white rounded-full px-2 text-xs font-semibold"></span>
-    </button>
-    <div x-show="showFilters" @click.away="showFilters = false" class="absolute top-10 right-0 w-56 bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-3 flex flex-col gap-3 z-[1001]" id="filtrosPop" style="display:none">
-      <!-- Bairro Select - carrega opções dinamicamente via HTMX -->
-      <div>
-        <label class="block text-xs font-medium text-gray-400 mb-1.5">🏢 Bairro</label>
-        <select id="fBairro"
-          hx-get="/api/v1/bairros"
-          hx-target="#fTipo"
-          hx-trigger="change"
-          hx-swap="innerHTML swap:200ms"
-          hx-indicator="#loading"
-          class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors">
-          <option value="">Todos</option>
-        </select>
-        <div id="htmx-bairro-loading" class="htmx-request hidden text-xs text-slate-400 mt-1">
-          <span class="spin inline-block mr-1"></span> Carregando tipos...
+  <div class="flex flex-col gap-3 p-4 sm:p-4 lg:p-5">
+    <!-- Primary Row: Logo/Title + Spacer + Right Actions -->
+    <div class="flex items-center justify-between gap-3">
+      <!-- Logo & Title Section -->
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <img id="cfgLogo" alt="Logo" class="h-6 w-auto rounded hidden mr-1"/>
+        <div class="min-w-0 flex-shrink-0">
+          <div class="font-bold text-sm sm:text-base lg:text-lg leading-tight whitespace-nowrap" style="color: var(--text-primary);">
+            <span id="cfgTitulo">Iluminação Pública</span>
+          </div>
+          <div class="flex items-center gap-2 mt-0.5">
+            <div class="w-20 sm:w-24 h-1 rounded-full overflow-hidden" style="background: var(--bg-tertiary);">
+              <div id="pctBar" class="h-full w-0 bg-gradient-to-r from-amber-400 to-green-500 transition-all duration-500"></div>
+            </div>
+            <span id="kpi" class="text-xs" style="color: var(--text-tertiary);">—</span>
+          </div>
         </div>
       </div>
 
-      <!-- Tipo Select - atualizado dinamicamente via HTMX -->
-      <div>
-        <label class="block text-xs font-medium text-gray-400 mb-1.5">💡 Tipo</label>
-        <select id="fTipo"
-          hx-get="/api/v1/tipos-por-bairro"
-          hx-trigger="change"
-          hx-swap="innerHTML swap:200ms"
-          hx-indicator="#loading"
-          class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors">
-          <option value="">Todos</option>
-        </select>
-        <div id="htmx-tipo-loading" class="htmx-request hidden text-xs text-slate-400 mt-1">
-          <span class="spin inline-block mr-1"></span> Carregando estados...
+      <!-- Loading Spinner -->
+      <span id="loading" class="hidden">
+        <div class="w-3 h-3 border-2 rounded-full animate-spin" style="border-color: var(--border-color-light); border-top-color: var(--color-primary-600);"></div>
+      </span>
+
+      <!-- Right Actions: Theme Toggle + Login (Always Visible) -->
+      <div class="flex items-center gap-2 ml-auto flex-shrink-0">
+        <button id="themeToggle"
+          class="p-2 rounded-lg transition-colors"
+          title="Alternar tema claro/escuro"
+          aria-label="Alternar tema"
+          style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary);">🌙</button>
+        <button id="btnLogin"
+          class="px-3 py-2 rounded-lg font-medium text-sm sm:text-base text-white transition-all"
+          style="background: var(--color-primary-600);">🔑 Entrar</button>
+      </div>
+    </div>
+
+    <!-- Secondary Row: Filters + Visualize + Actions (Responsive Layout) -->
+    <div class="flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
+      <!-- Left: Filters + Visualize (Hidden on very small screens) -->
+      <div class="flex items-center gap-2 w-full sm:w-auto sm:flex-1">
+        <!-- Filters -->
+        <div class="relative">
+          <button @click="showFilters = !showFilters"
+            class="px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 flex-shrink-0"
+            style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary);"
+            id="btnFiltros">
+            <span class="hidden sm:inline">⚙️ Filtros</span>
+            <span class="sm:hidden">⚙️</span>
+            <span id="fCount" class="hidden ml-1 rounded-full px-2 text-xs font-semibold" style="background: var(--color-primary-600); color: white;"></span>
+          </button>
+          <div x-show="showFilters"
+            @click.away="showFilters = false"
+            class="absolute top-full right-0 mt-2 w-56 rounded-lg shadow-xl p-4 flex flex-col gap-3 z-[1001]"
+            id="filtrosPop"
+            style="display: none; background: var(--bg-secondary); border: 1px solid var(--border-color);">
+            <!-- Bairro Select -->
+            <div>
+              <label class="block text-xs font-medium mb-1.5" style="color: var(--text-tertiary);">🏢 Bairro</label>
+              <select id="fBairro"
+                hx-get="/api/v1/bairros"
+                hx-target="#fTipo"
+                hx-trigger="change"
+                hx-swap="innerHTML swap:200ms"
+                hx-indicator="#loading"
+                class="w-full px-2.5 py-1.5 rounded-lg text-sm transition-colors"
+                style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
+                <option value="">Todos</option>
+              </select>
+            </div>
+            <!-- Tipo Select -->
+            <div>
+              <label class="block text-xs font-medium mb-1.5" style="color: var(--text-tertiary);">💡 Tipo</label>
+              <select id="fTipo"
+                hx-get="/api/v1/tipos-por-bairro"
+                hx-trigger="change"
+                hx-swap="innerHTML swap:200ms"
+                hx-indicator="#loading"
+                class="w-full px-2.5 py-1.5 rounded-lg text-sm transition-colors"
+                style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
+                <option value="">Todos</option>
+              </select>
+            </div>
+            <!-- Estado Select -->
+            <div>
+              <label class="block text-xs font-medium mb-1.5" style="color: var(--text-tertiary);">🔆 Estado</label>
+              <select id="fEstado"
+                hx-trigger="change"
+                class="w-full px-2.5 py-1.5 rounded-lg text-sm transition-colors"
+                style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
+                <option value="">Todos</option>
+                <option value="led">LED</option>
+                <option value="pendente">Pendente</option>
+                <option value="sem_lampada">Sem lâmpada</option>
+              </select>
+            </div>
+            <!-- Potência Select -->
+            <div>
+              <label class="block text-xs font-medium mb-1.5" style="color: var(--text-tertiary);">⚡ Potência mínima</label>
+              <select id="fPot" class="w-full px-2.5 py-1.5 rounded-lg text-sm transition-colors"
+                style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
+                <option value="">Qualquer</option>
+                <option value="150">≥ 150 W</option>
+                <option value="250">≥ 250 W</option>
+                <option value="400">≥ 400 W</option>
+              </select>
+            </div>
+            <!-- Fila Select -->
+            <div>
+              <label class="block text-xs font-medium mb-1.5" style="color: var(--text-tertiary);">📋 Fila</label>
+              <select id="fFila" class="w-full px-2.5 py-1.5 rounded-lg text-sm transition-colors"
+                style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
+                <option value="">— nenhuma —</option>
+                <option value="nao_verificado">🧭 Não verificados</option>
+                <option value="revisao">Marcados p/ revisão</option>
+                <option value="suspeito">LED suspeito (&gt;400 W)</option>
+              </select>
+            </div>
+            <!-- Saúde Select -->
+            <div>
+              <label class="block text-xs font-medium mb-1.5" style="color: var(--text-tertiary);">🏥 Status</label>
+              <select id="fSaude" class="w-full px-2.5 py-1.5 rounded-lg text-sm transition-colors"
+                style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
+                <option value="">Qualquer</option>
+                <option value="verde">🟢 Bom</option>
+                <option value="amarelo">🟡 Manutenção</option>
+                <option value="vermelho">🔴 Crítico</option>
+              </select>
+            </div>
+            <button id="fLimpar"
+              class="w-full px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+              style="background: var(--bg-tertiary); color: var(--text-primary);">Limpar</button>
+          </div>
+        </div>
+
+        <!-- Visualize -->
+        <div class="relative">
+          <button @click="showVis = !showVis"
+            class="px-3 py-2 rounded-lg text-sm font-medium transition-all flex-shrink-0"
+            style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary);"
+            id="btnVis">
+            <span class="hidden sm:inline">👁️ Visualizar</span>
+            <span class="sm:hidden">👁️</span>
+          </button>
+          <div x-show="showVis"
+            @click.away="showVis = false"
+            class="absolute top-full right-0 mt-2 w-52 rounded-lg shadow-xl p-2 flex flex-col gap-1 z-[1001]"
+            id="visPop"
+            style="display: none; background: var(--bg-secondary); border: 1px solid var(--border-color);">
+            <button id="btnChoro" class="px-3 py-2 text-left text-sm rounded-lg transition-colors" style="color: var(--text-primary);" title="Colorir bairros por % LED">🎨 Coroplético</button>
+            <button id="btnDens" class="px-3 py-2 text-left text-sm rounded-lg transition-colors" style="color: var(--text-primary);" title="Grade 250 m">📊 Densidade</button>
+            <button id="btnTimeline" class="px-3 py-2 text-left text-sm rounded-lg transition-colors" style="color: var(--text-primary);" title="Filtrar por período">📅 Timeline</button>
+            <button id="btnTabela" class="px-3 py-2 text-left text-sm rounded-lg transition-colors" style="color: var(--text-primary);">📋 Tabela</button>
+            <button id="btnStats" class="px-3 py-2 text-left text-sm rounded-lg transition-colors" style="color: var(--text-primary);">📈 Indicadores</button>
+            <button id="btnAdvancedFilters" class="px-3 py-2 text-left text-sm rounded-lg transition-colors" style="color: var(--text-primary);" title="Filtros avançados">🎯 Avançados</button>
+            <button id="btnCharts" class="px-3 py-2 text-left text-sm rounded-lg transition-colors" style="color: var(--text-primary);" onclick="window._showCharts()">📈 Gráficos</button>
+          </div>
         </div>
       </div>
 
-      <!-- Estado Select - atualizado via HTMX (cascata completa) -->
-      <div>
-        <label class="block text-xs font-medium text-gray-400 mb-1.5">🔆 Estado</label>
-        <select id="fEstado"
-          hx-trigger="change"
-          class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors">
-          <option value="">Todos</option>
-          <option value="led">LED</option>
-          <option value="pendente">Pendente</option>
-          <option value="sem_lampada">Sem lâmpada</option>
-        </select>
+      <!-- Right: Action Buttons (Responsive) -->
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        <button id="btnArea"
+          class="px-3 py-2 rounded-lg text-sm font-medium transition-all flex-1 sm:flex-none"
+          style="background: var(--bg-tertiary); border: 1px solid var(--color-info); color: var(--color-info);"
+          title="Selecionar uma área">✏️ Área</button>
+        <button id="btnNovo"
+          class="hidden px-3 py-2 rounded-lg text-sm font-medium text-white transition-all"
+          style="background: var(--color-success);">+ Ponto</button>
+        <button id="btnAdminConsole"
+          class="hidden px-3 py-2 rounded-lg text-sm font-medium transition-all"
+          style="background: var(--bg-tertiary); border: 1px solid var(--color-error); color: var(--color-error);">⚙️ Admin</button>
       </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-400 mb-1.5">⚡ Potência mínima</label>
-        <select id="fPot" class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"><option value="">Qualquer</option><option value="150">≥ 150 W</option><option value="250">≥ 250 W</option><option value="400">≥ 400 W</option></select>
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-400 mb-1.5">📋 Fila de auditoria</label>
-        <select id="fFila" class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"><option value="">— nenhuma —</option><option value="nao_verificado">🧭 Não verificados (recenseamento)</option><option value="revisao">Marcados p/ revisão</option><option value="suspeito">LED suspeito (&gt;400 W)</option><option value="mod_seconser">Origem: administrativo</option><option value="mod_censo">Origem: censo ENEL</option><option value="mod_campo">Origem: campo</option></select>
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-400 mb-1.5">🏥 Status de Saúde</label>
-        <select id="fSaude" class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"><option value="">Qualquer</option><option value="verde">🟢 Bom</option><option value="amarelo">🟡 Manutenção</option><option value="vermelho">🔴 Crítico</option><option value="cinza">⚫ Não mapeado</option></select>
-      </div>
-      <button id="fLimpar" class="w-full px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-medium transition-colors">Limpar filtros</button>
     </div>
   </div>
-
-
-  <!-- VISUALIZE -->
-  <div class="relative">
-    <button @click="showVis = !showVis" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 hover:border-blue-500 rounded-lg text-sm font-medium transition-colors" id="btnVis">👁️ Visualizar</button>
-    <div x-show="showVis" @click.away="showVis = false" class="absolute top-10 right-0 w-48 bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-2 flex flex-col gap-1.5 z-[1001]" id="visPop" style="display:none">
-      <button id="btnChoro" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Colorir bairros por % LED">🎨 Coroplético</button>
-      <button id="btnDens" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Grade 250 m de densidade">📊 Densidade</button>
-      <button id="btnTimeline" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Filtrar dados por período de intervalo">📅 Timeline</button>
-      <button id="btnTabela" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors">📋 Tabela</button>
-      <button id="btnStats" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors">📈 Indicadores</button>
-      <button id="btnAdvancedFilters" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Filtros avançados por múltiplos critérios">🎯 Filtros Avançados</button>
-      <button id="btnCharts" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Série temporal e KPIs avançados" onclick="window._showCharts()">📈 Gráficos Avançados</button>
-    </div>
-  </div>
-
-  <!-- ACTION BUTTONS -->
-  <div class="flex gap-2 items-center ml-auto">
-    <button id="btnArea" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-sky-500/50 text-sky-300 rounded-lg text-sm font-medium transition-colors" title="Selecionar uma área desenhando um polígono no mapa">✏️ Área</button>
-    <button id="btnNovo" class="hidden px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors">+ Ponto</button>
-    <button id="btnAdminConsole" class="hidden px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-red-500/50 text-red-400 rounded-lg text-sm font-medium transition-colors">⚙️ Admin</button>
-    <button id="btnLogin" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">🔑 Entrar</button>
-    <button id="themeToggle" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-sm transition-colors" title="Alternar tema claro/escuro" aria-label="Alternar tema">🌙</button>
-  </div>
-</div>
+</header>
 
 <div id="legend" role="complementary" aria-label="Legenda" class="absolute bottom-3.5 left-2.5 z-[1000] bg-slate-800/95 border border-slate-700 rounded-xl p-2.5 text-xs backdrop-blur">
   <div class="flex items-center gap-1.5 mb-0.5"><svg width="13" height="16" viewBox="0 0 20 24"><path d="M10 1.5a6.5 6.5 0 0 0-3.7 11.8V16h7.4v-2.7A6.5 6.5 0 0 0 10 1.5z" fill="#22c55e" stroke="#0b0f14" stroke-width="1.4"/><rect x="6.8" y="16.3" width="6.4" height="2.6" rx="1" fill="#9ca3af"/></svg> <span class="text-slate-300">LED</span></div>
