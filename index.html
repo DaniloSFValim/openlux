@@ -6,6 +6,10 @@
 <title>OpenLux — Public Lighting Asset Management System</title>
 <meta name="description" content="Open platform for georeferenced public lighting management. Interactive map, field data entry, installation photometry, spatial analysis and full auditing."/>
 <link id="favicon" rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Crect%20width%3D%2732%27%20height%3D%2732%27%20rx%3D%276%27%20fill%3D%27%230b0f14%27/%3E%3Ccircle%20cx%3D%2716%27%20cy%3D%2714%27%20r%3D%276%27%20fill%3D%27%23fbbf24%27/%3E%3Crect%20x%3D%2713%27%20y%3D%2719.5%27%20width%3D%276%27%20height%3D%274%27%20rx%3D%271%27%20fill%3D%27%239ca3af%27/%3E%3Cg%20stroke%3D%27%23fbbf24%27%20stroke-width%3D%271.6%27%20stroke-linecap%3D%27round%27%3E%3Cline%20x1%3D%2716%27%20y1%3D%272.5%27%20x2%3D%2716%27%20y2%3D%275.5%27/%3E%3Cline%20x1%3D%275.5%27%20y1%3D%2714%27%20x2%3D%272.5%27%20y2%3D%2714%27/%3E%3Cline%20x1%3D%2729.5%27%20y1%3D%2714%27%20x2%3D%2726.5%27%20y2%3D%2714%27/%3E%3Cline%20x1%3D%278%27%20y1%3D%276.5%27%20x2%3D%276%27%20y2%3D%274.5%27/%3E%3Cline%20x1%3D%2724%27%20y1%3D%276.5%27%20x2%3D%2726%27%20y2%3D%274.5%27/%3E%3C/g%3E%3C/svg%3E"/>
+<!-- Design System: Modern Typography (Inter) + Color Palette -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <!-- Leaflet.markercluster for client-side clustering (Fase 3: multi-cidade) -->
@@ -25,29 +29,276 @@
 <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 
 <style>
-  html,body,#map{height:100%;margin:0}
-  body{background:#0b0f14;color:#e5e7eb;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-  .leaflet-container{background:#0b0f14}
-  .leaflet-interactive{cursor:pointer}
-  .panel{background:var(--panel);border:1px solid #1f2a37}
-  .chip{background:#111a24;border:1px solid #1f2a37}
-  .cluster-label{color:#0b0f14;font-weight:700;font-size:11px;text-align:center;line-height:1}
-  input,select,textarea{background:#0b1017;border:1px solid #24303d;color:#e5e7eb;border-radius:6px;padding:6px 8px;font-size:13px;width:100%}
-  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
-  button{cursor:pointer}
-  :root{--accent:#1d4ed8;--panel:#0f151c}
-  .btn{border:1px solid #24303d;background:#111a24;border-radius:6px;padding:6px 12px;font-size:13px;color:#e5e7eb}
-  .btn:hover{border-color:var(--accent)}
-  .btn.on{border-color:var(--accent);background:#16233a}
-  .btn-accent{background:var(--accent);border-color:var(--accent);color:#fff}
-  .btn-accent:hover{filter:brightness(1.12)}
-  ::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:#24303d;border-radius:4px}
-  .badge{font-size:11px;padding:2px 8px;border-radius:999px;font-weight:600}
-  table{font-size:12.5px}th,td{padding:6px 8px;text-align:left;border-bottom:1px solid #1a232e}
-  th{color:#9ca3af;font-weight:600;position:sticky;top:0;background:#0f151c}
-  tr:hover td{background:#111a24}
-  #toast{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:2000;display:none;padding:10px 16px;border-radius:8px;font-size:13px;max-width:80vw}
-  .spin{width:12px;height:12px;border:2px solid #24303d;border-top-color:#3b82f6;border-radius:50%;display:inline-block;animation:sp .7s linear infinite}
+  /* ========== DESIGN SYSTEM: Colors + Typography ========== */
+  :root {
+    /* Primary Colors: Tech-forward gradient (blue → purple) */
+    --primary-50: #f0f9ff;
+    --primary-100: #e0f2fe;
+    --primary-500: #0ea5e9;
+    --primary-600: #0284c7;
+    --primary-700: #0369a1;
+    --primary-900: #0c2d6b;
+
+    /* Accent: Energetic cyan */
+    --accent: #06b6d4;
+    --accent-dark: #0891b2;
+
+    /* Semantic Colors */
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #3b82f6;
+
+    /* Neutral Grays (Dark mode optimized) */
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+
+    /* Dark Mode Background */
+    --bg-dark: #0f172a;
+    --bg-dark-secondary: #1e293b;
+    --bg-dark-tertiary: #334155;
+    --text-dark: #f1f5f9;
+    --text-dark-secondary: #cbd5e1;
+
+    /* Light Mode Background */
+    --bg-light: #ffffff;
+    --bg-light-secondary: #f8fafc;
+    --text-light: #1e293b;
+    --text-light-secondary: #475569;
+
+    /* Current Theme (defaults to dark) */
+    --bg: var(--bg-dark);
+    --bg-secondary: var(--bg-dark-secondary);
+    --bg-tertiary: var(--bg-dark-tertiary);
+    --text: var(--text-dark);
+    --text-secondary: var(--text-dark-secondary);
+    --border: #334155;
+    --panel: var(--bg-dark-secondary);
+  }
+
+  /* Light mode theme */
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: var(--bg-light);
+      --bg-secondary: var(--bg-light-secondary);
+      --bg-tertiary: #f1f5f9;
+      --text: var(--text-light);
+      --text-secondary: var(--text-light-secondary);
+      --border: #e2e8f0;
+      --panel: var(--bg-light);
+    }
+  }
+
+  /* ========== GLOBAL STYLES ========== */
+  * { box-sizing: border-box; }
+  html, body, #map { height: 100%; margin: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* ========== LEAFLET OVERRIDES ========== */
+  .leaflet-container { background: var(--bg); }
+  .leaflet-interactive { cursor: pointer; }
+  .leaflet-control-attribution { background: rgba(0,0,0,0.5) !important; }
+
+  /* ========== COMPONENTS ========== */
+  .panel, .chip {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .panel { padding: 12px; }
+  .chip { padding: 6px 12px; }
+
+  .cluster-label {
+    color: var(--bg);
+    font-weight: 700;
+    font-size: 11px;
+    text-align: center;
+    line-height: 1;
+  }
+
+  /* Input & Select Styling */
+  input, select, textarea {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    width: 100%;
+    transition: all 0.2s ease;
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: var(--text-secondary);
+  }
+
+  input:hover, select:hover, textarea:hover {
+    border-color: var(--accent);
+  }
+
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+  }
+
+  /* Button Styling */
+  button {
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s ease;
+  }
+
+  .btn {
+    border: 1px solid var(--border);
+    background: var(--bg-tertiary);
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .btn:hover {
+    border-color: var(--accent);
+    background: var(--bg-secondary);
+    transform: translateY(-1px);
+  }
+
+  .btn.on {
+    border-color: var(--accent);
+    background: rgba(6, 182, 212, 0.1);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .btn-accent {
+    background: linear-gradient(135deg, var(--primary-600) 0%, var(--accent) 100%);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .btn-accent:hover {
+    filter: brightness(1.15);
+    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+    transform: translateY(-2px);
+  }
+
+  /* ========== SCROLLBAR ========== */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+  }
+
+  /* ========== BADGE & TYPOGRAPHY ========== */
+  .badge {
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    display: inline-block;
+    transition: all 0.2s ease;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1.3;
+    margin: 0;
+  }
+
+  /* ========== TABLE STYLING ========== */
+  table {
+    font-size: 12.5px;
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    color: var(--text-secondary);
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    background: var(--bg-secondary);
+  }
+
+  tr:hover td {
+    background: var(--bg-tertiary);
+  }
+
+  /* ========== TOAST NOTIFICATIONS ========== */
+  #toast {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    display: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    max-width: 80vw;
+    font-weight: 500;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+
+  /* ========== LOADING SPINNER ========== */
+  .spin {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--bg-tertiary);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    display: inline-block;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
   @keyframes sp{to{transform:rotate(360deg)}}
   .lamp-ic{background:none;border:none}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
@@ -61,31 +312,30 @@
   @media (max-width:640px){
     #tblReg th:nth-child(5),#tblReg td:nth-child(5),#tblReg th:nth-child(7),#tblReg td:nth-child(7){display:none}
   }
-  /* Light theme */
-  body[data-theme="light"]{background:#f5f5f5;color:#1a1a1a}
-  body[data-theme="light"] .leaflet-container{background:#f0f0f0}
-  body[data-theme="light"] .panel{background:#ffffff;border-color:#e0e0e0}
-  body[data-theme="light"] .chip{background:#f9f9f9;border-color:#e0e0e0}
-  body[data-theme="light"] input,body[data-theme="light"] select,body[data-theme="light"] textarea{background:#ffffff;border-color:#d0d0d0;color:#1a1a1a}
-  body[data-theme="light"] input:focus,body[data-theme="light"] select:focus,body[data-theme="light"] textarea:focus{border-color:#1d4ed8}
-  body[data-theme="light"] .btn{border-color:#d0d0d0;background:#f5f5f5;color:#1a1a1a}
-  body[data-theme="light"] .btn:hover{border-color:#1d4ed8;background:#e8e8e8}
-  body[data-theme="light"] table th{background:#f5f5f5;color:#1a1a1a}
-  body[data-theme="light"] table tr:hover td{background:#f9f9f9}
-  body[data-theme="light"] #toast{background:#f0f0f0;border-color:#ddd}
+
+  /* ========== DATA-THEME OVERRIDES (legacy support) ========== */
+  body[data-theme="light"] {
+    --bg: var(--bg-light);
+    --bg-secondary: var(--bg-light-secondary);
+    --bg-tertiary: #f1f5f9;
+    --text: var(--text-light);
+    --text-secondary: var(--text-light-secondary);
+    --border: #e2e8f0;
+    --panel: var(--bg-light);
+  }
 </style>
 </head>
 <body>
 <div id="map" role="main" aria-label="Mapa de iluminação pública de Niterói"></div>
-<div id="splash" class="fixed inset-0 z-[3000] bg-slate-950 flex flex-col items-center justify-center gap-2 transition-opacity duration-500">
+<div id="splash" class="fixed inset-0 z-[3000] flex flex-col items-center justify-center gap-3 transition-opacity duration-500" style="background: linear-gradient(135deg, var(--bg-dark) 0%, var(--primary-900) 100%);">
   <img id="splashLogo" alt="" class="h-14 hidden mb-2"/>
-  <div id="splashTitle" style="font-size:23px;font-weight:700;color:#e5e7eb;letter-spacing:.3px">OpenLux</div>
-  <div style="font-size:13px;color:#9ca3af">Public Lighting Asset Management</div>
-  <div style="font-size:12px;color:#6b7280;margin-top:16px">Desenvolvido por <span style="color:#cbd5e1">Danilo Valim</span></div>
-  <div style="font-size:11px;color:#5f6b78">v1.1</div>
-  <button class="btn" id="splashSkip" style="margin-top:16px">Entrar</button>
+  <div id="splashTitle" style="font-size:32px;font-weight:800;letter-spacing:-.5px;background:linear-gradient(135deg,var(--primary-500),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">OpenLux</div>
+  <div style="font-size:14px;color:var(--text-secondary);font-weight:500">Public Lighting Asset Management</div>
+  <div style="font-size:12px;color:var(--text-secondary);margin-top:16px">Desenvolvido por <span style="color:var(--accent);font-weight:600">Danilo Valim</span></div>
+  <div style="font-size:11px;color:var(--text-secondary)">v1.1 • 2026</div>
+  <button class="btn-accent" id="splashSkip" style="margin-top:24px;padding:10px 32px;font-weight:600">Entrar →</button>
 </div>
-<div id="footerBand" role="contentinfo" style="position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:800;max-width:92vw;background:rgba(15,21,28,0.86);border:1px solid #1f2a37;border-radius:8px;padding:5px 14px;font-size:11px;color:#9ca3af;text-align:center;pointer-events:none">OpenLux · Desenvolvido por <span style="color:#cbd5e1">Danilo Valim</span> · v1.1</div>
+<div id="footerBand" role="contentinfo" style="position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:800;max-width:92vw;background:rgba(15,23,42,0.92);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:11px;color:var(--text-secondary);text-align:center;pointer-events:none;font-weight:500">OpenLux · <span style="color:var(--accent)">Danilo Valim</span> · v1.1</div>
 
 <!-- TOP BAR - Modernized with Tailwind + Alpine -->
 <div x-data="{ showFilters: false, showExport: false, showVis: false }" class="fixed top-3 left-3 right-3 z-[1000] bg-slate-900/95 backdrop-blur border border-slate-700 rounded-xl shadow-xl p-3 flex items-center gap-3 flex-wrap" role="banner" aria-label="Barra principal">
