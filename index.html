@@ -3870,7 +3870,8 @@ document.getElementById('tNext').onclick=()=>{ state.tPage++; loadTable(); };
 function podeEditar(){ return ['admin','editor'].includes(state.userRole); }
 async function setUser(u){
   state.user=u; state.userRole=null;
-  document.getElementById('btnLogin').textContent = u?'Sair':'Entrar';
+  const labelSpan = document.getElementById('btnLogin').querySelector('span.hidden.sm\\:inline');
+  if(labelSpan) labelSpan.textContent = u?'Sair':'Entrar';
   if(u){ try{ const {data}=await sb.from('profiles').select('role').eq('id',u.id).single(); state.userRole=data?.role||'leitura'; }
          catch(e){ state.userRole='leitura'; } }
   document.getElementById('btnNovo').style.display = podeEditar()?'inline-block':'none';
