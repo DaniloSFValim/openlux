@@ -1,11 +1,14 @@
-# Funding Options for Iluminação LED Niterói
+# Funding — OpenLux
+# Somente canais realmente ativos devem ficar descomentados: entradas apontando
+# para contas inexistentes viram links quebrados no botão "Sponsor" do GitHub.
 
 github: danilosfvalim
-patreon: danilosfvalim
-ko_fi: danilosfvalim
-buy_me_a_coffee: danilosfvalim
-liberapay: danilosfvalim
-issuehunt: danilosfvalim
-custom:
-  - https://www.paypal.com/donate/?hosted_button_id=YOUR_BUTTON_ID
-  - https://opencollective.com/iluminacao-led-niteroi
+
+# Descomente conforme criar as contas:
+# open_collective: openlux
+# patreon: danilosfvalim
+# ko_fi: danilosfvalim
+# buy_me_a_coffee: danilosfvalim
+# liberapay: danilosfvalim
+# custom:
+#   - https://www.paypal.com/donate/?hosted_button_id=<seu_button_id>

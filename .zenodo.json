@@ -1,0 +1,25 @@
+{
+  "title": "OpenLux — Georeferenced public lighting asset management system with first-order installation photometric indices",
+  "description": "Open-source platform for georeferenced management of public lighting parks, featuring a lightweight method for capturing installation condition at scale (aiming angle and ground material reflectance), first-order photometric indices (floor utilization, light pollution, relative luminance), photometric equipment catalog (Tier 2), and polygon-based spatial analysis via PostGIS. Includes source code, database migrations, comprehensive documentation, and a reference implementation case study. Designed for reproducibility, auditability, and deployment in any city.",
+  "upload_type": "software",
+  "language": "eng",
+  "license": "MIT",
+  "access_right": "open",
+  "creators": [
+    {
+      "name": "Valim, Danilo",
+      "orcid": "0009-0009-7250-6151"
+    }
+  ],
+  "keywords": [
+    "iluminação pública",
+    "public lighting",
+    "fotometria",
+    "poluição luminosa",
+    "light pollution",
+    "PostGIS",
+    "GIS",
+    "modernização LED",
+    "smart cities"
+  ]
+}

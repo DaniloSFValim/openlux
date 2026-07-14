@@ -1,0 +1,56 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='660' height='380' viewBox='0 0 660 380' font-size='13'>
+<rect width='660' height='380' fill='#ffffff'/>
+<text x='330.0' y='24' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='15' font-weight='700' fill='#1a1a1a'>Modelo de índices fotométricos vs. ângulo de apontamento (piso: concreto, ρ=0,30)</text>
+<line x1='70' y1='56' x2='70' y2='306' stroke='#1a1a1a' stroke-width='1'/>
+<line x1='70' y1='306' x2='590' y2='306' stroke='#1a1a1a' stroke-width='1'/>
+<line x1='70' y1='306.0' x2='590' y2='306.0' stroke='#e6e6e6' stroke-width='1'/>
+<text x='62' y='310.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>0.0</text>
+<line x1='70' y1='256.0' x2='590' y2='256.0' stroke='#e6e6e6' stroke-width='1'/>
+<text x='62' y='260.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>0.2</text>
+<line x1='70' y1='206.0' x2='590' y2='206.0' stroke='#e6e6e6' stroke-width='1'/>
+<text x='62' y='210.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>0.4</text>
+<line x1='70' y1='156.0' x2='590' y2='156.0' stroke='#e6e6e6' stroke-width='1'/>
+<text x='62' y='160.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>0.6</text>
+<line x1='70' y1='106.0' x2='590' y2='106.0' stroke='#e6e6e6' stroke-width='1'/>
+<text x='62' y='110.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>0.8</text>
+<line x1='70' y1='56.0' x2='590' y2='56.0' stroke='#e6e6e6' stroke-width='1'/>
+<text x='62' y='60.0' text-anchor='end' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>1.0</text>
+<line x1='70.0' y1='306' x2='70.0' y2='311' stroke='#1a1a1a' stroke-width='1'/>
+<text x='70.0' y='326' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>0°</text>
+<line x1='135.0' y1='306' x2='135.0' y2='311' stroke='#1a1a1a' stroke-width='1'/>
+<text x='135.0' y='326' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>15°</text>
+<line x1='200.0' y1='306' x2='200.0' y2='311' stroke='#1a1a1a' stroke-width='1'/>
+<text x='200.0' y='326' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>30°</text>
+<line x1='265.0' y1='306' x2='265.0' y2='311' stroke='#1a1a1a' stroke-width='1'/>
+<text x='265.0' y='326' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>45°</text>
+<line x1='330.0' y1='306' x2='330.0' y2='311' stroke='#1a1a1a' stroke-width='1'/>
+<text x='330.0' y='326' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>60°</text>
+<line x1='395.0' y1='306' x2='395.0' y2='311' stroke='#1a1a1a' stroke-width='1'/>
+<text x='395.0' y='326' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>75°</text>
+<line x1='460.0' y1='306' x2='460.0' y2='311' stroke='#1a1a1a' stroke-width='1'/>
+<text x='460.0' y='326' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>90°</text>
+<line x1='590.0' y1='306' x2='590.0' y2='311' stroke='#1a1a1a' stroke-width='1'/>
+<text x='590.0' y='326' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='11' fill='#666666'>120°</text>
+<polyline fill='none' stroke='#0072B2' stroke-width='2.5' points='70.0,56.0 74.3,56.0 78.7,56.2 83.0,56.3 87.3,56.6 91.7,57.0 96.0,57.4 100.3,57.9 104.7,58.4 109.0,59.1 113.3,59.8 117.7,60.6 122.0,61.5 126.3,62.4 130.7,63.4 135.0,64.5 139.3,65.7 143.7,66.9 148.0,68.2 152.3,69.6 156.7,71.1 161.0,72.6 165.3,74.2 169.7,75.9 174.0,77.6 178.3,79.4 182.7,81.3 187.0,83.2 191.3,85.3 195.7,87.3 200.0,89.5 204.3,91.7 208.7,94.0 213.0,96.3 217.3,98.7 221.7,101.2 226.0,103.7 230.3,106.3 234.7,109.0 239.0,111.7 243.3,114.5 247.7,117.3 252.0,120.2 256.3,123.2 260.7,126.2 265.0,129.2 269.3,132.3 273.7,135.5 278.0,138.7 282.3,142.0 286.7,145.3 291.0,148.7 295.3,152.1 299.7,155.5 304.0,159.1 308.3,162.6 312.7,166.2 317.0,169.8 321.3,173.5 325.7,177.2 330.0,181.0 334.3,184.8 338.7,188.6 343.0,192.5 347.3,196.4 351.7,200.3 356.0,204.3 360.3,208.3 364.7,212.3 369.0,216.4 373.3,220.5 377.7,224.6 382.0,228.7 386.3,232.9 390.7,237.1 395.0,241.3 399.3,245.5 403.7,249.8 408.0,254.0 412.3,258.3 416.7,262.6 421.0,266.9 425.3,271.2 429.7,275.5 434.0,279.9 438.3,284.2 442.7,288.6 447.0,292.9 451.3,297.3 455.7,301.6 460.0,306.0 464.3,306.0 468.7,306.0 473.0,306.0 477.3,306.0 481.7,306.0 486.0,306.0 490.3,306.0 494.7,306.0 499.0,306.0 503.3,306.0 507.7,306.0 512.0,306.0 516.3,306.0 520.7,306.0 525.0,306.0 529.3,306.0 533.7,306.0 538.0,306.0 542.3,306.0 546.7,306.0 551.0,306.0 555.3,306.0 559.7,306.0 564.0,306.0 568.3,306.0 572.7,306.0 577.0,306.0 581.3,306.0 585.7,306.0 590.0,306.0'/>
+<polyline fill='none' stroke='#D55E00' stroke-width='2.5' points='70.0,268.5 74.3,268.5 78.7,268.4 83.0,268.2 87.3,268.0 91.7,267.7 96.0,267.3 100.3,266.9 104.7,266.4 109.0,265.9 113.3,265.3 117.7,264.6 122.0,263.9 126.3,263.1 130.7,262.2 135.0,261.3 139.3,260.3 143.7,259.2 148.0,258.1 152.3,256.9 156.7,255.7 161.0,254.4 165.3,253.0 169.7,251.6 174.0,250.1 178.3,248.6 182.7,247.0 187.0,245.3 191.3,243.6 195.7,241.9 200.0,240.0 204.3,238.1 208.7,236.2 213.0,234.2 217.3,232.2 221.7,230.1 226.0,227.9 230.3,225.7 234.7,223.5 239.0,221.1 243.3,218.8 247.7,216.4 252.0,213.9 256.3,211.4 260.7,208.9 265.0,206.3 269.3,203.6 273.7,200.9 278.0,198.2 282.3,195.4 286.7,192.6 291.0,189.7 295.3,186.8 299.7,183.9 304.0,180.9 308.3,177.9 312.7,174.8 317.0,171.7 321.3,168.6 325.7,165.4 330.0,162.2 334.3,159.0 338.7,155.8 343.0,152.5 347.3,149.2 351.7,145.8 356.0,142.4 360.3,139.0 364.7,135.6 369.0,132.2 373.3,128.7 377.7,125.2 382.0,121.7 386.3,118.1 390.7,114.6 395.0,111.0 399.3,107.4 403.7,103.8 408.0,100.2 412.3,96.5 416.7,92.9 421.0,89.2 425.3,85.6 429.7,81.9 434.0,78.2 438.3,74.5 442.7,70.8 447.0,67.1 451.3,63.4 455.7,59.7 460.0,56.0 464.3,56.0 468.7,56.0 473.0,56.0 477.3,56.0 481.7,56.0 486.0,56.0 490.3,56.0 494.7,56.0 499.0,56.0 503.3,56.0 507.7,56.0 512.0,56.0 516.3,56.0 520.7,56.0 525.0,56.0 529.3,56.0 533.7,56.0 538.0,56.0 542.3,56.0 546.7,56.0 551.0,56.0 555.3,56.0 559.7,56.0 564.0,56.0 568.3,56.0 572.7,56.0 577.0,56.0 581.3,56.0 585.7,56.0 590.0,56.0'/>
+<circle cx='70.0' cy='56.0' r='3' fill='#0072B2'/>
+<circle cx='70.0' cy='268.5' r='3' fill='#D55E00'/>
+<circle cx='135.0' cy='64.5' r='3' fill='#0072B2'/>
+<circle cx='135.0' cy='261.3' r='3' fill='#D55E00'/>
+<circle cx='200.0' cy='89.5' r='3' fill='#0072B2'/>
+<circle cx='200.0' cy='240.0' r='3' fill='#D55E00'/>
+<circle cx='265.0' cy='129.2' r='3' fill='#0072B2'/>
+<circle cx='265.0' cy='206.3' r='3' fill='#D55E00'/>
+<circle cx='330.0' cy='181.0' r='3' fill='#0072B2'/>
+<circle cx='330.0' cy='162.2' r='3' fill='#D55E00'/>
+<circle cx='395.0' cy='241.3' r='3' fill='#0072B2'/>
+<circle cx='395.0' cy='111.0' r='3' fill='#D55E00'/>
+<circle cx='460.0' cy='306.0' r='3' fill='#0072B2'/>
+<circle cx='460.0' cy='56.0' r='3' fill='#D55E00'/>
+<circle cx='590.0' cy='306.0' r='3' fill='#0072B2'/>
+<circle cx='590.0' cy='56.0' r='3' fill='#D55E00'/>
+<circle cx='440' cy='64' r='4' fill='#0072B2'/><text x='450' y='68' font-family='Helvetica,Arial,sans-serif' font-size='12' fill='#1a1a1a'>η_piso (aproveitamento)</text>
+<circle cx='440' cy='82' r='4' fill='#D55E00'/><text x='450' y='86' font-family='Helvetica,Arial,sans-serif' font-size='12' fill='#1a1a1a'>P (poluição luminosa)</text>
+<text x='330.0' y='372' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='12' fill='#1a1a1a'>Ângulo de apontamento a partir do nadir (°)</text>
+<text x='16' y='181.0' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='12' fill='#1a1a1a' transform='rotate(-90 16 181.0)'>Índice (0–1)</text>
+</svg>

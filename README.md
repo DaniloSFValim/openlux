@@ -1,443 +1,362 @@
-# Iluminação LED Niterói 💡
+<div align="center">
 
-**Quality & Monitoring:**
-[![E2E Tests](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/e2e-tests.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/e2e-tests.yml)
-[![Lighthouse CI](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/lighthouse-ci.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/lighthouse-ci.yml)
-[![Security Scanning](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/security-scan.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/security-scan.yml)
-[![API Tests](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/api-testing.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/iluminacao-led-niteroi/actions/workflows/api-testing.yml)
+**🇧🇷 Português** · **[🇬🇧 English](README.en.md)**
+
+# 💡 OpenLux
+
+### Plataforma aberta de gestão de iluminação pública
+
+**Inventário vivo, georreferenciado e versionado do parque de iluminação — para
+qualquer cidade.** Mapa público, edição em campo, fotometria de instalação, análise
+espacial e auditoria completa. Código MIT; os dados pertencem a cada município.
+
+*Open platform for public lighting asset management — born in Niterói, Brazil, built for any city.*
+
+<br/>
+
 [![Netlify Status](https://api.netlify.com/api/v1/badges/fad767e1-972b-40e7-995d-f0c38b287c8e/deploy-status)](https://app.netlify.com/projects/iluminacao-niteroi)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org)
+[![E2E Tests](https://github.com/DaniloSFValim/openlux/actions/workflows/e2e-tests.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/openlux/actions/workflows/e2e-tests.yml)
+[![API Tests](https://github.com/DaniloSFValim/openlux/actions/workflows/api-testing.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/openlux/actions/workflows/api-testing.yml)
+[![Lighthouse CI](https://github.com/DaniloSFValim/openlux/actions/workflows/lighthouse-ci.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/openlux/actions/workflows/lighthouse-ci.yml)
+[![Security Scan](https://github.com/DaniloSFValim/openlux/actions/workflows/security-scan.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/openlux/actions/workflows/security-scan.yml)
 
-**Stack:**
-![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
-![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)
-![Leaflet](https://img.shields.io/badge/Leaflet-1.9.4-199900?style=flat-square&logo=leaflet&logoColor=white)
-![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-336791?style=flat-square&logo=supabase&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-316192?style=flat-square&logo=postgresql&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla_ES6+-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+![Leaflet](https://img.shields.io/badge/Leaflet-1.9.4-199900?style=for-the-badge&logo=leaflet&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL_+_PostGIS-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![Netlify](https://img.shields.io/badge/Netlify-Deploy_cont%C3%ADnuo-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)
 
-Sistema georreferenciado de gestão de infraestrutura de iluminação pública da cidade de Niterói.
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21305310-blue.svg?style=flat-square)](https://doi.org/10.5281/zenodo.21305310)
+[![License: MIT](https://img.shields.io/badge/Licen%C3%A7a-MIT-yellow.svg?style=flat-square)](LICENSE)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-FE5196?style=flat-square&logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](CONTRIBUTING.md)
 
-## 📊 Visão Geral
+<br/>
 
-- **Descrição:** Sistema web para visualizar, gerenciar e auditar a infraestrutura de iluminação pública
-- **Stack:** Leaflet (mapas) + Supabase (backend) + Netlify (hospedagem)
-- **Usuários:** Técnicos de campo, editores, administradores
-- **Funcionalidades:** Mapa interativo, edição de pontos, exportação de dados, relatórios, auditoria
+**[🌍 Visão do projeto](VISION.md)** ·
+**[🌐 Demo (Niterói)](https://iluminacao-niteroi.netlify.app)** ·
+**[🏙️ Implante na sua cidade](docs/DEPLOY_YOUR_CITY.md)** ·
+**[🐛 Reportar Bug](https://github.com/DaniloSFValim/openlux/issues/new?template=bug.md)**
 
-## 🏗️ Arquitetura
+<br/>
+<br/>
 
-### Frontend (Cliente)
-- **Tipo:** Single-page application (SPA)
-- **Tecnologia:** HTML5 + JavaScript vanilla (ES6+)
-- **Dependências via CDN:**
-  - Leaflet 1.9.4 — mapas interativos
-  - Supabase JS 2.x — cliente backend
-  - jsPDF 2.5.1 + autotable 3.8.2 — geração de relatórios PDF
-- **Estado:** Object `state` centralizado (filtros, seleção, cache)
-- **Autenticação:** Supabase Auth (email/password)
-- **Roles:** `leitura` | `editor` | `admin`
+[![OpenLux em produção — instância Niterói: 42.765 luminárias em clusters coloridos por taxa de LED](docs/assets/hero-niteroi.png)](https://iluminacao-niteroi.netlify.app)
 
-### Backend (Supabase)
-- **Database:** PostgreSQL 14+
-- **API:** PostgREST (RPC functions)
-- **Autenticação:** Supabase Auth com JWT
-- **Storage:** Bucket `branding` para logos/configuração visual
-- **Security:** Row-Level Security (RLS) por role
-- **RPC Functions:** 16+ funções para operações georreferenciadas
+*A instância de referência ao vivo: clusters do parque de Niterói coloridos por taxa de modernização LED — clique para abrir.*
 
-### Deploy
-- **Frontend:** Netlify (arquivos estáticos, deploy automático)
-- **Backend:** Supabase Cloud
-- **Build:** Zero — arquivos estáticos, nenhum build step necessário
-- **Headers de Segurança:** X-Frame-Options: SAMEORIGIN, X-Content-Type-Options: nosniff
-
-### Fluxos Críticos
-1. **Visualização:** Mapa interativo com renderização zoom-dependent (pontos < zoom 16, clusters >= zoom 16)
-2. **Edição:** Seleção de ponto → form → RPC `ip_atualizar_ponto` → refresh automático
-3. **Exportação:** Aplicar filtros → RPC com filtros → toCSV/toGeoJSON/toPDF → download
-4. **Admin:** Gestão de usuários, configuração visual, visualização de filas de auditoria
-
-## 🚀 Setup Local
-
-### Pré-requisitos
-- Node.js 18+ (apenas para Supabase CLI)
-- Git
-- Docker & Docker Compose (para Supabase local)
-- Editor de código (VS Code recomendado)
-- Terminal bash/zsh
-
-### 1️⃣ Frontend Local
-
-```bash
-git clone https://github.com/danilosfvalim/iluminacao-led-niteroi.git
-cd iluminacao-led-niteroi
-
-# Não há build step — servidor estático é suficiente
-# Opção A: Usar http-server (recomendado para desenvolvimento)
-npx http-server
-# Acessar http://localhost:8080
-
-# Opção B: Abrir index.html diretamente (sem live reload)
-open index.html
-
-# Opção C: VS Code Live Server
-# Instalar extensão "Live Server" e clicar "Go Live"
-```
-
-### 2️⃣ Supabase Local
-
-Supabase local permite desenvolvimento offline e testes sem afetar produção.
-
-```bash
-# Instalar CLI (primeira vez)
-npm install -g supabase
-
-# Inicializar projeto (primeira vez)
-cd supabase
-supabase init
-# Isso cria config.toml
-
-# Iniciar stack (Docker necessário)
-supabase start
-
-# Output será similar a:
-# API URL: http://localhost:54321
-# Anon Key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-# Service Role Key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-# Database URL: postgresql://postgres:postgres@localhost:54322/postgres
-
-# Verificar status
-supabase status
-
-# Parar stack
-supabase stop
-```
-
-### 3️⃣ Configurar Variáveis de Ambiente
-
-```bash
-# Criar arquivo local (não será commitado)
-cp .env.example .env.local
-
-# Editar com valores do Supabase local
-nano .env.local
-
-# Conteúdo (adaptar com valores reais):
-NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...
-```
-
-### 4️⃣ Conectar Frontend ao Backend Local
-
-O `index.html` detecta automaticamente:
-- Se `window.location.hostname === 'localhost'` → busca credenciais em `.env.local`
-- Se produção → usa credenciais hardcoded
-
-**Para usar local:**
-1. Adicionar `.env.local` com credenciais do Supabase local
-2. Modificar `index.html` (linhas 260-262) para ler do `.env.local`
-
-## 🔐 Variáveis de Ambiente
-
-| Variável | Escopo | Descrição | Exemplo |
-|----------|--------|-----------|---------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Public | URL da API Supabase | `https://lrnmydrwzxxajylsmoih.supabase.co` |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public | Anon key (seguro para frontend) | `sb_publishable_w3UmLsmcDtT81S3MDdDJjw_rEWckoVl` |
-| `SUPABASE_SERVICE_ROLE_KEY` | Private | Admin key (nunca no frontend/git) | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` |
-| `SUPABASE_LOCAL_URL` | Local | URL do Supabase local | `http://localhost:54321` |
-
-**Armazenamento:**
-- **Local:** `.env.local` (git-ignored)
-- **Produção:** Netlify → Site Settings → Build & Deploy → Environment
-- **CI/CD:** GitHub → Settings → Secrets and variables
-
-## 📦 Deploy
-
-### Deploy Frontend (Netlify)
-
-1. Conectar repositório GitHub ao Netlify
-2. Configurar build:
-   - **Build command:** (deixar vazio)
-   - **Publish directory:** `.` (raiz)
-3. Variáveis de ambiente (Site Settings → Environment):
-   ```
-   NEXT_PUBLIC_SUPABASE_URL = https://lrnmydrwzxxajylsmoih.supabase.co
-   NEXT_PUBLIC_SUPABASE_ANON_KEY = sb_publishable_...
-   ```
-4. Deploy automático ao fazer push para `main`
-
-### Deploy Backend (Supabase)
-
-Supabase é gerenciado via dashboard web e migrations versionadas:
-
-```bash
-# Ver status do projeto
-supabase projects list
-
-# Fazer pull das mudanças remoto
-supabase db pull --linked
-
-# Fazer push de migrations locais
-supabase db push --linked
-
-# Ver logs de erro
-supabase functions serve
-```
-
-## 🧪 Verificação End-to-End
-
-### Checklist Local
-- [ ] `supabase start` executa sem erro
-- [ ] Abrir http://localhost:8080 e página carrega
-- [ ] Login funciona com credenciais de teste
-- [ ] Mapa renderiza com dados (pontos/clusters)
-- [ ] Editar um ponto e salvamento funciona
-- [ ] Exportar CSV/PDF funciona
-- [ ] Filtros (bairro, tipo, estado) funcionam
-
-### Checklist Produção
-- [ ] `git push origin main` completa com sucesso
-- [ ] Netlify mostra "Published" (2-3 min após push)
-- [ ] Site carrega em https://seu-site.netlify.app
-- [ ] Login com credenciais reais funciona
-- [ ] Mapa renderiza com dados reais
-- [ ] Edição e exportação funcionam
-
-## 🔄 Backup & Restore
-
-### Backup Automático
-
-GitHub Actions executa backup diário (02:00 UTC):
-
-```bash
-# Ver backups
-ls -lh backups/
-
-# Backup é feito automaticamente via GitHub Actions
-# Arquivos salvos em /backups/db_YYYY-MM-DD_HH-MM-SS.sql
-```
-
-### Restore Manual
-
-```bash
-# Listar backups disponíveis
-ls -lh backups/
-
-# Restaurar de um backup específico
-./scripts/restore.sh backups/db_2026-07-07_14-30-00.sql
-
-# Ou via Supabase local
-supabase db reset
-psql -f backups/db_2026-07-07_14-30-00.sql
-```
-
-## 📊 Observabilidade
-
-### Logs & Debugging
-
-| Camada | Ferramenta | Como Acessar |
-|--------|-----------|--------------|
-| **Frontend** | Browser DevTools | F12 → Console, Network, Sources |
-| **Backend** | Supabase Dashboard | https://app.supabase.com → Logs |
-| **Deploy** | Netlify Dashboard | https://app.netlify.com → Deploys → View logs |
-
-### Monitoramento Recomendado (Futuro)
-
-- **Sentry:** Error tracking e crash reports
-- **LogRocket:** Session replay e debugging
-- **Datadog:** APM e performance monitoring
-
-## 🧱 Governança de Código
-
-### Conventional Commits
-
-Use mensagens estruturadas:
-
-```bash
-# Feature
-git commit -m "feat: adicionar visualização de densidade"
-
-# Bug fix
-git commit -m "fix: corrigir renderização de clusters"
-
-# Documentation
-git commit -m "docs: atualizar guia de setup"
-
-# Chore
-git commit -m "chore: atualizar dependências CDN"
-
-# Refactor
-git commit -m "refactor: simplificar lógica de filtros"
-```
-
-### Branch Strategy
-
-- `main` — produção (sempre estável, deploy automático)
-- `develop` — staging
-- `feature/*` — novas features (`feature/mapa-densidade`)
-- `fix/*` — correções (`fix/cluster-zoom`)
-- `docs/*` — documentação (`docs/setup-local`)
-
-### Pull Request Workflow
-
-1. Criar feature branch (`git checkout -b feature/meu-recurso`)
-2. Fazer commits com Conventional Commits
-3. Fazer push (`git push -u origin feature/meu-recurso`)
-4. Abrir PR no GitHub
-5. Preencher template de PR (descrição, testes, checklist)
-6. Aguardar review + CI passar
-7. Merge via GitHub (GitHub faz o rebase automático)
-
-## 🆘 Plano de Recuperação
-
-### Cenário 1: Perda Total do Supabase Produção
-
-**Tempo de Recuperação:** 15-30 minutos
-
-```bash
-# 1. Restaurar dados do backup
-supabase db reset --linked
-psql -f backups/db_<latest>.sql
-
-# 2. Verificar schema
-supabase db pull --linked
-git status  # revisar migrations em supabase/migrations/
-
-# 3. Recriar usuários (se necessário)
-# Via Supabase Dashboard → Auth → Users
-
-# 4. Frontend já está correto (Netlify pull automático)
-# Apenas limpar cache e aguardar DNS
-
-# 5. Validar
-# - Login funciona
-# - Mapa carrega dados
-# - Edição funciona
-# - Exportação funciona
-```
-
-### Cenário 2: Código Corrompido no Git
-
-**Tempo de Recuperação:** 2 minutos
-
-```bash
-# Ver histórico
-git log --oneline -20
-
-# Revert commit específico
-git revert <commit-id>
-git push origin main
-
-# Ou reset (cuidado com força)
-git reset --hard <commit-id>
-git push --force-with-lease origin main
-```
-
-### Cenário 3: Netlify Deploy Quebrado
-
-**Tempo de Recuperação:** 3 minutos
-
-```bash
-# Opção A: Trigger rebuild no dashboard
-# Ir em app.netlify.com → seu site → Deploys → Trigger deploy
-
-# Opção B: Push corrigido
-git push origin main
-# Netlify rebuilda automaticamente em 1-2 min
-
-# Ver logs de erro
-# app.netlify.com → Deploy logs → ver erro específico
-```
-
-## 📊 Estatísticas & Visão Rápida
-
-| Métrica | Valor | Status |
-|---------|-------|--------|
-| **Luminárias Mapeadas** | 14.000+ | ✅ Ativo |
-| **Bairros Cobertos** | 35 | ✅ Completo |
-| **Usuários do Sistema** | 50+ | ✅ Crescente |
-| **Uptime** | 99.9% | ✅ Excelente |
-| **Tempo de Resposta (API)** | <200ms | ✅ Rápido |
-| **Cobertura de Testes** | 40+ tests | ✅ Automated |
-
-### Tecnologias & Versões
-
-| Stack | Versão | Status |
-|-------|--------|--------|
-| **Frontend** | HTML5 + Vanilla JS | ✅ Production |
-| **Leaflet Maps** | 1.9.4 | ✅ Latest |
-| **Supabase** | 2.x | ✅ Latest |
-| **PostgreSQL** | 14+ | ✅ LTS |
-| **Node.js** | 18+ | ✅ LTS |
-| **Netlify** | Latest | ✅ Auto-Deploy |
-
-### Desenvolvimento & DevOps
-
-| Aspecto | Descrição |
-|--------|-----------|
-| **Versioning** | Semantic Versioning (v1.0.0+) |
-| **Commits** | Conventional Commits + Automated |
-| **CI/CD** | 6 GitHub Actions workflows (E2E, Lighthouse, Security, API, Load tests) |
-| **Testing** | Playwright (12+ E2E tests) + Newman (15+ API tests) |
-| **Performance** | Lighthouse CI (p75+) + k6 load testing |
-| **Security** | Daily scans, hardcoded secret detection, OWASP ZAP |
-| **Backup** | Automático diário + manual on-demand |
-| **RLS** | Row-Level Security por role |
-| **Auditoria** | Logs de todas as alterações |
-## 📚 Documentação Adicional
-
-- **[ARCHITECTURE.md](./ARCHITECTURE.md)** — Diagramas, fluxos de dados, modelo de dados
-- **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** — FAQ e soluções para 20+ problemas comuns
-- **[supabase/README.md](./supabase/README.md)** — Guia de Supabase local, migrations, seed
-
-## 🔗 Links Úteis
-
-- **GitHub:** https://github.com/danilosfvalim/iluminacao-led-niteroi
-- **Netlify Dashboard:** https://app.netlify.com
-- **Supabase Dashboard:** https://app.supabase.com
-- **Leaflet Documentation:** https://leafletjs.com
-- **Supabase JS Client:** https://supabase.com/docs/reference/javascript
-
-## ❓ FAQ
-
-**P: Como adicionar novo usuário?**  
-R: Via Supabase Dashboard → Authentication → Users → Add user. Depois criar perfil em `profiles` com role.
-
-**P: Como mudar configuração visual (título, cor, logo)?**  
-R: Opção A (UI): Admin console no site → "Configurações"  
-   Opção B (SQL): `UPDATE site_config SET titulo='Novo Título' WHERE id=1;`
-
-**P: Como restaurar dados de um backup?**  
-R: Ver seção "Backup & Restore" acima. Execute: `./scripts/restore.sh backups/db_*.sql`
-
-**P: Posso rodar frontend e backend em máquinas diferentes?**  
-R: Sim! Frontend é SPA estática. Apenas aponte URL remota do Supabase em `index.html` (linhas 260-262).
-
-**P: Supabase local está muito lento ou travado?**  
-R: Tente: `supabase stop && supabase start --force-pull`. Se persistir, verificar espaço em disco e Docker.
-
-**P: Como debugar problemas de Row-Level Security (RLS)?**  
-R: 
-1. Supabase Dashboard → SQL Editor
-2. Verificar policies da tabela: `SELECT * FROM pg_policies WHERE tablename='v_parque_export';`
-3. Verificar role do usuário: `SELECT role FROM profiles WHERE id = auth.uid();`
-4. Testar query com `EXPLAIN ANALYZE`
-
-**P: Posso usar este código em outro município?**  
-R: Sim! Código é agnóstico ao município. Adapte: URLs Supabase, bounds do mapa (Niterói: -23.03 a -22.80 lat, -43.20 a -42.90 lng), dados de entrada.
-
-## 📝 Licença
-
-[A definir — adicionar licença do projeto]
-
-## 👥 Contribuindo
-
-Veja [CONTRIBUTING.md](./CONTRIBUTING.md) para guidelines de contribuição.
+</div>
 
 ---
 
-**Última atualização:** 2026-07-07  
-**Versão:** 1.0.0  
-**Mantido por:** [@danilosfvalim](https://github.com/danilosfvalim)
+## 🌍 A plataforma
+
+Quase toda cidade gerencia sua iluminação pública com planilhas, sistemas
+proprietários caros e **dados mortos** — um censo que envelhece no dia seguinte.
+O OpenLux propõe outro paradigma, detalhado no **[documento de visão](VISION.md)**:
+
+- **Dado vivo e versionado** — campanhas de levantamento sucessivas; cada ponto sabe a
+  idade e a proveniência do seu dado; nada é apagado, tudo é camada.
+- **Instalação, não só inventário** — índices fotométricos (aproveitamento no piso,
+  poluição luminosa) calculados a partir de atributos baratos coletados em campo.
+- **Aberto e expansível** — cidade é configuração, não código: consórcios regionais
+  multi-tenant ou instâncias soberanas, com federação de indicadores no horizonte.
+
+## 🧪 Caso de estudo — parque urbano de referência
+
+A plataforma é a generalização de um sistema **em produção** operando um parque urbano
+real, que serve de **laboratório**: cada recurso é validado com dados reais antes de
+virar plataforma. O marco está congelado e citável no DOI
+[10.5281/zenodo.21305310](https://doi.org/10.5281/zenodo.21305310).
+
+<div align="center">
+
+| 🔦 Pontos mapeados | 🏘️ Bairros | ✅ Modernizados LED | ⚡ Potência instalada | 📋 Histórico |
+|:---:|:---:|:---:|:---:|:---:|
+| **42.765** | **52** | **39%** | **~5,8 MW** | **85.000+ registros** |
+
+</div>
+
+Outras implantações: ver o **[registro de cidades](cities/README.md)**.
+
+## ✨ Funcionalidades
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### 🗺️ Mapa Inteligente
+- Clustering dinâmico por zoom (grid geohash)
+- 4 mapas-base (escuro, claro, ruas, satélite)
+- Coroplético por bairro e grid de densidade
+- 🔥 **Heat maps**: % LED, densidade e idade
+- ✏️ **Seleção por área** (polígono): contagem, densidade, % LED e export só da região (PostGIS)
+
+</td>
+<td width="50%" valign="top">
+
+### 🎯 Filtros Avançados
+- Bairro, tipo de lâmpada, potência, status
+- Faixas de % LED e watts (min/max)
+- 📅 Timeline por período de modernização
+- Saúde do ponto (verde/amarelo/vermelho)
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### ✏️ Gestão em Campo
+- Cadastro de ativos direto no mapa
+- Luminárias, postes, caixas, relés e braços
+- Edição com fila de aprovação opcional
+- 📸 Upload de foto com compressão automática
+
+</td>
+<td width="50%" valign="top">
+
+### 📊 Dados & Conformidade
+- Exportação CSV, GeoJSON e PDF
+- Catálogo de modelos com **fotometria Tier 2** (lumens, lm/W, FP, THD, IK, DPS, arquivo .IES)
+- Histórico completo de alterações por ponto
+- Auditoria de intervenções
+
+</td>
+</tr>
+</table>
+
+## 🔐 Perfis de Acesso
+
+| Papel | Visualizar | Criar/Editar pontos | Excluir | Administração |
+|-------|:---:|:---:|:---:|:---:|
+| 👁️ `leitura` | ✅ | — | — | — |
+| ✏️ `editor` | ✅ | ✅ | — | Modelos |
+| 🛡️ `admin` | ✅ | ✅ | ✅ | Usuários, branding, aprovações |
+
+> O mapa é **público** (sem login). Escrita exige autenticação + papel — validado por RLS
+> e por RPCs `SECURITY DEFINER` com verificação de papel no banco, nunca no cliente.
+
+## 🏗️ Arquitetura
+
+```mermaid
+flowchart LR
+    U(["👤 Usuário"]) --> SPA["🖥️ SPA<br/>index.html único<br/>Leaflet + JS vanilla"]
+
+    subgraph Supabase ["☁️ Supabase (por cidade ou consórcio)"]
+        DB[("🐘 PostgreSQL + PostGIS<br/>RPCs ip_* · RLS")]
+        AUTH["🔑 Auth<br/>leitura · editor · admin"]
+        STG["🗂️ Storage<br/>branding · fotos · .IES"]
+    end
+
+    SPA -- "RPC (PostgREST)" --> DB
+    SPA --> AUTH
+    SPA --> STG
+
+    GH["📦 GitHub (main)"] -- "deploy automático" --> NF["🌐 Netlify<br/>publica somente dist/"]
+    NF --> SPA
+```
+
+**Decisões de projeto:** zero build step, zero framework — um único `index.html` autocontido
+com dependências via CDN. Toda a lógica de permissão vive no banco (RLS + RPCs).
+Simplicidade que uma prefeitura pequena opera e uma universidade audita.
+
+## 📐 Fotometria de Instalação (Tier 3)
+
+> **Do inventário ao modelo de engenharia.** Além de registrar *o que* está instalado, a
+> plataforma captura **como** e **onde** — transformando o cadastro em base para análise
+> luminotécnica e **objeto de artigo científico**.
+
+Cada luminária pode ser classificada por dois parâmetros de instalação, coletados em
+**opções pré-definidas** (sem digitação livre) e convertidos em índices exibidos no painel:
+
+| Parâmetro | Captura | Alimenta |
+|---|---|---|
+| 📐 **Ângulo de apontamento** (0°–120°, nadir) | dropdown pré-classificado | Aproveitamento no piso · *uplight* |
+| 🧱 **Material do piso** (asfalto, concreto, água…) | dropdown com refletância ρ tabelada | Luminância percebida · luz refletida ao céu |
+
+A partir deles, três indicadores de primeira ordem são calculados e mostrados por ponto:
+
+<div align="center">
+
+| Indicador | Fórmula | Significado |
+|---|:---:|---|
+| **Aproveitamento no piso** | `η = max(0, cos θ)` | fração do fluxo útil no solo |
+| **Poluição luminosa** | `P = (1−η) + ρ·η·0,5` | *skyglow* direto + refletido |
+| **Luminância relativa** | `L = η·ρ` | o que o olho percebe |
+
+</div>
+
+📖 **Modelo completo, fórmulas, refletâncias e referências normativas (ABNT NBR 5101, CIE
+144/150, IESNA BUG):** [`docs/FIELD_REFERENCE_TIER3_PHOTOMETRY.md`](docs/FIELD_REFERENCE_TIER3_PHOTOMETRY.md)
+
+## 🏙️ Implante na sua cidade
+
+O OpenLux é feito para ser replicado: backend gratuito/baixo custo (Supabase),
+hospedagem estática, base de pontos importada de censo/KML ou cadastrada em campo.
+A implantação hoje é manual (~1 dia); o roadmap a leva a ~1 hora.
+
+➡️ **[Guia: implante o OpenLux na sua cidade](docs/DEPLOY_YOUR_CITY.md)** ·
+[registro de cidades](cities/README.md) · [governança](GOVERNANCE.md)
+
+## 🚀 Rodando localmente (instância de referência)
+
+### Pré-requisitos
+
+- Qualquer servidor HTTP estático (ou só abrir o arquivo no navegador)
+- Node.js 18+ apenas para rodar os testes
+
+```bash
+# 1. Clone o repositório
+git clone https://github.com/DaniloSFValim/openlux.git
+cd openlux
+
+# 2. Sirva o index.html
+npx http-server .
+# → http://localhost:8080
+```
+
+> 💡 O app aponta para o Supabase de produção de Niterói via chave *publishable*
+> (pública por design). Para um backend próprio, veja
+> [`supabase/README.md`](supabase/README.md) e [`.env.example`](.env.example).
+
+### Rodando os testes
+
+```bash
+npm install
+npx playwright test        # E2E (26 testes)
+```
+
+## 🧪 Qualidade & CI/CD
+
+| Workflow | O que faz | Quando roda |
+|----------|-----------|-------------|
+| ⚙️ **CI** | Validação de HTML e migrations | push / PR |
+| 🎭 **E2E Tests** | 26 testes Playwright contra o deploy preview | PR |
+| 🔌 **API Tests** | 9 requisições Newman/Postman contra os RPCs | PR |
+| 🔦 **Lighthouse CI** | Auditoria de performance | PR |
+| 🛡️ **Security Scan** | npm audit + análise estática | push / PR |
+| 💾 **Backup** | Dump diário do banco | cron 02:00 UTC |
+
+## 🗄️ Banco de Dados
+
+O schema é versionado em [`supabase/migrations/`](supabase/migrations/) — **leia o
+[README de migrations](supabase/migrations/README.md)** antes de qualquer mudança:
+o banco de produção é a fonte de verdade e *merge de PR não aplica migration*.
+
+<details>
+<summary><b>📂 Estrutura do projeto</b></summary>
+
+```
+openlux/
+├── index.html                  # 🎯 A aplicação inteira (SPA autocontida)
+├── netlify.toml                # Deploy: publica somente dist/index.html
+├── VISION.md                   # 🌍 Visão e roadmap da plataforma
+├── GOVERNANCE.md               # Como o projeto decide
+├── cities/                     # Registro público de implantações
+├── supabase/
+│   ├── migrations/             # Schema versionado (espelho do banco) + README
+│   └── migrations_archive/     # Migrations legadas (NÃO executar)
+├── tests/                      # E2E Playwright
+├── scripts/                    # Backup & restore
+├── docs/                       # Guias e referências (deploy, Tier 2/3, PI)
+├── paper/                      # 📄 Artigo científico (PT/EN), dados e figuras
+├── .github/workflows/          # 7 pipelines de CI/CD
+├── ARCHITECTURE.md             # Arquitetura detalhada
+├── DEPLOYMENT_GUIDE.md         # Guia de deploy passo a passo
+├── TROUBLESHOOTING.md          # Soluções para problemas comuns
+└── CHANGELOG.md                # Histórico de versões
+```
+
+</details>
+
+## 🗺️ Roadmap
+
+O roadmap completo, por fases, vive na **[visão](VISION.md#6-roadmap-por-fases)**. Resumo:
+
+- [x] **Fase −1 · Laboratório** — sistema de Niterói completo em produção (v1.3.0, DOI)
+- [x] **Fase 0 · Identidade** — visão, governança, registro de cidades (OpenLux)
+- [x] **Fase 1 · Desacoplar** — cidade vira configuração (`config/cities/` + bloco `CITY`)
+- [x] **Fase 2 · Recenseamento** — campanhas versionadas, estado herdado/verificado, filtro de campo no mapa
+- [ ] **Fase 3 · Multi-cidade** — RLS por município, onboarding "nova cidade em 1 hora"
+- [ ] **Fase 4 · Região** — painel agregado multi-cidade, PWA offline para campo
+- [ ] **Fase 5 · Comunidade** — federação de instâncias, datasets abertos
+
+Veja as [issues abertas](https://github.com/DaniloSFValim/openlux/issues) para a lista completa.
+
+## 🤝 Contribuindo
+
+Contribuições são bem-vindas! Leia a [governança](GOVERNANCE.md), o
+[guia de contribuição](CONTRIBUTING.md) e o [código de conduta](CODE_OF_CONDUCT.md). Em resumo:
+
+1. Faça um fork e crie sua branch: `git checkout -b feature/minha-feature`
+2. Commit seguindo [Conventional Commits](https://www.conventionalcommits.org): `feat: adicionar X`
+3. Abra um PR — os templates de [bug](.github/ISSUE_TEMPLATE/bug.md) e
+   [feature](.github/ISSUE_TEMPLATE/feature.md) ajudam a padronizar
+
+Vulnerabilidades de segurança: siga a [política de segurança](SECURITY.md) — **não** abra issue pública.
+
+## 📚 Documentação
+
+| Documento | Conteúdo |
+|-----------|----------|
+| [VISION.md](VISION.md) | 🌍 A visão da plataforma: tese, modelo de expansão, fases |
+| [GOVERNANCE.md](GOVERNANCE.md) | Como o projeto decide; como cidades aderem |
+| [docs/DEPLOY_YOUR_CITY.md](docs/DEPLOY_YOUR_CITY.md) | 🏙️ Implante o OpenLux na sua cidade |
+| [cities/README.md](cities/README.md) | Registro público de implantações |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Diagramas, fluxos e modelo de dados |
+| [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) | Deploy do zero (Netlify + Supabase) |
+| [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | FAQ e diagnóstico de problemas |
+| [APPROVAL_WORKFLOW.md](APPROVAL_WORKFLOW.md) | Fila de aprovação de alterações |
+| [docs/FIELD_REFERENCE_TIER2.md](docs/FIELD_REFERENCE_TIER2.md) | Campos de fotometria e conformidade do modelo (Tier 2) |
+| [docs/FIELD_REFERENCE_TIER3_PHOTOMETRY.md](docs/FIELD_REFERENCE_TIER3_PHOTOMETRY.md) | 📐 Fotometria de instalação: ângulo, material do piso e índices de poluição luminosa (Tier 3) |
+| [paper/](paper/) | 📄 Rascunho de artigo científico (PT + EN), dados e figuras reprodutíveis |
+| [docs/INTELLECTUAL_PROPERTY.md](docs/INTELLECTUAL_PROPERTY.md) | 🔒 Propriedade intelectual: DOI Zenodo, registro INPI, como citar |
+| [CHANGELOG.md](CHANGELOG.md) | Histórico de versões |
+
+## 📝 Como citar
+
+**Autor:** Danilo Valim — ORCID [`0009-0009-7250-6151`](https://orcid.org/0009-0009-7250-6151)
+· **DOI:** [`10.5281/zenodo.21305310`](https://doi.org/10.5281/zenodo.21305310)
+
+Se você usar este software ou o método de índices fotométricos, cite:
+
+> Valim, D. (2026). *Iluminação LED Niterói — sistema georreferenciado de gestão do
+> parque de iluminação pública com índices fotométricos de instalação* (v1.3.0)
+> [Software]. Zenodo. https://doi.org/10.5281/zenodo.21305310
+
+O GitHub também gera a citação a partir do [`CITATION.cff`](CITATION.cff) (botão
+*"Cite this repository"*, com o iD do ORCID e o DOI). O marco v1.3.0 (Niterói)
+permanece o registro citável até o release `v2.0.0` da plataforma.
+
+## ⚠️ Limitações Conhecidas
+
+| Limitação | Contexto | Roadmap |
+|-----------|----------|---------|
+| **Implantação manual** | Setup leva ~1 dia (leitura de dados, schema, config) | Fase 3: onboarding guiado (~1 hora) |
+| **Single-tenant por projeto** | Cada cidade = projeto Supabase separado | Fase 3: multi-tenant com RLS |
+| **Export max 4.000 pontos** | Limite por performance/memória no PDF | Chunk export ou server-side rendering (Fase 4) |
+| **Sem offline para campo** | Edições perdem-se se desconectar | Fase 4: PWA com queue offline + sync |
+| **Fotometria .IES sem visualizador** | .IES uploadado mas não parseado | Fase 3.1: parser + curvas polares interativas |
+| **Sem imagens em ponto** | Campo foto comentado; apenas modelo tem .IES | Fase 4: galeria por ponto + compressão automática |
+| **API interna apenas** | RPC functions não têm versionamento público | Fase 5: API externa com SLA |
+| **Sem notificações em tempo real** | Edições de outros usuários require refresh | Futuro: WebSocket + Supabase realtime |
+
+**Nota:** Limitações são **por design** (MVP mindset) e roadmapped. Antes de reportar como bug, verificar esta tabela.
+
+## 📄 Licença
+
+Código sob licença MIT — veja [`LICENSE`](LICENSE). **Os dados de cada implantação
+pertencem ao respectivo município** ([governança](GOVERNANCE.md)).
+
+---
+
+<div align="center">
+
+**OpenLux** · concebido e mantido por [Danilo Valim](https://github.com/DaniloSFValim)
+
+Nascido em Niterói/RJ · feito para qualquer cidade
+
+Feito com 💛 para iluminar melhor — com menos poluição luminosa
+
+⭐ Se este projeto te ajudou, deixe uma estrela!
+
+</div>

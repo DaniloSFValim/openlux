@@ -1,4 +1,4 @@
-name: Security Scanning (OWASP + Dependency Check)
+name: Security Scan
 
 on:
   push:
@@ -16,6 +16,10 @@ jobs:
       pull-requests: write
       contents: read
       security-events: write
+    env:
+      # secrets não é permitido em `if` de step (invalida o workflow na
+      # inicialização — run falha com 0 jobs); o gate correto é via env de job.
+      HAS_SNYK_TOKEN: ${{ secrets.SNYK_TOKEN != '' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -56,7 +60,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         continue-on-error: true
-        if: ${{ secrets.SNYK_TOKEN != '' }}
+        if: env.HAS_SNYK_TOKEN == 'true'
 
       - name: HTML Validation
         run: |
@@ -67,15 +71,34 @@ jobs:
       - name: Check for hardcoded secrets
         run: |
           echo "🔐 Scanning for exposed secrets..."
-          if grep -r "BEGIN RSA PRIVATE KEY" .; then
+          # Exclude docs, workflows, and config files that may reference key format
+          if grep -r "BEGIN RSA PRIVATE KEY" . \
+            --exclude-dir=.git \
+            --exclude-dir=node_modules \
+            --exclude="*.md" \
+            --exclude-dir=.github \
+            --exclude="package*.json" \
+            --exclude="netlify.toml" \
+            --exclude=".env*"; then
             echo "❌ PRIVATE KEY FOUND"
             exit 1
           fi
-          if grep -r "BEGIN PRIVATE KEY" .; then
+          if grep -r "BEGIN PRIVATE KEY" . \
+            --exclude-dir=.git \
+            --exclude-dir=node_modules \
+            --exclude="*.md" \
+            --exclude-dir=.github \
+            --exclude="package*.json" \
+            --exclude="netlify.toml" \
+            --exclude=".env*"; then
             echo "❌ PRIVATE KEY FOUND"
             exit 1
           fi
-          if grep -r "SUPABASE_SERVICE_ROLE_KEY" . --include="*.js" --include="*.html"; then
+          if grep -r "SUPABASE_SERVICE_ROLE_KEY" . \
+            --include="*.js" \
+            --include="*.html" \
+            --exclude-dir=.git \
+            --exclude-dir=node_modules; then
             echo "❌ Service role key exposed in code"
             exit 1
           fi

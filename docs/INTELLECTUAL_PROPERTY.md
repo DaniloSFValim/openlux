@@ -1,0 +1,86 @@
+<div align="center">
+
+# 🔒 Propriedade Intelectual & Citação
+
+*Como comprovar autoria (com data) e tornar o trabalho citável academicamente*
+
+</div>
+
+> **Aviso:** este documento é uma orientação prática, **não é parecer jurídico**.
+> Para o registro formal, confirme com a Procuradoria do Município e/ou um
+> advogado especializado em propriedade intelectual — especialmente a questão de
+> **titularidade** (§4).
+
+---
+
+## 1. Camada imediata (grátis, já configurada no repositório)
+
+| Mecanismo | O que prova | Status |
+|---|---|---|
+| **Histórico Git** | Autoria + cronologia (commits datados, encadeados por hash SHA) | ✅ contínuo |
+| **`CITATION.cff`** | Metadados de citação (botão "Cite this repository" no GitHub) | ✅ neste repo |
+| **`.zenodo.json`** | Metadados para arquivamento/DOI | ✅ neste repo |
+| **Tag + GitHub Release** | Marco versionado e citável (`v1.3.0`) | ✅ publicado |
+| **DOI no Zenodo** | Arquivo permanente + citação acadêmica + **data comprovada** | ✅ [`10.5281/zenodo.21305310`](https://doi.org/10.5281/zenodo.21305310) |
+| **OpenTimestamps** | Carimbo de tempo do hash em blockchain | ⏳ opcional (§3) |
+
+## 2. Emitir o DOI no Zenodo (10 min, grátis) — recomendado
+
+O DOI é o "dois em um": **prova de autoria datada** e **citação acadêmica**.
+
+1. Acesse <https://zenodo.org> e faça login **com a conta do GitHub**.
+2. Em **Account → GitHub**, ligue o *toggle* do repositório
+   `DaniloSFValim/openlux`.
+3. No GitHub, publique um **Release** a partir da tag `v1.3.0` (ver §5).
+4. O Zenodo captura o release automaticamente e **emite um DOI**.
+5. Copie o DOI e adicione em `CITATION.cff` (campo `doi:`) e no `README`.
+
+> O Zenodo gera um DOI *versionado* (cada release) e um DOI *conceitual* (sempre
+> aponta para a versão mais recente). Cite o conceitual em textos gerais.
+
+## 3. Carimbo de tempo independente (opcional, reforça a data)
+
+```bash
+# hash do estado atual do repositório
+git rev-parse HEAD
+# ou hash de um pacote .zip do código, carimbado em blockchain:
+#   https://opentimestamps.org  (arraste o arquivo, guarde o .ots)
+```
+
+## 4. Registro formal (certificado oficial) — quando quiser blindar
+
+| Órgão | Protege | Quando vale a pena |
+|---|---|---|
+| **INPI — Registro de Programa de Computador** | O **código-fonte** (Lei 9.609/98) | Certificado datado e sigiloso; recomendável se houver interesse comercial/institucional |
+| **Biblioteca Nacional / EDA** | A **documentação e o artigo** como obra científica (Lei 9.610/98) | Para o texto do artigo e o modelo descrito |
+| **Cartório (RTD)** | "Data certa" de código ou texto | Alternativa simples e barata |
+
+**Patente:** em geral **não se aplica** — a LPI (Lei 9.279/96, art. 10) exclui
+"programas de computador em si" e métodos matemáticos. Não recomendado aqui.
+
+### ⚠️ Titularidade — confirmado como trabalho intelectual pessoal
+Este trabalho é de autoria pessoal (**Danilo Valim, pessoa física**). A Lei 9.609/98
+estabelece que o `LICENSE`, `CITATION.cff` e `.zenodo.json` atribuem legitimamente
+a autoria ao desenvolvedor. O código foi desenvolvido de forma independente utilizando
+dados públicos.
+
+## 5. Criar a tag/release do marco citável
+
+```bash
+git tag -a v1.3.0 -m "Marco citável: gestão georreferenciada + fotometria Tier 2/3 + análise por polígono"
+git push origin v1.3.0
+# depois publique o Release no GitHub a partir da tag (dispara o Zenodo)
+```
+
+## 6. Como citar
+
+> Valim, D. (2026). *OpenLux: Georeferenced public lighting asset management system
+> with first-order installation photometric indices* (v1.3.0) [Software]. Zenodo.
+> https://doi.org/10.5281/zenodo.21305310
+
+**DOI:** `10.5281/zenodo.21305310` · **ORCID:** `0009-0009-7250-6151`
+
+> 💡 O Zenodo também gera um **DOI conceitual** (version-agnostic, sempre aponta para
+> a versão mais recente). Use-o em textos gerais e reserve o DOI de versão acima para
+> citar exatamente a v1.3.0.
+

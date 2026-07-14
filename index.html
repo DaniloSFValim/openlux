@@ -3,14 +3,27 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Iluminação Pública · Niterói · SECONSER</title>
-<meta name="description" content="Cadastro georreferenciado e gestão da iluminação pública de Niterói — SECONSER. Mapa do parque de luminárias, situação da modernização LED e indicadores por bairro."/>
+<title>OpenLux — Public Lighting Asset Management System</title>
+<meta name="description" content="Open platform for georeferenced public lighting management. Interactive map, field data entry, installation photometry, spatial analysis and full auditing."/>
 <link id="favicon" rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Crect%20width%3D%2732%27%20height%3D%2732%27%20rx%3D%276%27%20fill%3D%27%230b0f14%27/%3E%3Ccircle%20cx%3D%2716%27%20cy%3D%2714%27%20r%3D%276%27%20fill%3D%27%23fbbf24%27/%3E%3Crect%20x%3D%2713%27%20y%3D%2719.5%27%20width%3D%276%27%20height%3D%274%27%20rx%3D%271%27%20fill%3D%27%239ca3af%27/%3E%3Cg%20stroke%3D%27%23fbbf24%27%20stroke-width%3D%271.6%27%20stroke-linecap%3D%27round%27%3E%3Cline%20x1%3D%2716%27%20y1%3D%272.5%27%20x2%3D%2716%27%20y2%3D%275.5%27/%3E%3Cline%20x1%3D%275.5%27%20y1%3D%2714%27%20x2%3D%272.5%27%20y2%3D%2714%27/%3E%3Cline%20x1%3D%2729.5%27%20y1%3D%2714%27%20x2%3D%2726.5%27%20y2%3D%2714%27/%3E%3Cline%20x1%3D%278%27%20y1%3D%276.5%27%20x2%3D%276%27%20y2%3D%274.5%27/%3E%3Cline%20x1%3D%2724%27%20y1%3D%276.5%27%20x2%3D%2726%27%20y2%3D%274.5%27/%3E%3C/g%3E%3C/svg%3E"/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Design System: Modern Typography (Inter) + Color Palette -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Leaflet.markercluster for client-side clustering (Fase 3: multi-cidade) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"/>
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+<!-- Heatmap.js for density visualization (Tier 3 Phase 1: improved density analysis) -->
+<script src="https://www.patrick-wied.at/static/heatmap/heatmap.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<!-- Charting Libraries: Chart.js + plugins -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 <script defer data-domain="iluminacao-niteroi.netlify.app" src="https://plausible.io/js/script.js"></script>
 
 <!-- POC: Tailwind CSS + Alpine.js + HTMX -->
@@ -19,29 +32,276 @@
 <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 
 <style>
-  html,body,#map{height:100%;margin:0}
-  body{background:#0b0f14;color:#e5e7eb;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-  .leaflet-container{background:#0b0f14}
-  .leaflet-interactive{cursor:pointer}
-  .panel{background:var(--panel);border:1px solid #1f2a37}
-  .chip{background:#111a24;border:1px solid #1f2a37}
-  .cluster-label{color:#0b0f14;font-weight:700;font-size:11px;text-align:center;line-height:1}
-  input,select,textarea{background:#0b1017;border:1px solid #24303d;color:#e5e7eb;border-radius:6px;padding:6px 8px;font-size:13px;width:100%}
-  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
-  button{cursor:pointer}
-  :root{--accent:#1d4ed8;--panel:#0f151c}
-  .btn{border:1px solid #24303d;background:#111a24;border-radius:6px;padding:6px 12px;font-size:13px;color:#e5e7eb}
-  .btn:hover{border-color:var(--accent)}
-  .btn.on{border-color:var(--accent);background:#16233a}
-  .btn-accent{background:var(--accent);border-color:var(--accent);color:#fff}
-  .btn-accent:hover{filter:brightness(1.12)}
-  ::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:#24303d;border-radius:4px}
-  .badge{font-size:11px;padding:2px 8px;border-radius:999px;font-weight:600}
-  table{font-size:12.5px}th,td{padding:6px 8px;text-align:left;border-bottom:1px solid #1a232e}
-  th{color:#9ca3af;font-weight:600;position:sticky;top:0;background:#0f151c}
-  tr:hover td{background:#111a24}
-  #toast{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:2000;display:none;padding:10px 16px;border-radius:8px;font-size:13px;max-width:80vw}
-  .spin{width:12px;height:12px;border:2px solid #24303d;border-top-color:#3b82f6;border-radius:50%;display:inline-block;animation:sp .7s linear infinite}
+  /* ========== DESIGN SYSTEM: Colors + Typography ========== */
+  :root {
+    /* Primary Colors: Tech-forward gradient (blue → purple) */
+    --primary-50: #f0f9ff;
+    --primary-100: #e0f2fe;
+    --primary-500: #0ea5e9;
+    --primary-600: #0284c7;
+    --primary-700: #0369a1;
+    --primary-900: #0c2d6b;
+
+    /* Accent: Energetic cyan */
+    --accent: #06b6d4;
+    --accent-dark: #0891b2;
+
+    /* Semantic Colors */
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #3b82f6;
+
+    /* Neutral Grays (Dark mode optimized) */
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+
+    /* Dark Mode Background */
+    --bg-dark: #0f172a;
+    --bg-dark-secondary: #1e293b;
+    --bg-dark-tertiary: #334155;
+    --text-dark: #f1f5f9;
+    --text-dark-secondary: #cbd5e1;
+
+    /* Light Mode Background */
+    --bg-light: #ffffff;
+    --bg-light-secondary: #f8fafc;
+    --text-light: #1e293b;
+    --text-light-secondary: #475569;
+
+    /* Current Theme (defaults to dark) */
+    --bg: var(--bg-dark);
+    --bg-secondary: var(--bg-dark-secondary);
+    --bg-tertiary: var(--bg-dark-tertiary);
+    --text: var(--text-dark);
+    --text-secondary: var(--text-dark-secondary);
+    --border: #334155;
+    --panel: var(--bg-dark-secondary);
+  }
+
+  /* Light mode theme */
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: var(--bg-light);
+      --bg-secondary: var(--bg-light-secondary);
+      --bg-tertiary: #f1f5f9;
+      --text: var(--text-light);
+      --text-secondary: var(--text-light-secondary);
+      --border: #e2e8f0;
+      --panel: var(--bg-light);
+    }
+  }
+
+  /* ========== GLOBAL STYLES ========== */
+  * { box-sizing: border-box; }
+  html, body, #map { height: 100%; margin: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* ========== LEAFLET OVERRIDES ========== */
+  .leaflet-container { background: var(--bg); }
+  .leaflet-interactive { cursor: pointer; }
+  .leaflet-control-attribution { background: rgba(0,0,0,0.5) !important; }
+
+  /* ========== COMPONENTS ========== */
+  .panel, .chip {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .panel { padding: 12px; }
+  .chip { padding: 6px 12px; }
+
+  .cluster-label {
+    color: var(--bg);
+    font-weight: 700;
+    font-size: 11px;
+    text-align: center;
+    line-height: 1;
+  }
+
+  /* Input & Select Styling */
+  input, select, textarea {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    width: 100%;
+    transition: all 0.2s ease;
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: var(--text-secondary);
+  }
+
+  input:hover, select:hover, textarea:hover {
+    border-color: var(--accent);
+  }
+
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+  }
+
+  /* Button Styling */
+  button {
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s ease;
+  }
+
+  .btn {
+    border: 1px solid var(--border);
+    background: var(--bg-tertiary);
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .btn:hover {
+    border-color: var(--accent);
+    background: var(--bg-secondary);
+    transform: translateY(-1px);
+  }
+
+  .btn.on {
+    border-color: var(--accent);
+    background: rgba(6, 182, 212, 0.1);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .btn-accent {
+    background: linear-gradient(135deg, var(--primary-600) 0%, var(--accent) 100%);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .btn-accent:hover {
+    filter: brightness(1.15);
+    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+    transform: translateY(-2px);
+  }
+
+  /* ========== SCROLLBAR ========== */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+  }
+
+  /* ========== BADGE & TYPOGRAPHY ========== */
+  .badge {
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    display: inline-block;
+    transition: all 0.2s ease;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1.3;
+    margin: 0;
+  }
+
+  /* ========== TABLE STYLING ========== */
+  table {
+    font-size: 12.5px;
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    color: var(--text-secondary);
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    background: var(--bg-secondary);
+  }
+
+  tr:hover td {
+    background: var(--bg-tertiary);
+  }
+
+  /* ========== TOAST NOTIFICATIONS ========== */
+  #toast {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    display: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    max-width: 80vw;
+    font-weight: 500;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+
+  /* ========== LOADING SPINNER ========== */
+  .spin {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--bg-tertiary);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    display: inline-block;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
   @keyframes sp{to{transform:rotate(360deg)}}
   .lamp-ic{background:none;border:none}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
@@ -55,31 +315,160 @@
   @media (max-width:640px){
     #tblReg th:nth-child(5),#tblReg td:nth-child(5),#tblReg th:nth-child(7),#tblReg td:nth-child(7){display:none}
   }
-  /* Light theme */
-  body[data-theme="light"]{background:#f5f5f5;color:#1a1a1a}
-  body[data-theme="light"] .leaflet-container{background:#f0f0f0}
-  body[data-theme="light"] .panel{background:#ffffff;border-color:#e0e0e0}
-  body[data-theme="light"] .chip{background:#f9f9f9;border-color:#e0e0e0}
-  body[data-theme="light"] input,body[data-theme="light"] select,body[data-theme="light"] textarea{background:#ffffff;border-color:#d0d0d0;color:#1a1a1a}
-  body[data-theme="light"] input:focus,body[data-theme="light"] select:focus,body[data-theme="light"] textarea:focus{border-color:#1d4ed8}
-  body[data-theme="light"] .btn{border-color:#d0d0d0;background:#f5f5f5;color:#1a1a1a}
-  body[data-theme="light"] .btn:hover{border-color:#1d4ed8;background:#e8e8e8}
-  body[data-theme="light"] table th{background:#f5f5f5;color:#1a1a1a}
-  body[data-theme="light"] table tr:hover td{background:#f9f9f9}
-  body[data-theme="light"] #toast{background:#f0f0f0;border-color:#ddd}
+
+  /* ========== FASE 4: ANIMATIONS & POLISH ========== */
+  /* Smooth scroll behavior */
+  html { scroll-behavior: smooth; }
+
+  /* Modal fade-in animation */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  /* Apply animations to modals */
+  div[id*="Modal"] { animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  div[id*="Modal"][style*="display: none"] { animation: none; }
+
+  /* Panel animations */
+  div[role="complementary"] {
+    animation: slideInRight 0.3s ease;
+  }
+
+  /* Button micro-interactions */
+  .btn {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  .btn:active::after {
+    width: 300px;
+    height: 300px;
+  }
+
+  /* Card hover scale */
+  .chip:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.2);
+  }
+
+  /* Table row hover with smooth background */
+  table tbody tr {
+    transition: background-color 0.2s ease;
+  }
+
+  table tbody tr:hover {
+    background-color: rgba(6, 182, 212, 0.05);
+  }
+
+  /* Toast animation - fade in and out */
+  #toast {
+    animation: slideUp 0.3s ease;
+  }
+
+  /* Spinner pulse effect */
+  .spin {
+    animation: spin 0.8s linear infinite;
+    filter: drop-shadow(0 0 3px rgba(6, 182, 212, 0.5));
+  }
+
+  /* Loading state pulsing */
+  .pulsing {
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  /* Chart fade-in */
+  canvas {
+    animation: fadeIn 0.5s ease;
+  }
+
+  /* KPI card entrance animation */
+  #kpiSparklines > div {
+    animation: slideDown 0.4s ease-out;
+    animation-fill-mode: both;
+  }
+
+  #kpiSparklines > div:nth-child(1) { animation-delay: 0.05s; }
+  #kpiSparklines > div:nth-child(2) { animation-delay: 0.1s; }
+  #kpiSparklines > div:nth-child(3) { animation-delay: 0.15s; }
+  #kpiSparklines > div:nth-child(4) { animation-delay: 0.2s; }
+
+  /* Input focus glow */
+  input:focus, select:focus, textarea:focus {
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
+  }
+
+  /* Legend smooth transition */
+  #legend, #densCtl, #timelineCtl, #advancedFiltersCtl, #detail, #stats, #poligonoPanel, #modeloModal, #tableModal, #chartsModal {
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+  }
+
+  /* Hidden state for smooth fade */
+  .hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Visible state */
+  [style*="display: block"]:not(.hidden),
+  [style*="display: block"] { opacity: 1; }
+
+  /* ========== DATA-THEME OVERRIDES (legacy support) ========== */
+  body[data-theme="light"] {
+    --bg: var(--bg-light);
+    --bg-secondary: var(--bg-light-secondary);
+    --bg-tertiary: #f1f5f9;
+    --text: var(--text-light);
+    --text-secondary: var(--text-light-secondary);
+    --border: #e2e8f0;
+    --panel: var(--bg-light);
+  }
 </style>
 </head>
 <body>
 <div id="map" role="main" aria-label="Mapa de iluminação pública de Niterói"></div>
-<div id="splash" class="fixed inset-0 z-[3000] bg-slate-950 flex flex-col items-center justify-center gap-2 transition-opacity duration-500">
+<div id="splash" class="fixed inset-0 z-[3000] flex flex-col items-center justify-center gap-3 transition-opacity duration-500" style="background: linear-gradient(135deg, var(--bg-dark) 0%, var(--primary-900) 100%);">
   <img id="splashLogo" alt="" class="h-14 hidden mb-2"/>
-  <div id="splashTitle" style="font-size:23px;font-weight:700;color:#e5e7eb;letter-spacing:.3px">Iluminação Pública · Niterói</div>
-  <div style="font-size:13px;color:#9ca3af">SECONSER · Diretoria de Iluminação Pública</div>
-  <div style="font-size:12px;color:#6b7280;margin-top:16px">Desenvolvido por <span style="color:#cbd5e1">Danilo Valim</span></div>
-  <div style="font-size:11px;color:#5f6b78">v1.1</div>
-  <button class="btn" id="splashSkip" style="margin-top:16px">Entrar</button>
+  <div id="splashTitle" style="font-size:32px;font-weight:800;letter-spacing:-.5px;background:linear-gradient(135deg,var(--primary-500),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">OpenLux</div>
+  <div style="font-size:14px;color:var(--text-secondary);font-weight:500">Public Lighting Asset Management</div>
+  <div style="font-size:12px;color:var(--text-secondary);margin-top:16px">Desenvolvido por <span style="color:var(--accent);font-weight:600">Danilo Valim</span></div>
+  <div style="font-size:11px;color:var(--text-secondary)">v1.1 • 2026</div>
+  <button class="btn-accent" id="splashSkip" style="margin-top:24px;padding:10px 32px;font-weight:600">Entrar →</button>
 </div>
-<div id="footerBand" role="contentinfo" style="position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:800;max-width:92vw;background:rgba(15,21,28,0.86);border:1px solid #1f2a37;border-radius:8px;padding:5px 14px;font-size:11px;color:#9ca3af;text-align:center;pointer-events:none">SECONSER · Diretoria de Iluminação Pública · Prefeitura de Niterói · Desenvolvido por <span style="color:#cbd5e1">Danilo Valim</span> · v1.1</div>
+<div id="footerBand" role="contentinfo" style="position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:800;max-width:92vw;background:rgba(15,23,42,0.92);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:11px;color:var(--text-secondary);text-align:center;pointer-events:none;font-weight:500">OpenLux · <span style="color:var(--accent)">Danilo Valim</span> · v1.1</div>
 
 <!-- TOP BAR - Modernized with Tailwind + Alpine -->
 <div x-data="{ showFilters: false, showExport: false, showVis: false }" class="fixed top-3 left-3 right-3 z-[1000] bg-slate-900/95 backdrop-blur border border-slate-700 rounded-xl shadow-xl p-3 flex items-center gap-3 flex-wrap" role="banner" aria-label="Barra principal">
@@ -162,27 +551,16 @@
       </div>
       <div>
         <label class="block text-xs font-medium text-gray-400 mb-1.5">📋 Fila de auditoria</label>
-        <select id="fFila" class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"><option value="">— nenhuma —</option><option value="revisao">Marcados p/ revisão</option><option value="suspeito">LED suspeito (&gt;400 W)</option><option value="mod_seconser">Origem: SECONSER</option><option value="mod_censo">Origem: censo ENEL</option><option value="mod_campo">Origem: campo</option></select>
+        <select id="fFila" class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"><option value="">— nenhuma —</option><option value="nao_verificado">🧭 Não verificados (recenseamento)</option><option value="revisao">Marcados p/ revisão</option><option value="suspeito">LED suspeito (&gt;400 W)</option><option value="mod_seconser">Origem: administrativo</option><option value="mod_censo">Origem: censo ENEL</option><option value="mod_campo">Origem: campo</option></select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">🏥 Status de Saúde</label>
+        <select id="fSaude" class="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"><option value="">Qualquer</option><option value="verde">🟢 Bom</option><option value="amarelo">🟡 Manutenção</option><option value="vermelho">🔴 Crítico</option><option value="cinza">⚫ Não mapeado</option></select>
       </div>
       <button id="fLimpar" class="w-full px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-medium transition-colors">Limpar filtros</button>
     </div>
   </div>
 
-  <!-- EXPORT -->
-  <div class="relative">
-    <button @click="showExport = !showExport" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 hover:border-blue-500 rounded-lg text-sm font-medium transition-colors" id="btnExport">📥 Exportar</button>
-    <div x-show="showExport" @click.away="showExport = false" class="absolute top-10 right-0 w-52 bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-2 flex flex-col gap-1.5 z-[1001]" id="exportPop" style="display:none">
-      <div class="px-2 py-1 text-xs text-gray-400">Conforme filtros ativos</div>
-      <button class="btn-export px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" data-exp="csv">📊 Dados (CSV)</button>
-      <button class="btn-export px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" data-exp="geojson">🗺️ GeoJSON (GIS)</button>
-      <button class="btn-export px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" data-exp="bairros">📈 Passivo/bairro</button>
-      <button class="btn-export px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" data-exp="serie">📉 Série de métricas</button>
-      <button class="btn-export px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" data-exp="grade">🔲 Grade de densidade</button>
-      <button class="btn-export px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" data-exp="png">🖼️ Mapa (PNG)</button>
-      <button class="btn-export px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" data-exp="pdf">📄 Relatório (PDF)</button>
-      <button class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors border-t border-slate-700 mt-1 pt-1.5" id="btnExportCustom">⚙️ Personalizar colunas...</button>
-    </div>
-  </div>
 
   <!-- VISUALIZE -->
   <div class="relative">
@@ -190,13 +568,17 @@
     <div x-show="showVis" @click.away="showVis = false" class="absolute top-10 right-0 w-48 bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-2 flex flex-col gap-1.5 z-[1001]" id="visPop" style="display:none">
       <button id="btnChoro" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Colorir bairros por % LED">🎨 Coroplético</button>
       <button id="btnDens" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Grade 250 m de densidade">📊 Densidade</button>
+      <button id="btnTimeline" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Filtrar dados por período de intervalo">📅 Timeline</button>
       <button id="btnTabela" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors">📋 Tabela</button>
       <button id="btnStats" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors">📈 Indicadores</button>
+      <button id="btnCharts" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Série temporal e KPIs avançados" onclick="window._showCharts()">📈 Gráficos Avançados</button>
+      <button id="btnAdvancedFilters" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Filtros avançados por múltiplos critérios">🎯 Filtros Avançados</button>
     </div>
   </div>
 
   <!-- ACTION BUTTONS -->
   <div class="flex gap-2 items-center ml-auto">
+    <button id="btnArea" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-sky-500/50 text-sky-300 rounded-lg text-sm font-medium transition-colors" title="Selecionar uma área desenhando um polígono no mapa">✏️ Área</button>
     <button id="btnNovo" class="hidden px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors">+ Ponto</button>
     <button id="btnAdminConsole" class="hidden px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-red-500/50 text-red-400 rounded-lg text-sm font-medium transition-colors">⚙️ Admin</button>
     <button id="btnLogin" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">🔑 Entrar</button>
@@ -214,8 +596,60 @@
 
 <div id="densCtl" role="complementary" aria-label="Controle da grade de densidade" class="absolute bottom-3.5 left-2.5 z-[1000] bg-slate-800/95 border border-slate-700 rounded-xl p-2.5 text-xs max-w-xs hidden backdrop-blur"></div>
 
+<div id="drawCtl" class="absolute top-16 left-1/2 -translate-x-1/2 z-[1100] bg-slate-900/95 border border-sky-600 rounded-xl px-4 py-2.5 text-xs backdrop-blur hidden">
+  <div class="text-sky-300 font-semibold mb-1">✏️ Selecionando área</div>
+  <div class="text-slate-300 mb-2">Clique no mapa para adicionar vértices · duplo-clique ou <b>Concluir</b> para fechar (mín. 3).</div>
+  <div class="flex gap-2 items-center">
+    <button id="drawDone" class="px-3 py-1 bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-medium transition-colors">Concluir</button>
+    <button id="drawCancel" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg transition-colors">Cancelar</button>
+    <span id="drawCount" class="text-slate-400">0 vértices</span>
+  </div>
+</div>
+<div id="poligonoPanel" role="complementary" aria-label="Estatísticas da área selecionada" class="absolute top-16 left-2.5 w-80 z-[1000] bg-slate-800/95 border border-sky-700 rounded-xl p-3 hidden max-h-[calc(100%-90px)] overflow-auto backdrop-blur"></div>
 <div id="detail" role="complementary" aria-label="Detalhe do ativo" class="absolute top-16 right-2.5 w-80 z-[1000] bg-slate-800/95 border border-slate-700 rounded-xl p-3 hidden max-h-[calc(100%-90px)] overflow-auto backdrop-blur"></div>
 <div id="stats" role="complementary" aria-label="Indicadores" class="absolute top-16 left-2.5 w-96 z-[1000] bg-slate-800/95 border border-slate-700 rounded-xl p-3 hidden max-h-[calc(100%-90px)] overflow-auto backdrop-blur"></div>
+
+<div id="timelineCtl" role="complementary" aria-label="Timeline de dados" class="absolute bottom-3.5 left-2.5 z-[1000] bg-slate-800/95 border border-slate-700 rounded-xl p-3 text-xs max-w-xs hidden backdrop-blur">
+  <div class="font-medium text-slate-200 mb-2">📅 Timeline Interativa</div>
+  <div class="mb-2">
+    <label class="text-xs text-slate-400 block mb-1">Período:</label>
+    <input id="timelineStart" type="date" class="w-full px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs mb-1"/>
+    <input id="timelineEnd" type="date" class="w-full px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs"/>
+  </div>
+  <div class="flex gap-2">
+    <button id="timelineReset" class="px-2 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs w-full">Reset</button>
+    <button id="timelineApply" class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs w-full">Aplicar</button>
+  </div>
+</div>
+
+<div id="advancedFiltersCtl" role="complementary" aria-label="Filtros avançados" class="absolute bottom-3.5 left-2.5 z-[1000] bg-slate-800/95 border border-slate-700 rounded-xl p-3 text-xs max-w-sm hidden backdrop-blur max-h-[calc(100%-120px)] overflow-auto">
+  <div class="font-medium text-slate-200 mb-2">🎯 Filtros Avançados</div>
+  <div class="space-y-2">
+    <div>
+      <label class="text-xs text-slate-400 block mb-1">LED %:</label>
+      <input id="filterLedMin" type="number" min="0" max="100" placeholder="Min" class="w-full px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs mb-1"/>
+      <input id="filterLedMax" type="number" min="0" max="100" placeholder="Max" class="w-full px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs"/>
+    </div>
+    <div>
+      <label class="text-xs text-slate-400 block mb-1">Potência (W):</label>
+      <input id="filterPowerMin" type="number" min="0" placeholder="Min" class="w-full px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs mb-1"/>
+      <input id="filterPowerMax" type="number" placeholder="Max" class="w-full px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs"/>
+    </div>
+    <div>
+      <label class="text-xs text-slate-400 block mb-1">Status:</label>
+      <select id="filterStatus" class="w-full px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs">
+        <option value="">Todos</option>
+        <option value="ok">OK</option>
+        <option value="pending">Pendente</option>
+        <option value="error">Erro</option>
+      </select>
+    </div>
+  </div>
+  <div class="flex gap-2 mt-2">
+    <button id="advancedFiltersClear" class="px-2 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs w-full">Limpar</button>
+    <button id="advancedFiltersApply" class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs w-full">Aplicar</button>
+  </div>
+</div>
 <div id="toast"></div>
 
 <div id="modeloModal" class="fixed inset-0 z-[1150] bg-black/60 flex items-center justify-center hidden">
@@ -253,6 +687,7 @@
             <th class="px-3 py-2 text-left text-xs font-semibold text-slate-300">Tipo</th>
             <th class="px-3 py-2 text-right text-xs font-semibold text-slate-300">Pot.</th>
             <th class="px-3 py-2 text-left text-xs font-semibold text-slate-300">Estado</th>
+            <th class="px-3 py-2 text-left text-xs font-semibold text-slate-300">🏥 Saúde</th>
             <th class="px-3 py-2 text-left text-xs font-semibold text-slate-300">Origem mod.</th>
             <th class="px-3 py-2 text-right text-xs font-semibold text-slate-300"></th>
           </tr>
@@ -286,7 +721,7 @@
 
       <label class="flex items-center gap-3 p-2 cursor-pointer hover:bg-slate-700/50 rounded-lg transition-colors">
         <input type="checkbox" id="expCol-codigo" class="exp-col-checkbox" value="codigo" checked/>
-        <span class="text-sm text-slate-300">Código SECONSER</span>
+        <span class="text-sm text-slate-300">Código</span>
       </label>
 
       <label class="flex items-center gap-3 p-2 cursor-pointer hover:bg-slate-700/50 rounded-lg transition-colors">
@@ -351,7 +786,7 @@
   <div class="flex items-center justify-between gap-3 px-6 py-4 border-b border-slate-700 bg-slate-800/50">
     <div class="flex-1">
       <h2 class="text-lg font-semibold text-white">Administração</h2>
-      <p class="text-xs text-slate-400 mt-0.5">Iluminação Pública · Niterói · SECONSER</p>
+      <p class="text-xs text-slate-400 mt-0.5">OpenLux — Public Lighting Management</p>
     </div>
     <button class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-100 text-sm rounded-lg border border-slate-600 transition-colors" id="acVoltar">← Voltar ao mapa</button>
   </div>
@@ -364,6 +799,7 @@
       <button @click="activeTab = 'usuarios'" :class="{ 'bg-slate-700 text-white': activeTab === 'usuarios', 'text-slate-300 hover:bg-slate-700/50': activeTab !== 'usuarios' }" class="text-left px-3 py-2 rounded-lg transition-colors text-sm font-medium acnav" data-sec="usuarios">👥 Usuários</button>
       <button @click="activeTab = 'modelos'" :class="{ 'bg-slate-700 text-white': activeTab === 'modelos', 'text-slate-300 hover:bg-slate-700/50': activeTab !== 'modelos' }" class="text-left px-3 py-2 rounded-lg transition-colors text-sm font-medium acnav" data-sec="modelos">💡 Modelos</button>
       <button @click="activeTab = 'aparencia'" :class="{ 'bg-slate-700 text-white': activeTab === 'aparencia', 'text-slate-300 hover:bg-slate-700/50': activeTab !== 'aparencia' }" class="text-left px-3 py-2 rounded-lg transition-colors text-sm font-medium acnav" data-sec="aparencia">🎨 Aparência</button>
+      <button @click="activeTab = 'campanhas'" :class="{ 'bg-slate-700 text-white': activeTab === 'campanhas', 'text-slate-300 hover:bg-slate-700/50': activeTab !== 'campanhas' }" class="text-left px-3 py-2 rounded-lg transition-colors text-sm font-medium acnav" data-sec="campanhas">🧭 Campanhas</button>
       <button @click="activeTab = 'dados'" :class="{ 'bg-slate-700 text-white': activeTab === 'dados', 'text-slate-300 hover:bg-slate-700/50': activeTab !== 'dados' }" class="text-left px-3 py-2 rounded-lg transition-colors text-sm font-medium acnav" data-sec="dados">📦 Dados</button>
     </nav>
 
@@ -372,36 +808,57 @@
       <section id="sec-visao" :style="{ display: activeTab === 'visao' ? 'block' : 'none' }" class="acsec"></section>
 
       <section id="sec-usuarios" :style="{ display: activeTab === 'usuarios' ? 'block' : 'none' }" class="acsec">
-        <h3 class="text-lg font-semibold text-white mb-5">Usuários</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <h3 class="text-lg font-semibold text-white">Usuários</h3>
+          <div id="userCount" style="background:#1f2a37;padding:4px 12px;border-radius:12px;font-size:12px;color:#9ca3af;font-weight:600">0 usuários</div>
+        </div>
 
         <!-- New User Form -->
-        <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4 mb-6 max-w-2xl">
-          <label class="block text-xs font-medium text-slate-400 mb-3">Novo operador</label>
-          <div class="flex flex-col gap-3">
-            <div class="flex gap-3 flex-wrap">
-              <input id="admEmail" type="email" placeholder="E-mail" class="flex-1 min-w-[150px] px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-              <input id="admPass" type="text" placeholder="Senha (opcional)" class="flex-1 min-w-[120px] px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-              <select id="admRole" class="flex-1 min-w-[100px] px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="leitura">Leitura</option>
-                <option value="editor">Editor</option>
-                <option value="admin">Admin</option>
-              </select>
-              <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium transition-colors btn-accent" id="admCreate">Adicionar</button>
+        <div class="bg-blue-950/20 border border-blue-900/50 rounded-lg p-4 mb-6 max-w-3xl">
+          <label style="display:flex;align-items:center;gap:8px;color:#9ca3af;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">
+            <span style="font-size:18px">➕</span>
+            Novo operador
+          </label>
+          <div style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr;gap:10px;align-items:end">
+            <div>
+              <label style="display:block;font-size:11px;color:#9ca3af;margin-bottom:4px;font-weight:600">E-mail</label>
+              <input id="admEmail" type="email" placeholder="usuario@example.com" class="w-full px-3 py-2 bg-slate-900 border border-blue-800/50 rounded-lg text-white text-sm placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"/>
+              <div id="emailError" style="font-size:10px;color:#ef4444;margin-top:2px;display:none"></div>
             </div>
+            <div>
+              <label style="display:block;font-size:11px;color:#9ca3af;margin-bottom:4px;font-weight:600">Senha (opt.)</label>
+              <input id="admPass" type="password" placeholder="•••••••" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+            </div>
+            <div>
+              <label style="display:block;font-size:11px;color:#9ca3af;margin-bottom:4px;font-weight:600">Papel</label>
+              <select id="admRole" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="leitura">👁️ Leitura</option>
+                <option value="editor">✏️ Editor</option>
+                <option value="admin">🔑 Admin</option>
+              </select>
+            </div>
+            <button class="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm rounded-lg font-semibold transition-all shadow-lg hover:shadow-blue-900/50" id="admCreate">Adicionar</button>
           </div>
+          <div id="formStatus" style="font-size:11px;color:#4ade80;margin-top:6px;display:none;font-weight:600"></div>
+        </div>
+
+        <!-- Search Bar -->
+        <div style="margin-bottom:12px">
+          <input id="userSearch" type="text" placeholder="🔍 Buscar por e-mail..." class="w-full max-w-md px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-600"/>
         </div>
 
         <!-- Users Table -->
-        <div class="max-w-2xl overflow-x-auto">
-          <table class="w-full border-collapse">
-            <thead class="bg-slate-800/50 border-b border-slate-700">
+        <div style="border-radius:12px;border:1px solid #1f2a37;overflow:hidden;max-width:100%">
+          <table class="w-full border-collapse" style="font-size:13px">
+            <thead style="background:#0f151c/70;border-bottom:1px solid #1f2a37">
               <tr>
-                <th class="px-4 py-2 text-left text-xs font-semibold text-slate-300">E-mail</th>
-                <th class="px-4 py-2 text-left text-xs font-semibold text-slate-300">Papel</th>
-                <th class="px-4 py-2 text-right text-xs font-semibold text-slate-300"></th>
+                <th class="px-4 py-3 text-left font-semibold text-slate-400">👤 E-mail</th>
+                <th class="px-4 py-3 text-left font-semibold text-slate-400">Papel</th>
+                <th class="px-4 py-3 text-center font-semibold text-slate-400">Criado</th>
+                <th class="px-4 py-3 text-right font-semibold text-slate-400">Ações</th>
               </tr>
             </thead>
-            <tbody id="admBody" class="divide-y divide-slate-700"></tbody>
+            <tbody id="admBody" style="divide-y divide-slate-800/50"></tbody>
           </table>
         </div>
       </section>
@@ -514,7 +971,7 @@
               </div>
             </div>
 
-            <!-- Row 3: IP, NBR, Technology -->
+            <!-- Row 3: IP, NBR, Technology (now select) -->
             <div class="flex gap-4 flex-wrap">
               <div class="flex-1 min-w-[110px]">
                 <label class="text-xs font-medium text-slate-400 block mb-1">Grau IP</label>
@@ -526,11 +983,20 @@
               </div>
               <div class="flex-1 min-w-[110px]">
                 <label class="text-xs font-medium text-slate-400 block mb-1">Tecnologia</label>
-                <input id="modTecnologia" placeholder="LED" value="LED" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                <select id="modTecnologia" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">—</option>
+                  <option value="LED" selected>LED</option>
+                  <option value="vapor_sodio">Vapor de Sódio</option>
+                  <option value="metalico">Metálico</option>
+                  <option value="vapor_mercurio">Vapor de Mercúrio</option>
+                  <option value="fluorescente">Fluorescente</option>
+                  <option value="sem_lampada">Sem Lâmpada</option>
+                  <option value="desconhecido">Desconhecido</option>
+                </select>
               </div>
             </div>
 
-            <!-- Row 4: Luminary & Lamp Types -->
+            <!-- Row 4: Luminary & Lamp Types (lamp type now conditional) -->
             <div class="flex gap-4 flex-wrap">
               <div class="flex-1 min-w-[150px]">
                 <label class="text-xs font-medium text-slate-400 block mb-1">Tipo de luminária</label>
@@ -538,16 +1004,24 @@
                   <option value="">—</option>
                 </select>
               </div>
-              <div class="flex-1 min-w-[150px]">
+              <div id="modTipoLampRow" class="flex-1 min-w-[150px]" style="display:none">
                 <label class="text-xs font-medium text-slate-400 block mb-1">Tipo de lâmpada</label>
                 <select id="modTipoLamp" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></select>
               </div>
             </div>
 
-            <!-- Photo URL -->
+            <!-- Photo Upload with Compression -->
             <div>
-              <label class="text-xs font-medium text-slate-400 block mb-1">Foto (URL)</label>
-              <input id="modFoto" type="url" placeholder="https://…/foto.jpg (opcional)" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+              <label class="text-xs font-medium text-slate-400 block mb-1">Foto (Upload ou URL)</label>
+              <div class="flex gap-2 flex-wrap">
+                <div class="flex-1 min-w-[200px]">
+                  <input id="modFotoUpload" type="file" accept="image/*" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Upload foto (será compactada automaticamente)"/>
+                  <div id="modFotoStatus" class="text-xs text-slate-500 mt-1"></div>
+                </div>
+                <div class="flex-1 min-w-[200px]">
+                  <input id="modFoto" type="url" placeholder="ou URL: https://…/foto.jpg" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+              </div>
             </div>
 
             <!-- Description -->
@@ -556,8 +1030,88 @@
               <textarea id="modDescricao" placeholder="Aplicação, observações… (opcional)" rows="2" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
             </div>
 
+            <!-- TIER 2: Performance Section -->
+            <div class="border-t border-slate-700 pt-4 mt-4">
+              <h4 class="text-sm font-semibold text-slate-300 mb-3">Desempenho Energético (Opcional)</h4>
+              <div class="flex gap-4 flex-wrap">
+                <div class="flex-1 min-w-[110px]">
+                  <label class="text-xs font-medium text-slate-400 block mb-1">Fluxo Luminoso (lm)</label>
+                  <input id="modFluxo" type="number" min="0" placeholder="12000" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Lumens - flux total independente da potência"/>
+                </div>
+                <div class="flex-1 min-w-[110px]">
+                  <label class="text-xs font-medium text-slate-400 block mb-1">Eficácia (lm/W)</label>
+                  <input id="modEficacia" type="number" step="0.01" min="0" placeholder="80.0" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Lumens por Watt - razão de eficiência"/>
+                </div>
+                <div class="flex-1 min-w-[110px]">
+                  <label class="text-xs font-medium text-slate-400 block mb-1">Fator de Potência</label>
+                  <input id="modFP" type="number" step="0.01" min="0.90" max="1.0" placeholder="0.95" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" title="0.90-1.0 - conformidade de energia reativa"/>
+                </div>
+                <div class="flex-1 min-w-[110px]">
+                  <label class="text-xs font-medium text-slate-400 block mb-1">THD (%)</label>
+                  <input id="modTHD" type="number" step="0.1" min="0" max="100" placeholder="7" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Distorção Harmônica Total 0-100%"/>
+                </div>
+              </div>
+            </div>
+
+            <!-- TIER 2: Protection & Connectivity Section -->
+            <div class="border-t border-slate-700 pt-4 mt-4">
+              <h4 class="text-sm font-semibold text-slate-300 mb-3">Proteção & Conectividade (Opcional)</h4>
+              <div class="flex gap-4 flex-wrap">
+                <div class="flex-1 min-w-[110px]">
+                  <label class="text-xs font-medium text-slate-400 block mb-1">Grau IK</label>
+                  <select id="modGrauIK" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" title="Resistência a impacto/vandalismo">
+                    <option value="">—</option>
+                    <option value="IK08">IK08 (2J)</option>
+                    <option value="IK09">IK09 (5J)</option>
+                    <option value="IK10">IK10 (20J)</option>
+                  </select>
+                </div>
+                <div class="flex-1 min-w-[140px]">
+                  <label class="text-xs font-medium text-slate-400 block mb-1">Protetor de Surto</label>
+                  <input id="modDPS" placeholder="10kV/10kA" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Especificação DPS ex: 10kV/10kA"/>
+                </div>
+                <div class="flex-1 min-w-[140px]">
+                  <label class="text-xs font-medium text-slate-400 block mb-1">Conectividade</label>
+                  <select id="modConectividade" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" title="Tipo de tomada para célula fotoelétrica">
+                    <option value="">—</option>
+                    <option value="sem_tomada">Sem Tomada</option>
+                    <option value="ansi_3pin">ANSI 3-pin</option>
+                    <option value="ansi_7pin">ANSI 7-pin (NEMA)</option>
+                    <option value="zhaga">Zhaga</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mt-4">
+                <label class="text-xs font-medium text-slate-400 block mb-1">Arquivo Fotométrico (.IES)</label>
+                <input id="modArquivoIES" type="file" accept=".ies" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Upload arquivo .IES para importação Dialux"/>
+              </div>
+            </div>
+
+            <!-- TIER 1: Regulatory Compliance Section -->
+            <div class="border-t border-slate-700 pt-4 mt-4">
+              <h4 class="text-sm font-semibold text-slate-300 mb-3">Conformidade Regulatória (Opcional)</h4>
+              <div class="flex gap-4 flex-wrap">
+                <div class="flex-1 min-w-[150px]">
+                  <label class="text-xs font-medium text-slate-400 block mb-1">Registro INMETRO</label>
+                  <input id="modINMETRO" placeholder="ex: 01234567890" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Número de registro INMETRO do equipamento"/>
+                </div>
+                <div class="flex-1 min-w-[110px]">
+                  <label class="text-xs font-medium text-slate-400 block mb-1">Vida Útil (anos)</label>
+                  <input id="modVidaUtil" type="number" min="1" max="100" placeholder="10" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Anos de vida útil esperada do equipamento"/>
+                </div>
+                <div class="flex-1 min-w-[110px]">
+                  <label class="text-xs font-medium text-slate-400 block mb-1">Garantia (anos)</label>
+                  <input id="modGarantia" type="number" min="0" max="50" placeholder="3" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Anos de garantia do fabricante"/>
+                </div>
+                <div class="flex-1 min-w-[150px]">
+                  <label class="text-xs font-medium text-slate-400 block mb-1">Manutención Prev. (dias)</label>
+                  <input id="modManutencao" type="number" min="1" max="3650" placeholder="180" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Intervalo recomendado de manutenção preventiva em dias"/>
+                </div>
+              </div>
+            </div>
+
             <!-- Add Button -->
-            <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium transition-colors" id="modCreate">Adicionar modelo</button>
+            <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium transition-colors mt-4" id="modCreate">Adicionar modelo</button>
           </div>
         </div>
 
@@ -581,19 +1135,75 @@
         </div>
       </section>
 
-      <section id="sec-dados" :style="{ display: activeTab === 'dados' ? 'block' : 'none' }" class="acsec">
-        <h3 class="text-lg font-semibold text-white mb-5">Dados</h3>
+      <section id="sec-campanhas" :style="{ display: activeTab === 'campanhas' ? 'block' : 'none' }" class="acsec">
+        <h3 class="text-lg font-semibold text-white mb-2">🧭 Campanhas de Recenseamento</h3>
+        <p class="text-xs text-slate-400 mb-5 max-w-2xl">Com uma campanha <b>ativa</b>, toda edição em campo e o botão
+          "✓ Confirmar em campo" carimbam o ponto como <b>verificado</b>. Pontos nunca verificados são o dado
+          <b>herdado</b> (censo/base histórica) — filtráveis no mapa por "🧭 Não verificados".</p>
+        <div id="campBox" class="max-w-2xl"></div>
+      </section>
 
-        <div class="max-w-2xl space-y-4">
-          <!-- Export Card -->
-          <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
-            <label class="text-xs font-medium text-slate-400 block mb-3">Exportar — parque completo ou conforme os filtros ativos no mapa</label>
+      <section id="sec-dados" :style="{ display: activeTab === 'dados' ? 'block' : 'none' }" class="acsec">
+        <h3 class="text-lg font-semibold text-white mb-5">📤 Exportação de Dados</h3>
+
+        <div class="max-w-3xl space-y-4">
+          <!-- Export Card - Advanced Options -->
+          <div class="bg-gradient-to-r from-slate-800/50 to-slate-800/30 border border-slate-700 rounded-lg p-5">
+            <div class="mb-4">
+              <label class="text-xs font-bold text-slate-300 block mb-2 uppercase tracking-wide">📊 Escopo de Dados</label>
+              <div class="flex gap-2 flex-wrap">
+                <label class="flex items-center gap-2 px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg cursor-pointer transition-colors text-sm">
+                  <input type="radio" name="exportScope" value="all" class="w-3 h-3" checked/>
+                  <span class="text-slate-100">Todos os pontos</span>
+                </label>
+                <label class="flex items-center gap-2 px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg cursor-pointer transition-colors text-sm">
+                  <input type="radio" name="exportScope" value="filtered" class="w-3 h-3"/>
+                  <span class="text-slate-100">Conforme filtros do mapa</span>
+                </label>
+              </div>
+              <p class="text-xs text-slate-400 mt-1.5">Selecione "filtros do mapa" para exportar apenas pontos que atendem aos critérios ativos (bairro, tipo, estado, etc)</p>
+            </div>
+
+            <div class="border-t border-slate-700 my-4"></div>
+
+            <div class="mb-4">
+              <label class="text-xs font-bold text-slate-300 block mb-2 uppercase tracking-wide">📋 Formato & Tipo</label>
+              <div class="grid grid-cols-2 gap-2 mb-3">
+                <div>
+                  <p class="text-xs text-slate-400 mb-1.5">Formato</p>
+                  <select id="exportFormat" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="csv">📊 CSV (Tabular)</option>
+                    <option value="geojson">🗺️ GeoJSON (SIG)</option>
+                    <option value="pdf">📄 PDF (Relatório)</option>
+                  </select>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-400 mb-1.5">Tipo de Dados</p>
+                  <select id="exportType" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="luminárias">💡 Luminárias (completo)</option>
+                    <option value="bairros">📈 Passivo por bairro</option>
+                    <option value="série">📉 Série de métricas</option>
+                    <option value="grade">🔲 Grade de densidade (250m)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="border-t border-slate-700 my-4"></div>
+
+            <div class="mb-4">
+              <label class="text-xs font-bold text-slate-300 block mb-2 uppercase tracking-wide">🎯 Seleção de Colunas (CSV)</label>
+              <p class="text-xs text-slate-400 mb-2">Clique no botão "Personalizar colunas" para escolher quais campos incluir na exportação CSV:</p>
+              <button class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-100 text-sm rounded-lg border border-slate-600 transition-colors" id="btnExportCustomAdvanced">⚙️ Personalizar colunas...</button>
+            </div>
+
+            <div class="border-t border-slate-700 my-4"></div>
+
             <div class="flex gap-3 flex-wrap">
-              <button class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-xs rounded-lg border border-slate-600 transition-colors btn" data-exp="csv">Dados (CSV)</button>
-              <button class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-xs rounded-lg border border-slate-600 transition-colors btn" data-exp="geojson">Dados (GeoJSON)</button>
-              <button class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-xs rounded-lg border border-slate-600 transition-colors btn" data-exp="bairros">Passivo por bairro (CSV)</button>
-              <button class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-xs rounded-lg border border-slate-600 transition-colors btn" data-exp="serie">Série de métricas (CSV)</button>
-              <button class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-xs rounded-lg border border-slate-600 transition-colors btn" data-exp="grade">Grade de densidade (CSV)</button>
+              <button class="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm rounded-lg font-medium transition-all shadow-lg hover:shadow-blue-900/50" id="btnExportAdvanced">📥 Executar Exportação</button>
+              <button class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-100 text-sm rounded-lg border border-slate-600 transition-colors" id="btnExportBairros">📈 Passivo/bairro</button>
+              <button class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-100 text-sm rounded-lg border border-slate-600 transition-colors" id="btnExportSerie">📉 Série de métricas</button>
+              <button class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-100 text-sm rounded-lg border border-slate-600 transition-colors" id="btnExportGrade">🔲 Grade de densidade</button>
             </div>
           </div>
 
@@ -643,6 +1253,31 @@
   </div>
 </div>
 
+<div id="chartsModal" class="fixed inset-0 z-[1150] bg-black/60 flex items-center justify-center hidden">
+  <div class="bg-slate-800 border border-slate-700 rounded-xl w-[min(1000px,95vw)] h-[min(80vh,700px)] flex flex-col overflow-hidden shadow-2xl">
+    <!-- Header -->
+    <div class="flex gap-2 items-center px-4 py-3 border-b border-slate-700 bg-slate-700/50">
+      <h3 class="font-semibold text-white text-sm">📈 Indicadores & Série Temporal</h3>
+      <div class="flex-1"></div>
+      <button class="btn px-1.5 py-1 text-slate-300 hover:text-white text-base" onclick="window._closeCharts()">✕</button>
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 overflow-auto flex flex-col gap-4 p-4">
+      <!-- KPI Cards -->
+      <div id="kpiSparklines" class="flex gap-3 flex-wrap"></div>
+
+      <!-- Time Series Chart -->
+      <div class="flex-1 min-h-0 flex flex-col">
+        <h4 class="text-xs font-semibold text-slate-300 mb-2">Evolução Mensal</h4>
+        <div class="flex-1 relative">
+          <canvas id="chartTimeSeries"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 // Get Supabase credentials from environment or build-time injection
 // In production (Netlify): injected as window.__CONFIG__ by build process
@@ -659,18 +1294,88 @@ const sb = window.supabase.createClient(URL_SB, ANON);
 
 const state = { user:null, userRole:null, bairro:"", tipo:"", estado:"", pot:"", fila:"", layer:null, mode:"", tPage:0, tSize:50,
   bairroLayer:null, choropleth:false, choroLayer:null, choroData:null, current:null, tCache:{}, config:null,
-  densidade:false, densLayer:null, densMunLayer:null, densData:null, densMetric:'klm' };
+  densidade:false, densLayer:null, densMunLayer:null, densData:null, densMetric:'klm', densMode:'grade', heatmap:null, heatmapInstance:null,
+  markerCluster:null,
+  charts: {} }; // FASE 3: Client-side clustering; Tier 3: heatmap; Fase 2: charts (Chart.js instances)
 const TIPOS = ["led","vapor_sodio","metalico","vapor_mercurio","fluorescente","sem_lampada","desconhecido"];
 const STATUS = ["led_instalado","pendente_troca","a_verificar"];
 const TIPO_ATIVO = [['luminaria','Luminária'],['caixa_comando','Caixa de comando'],['chave_magnetica','Chave magnética'],['rele_fotoeletrico','Relé fotoelétrico'],['poste','Poste'],['braco','Braço'],['outro','Outro']];
 const TIPO_LUM = ["viaria","globo","petala","projetor","balizador","orla","ornamental","piso","outro"];
 const INTERV = [['instalacao','Instalação'],['substituicao','Substituição'],['manutencao','Manutenção'],['vistoria','Vistoria'],['remocao','Remoção']];
 function ativoLabel(t){ return (TIPO_ATIVO.find(x=>x[0]===t)||[t,t])[1]; }
+
+// ---------- Tier 3 · Fotometria de instalação (ângulo + material do piso) ----------
+// Ângulo de apontamento do facho medido a partir da vertical descendente (nadir):
+// 0° = reto para baixo (full-cutoff, ideal) · 90° = horizontal · 120° = uplight.
+// Modelo, fórmulas e referências: docs/FIELD_REFERENCE_TIER3_PHOTOMETRY.md
+const ANGULOS_INCLINACAO = [
+  [0,   '0° — Prumo · reto p/ baixo (full-cutoff)'],
+  [15,  '15° — Quase vertical'],
+  [30,  '30° — Inclinação leve'],
+  [45,  '45° — Inclinação média'],
+  [60,  '60° — Inclinação acentuada'],
+  [75,  '75° — Muito rasante'],
+  [90,  '90° — Horizontal (paralelo ao solo)'],
+  [120, '120° — Uplight (acima da horizontal)']
+];
+// Materiais de piso com refletância difusa média ρ (espelho do ref_material_piso do banco).
+// Fontes: CIE 144, CIE 30.2, ABNT NBR 5101, IESNA.
+const MATERIAIS_PISO = [
+  ['asfalto_novo',       'Asfalto novo (escuro)',       0.07],
+  ['asfalto_desgastado', 'Asfalto desgastado (claro)',  0.12],
+  ['concreto',           'Concreto / cimento',          0.30],
+  ['paralelepipedo',     'Paralelepípedo / pedra',      0.18],
+  ['terra',              'Terra batida',                0.20],
+  ['vegetacao',          'Vegetação / grama',           0.08],
+  ['areia',              'Areia',                       0.25],
+  ['agua',               "Água (espelho d'água)",       0.06]
+];
+function materialLabel(k){ return (MATERIAIS_PISO.find(m=>m[0]===k)||[k,k])[1]; }
+function materialRho(k){ const m=MATERIAIS_PISO.find(x=>x[0]===k); return m?m[2]:null; }
+// Índices de primeira ordem (proxy geométrico documentado — ver doc Tier 3).
+//  η_piso  = aproveitamento direto no piso   = max(0, cos θ)
+//  P       = poluição luminosa (proxy 0..1)  = (1-η_piso) + ρ·η_piso·f_up
+//  L_rel   = luminância relativa da superfície (percepção) = η_piso·ρ
+function fotometriaIndices(anguloDeg, materialKey){
+  if(anguloDeg==null || anguloDeg==='' || !materialKey) return null;
+  const rho = materialRho(materialKey);
+  if(rho==null) return null;
+  const th = Number(anguloDeg)*Math.PI/180;
+  const etaPiso = Math.max(0, Math.cos(th));   // fração útil incidente no piso
+  const fUp = 0.5;                             // fração da reflexão difusa que retorna ao hemisfério superior
+  const P = Math.min(1, (1-etaPiso) + rho*etaPiso*fUp);
+  const Lrel = etaPiso*rho;
+  return { etaPiso, P, Lrel, rho };
+}
+// Bloco HTML resumindo os índices (usado no painel de detalhe e no preview de edição).
+function fotoIdxHtml(anguloDeg, materialKey){
+  const r = fotometriaIndices(anguloDeg, materialKey);
+  if(!r) return '';
+  const pct = x => Math.round(x*100)+'%';
+  const cor = (v,bom) => bom ? (v>=0.66?'#4ade80':v>=0.33?'#fbbf24':'#f87171')
+                             : (v<=0.33?'#4ade80':v<=0.66?'#fbbf24':'#f87171');
+  const bar = (v,bom) => `<div style="height:5px;border-radius:3px;background:#1f2a37;overflow:hidden;margin-top:2px"><div style="height:100%;width:${pct(v)};background:${cor(v,bom)}"></div></div>`;
+  return `<div style="font-weight:600;color:#cbd5e1;margin-bottom:4px">📐 Índices fotométricos (proxy 1ª ordem)</div>
+    <div style="display:flex;justify-content:space-between"><span>Aproveitamento no piso</span><b style="color:${cor(r.etaPiso,true)}">${pct(r.etaPiso)}</b></div>${bar(r.etaPiso,true)}
+    <div style="display:flex;justify-content:space-between;margin-top:5px"><span>Poluição luminosa</span><b style="color:${cor(r.P,false)}">${pct(r.P)}</b></div>${bar(r.P,false)}
+    <div style="display:flex;justify-content:space-between;margin-top:5px"><span>Luminância relativa (percepção)</span><b>${pct(r.Lrel)}</b></div>${bar(r.Lrel,true)}
+    <div style="color:#6b7280;margin-top:5px;font-size:9.5px">ρ=${r.rho.toFixed(2)} · modelo geométrico documentado em docs/FIELD_REFERENCE_TIER3_PHOTOMETRY.md</div>`;
+}
 function intervLabel(t){ return (INTERV.find(x=>x[0]===t)||[t,t])[1]; }
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 let busy=0;
-function setBusy(b){ busy+=b?1:-1; document.getElementById('loading').style.display = busy>0?'inline':'none'; }
+function setBusy(b){
+  busy+=b?1:-1;
+  const loader = document.getElementById('loading');
+  if(busy>0) {
+    loader.style.display = 'inline';
+    loader.classList.add('pulsing');
+  } else {
+    loader.classList.remove('pulsing');
+    loader.style.display = 'none';
+  }
+}
 function toast(msg,err){ const t=document.getElementById('toast'); t.textContent=msg;
   t.style.background=err?'#3b1113':'#0d2a1a'; t.style.color=err?'#fca5a5':'#86efac';
   t.style.border='1px solid '+(err?'#7f1d1d':'#14532d'); t.style.display='block';
@@ -679,9 +1384,25 @@ async function rpc(fn,args){ setBusy(true); try{
     const {data,error}=await sb.rpc(fn,args); if(error) throw error; return data;
   }catch(e){ toast('Erro ao carregar: '+(e.message||e),true); return null; } finally{ setBusy(false); } }
 
-const map = L.map('map',{zoomControl:false,attributionControl:false,preferCanvas:true,minZoom:11,maxBoundsViscosity:1}).setView([-22.905,-43.055],12);
+// ---------- OpenLux · Configuração da cidade (Fase 1) ----------
+// Espelho documentado: config/cities/niteroi.json. Para implantar outra cidade,
+// edite este bloco (ou injete window.__CONFIG__.city no deploy) — mais nada no código.
+const CITY = Object.assign({
+  slug: 'niteroi',
+  nome: 'Niterói',
+  centro: [-22.905, -43.055],
+  zoomInicial: 12,
+  maxBounds: [[-23.03, -43.20], [-22.80, -42.90]],
+  bounds: { latMin: -23.05, latMax: -22.80, lngMin: -43.20, lngMax: -42.90 }
+}, (window.__CONFIG__ && window.__CONFIG__.city) || {});
+function dentroDaCidade(lat, lng){
+  const b = CITY.bounds;
+  return !(isNaN(lat) || isNaN(lng) || lat < b.latMin || lat > b.latMax || lng < b.lngMin || lng > b.lngMax);
+}
+
+const map = L.map('map',{zoomControl:false,attributionControl:false,preferCanvas:true,minZoom:11,maxBoundsViscosity:1}).setView(CITY.centro, CITY.zoomInicial);
 L.control.zoom({position:'bottomright'}).addTo(map); // canto inferior direito: a barra superior cobre a posição padrão
-map.setMaxBounds([[-23.03,-43.20],[-22.80,-42.90]]);
+map.setMaxBounds(CITY.maxBounds);
 state.munLayer = L.layerGroup().addTo(map);
 const bases = {
   'Escuro': L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',crossOrigin:true}),
@@ -696,6 +1417,22 @@ state.layer = L.layerGroup().addTo(map);
 const POINT_ZOOM = 16;
 function gridForZoom(z){ return Math.max(0.0015, 0.05/Math.pow(2, z-11)); }
 function colorFor(p){ if((p.tipo_ativo||'luminaria')!=='luminaria') return '#38bdf8'; if(p.modernizado_led) return '#22c55e'; if(p.tipo_lampada==='sem_lampada') return '#6b7280'; return '#f59e0b'; }
+function colorForHealth(p){
+  if((p.tipo_ativo||'luminaria')!=='luminaria') return '#38bdf8';
+  if(p.health_status==='verde') return '#10b981';
+  if(p.health_status==='amarelo') return '#f59e0b';
+  if(p.health_status==='vermelho') return '#ef4444';
+  return '#6b7280';
+}
+function healthStatusBadge(status){
+  const badges = {
+    'verde': { emoji: '🟢', label: 'Bom', color: '#10b981' },
+    'amarelo': { emoji: '🟡', label: 'Manutenção', color: '#f59e0b' },
+    'vermelho': { emoji: '🔴', label: 'Crítico', color: '#ef4444' },
+    'cinza': { emoji: '⚫', label: 'Não mapeado', color: '#6b7280' }
+  };
+  return badges[status] || badges['cinza'];
+}
 function svgLamp(color, hollow){
   const fill = hollow?'#141b24':color;
   return `<svg width="20" height="24" viewBox="0 0 20 24" xmlns="http://www.w3.org/2000/svg">`
@@ -732,13 +1469,39 @@ function filtros(){
   else if(state.estado==='pendente') p_modernizado=false;
   else if(state.estado==='sem_lampada') p_tipo='sem_lampada';
   const f=state.fila;
-  return { p_bairro:state.bairro||null, p_tipo, p_modernizado, p_pot_min: state.pot?parseInt(state.pot):null,
+
+  // Advanced filters
+  const af = state.advancedFilters || {};
+  const p_led_min = af.ledMin !== undefined ? af.ledMin : null;
+  const p_led_max = af.ledMax !== undefined ? af.ledMax : null;
+  const p_power_min = af.powerMin !== undefined ? af.powerMin : null;
+  const p_power_max = af.powerMax !== undefined ? af.powerMax : null;
+
+  // Timeline filters
+  const p_data_inicio = state.timelineFilterStart ? state.timelineFilterStart.toISOString().split('T')[0] : null;
+  const p_data_fim = state.timelineFilterEnd ? state.timelineFilterEnd.toISOString().split('T')[0] : null;
+
+  return {
+    p_bairro:state.bairro||null,
+    p_tipo,
+    p_modernizado,
+    p_pot_min: state.pot?parseInt(state.pot):null,
     p_revisao: f==='revisao'?true:null,
     p_fonte_mod: f==='mod_censo'?'censo_enel':f==='mod_seconser'?'seconser_pos_censo':f==='mod_campo'?'campo':null,
-    p_suspeito: f==='suspeito'?true:null };
+    p_suspeito: f==='suspeito'?true:null,
+    p_led_min,
+    p_led_max,
+    p_power_min,
+    p_power_max,
+    p_data_inicio,
+    p_data_fim,
+    p_health_status: state.saude||null,
+    p_nao_verificado: f==='nao_verificado'?true:null
+  };
 }
 function aplicaFila(q){ const f=state.fila;
-  if(f==='revisao') q=q.eq('flag_revisao_censo',true);
+  if(f==='nao_verificado') q=q.is('verificado_em',null);
+  else if(f==='revisao') q=q.eq('flag_revisao_censo',true);
   else if(f==='suspeito') q=q.eq('modernizado_led',true).gt('potencia_w',400);
   else if(f==='mod_censo') q=q.eq('fonte_modernizacao','censo_enel');
   else if(f==='mod_seconser') q=q.eq('fonte_modernizacao','seconser_pos_censo');
@@ -747,9 +1510,42 @@ function aplicaFila(q){ const f=state.fila;
 
 function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
 
+// Initialize markerClusterGroup for Fase 3 multi-cidade support
+function initClusterGroup(){
+  return L.markerClusterGroup({
+    maxClusterRadius: 80,
+    disableClusteringAtZoom: POINT_ZOOM, // Disable clustering at detailed zoom
+    iconCreateFunction: function(cluster){
+      const count = cluster.getChildCount();
+      let c = ' marker-cluster-';
+      if(count < 10) c += 'small';
+      else if(count < 100) c += 'medium';
+      else c += 'large';
+
+      const pct = cluster.getAllChildMarkers().reduce((sum, m)=>sum+(m.options.ledStatus ? 1:0),0)/count;
+      const color = mix(pct);
+
+      return L.divIcon({
+        html: `<div style="background-color:${color};border:2px solid #0b0f14;width:100%;height:100%;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#0b0f14;font-weight:bold;font-size:13px">${count}</div>`,
+        className: 'marker-cluster' + c,
+        iconSize: new L.Point(40, 40)
+      });
+    }
+  });
+}
+
 async function _refresh(){
-  if(state.densidade){ if(!state.densLayer) renderDensidade(); return; }
+  if(state.poligono){ return; } // área desenhada fixa o conteúdo; pan/zoom não recarrega
+  if(state.densidade){
+    if(state.densMode === 'heatmap'){
+      if(!state.heatmapInstance) renderHeatmap();
+    } else {
+      if(!state.densLayer) renderDensidade();
+    }
+    return;
+  }
   if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; document.getElementById('densCtl').style.display='none'; }
+  if(state.heatmap){ state.heatmap.style.display='none'; }
   if(state.choropleth){ renderChoropleth(); return; }
   if(state.choroLayer){ map.removeLayer(state.choroLayer); state.choroLayer=null; }
   const b = map.getBounds(), z = map.getZoom();
@@ -758,14 +1554,36 @@ async function _refresh(){
   if(z >= POINT_ZOOM){
     state.mode="pontos";
     const data = await rpc('ip_pontos_bbox', {...box, limite:4000, ...filtros()});
-    const usarIcones = (data||[]).length <= 1000;
-    (data||[]).forEach(p=>{
-      let mk;
-      if(usarIcones){ mk = L.marker([p.lat,p.lon],{icon:iconFor(p),keyboard:false}); }
-      else { const rad = z>=18?9:(z>=17?7:6);
-        mk = L.circleMarker([p.lat,p.lon],{radius:rad,weight:1,color:'#0b0f14',fillColor:colorFor(p),fillOpacity:.95,bubblingMouseEvents:false}); }
-      mk.on('click',()=>openDetail(p)).addTo(state.layer);
-    });
+
+    // FASE 3: Use client-side clustering for large datasets (50k+ points in multi-city)
+    if((data||[]).length > 500){
+      // Switch to markerClusterGroup for better performance
+      if(!state.markerCluster){ state.markerCluster = initClusterGroup(); }
+      state.markerCluster.clearLayers();
+      const usarIcones = (data||[]).length <= 1000;
+      (data||[]).forEach(p=>{
+        let mk;
+        if(usarIcones){ mk = L.marker([p.lat,p.lon],{icon:iconFor(p),keyboard:false}); }
+        else { const rad = z>=18?9:(z>=17?7:6);
+          mk = L.circleMarker([p.lat,p.lon],{radius:rad,weight:1,color:'#0b0f14',fillColor:colorForHealth(p),fillOpacity:.95,bubblingMouseEvents:false});
+          mk.options.ledStatus = p.led_instalado; // Store LED status for cluster coloring
+        }
+        mk.on('click',()=>openDetail(p));
+        state.markerCluster.addLayer(mk);
+      });
+      if(!map.hasLayer(state.markerCluster)) map.addLayer(state.markerCluster);
+    } else {
+      // Small dataset: use simple layerGroup (no clustering overhead)
+      if(state.markerCluster && map.hasLayer(state.markerCluster)) map.removeLayer(state.markerCluster);
+      const usarIcones = (data||[]).length <= 1000;
+      (data||[]).forEach(p=>{
+        let mk;
+        if(usarIcones){ mk = L.marker([p.lat,p.lon],{icon:iconFor(p),keyboard:false}); }
+        else { const rad = z>=18?9:(z>=17?7:6);
+          mk = L.circleMarker([p.lat,p.lon],{radius:rad,weight:1,color:'#0b0f14',fillColor:colorForHealth(p),fillOpacity:.95,bubblingMouseEvents:false}); }
+        mk.on('click',()=>openDetail(p)).addTo(state.layer);
+      });
+    }
     const mh=document.getElementById('modeHint');
     if(!(data||[]).length){ mh.textContent='Nenhum ponto atende aos filtros nesta região'; mh.style.color='#fbbf24'; }
     else { mh.textContent=`${data.length} pontos nesta área`; mh.style.color='#6b7280'; }
@@ -806,11 +1624,12 @@ map.on('mouseup', () => {
 
 // ---------- Novo ponto via mapa (click) ----------
 map.on('click', function(e){
+  if(state.drawing){ _addVertice(e.latlng); return; } // modo desenho de área
   if(!state.user || !podeEditar()) return;
   if(map.getZoom() < 18){ toast('Zoom mínimo necessário: 18', true); return; }
   const lat = e.latlng.lat, lng = e.latlng.lng;
-  if(lat < -23.05 || lat > -22.80 || lng < -43.20 || lng > -42.90){
-    toast('Clique dentro dos limites de Niterói', true);
+  if(!dentroDaCidade(lat, lng)){
+    toast('Clique dentro dos limites de ' + CITY.nome, true);
     return;
   }
   const d = document.getElementById('detail'); d.style.display = 'block';
@@ -836,6 +1655,11 @@ map.on('click', function(e){
         <input id="nPot" type="number" placeholder="Potência (W)"/>
         <select id="nStatus">${statusOpts}</select>
         <label style="font-size:12px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="nMod" style="width:auto"/> LED</label>
+        <div style="margin-top:2px;padding-top:6px;border-top:1px solid #1f2a37;display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.4px">📐 Fotometria da instalação (opcional)</div>
+          <label style="font-size:11px;color:#9ca3af">Ângulo de apontamento<select id="nAngulo"><option value="">— não classificado</option>${ANGULOS_INCLINACAO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
+          <label style="font-size:11px;color:#9ca3af">Material do piso<select id="nMaterial"><option value="">— não classificado</option>${MATERIAIS_PISO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
+        </div>
       </div>
       <div style="display:flex;gap:8px"><button class="btn btn-accent" style="flex:1" id="nSave">Cadastrar</button><button class="btn" onclick="document.getElementById('detail').style.display='none'">Cancelar</button></div>
     </div>`;
@@ -862,7 +1686,7 @@ map.on('click', function(e){
   })();
   document.getElementById('nSave').onclick = async () => {
     const lat2 = parseFloat(document.getElementById('nLat').value), lng2 = parseFloat(document.getElementById('nLng').value);
-    if(isNaN(lat2) || isNaN(lng2) || lat2 < -23.05 || lat2 > -22.80 || lng2 < -43.20 || lng2 > -42.90){ toast('Coordenadas fora de Niterói', true); return; }
+    if(!dentroDaCidade(lat2, lng2)){ toast('Coordenadas fora de ' + CITY.nome, true); return; }
     const ehLum = nAtivo.value === 'luminaria';
     const pot = parseInt(document.getElementById('nPot').value);
     if(ehLum && !isNaN(pot) && (pot < 0 || pot > 2000)){ toast('Potência fora da faixa (0–2000 W)', true); return; }
@@ -872,7 +1696,9 @@ map.on('click', function(e){
       p_status: ehLum ? document.getElementById('nStatus').value : 'a_verificar', p_modernizado: ehLum ? document.getElementById('nMod').checked : false,
       p_endereco: document.getElementById('nEnd').value || null, p_patrimonio: document.getElementById('nPatr').value || null, p_obs: 'cadastro via mapa',
       p_tipo_ativo: nAtivo.value, p_tipo_luminaria: ehLum ? (document.getElementById('nTipoLum').value || null) : null,
-      p_classe_nbr: ehLum ? (document.getElementById('nClasse').value || null) : null });
+      p_classe_nbr: ehLum ? (document.getElementById('nClasse').value || null) : null, p_requer_aprovacao: false,
+      p_angulo: ehLum ? (document.getElementById('nAngulo').value!==''?parseInt(document.getElementById('nAngulo').value):null) : null,
+      p_material: ehLum ? (document.getElementById('nMaterial').value || null) : null });
     setBusy(false);
     if(error){ toast('Falha ao cadastrar: ' + error.message, true); return; }
     toast('Cadastrado: ' + (data || 'ok')); d.style.display = 'none'; state.choroData = null; state.densData = null; refresh(); loadStatsChips();
@@ -897,7 +1723,9 @@ async function renderChoropleth(){
   document.getElementById('modeHint').textContent = 'Coroplético: cor = % LED do bairro';
 }
 document.getElementById('btnChoro').onclick = ()=>{
+  if(state.poligono) limparPoligono(true);
   state.choropleth=!state.choropleth;
+  document.getElementById('detail').style.display='none'; // Fechar painel de detalhes
   if(state.choropleth && state.densidade){ state.densidade=false;
     document.getElementById('btnDens').classList.remove('on');
     if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; }
@@ -965,20 +1793,303 @@ async function renderDensidade(){
 }
 function buildDensCtl(breaks,cfg){
   const c=document.getElementById('densCtl');
+  const modBtns=`<button class="btn" style="padding:3px 8px;font-size:11px" onclick="window._switchDensMode('heatmap')">🔥 Heatmap</button>
+                 <button class="btn on" style="padding:3px 8px;font-size:11px" onclick="window._switchDensMode('grade')">🔲 Grade</button>`;
   const mBtns=Object.entries(DENS_M).map(([k,v])=>
     `<button class="btn ${k===state.densMetric?'on':''}" style="padding:3px 8px;font-size:11px" onclick="window._densMetric('${k}')">${v.rot}</button>`).join('');
   const sw=cfg.ramp.map((cor,i)=>{
     const lo=i===0?null:breaks[i-1], hi=i<breaks.length?breaks[i]:null;
     const rot=lo==null?('&lt; '+fmtDens(hi)):hi==null?('≥ '+fmtDens(lo)):(fmtDens(lo)+' – '+fmtDens(hi));
     return `<div style="display:flex;align-items:center;gap:6px;margin-top:2px"><span style="width:14px;height:11px;border-radius:2px;background:${cor};display:inline-block;flex-shrink:0"></span><span>${rot}</span></div>`; }).join('');
-  c.innerHTML=`<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">${mBtns}</div>
+  c.innerHTML=`<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">${modBtns}</div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">${mBtns}</div>
     <div style="color:#9ca3af;margin-bottom:2px">${cfg.unid}${cfg.fixo?'':' · quintis'}</div>${sw}
     <div style="color:#6b7280;margin-top:5px;font-size:10.5px">Estimativa de fluxo instalado — não é medição NBR 5101</div>`;
   c.style.display='block';
 }
-window._densMetric=(m)=>{ state.densMetric=m; renderDensidade(); };
+
+// ---------- Heatmap Visualization (Tier 3 Phase 1: density analysis optimization) ----------
+async function renderHeatmap(){
+  state.layer.clearLayers();
+  if(state.choroLayer){ map.removeLayer(state.choroLayer); state.choroLayer=null; }
+  if(state.bairroLayer){ map.removeLayer(state.bairroLayer); state.bairroLayer=null; }
+  if(state.heatmapInstance && map.hasLayer(state.heatmap)){ map.removeLayer(state.heatmap); }
+
+  setBusy(true);
+  try{
+    const b = map.getBounds();
+    const box = { min_lng:b.getWest(), min_lat:b.getSouth(), max_lng:b.getEast(), max_lat:b.getNorth() };
+    const data = await rpc('ip_pontos_bbox', {...box, limite:50000, ...filtros()});
+
+    if(!data || !data.length){
+      toast('Sem dados de pontos para heatmap', true);
+      return;
+    }
+
+    // Transform points to heatmap.js format: higher value for LED points
+    const heatmapData = data.map(p => ({
+      lat: p.lat,
+      lng: p.lon,
+      value: p.led_instalado ? 100 : 30  // LED: 100, non-LED: 30 (visual weight)
+    }));
+
+    // Create heatmap container if not exists
+    let container = document.getElementById('heatmapContainer');
+    if(!container){
+      container = document.createElement('div');
+      container.id = 'heatmapContainer';
+      container.style.position = 'absolute';
+      container.style.top = '0';
+      container.style.left = '0';
+      container.style.width = '100%';
+      container.style.height = '100%';
+      container.style.zIndex = '300';
+      container.style.pointerEvents = 'none';
+      map.getContainer().appendChild(container);
+    }
+    container.style.display = 'block';
+
+    // Initialize heatmap instance if not exists
+    if(!state.heatmapInstance){
+      state.heatmapInstance = h337.create({
+        container: container,
+        radius: 60,
+        maxOpacity: 0.7,
+        minOpacity: 0.1,
+        blur: 85,
+        gradient: {
+          '.0': '#0000ff',    // Blue (low density / non-LED)
+          '.25': '#00ffff',   // Cyan
+          '.5': '#00ff00',    // Green (medium)
+          '.75': '#ffff00',   // Yellow
+          '1.0': '#ff0000'    // Red (high density / LED)
+        }
+      });
+    }
+
+    // Set heatmap data with proper max value
+    const heatmapMax = Math.max(...heatmapData.map(d=>d.value), 1);
+    state.heatmapInstance.setData({
+      max: heatmapMax,
+      min: 0,
+      data: heatmapData
+    });
+
+    // Container already added to map in previous block; heatmap.js renders into it
+    state.heatmap = document.getElementById('heatmapContainer');
+
+    // Hachura de limites municipais
+    const munData = await rpc('ip_bairros_choropleth', {});
+    if(munData){
+      const munGeoJson={type:'FeatureCollection',features:munData.features.map(f=>({type:'Feature',geometry:f.geometry,properties:f.properties}))};
+      state.densMunLayer=L.geoJSON(munGeoJson,{style:{color:'#60a5fa',weight:2,fill:false,opacity:.4},interactive:false}).addTo(map);
+    }
+
+    buildHeatmapCtl();
+    document.getElementById('modeHint').textContent='Mapa de calor · Verde=LED, Vermelho=Alta densidade (limites em azul)';
+
+  }catch(e){
+    toast('Erro ao renderizar heatmap: '+(e.message||e), true);
+  }finally{
+    setBusy(false);
+  }
+}
+
+function buildHeatmapCtl(){
+  const c=document.getElementById('densCtl');
+  const mBtns=`<button class="btn" style="padding:3px 8px;font-size:11px" onclick="window._switchDensMode('heatmap')">🔥 Heatmap</button>
+               <button class="btn on" style="padding:3px 8px;font-size:11px" onclick="window._switchDensMode('grade')">🔲 Grade</button>`;
+  c.innerHTML=`<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">${mBtns}</div>
+    <div style="color:#9ca3af;margin-bottom:2px">Azul=Baixa · Verde=Média · Vermelho=Alto</div>
+    <div style="color:#6b7280;margin-top:5px;font-size:10.5px">Heatmap de densidade com peso LED · Gradient smooth · Até 50k pontos</div>`;
+  c.style.display='block';
+}
+
+window._switchDensMode = (mode) => {
+  state.densMode = mode;
+  document.querySelectorAll('#densCtl .btn').forEach(btn=>btn.classList.remove('on'));
+  event.target.classList.add('on');
+  if(mode === 'heatmap') renderHeatmap();
+  else renderDensidade();
+};
+
+window._densMetric=(m)=>{ state.densMetric=m; if(state.densMode==='grade') renderDensidade(); };
+
+// ---------- CHARTS & DASHBOARDS (Fase 2) ----------
+async function loadTimeSeriesData(){
+  try{
+    // RPC returns JSON array from metricas_diarias: { data, pct_led, led, pendente, total }
+    const response = await rpc('ip_serie_metricas', {});
+    if(!Array.isArray(response)) return [];
+    // Map 'data' field to 'mes' for chart labels
+    return response.map(item => ({
+      mes: item.data,
+      total: item.total,
+      led: item.led,
+      pct_led: item.pct_led
+    }));
+  }catch(e){
+    console.error('Erro ao carregar série temporal:', e);
+    return [];
+  }
+}
+
+async function renderTimeSeriesChart(){
+  const container = document.getElementById('chartTimeSeries');
+  if(!container) return;
+
+  const data = await loadTimeSeriesData();
+  if(!data.length){
+    container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-secondary)">Sem dados de série temporal</div>';
+    return;
+  }
+
+  // Destroy existing chart if any
+  if(state.charts.timeSeries){
+    state.charts.timeSeries.destroy();
+  }
+
+  const ctx = container.querySelector('canvas');
+  if(!ctx) return;
+
+  const labels = data.map(d=>d.mes);
+  const totalData = data.map(d=>d.total);
+  const ledData = data.map(d=>d.led);
+  const pctLedData = data.map(d=>Math.round(d.pct_led || 0));
+
+  state.charts.timeSeries = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Total de Luminárias',
+          data: totalData,
+          borderColor: 'var(--primary-600)',
+          backgroundColor: 'rgba(2, 132, 199, 0.1)',
+          borderWidth: 2,
+          tension: 0.4,
+          fill: true,
+          yAxisID: 'y'
+        },
+        {
+          label: 'LED Instaladas',
+          data: ledData,
+          borderColor: 'var(--success)',
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          borderWidth: 2,
+          tension: 0.4,
+          fill: true,
+          yAxisID: 'y'
+        },
+        {
+          label: '% LED',
+          data: pctLedData,
+          borderColor: 'var(--accent)',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          tension: 0.4,
+          borderDash: [5, 5],
+          yAxisID: 'y1'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          display: true,
+          labels: { color: 'var(--text-secondary)', usePointStyle: true, padding: 15 }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          titleColor: 'var(--text)',
+          bodyColor: 'var(--text-secondary)',
+          borderColor: 'var(--border)',
+          borderWidth: 1
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'var(--bg-tertiary)', drawBorder: false },
+          ticks: { color: 'var(--text-secondary)' }
+        },
+        y: {
+          type: 'linear',
+          display: true,
+          position: 'left',
+          grid: { color: 'var(--bg-tertiary)' },
+          ticks: { color: 'var(--text-secondary)' },
+          title: { display: true, text: 'Quantidade', color: 'var(--text-secondary)' }
+        },
+        y1: {
+          type: 'linear',
+          display: true,
+          position: 'right',
+          grid: { drawOnChartArea: false },
+          ticks: { color: 'var(--text-secondary)' },
+          title: { display: true, text: 'Percentual (%)', color: 'var(--text-secondary)' }
+        }
+      }
+    }
+  });
+}
+
+async function renderKPISparklines(){
+  const container = document.getElementById('kpiSparklines');
+  if(!container) return;
+
+  const stats = await rpc('ip_estatisticas_gerais', {});
+  if(!stats){
+    container.innerHTML = '<div style="color:var(--text-secondary)">Carregando estatísticas...</div>';
+    return;
+  }
+
+  const kpis = [
+    { label: 'Total Luminárias', value: stats.total_luminas, unit: '', icon: '💡' },
+    { label: 'LED Instaladas', value: stats.led_total, unit: '%', icon: '⚡', highlight: true },
+    { label: 'Potência Média', value: Math.round(stats.potencia_media || 0), unit: 'W', icon: '⚙️' },
+    { label: 'Eficiência Média', value: Math.round(stats.eficacia_media || 0), unit: 'lm/W', icon: '📊' }
+  ];
+
+  container.innerHTML = kpis.map((kpi,i) => `
+    <div style="flex:1;min-width:120px;padding:12px;border-radius:8px;background:var(--bg-secondary);border:1px solid var(--border);text-align:center">
+      <div style="font-size:20px;margin-bottom:4px">${kpi.icon}</div>
+      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px">${kpi.label}</div>
+      <div style="font-size:20px;font-weight:700;color:${kpi.highlight?'var(--success)':'var(--accent)'}">${kpi.value}<span style="font-size:11px;margin-left:2px">${kpi.unit}</span></div>
+    </div>
+  `).join('');
+}
+
+window._showCharts = async () => {
+  const modal = document.getElementById('chartsModal');
+  if(!modal) return;
+  modal.style.display = 'block';
+  // Trigger animation with small delay to allow display: block to take effect
+  setTimeout(() => {
+    modal.classList.remove('hidden');
+    modal.style.opacity = '1';
+  }, 10);
+  await renderTimeSeriesChart();
+  await renderKPISparklines();
+};
+
+window._closeCharts = () => {
+  const modal = document.getElementById('chartsModal');
+  if(!modal) return;
+  modal.style.opacity = '0';
+  setTimeout(() => {
+    modal.style.display = 'none';
+    modal.classList.add('hidden');
+  }, 300);
+};
+
 document.getElementById('btnDens').onclick = ()=>{
+  if(state.poligono) limparPoligono(true);
   state.densidade=!state.densidade;
+  document.getElementById('detail').style.display='none'; // Fechar painel de detalhes
   if(state.densidade && state.choropleth){ state.choropleth=false;
     document.getElementById('btnChoro').classList.remove('on');
     if(state.choroLayer){ map.removeLayer(state.choroLayer); state.choroLayer=null; } }
@@ -988,11 +2099,218 @@ document.getElementById('btnDens').onclick = ()=>{
   if(!state.densidade){
     if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; }
     if(state.densMunLayer){ map.removeLayer(state.densMunLayer); state.densMunLayer=null; }
+    if(state.heatmap){ state.heatmap.style.display='none'; }
     document.getElementById('densCtl').style.display='none';
     renderMunicipioLimites();
+  } else {
+    // Default to heatmap on first toggle (better performance & visualization)
+    if(state.densMode === 'heatmap') renderHeatmap();
+    else renderDensidade();
   }
   refresh();
 };
+
+// ---------- Timeline Visualization ----------
+state.timeline = false;
+state.timelineFilterStart = null;
+state.timelineFilterEnd = null;
+
+document.getElementById('btnTimeline').onclick = () => {
+  state.timeline = !state.timeline;
+  document.getElementById('detail').style.display='none'; // Fechar painel de detalhes
+  document.getElementById('btnTimeline').classList.toggle('on', state.timeline);
+  document.getElementById('timelineCtl').style.display = state.timeline ? 'block' : 'none';
+
+  if(state.timeline) {
+    const now = new Date();
+    const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+    document.getElementById('timelineStart').valueAsDate = oneYearAgo;
+    document.getElementById('timelineEnd').valueAsDate = now;
+  }
+};
+
+// ---------- Seleção por polígono (área desenhada) ----------
+let _drawPts = [], _drawLayer = null, _drawVerts = null;
+function _drawCtl(show){ const c=document.getElementById('drawCtl'); if(c) c.style.display=show?'block':'none'; }
+function _updDrawCount(){ const el=document.getElementById('drawCount'); if(el) el.textContent=_drawPts.length+' vértice'+(_drawPts.length!==1?'s':''); }
+
+function iniciarDesenhoArea(){
+  if(state.drawing) return;
+  limparPoligono(true); // remove seleção anterior sem recarregar o mapa
+  if(state.choropleth) document.getElementById('btnChoro').click();
+  if(state.densidade)  document.getElementById('btnDens').click();
+  state.drawing = true; _drawPts = [];
+  _drawLayer = L.polygon([], {color:'#38bdf8',weight:2,dashArray:'6,5',fillColor:'#38bdf8',fillOpacity:0.06}).addTo(map);
+  _drawVerts = L.layerGroup().addTo(map);
+  map.doubleClickZoom.disable();
+  map.getContainer().style.cursor = 'crosshair';
+  document.getElementById('btnArea').classList.add('on');
+  _drawCtl(true); _updDrawCount();
+  const mh=document.getElementById('modeHint'); if(mh){ mh.textContent='Desenhando área…'; mh.style.color='#38bdf8'; }
+}
+function _addVertice(latlng){
+  _drawPts.push([latlng.lat, latlng.lng]);
+  if(_drawLayer) _drawLayer.setLatLngs(_drawPts);
+  if(_drawVerts) L.circleMarker(latlng,{radius:3,weight:1,color:'#0b0f14',fillColor:'#38bdf8',fillOpacity:1,interactive:false}).addTo(_drawVerts);
+  _updDrawCount();
+}
+function _encerraDesenho(){
+  state.drawing=false;
+  if(_drawVerts){ map.removeLayer(_drawVerts); _drawVerts=null; }
+  if(_drawLayer){ map.removeLayer(_drawLayer); _drawLayer=null; }
+  _drawPts=[]; map.doubleClickZoom.enable(); map.getContainer().style.cursor='';
+  _drawCtl(false);
+}
+function cancelarDesenhoArea(){
+  _encerraDesenho();
+  document.getElementById('btnArea').classList.remove('on');
+  if(!state.poligono) refresh();
+}
+function concluirDesenhoArea(){
+  if(!state.drawing) return;
+  if(_drawPts.length < 3){ toast('Desenhe ao menos 3 vértices',true); return; }
+  const pts = _drawPts.slice();
+  const ring = pts.map(p=>[+p[1].toFixed(6), +p[0].toFixed(6)]); // [lng,lat]
+  ring.push(ring[0]);                                            // fecha o anel
+  state.poligono = JSON.stringify({ type:'Polygon', coordinates:[ring] });
+  _encerraDesenho();
+  state.poligonoLayer = L.polygon(pts, {color:'#38bdf8',weight:2,fillColor:'#38bdf8',fillOpacity:0.05}).addTo(map);
+  aplicarPoligono();
+}
+async function aplicarPoligono(){
+  document.getElementById('detail').style.display='none';
+  document.getElementById('stats').style.display='none';
+  setBusy(true);
+  const [pontos, stats] = await Promise.all([
+    rpc('ip_pontos_poligono', { p_geojson: state.poligono, limite: 5000 }),
+    rpc('ip_stats_poligono',  { p_geojson: state.poligono })
+  ]);
+  setBusy(false);
+  state.poligonoPontos = pontos || [];
+  state.layer.clearLayers();
+  (pontos||[]).forEach(p=>{
+    L.circleMarker([p.lat,p.lon],{radius:7,weight:1,color:'#0b0f14',fillColor:colorForHealth(p),fillOpacity:.95,bubblingMouseEvents:false})
+      .on('click',()=>openDetail(p)).addTo(state.layer);
+  });
+  if(state.poligonoLayer){ try{ map.fitBounds(state.poligonoLayer.getBounds(),{padding:[40,40]}); }catch(e){} }
+  document.getElementById('btnArea').classList.add('on');
+  renderPoligonoPanel(stats);
+  const mh=document.getElementById('modeHint');
+  if(mh){ mh.textContent = (stats && stats.total>5000) ? `Área: ${stats.total.toLocaleString('pt-BR')} pontos (mapa mostra 5.000)` : 'Área selecionada'; mh.style.color='#38bdf8'; }
+}
+function renderPoligonoPanel(s){
+  const box=document.getElementById('poligonoPanel'); if(!box) return;
+  if(!s){ box.style.display='none'; return; }
+  const fmt=n=>(n||0).toLocaleString('pt-BR');
+  const tipoRows=Object.entries(s.por_tipo_lampada||{}).map(([k,v])=>`<div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">${esc(k)}</span><b>${fmt(v)}</b></div>`).join('');
+  const foto = (s.aproveitamento_medio!=null)
+    ? `<div style="margin-top:8px;padding-top:8px;border-top:1px solid #1f2a37">
+         <div style="color:#9ca3af;margin-bottom:3px">📐 Fotometria média (${fmt(s.classificados_foto)} classificados)</div>
+         <div style="display:flex;justify-content:space-between"><span>Aproveitamento no piso</span><b style="color:#4ade80">${Math.round(s.aproveitamento_medio*100)}%</b></div>
+         <div style="display:flex;justify-content:space-between"><span>Poluição luminosa</span><b style="color:#fbbf24">${Math.round((s.poluicao_media||0)*100)}%</b></div>
+       </div>`
+    : `<div style="margin-top:8px;color:#6b7280;font-size:10.5px">Sem pontos classificados por fotometria nesta área.</div>`;
+  const exportar = podeEditar()
+    ? `<div style="display:flex;gap:6px;margin-top:10px">
+         <button class="btn" style="flex:1;font-size:11px" onclick="exportarPoligono('csv')">⬇️ CSV da área</button>
+         <button class="btn" style="flex:1;font-size:11px" onclick="exportarPoligono('geojson')">⬇️ GeoJSON</button>
+       </div>` : '';
+  box.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <b style="font-size:13px;color:#38bdf8">🗺️ Área selecionada</b>
+      <button class="btn" style="padding:2px 8px;font-size:11px" onclick="limparPoligono()">✕ Limpar</button>
+    </div>
+    <div style="font-size:12px;display:flex;flex-direction:column;gap:3px">
+      <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Luminárias</span><b>${fmt(s.total)}</b></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Área</span><b>${s.area_km2} km²</b></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Densidade</span><b>${s.densidade_km2} /km²</b></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">LED</span><b style="color:#4ade80">${fmt(s.led)} (${s.pct_led}%)</b></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Pendentes</span><b style="color:#fbbf24">${fmt(s.pendente)}</b></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Potência instalada</span><b>${s.potencia_kw} kW</b></div>
+    </div>
+    <div style="margin-top:8px;padding-top:8px;border-top:1px solid #1f2a37;font-size:11px">
+      <div style="color:#9ca3af;margin-bottom:3px">Por tipo de lâmpada</div>${tipoRows||'<span style="color:#6b7280">—</span>'}
+    </div>
+    ${foto}
+    ${exportar}`;
+  box.style.display='block';
+}
+function limparPoligono(silencioso){
+  if(state.poligonoLayer){ map.removeLayer(state.poligonoLayer); state.poligonoLayer=null; }
+  state.poligono=null; state.poligonoPontos=null;
+  const box=document.getElementById('poligonoPanel'); if(box) box.style.display='none';
+  const ba=document.getElementById('btnArea'); if(ba) ba.classList.remove('on');
+  if(!silencioso) refresh();
+}
+async function exportarPoligono(fmt){
+  if(!state.poligono || !podeEditar()) return;
+  setBusy(true);
+  const rows = await rpc('ip_pontos_poligono', { p_geojson: state.poligono, limite: 100000 });
+  setBusy(false);
+  if(!rows || !rows.length){ toast('Nenhum ponto na área',true); return; }
+  if(fmt==='csv') baixar(`area_${stamp()}.csv`, '﻿'+toCSV(rows), 'text/csv;charset=utf-8');
+  else { const fc={type:'FeatureCollection',features:rows.filter(r=>r.lat!=null).map(r=>{ const {lat,lon,...p}=r; return {type:'Feature',geometry:{type:'Point',coordinates:[lon,lat]},properties:p}; })};
+    baixar(`area_${stamp()}.geojson`, JSON.stringify(fc), 'application/geo+json'); }
+  toast(`Área exportada: ${rows.length.toLocaleString('pt-BR')} pontos`);
+}
+document.getElementById('btnArea').onclick = ()=>{ if(state.drawing) cancelarDesenhoArea(); else if(state.poligono) limparPoligono(); else iniciarDesenhoArea(); };
+document.getElementById('drawDone').onclick = concluirDesenhoArea;
+document.getElementById('drawCancel').onclick = cancelarDesenhoArea;
+map.on('dblclick', ()=>{ if(state.drawing) concluirDesenhoArea(); });
+window.limparPoligono = limparPoligono;
+window.exportarPoligono = exportarPoligono;
+
+document.getElementById('timelineReset')?.addEventListener('click', () => {
+  state.timelineFilterStart = null;
+  state.timelineFilterEnd = null;
+  document.getElementById('timelineStart').value = '';
+  document.getElementById('timelineEnd').value = '';
+  toast('Filtro de timeline removido');
+  refresh();
+});
+
+document.getElementById('timelineApply')?.addEventListener('click', () => {
+  const start = document.getElementById('timelineStart').valueAsDate;
+  const end = document.getElementById('timelineEnd').valueAsDate;
+  if(!start || !end) { toast('Selecione ambas as datas', true); return; }
+  if(start > end) { toast('Data inicial deve ser anterior à final', true); return; }
+  state.timelineFilterStart = start;
+  state.timelineFilterEnd = end;
+  toast(`Timeline: ${start.toLocaleDateString('pt-BR')} a ${end.toLocaleDateString('pt-BR')}`);
+  refresh();
+});
+
+// ---------- Advanced Filters ----------
+state.advancedFilters = {};
+
+document.getElementById('btnAdvancedFilters').onclick = () => {
+  const showing = document.getElementById('advancedFiltersCtl').style.display !== 'none';
+  document.getElementById('advancedFiltersCtl').style.display = showing ? 'none' : 'block';
+  document.getElementById('btnAdvancedFilters').classList.toggle('on', !showing);
+};
+
+document.getElementById('advancedFiltersClear')?.addEventListener('click', () => {
+  document.getElementById('filterLedMin').value = '';
+  document.getElementById('filterLedMax').value = '';
+  document.getElementById('filterPowerMin').value = '';
+  document.getElementById('filterPowerMax').value = '';
+  document.getElementById('filterStatus').value = '';
+  state.advancedFilters = {};
+  toast('Filtros avançados removidos');
+  refresh();
+});
+
+document.getElementById('advancedFiltersApply')?.addEventListener('click', () => {
+  state.advancedFilters = {
+    ledMin: parseFloat(document.getElementById('filterLedMin').value) || 0,
+    ledMax: parseFloat(document.getElementById('filterLedMax').value) || 100,
+    powerMin: parseFloat(document.getElementById('filterPowerMin').value) || 0,
+    powerMax: parseFloat(document.getElementById('filterPowerMax').value) || Infinity,
+    status: document.getElementById('filterStatus').value || null
+  };
+  toast('Filtros avançados aplicados');
+  refresh();
+});
 
 // ---------- Realce do bairro ----------
 async function highlightBairro(name){
@@ -1022,11 +2340,13 @@ function openDetail(p){
   state.current=p;
   const d=document.getElementById('detail'); d.style.display='block';
   const badge=p.modernizado_led?`<span class="badge" style="background:#0d3d24;color:#4ade80">LED</span>`:`<span class="badge" style="background:#3d2f0d;color:#fbbf24">Pendente</span>`;
+  const healthBadge = healthStatusBadge(p.health_status);
+  const healthSpan=`<span class="badge" style="background:${healthBadge.color}33;color:${healthBadge.color};border:1px solid ${healthBadge.color}">${healthBadge.emoji} ${healthBadge.label}</span>`;
   const origem=p.fonte_modernizacao==='censo_enel'?'Censo ENEL':p.fonte_modernizacao==='seconser_pos_censo'?'SECONSER (pós-censo)':p.fonte_modernizacao==='campo'?'Campo':'—';
   const ehLum=(p.tipo_ativo||'luminaria')==='luminaria';
   d.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <b style="font-size:13px">${esc(p.codigo_seconser)||'—'}</b> ${ehLum?badge:''}</div>
+      <b style="font-size:13px">${esc(p.codigo_seconser)||'—'}</b> ${ehLum?badge+' '+healthSpan:healthSpan}</div>
     ${fld('Referência ENEL', p.numero_patrimonio)}
     ${fld('Tipo de ativo', ativoLabel(p.tipo_ativo||'luminaria'))}
     ${ehLum?fld('Tipo de luminária', p.tipo_luminaria):''}
@@ -1035,56 +2355,198 @@ function openDetail(p){
     ${ehLum?fld('Lâmpada', p.tipo_lampada):''}
     ${ehLum?fld('Potência', p.potencia_w? p.potencia_w+' W':null):''}
     ${ehLum?fld('Estado', p.status):''}
+    ${ehLum?fld('Status de Saúde', healthBadge.emoji + ' ' + healthBadge.label):''}
     ${ehLum?fld('Origem modernização', origem):''}
+    ${fld('Dado de campo', p.verificado_em ? ('✅ verificado em '+new Date(p.verificado_em).toLocaleDateString('pt-BR')) : '🕓 herdado — não verificado')}
+    ${ehLum&&p.angulo_inclinacao_graus!=null?fld('Ângulo (nadir)', p.angulo_inclinacao_graus+'°'):''}
+    ${ehLum&&p.material_piso?fld('Material do piso', materialLabel(p.material_piso)):''}
+    ${ehLum&&fotometriaIndices(p.angulo_inclinacao_graus, p.material_piso)?`<div style="font-size:10.5px;color:#9ca3af;background:#0f151c;border:1px solid #1f2a37;border-radius:6px;padding:7px;margin-top:6px">${fotoIdxHtml(p.angulo_inclinacao_graus, p.material_piso)}</div>`:''}
     ${p.flag_revisao_censo?`<div style="color:#fbbf24;font-size:11px;margin-top:4px">⚑ marcado para revisão</div>`:''}
     ${p.observacoes?`<div style="color:#9ca3af;font-size:11px;margin-top:6px">${esc(p.observacoes)}</div>`:''}
     ${state.user?`<div style="display:flex;gap:6px;margin-top:8px">
         <button class="btn" style="flex:1" onclick="window._interv('${p.id}')">Intervenções</button>
         <button class="btn" style="flex:1" onclick="window._hist('${p.id}')">Histórico</button>
       </div><div id="histBox"></div>`:''}
+    ${podeEditar()?`<button class="btn" style="width:100%;margin-top:8px;border-color:#14532d;color:#4ade80" onclick="window._confirmarPonto('${p.id}')" title="Recenseamento: confirma que os dados conferem com a realidade em campo, sem alterá-los">✓ Confirmar em campo (dados corretos)</button>`:''}
     <div style="margin-top:10px;display:flex;gap:8px">
       ${podeEditar()?`<button class="btn btn-accent" style="flex:1" onclick="window._edit()">Editar</button>`:''}
       <button class="btn" onclick="document.getElementById('detail').style.display='none'">Fechar</button></div>`;
 }
+window._confirmarPonto = async (id)=>{
+  if(!podeEditar()) return;
+  setBusy(true);
+  const {data,error} = await sb.rpc('ip_confirmar_ponto', { p_id: id });
+  setBusy(false);
+  if(error){ toast('Falha ao confirmar: '+error.message, true); return; }
+  if(data && data.error){ toast(data.error, true); return; }
+  toast('✓ Ponto verificado em campo'+(data&&data.campanha?(' — '+data.campanha):''));
+  if(state.current && state.current.id===id){ state.current.verificado_em = new Date().toISOString(); openDetail(state.current); }
+  refresh();
+};
 window._edit = function(){
   const p=state.current; if(!p) return;
   const d=document.getElementById('detail');
+
+  const initialValues = {
+    lat: p.lat??'', lng: p.lon??'', tipo: p.tipo_lampada, pot: p.potencia_w||'',
+    status: p.status, mod: p.modernizado_led, tipoLum: p.tipo_luminaria||'', classe: p.classe_nbr||'', obs: p.observacoes||'',
+    angulo: (p.angulo_inclinacao_graus??'')===''?'':String(p.angulo_inclinacao_graus), material: p.material_piso||''
+  };
+
   d.innerHTML = `
-    <b style="font-size:13px">Editar · ${esc(p.numero_patrimonio)}</b>
-    <div style="margin-top:8px;display:flex;flex-direction:column;gap:7px">
-      <div style="display:flex;gap:6px">
-        <label style="font-size:11px;color:#9ca3af;flex:1">Latitude<input id="eLat" type="number" step="0.000001" value="${p.lat??''}"/></label>
-        <label style="font-size:11px;color:#9ca3af;flex:1">Longitude<input id="eLng" type="number" step="0.000001" value="${p.lon??''}"/></label>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #1f2a37">
+      <div>
+        <b style="font-size:13px">✏️ Editar Ativo</b>
+        <div style="font-size:11px;color:#9ca3af;margin-top:2px">${esc(p.numero_patrimonio)}</div>
       </div>
-      <label style="font-size:11px;color:#9ca3af">Tipo<select id="eTipo">${TIPOS.map(t=>`<option ${t===p.tipo_lampada?'selected':''}>${t}</option>`).join('')}</select></label>
-      <label style="font-size:11px;color:#9ca3af">Potência (W)<input id="ePot" type="number" value="${p.potencia_w||''}"/></label>
-      <label style="font-size:11px;color:#9ca3af">Estado<select id="eStatus">${STATUS.map(s=>`<option ${s===p.status?'selected':''}>${s}</option>`).join('')}</select></label>
-      <label style="font-size:12px;display:flex;gap:8px;align-items:center;color:#e5e7eb"><input type="checkbox" id="eMod" ${p.modernizado_led?'checked':''} style="width:auto"/> Modernizado para LED</label>
-      <label style="font-size:11px;color:#9ca3af">Tipo de luminária<select id="eTipoLum"><option value="">—</option>${TIPO_LUM.map(t=>`<option ${t===p.tipo_luminaria?'selected':''}>${t}</option>`).join('')}</select></label>
-      <label style="font-size:11px;color:#9ca3af">Classe NBR<input id="eClasse" value="${esc(p.classe_nbr)}" placeholder="V3, P2, C4…"/></label>
-      <label style="font-size:11px;color:#9ca3af">Observações<textarea id="eObs" rows="2">${esc(p.observacoes)}</textarea></label>
-      <div style="display:flex;gap:8px"><button class="btn btn-accent" style="flex:1" id="eSave">Salvar</button><button class="btn" onclick="window._reopen()">Cancelar</button></div>
-      <button class="btn" id="eDelete" style="border-color:#ef4444;color:#f87171">🗑 Excluir ativo</button>
-    </div>`;
+      <div id="editChangedCount" style="background:#1f2a37;padding:4px 8px;border-radius:8px;font-size:11px;color:#9ca3af;font-weight:600;display:none">0 campos</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">📍 Latitude</label>
+        <input id="eLat" type="number" step="0.000001" value="${initialValues.lat}" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;transition:all 0.2s" placeholder="-22.90"/>
+        <div id="latError" style="font-size:9px;color:#ef4444;margin-top:2px;display:none"></div>
+      </div>
+      <div>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">📍 Longitude</label>
+        <input id="eLng" type="number" step="0.000001" value="${initialValues.lng}" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;transition:all 0.2s" placeholder="-43.10"/>
+        <div id="lngError" style="font-size:9px;color:#ef4444;margin-top:2px;display:none"></div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">💡 Tipo</label>
+        <select id="eTipo" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;cursor:pointer">${TIPOS.map(t=>'<option '+((t===initialValues.tipo)?'selected':'')+'>'+t+'</option>').join('')}</select>
+      </div>
+      <div>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">⚡ Potência (W)</label>
+        <input id="ePot" type="number" value="${initialValues.pot}" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px" placeholder="0-2000"/>
+        <div id="potError" style="font-size:9px;color:#ef4444;margin-top:2px;display:none"></div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">🔧 Estado</label>
+        <select id="eStatus" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;cursor:pointer">${STATUS.map(s=>'<option '+(s===initialValues.status?'selected':'')+'>'+s+'</option>').join('')}</select>
+      </div>
+      <div style="display:flex;align-items:flex-end">
+        <label style="font-size:11px;color:#e5e7eb;display:flex;gap:8px;align-items:center;cursor:pointer;padding:6px;border-radius:4px;flex:1">
+          <input type="checkbox" id="eMod" ${initialValues.mod?'checked':''} style="width:16px;height:16px;cursor:pointer;accent-color:#3b82f6"/>
+          ⚡ LED
+        </label>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">🏷️ Tipo Luminária</label>
+        <select id="eTipoLum" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;cursor:pointer"><option value="">—</option>${TIPO_LUM.map(t=>'<option '+(t===initialValues.tipoLum?'selected':'')+'>'+t+'</option>').join('')}</select>
+      </div>
+      <div>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">📋 Classe NBR</label>
+        <input id="eClasse" value="${initialValues.classe}" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px" placeholder="V3, P2…"/>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">📐 Ângulo (nadir)</label>
+        <select id="eAngulo" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;cursor:pointer"><option value="">— não classificado</option>${ANGULOS_INCLINACAO.map(([v,l])=>'<option value="'+v+'"'+(String(v)===initialValues.angulo?' selected':'')+'>'+l+'</option>').join('')}</select>
+      </div>
+      <div>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">🧱 Material do piso</label>
+        <select id="eMaterial" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;cursor:pointer"><option value="">— não classificado</option>${MATERIAIS_PISO.map(([v,l])=>'<option value="'+v+'"'+(v===initialValues.material?' selected':'')+'>'+l+'</option>').join('')}</select>
+      </div>
+    </div>
+    <div id="eFotoIdx" style="font-size:10.5px;color:#9ca3af;background:#0f151c;border:1px solid #1f2a37;border-radius:4px;padding:6px;margin-bottom:8px;display:none"></div>
+
+    <div style="margin-bottom:8px">
+      <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">📝 Observações</label>
+      <textarea id="eObs" rows="2" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;font-family:monospace;resize:vertical">${esc(initialValues.obs)}</textarea>
+    </div>
+
+    <div id="editStatus" style="font-size:11px;padding:6px;border-radius:4px;margin-bottom:8px;display:none;font-weight:600"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
+      <button class="btn" style="background:linear-gradient(to right, #3b82f6, #2563eb);border:none;color:white;padding:8px;border-radius:4px;font-weight:600;cursor:pointer" id="eSave">💾 Salvar</button>
+      <button class="btn" style="background:#1f2a37;border:1px solid #374151;color:#cbd5e1;padding:8px;border-radius:4px;cursor:pointer" onclick="window._reopen()">Cancel</button>
+    </div>
+    <button class="btn" id="eDelete" style="width:100%;border-color:#7f1d1d;background:#1f0f0f;color:#f87171;padding:6px;border-radius:4px;cursor:pointer;font-weight:600">🗑️ Excluir Ativo</button>`;
+
+  const renderFotoIdx = () => {
+    const box = document.getElementById('eFotoIdx'); if(!box) return;
+    const av = document.getElementById('eAngulo').value;
+    const mv = document.getElementById('eMaterial').value;
+    box.innerHTML = fotoIdxHtml(av, mv);
+    box.style.display = (av!=='' && mv!=='') ? 'block' : 'none';
+  };
+
+  const trackChanges = () => {
+    const changed = Object.keys(initialValues).filter(k => {
+      const el = document.getElementById({lat:'eLat',lng:'eLng',tipo:'eTipo',pot:'ePot',status:'eStatus',mod:'eMod',tipoLum:'eTipoLum',classe:'eClasse',obs:'eObs',angulo:'eAngulo',material:'eMaterial'}[k]);
+      if (!el) return false;
+      const current = el.type === 'checkbox' ? el.checked : el.value;
+      return current != initialValues[k];
+    });
+    const counter = document.getElementById('editChangedCount');
+    if (changed.length > 0) {
+      counter.textContent = changed.length + ' campo' + (changed.length !== 1 ? 's' : '');
+      counter.style.display = 'block';
+    } else {
+      counter.style.display = 'none';
+    }
+  };
+
+  ['eLat','eLng','ePot','eTipo','eStatus','eMod','eTipoLum','eClasse','eObs','eAngulo','eMaterial'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('change', trackChanges);
+      el.addEventListener('input', trackChanges);
+    }
+  });
+  ['eAngulo','eMaterial'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('change', renderFotoIdx); });
+  renderFotoIdx();
+
   document.getElementById('eDelete').onclick = ()=>window._excluirPonto(p);
   document.getElementById('eSave').onclick = async ()=>{
     const pot=parseInt(document.getElementById('ePot').value);
-    if(!isNaN(pot) && (pot<0||pot>2000)){ toast('Potência fora da faixa (0–2000 W)',true); return; }
+    if(!isNaN(pot) && (pot<0||pot>2000)){ document.getElementById('potError').textContent='Fora da faixa (0-2000 W)'; document.getElementById('potError').style.display='block'; return; }
+    document.getElementById('potError').style.display='none';
+
     const lat=parseFloat(document.getElementById('eLat').value), lng=parseFloat(document.getElementById('eLng').value);
     let pLat=null,pLng=null;
     if(!(isNaN(lat)&&isNaN(lng))){
-      if(isNaN(lat)||isNaN(lng)||lat<-23.05||lat>-22.80||lng<-43.20||lng>-42.90){ toast('Coordenadas inválidas ou fora de Niterói',true); return; }
+      if(!dentroDaCidade(lat,lng)){
+        document.getElementById('latError').textContent=isNaN(lat)?'Inválido':'Fora de '+CITY.nome;
+        document.getElementById('lngError').textContent=isNaN(lng)?'Inválido':'Fora de '+CITY.nome;
+        document.getElementById('latError').style.display='block';
+        document.getElementById('lngError').style.display='block';
+        return;
+      }
+      document.getElementById('latError').style.display='none';
+      document.getElementById('lngError').style.display='none';
       pLat=+lat.toFixed(6); pLng=+lng.toFixed(6);
     }
+
+    const status = document.getElementById('editStatus');
+    status.textContent='⏳ Salvando…'; status.style.color='#9ca3af'; status.style.display='block';
+
     setBusy(true);
     const {error}=await sb.rpc('ip_atualizar_ponto',{ p_id:p.id, p_tipo:document.getElementById('eTipo').value,
       p_potencia:isNaN(pot)?null:pot, p_status:document.getElementById('eStatus').value,
       p_modernizado:document.getElementById('eMod').checked, p_obs:document.getElementById('eObs').value||null,
       p_lat:pLat, p_lng:pLng,
-      p_tipo_luminaria:document.getElementById('eTipoLum').value||null, p_classe_nbr:document.getElementById('eClasse').value||null });
+      p_tipo_luminaria:document.getElementById('eTipoLum').value||null, p_classe_nbr:document.getElementById('eClasse').value||null,
+      p_angulo:document.getElementById('eAngulo').value!==''?parseInt(document.getElementById('eAngulo').value):null,
+      p_material:document.getElementById('eMaterial').value||null });
     setBusy(false);
-    if(error){ toast('Falha ao salvar: '+error.message,true); return; }
-    toast('Ponto atualizado'); document.getElementById('detail').style.display='none';
+
+    if(error){ status.textContent='❌ Erro: '+error.message; status.style.color='#ef4444'; status.style.display='block'; return; }
+    status.textContent='✅ Ponto atualizado!'; status.style.color='#4ade80'; status.style.display='block';
+    setTimeout(()=>{ document.getElementById('detail').style.display='none'; }, 1500);
     state.choroData=null; state.densData=null; refresh(); loadStatsChips();
   };
 };
@@ -1201,6 +2663,11 @@ document.getElementById('btnNovo').onclick = ()=>{
         <input id="nPot" type="number" placeholder="Potência (W)"/>
         <select id="nStatus">${STATUS.map(s=>`<option>${s}</option>`).join('')}</select>
         <label style="font-size:12px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="nMod" style="width:auto"/> LED</label>
+        <div style="margin-top:2px;padding-top:6px;border-top:1px solid #1f2a37;display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.4px">📐 Fotometria da instalação (opcional)</div>
+          <label style="font-size:11px;color:#9ca3af">Ângulo de apontamento<select id="nAngulo"><option value="">— não classificado</option>${ANGULOS_INCLINACAO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
+          <label style="font-size:11px;color:#9ca3af">Material do piso<select id="nMaterial"><option value="">— não classificado</option>${MATERIAIS_PISO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
+        </div>
       </div>
       <div style="display:flex;gap:8px"><button class="btn btn-accent" style="flex:1" id="nSave">Cadastrar</button><button class="btn" onclick="document.getElementById('detail').style.display='none'">Cancelar</button></div>
     </div>`;
@@ -1213,7 +2680,7 @@ document.getElementById('btnNovo').onclick = ()=>{
 
   document.getElementById('nSave').onclick = async ()=>{
     const lat=parseFloat(document.getElementById('nLat').value), lng=parseFloat(document.getElementById('nLng').value);
-    if(isNaN(lat)||isNaN(lng)||lat<-23.05||lat>-22.80||lng<-43.20||lng>-42.90){ toast('Coordenadas fora de Niterói',true); return; }
+    if(!dentroDaCidade(lat,lng)){ toast('Coordenadas fora de '+CITY.nome,true); return; }
     const ehLum=nAtivo.value==='luminaria';
     const pot=parseInt(document.getElementById('nPot').value);
     if(ehLum && !isNaN(pot) && (pot<0||pot>2000)){ toast('Potência fora da faixa (0–2000 W)',true); return; }
@@ -1223,7 +2690,9 @@ document.getElementById('btnNovo').onclick = ()=>{
       p_status: ehLum?document.getElementById('nStatus').value:'a_verificar', p_modernizado: ehLum?document.getElementById('nMod').checked:false,
       p_endereco:document.getElementById('nEnd').value||null, p_patrimonio:document.getElementById('nPatr').value||null, p_obs:'cadastro manual',
       p_tipo_ativo:nAtivo.value, p_tipo_luminaria: ehLum?(document.getElementById('nTipoLum').value||null):null,
-      p_classe_nbr: ehLum?(document.getElementById('nClasse').value||null):null });
+      p_classe_nbr: ehLum?(document.getElementById('nClasse').value||null):null, p_requer_aprovacao: false,
+      p_angulo: ehLum ? (document.getElementById('nAngulo').value!==''?parseInt(document.getElementById('nAngulo').value):null) : null,
+      p_material: ehLum ? (document.getElementById('nMaterial').value||null) : null });
     setBusy(false);
     if(error){ toast('Falha ao cadastrar: '+error.message,true); return; }
     toast('Cadastrado: '+(data||'ok')); d.style.display='none'; state.choroData=null; state.densData=null; refresh(); loadStatsChips();
@@ -1300,19 +2769,59 @@ async function loadStatsPanel(){
   const [porBairro, serie] = await Promise.all([ rpc('ip_por_bairro'), rpc('ip_serie_metricas') ]);
   if(!state.stats){ state.stats = await rpc('ip_estatisticas',{p_bairro:state.bairro||null}); }
   const s=state.stats||{};
-  const kv=(k,v)=>`<div class="chip" style="border-radius:8px;padding:6px 9px"><div style="color:#9ca3af;font-size:11px">${k}</div><div style="font-weight:700;font-size:14px">${v}</div></div>`;
-  const bd=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
-    ${kv('Luminárias',(s.total||0).toLocaleString('pt-BR'))}${kv('% LED',(s.pct_led||0)+'%')}${kv('Pot. LED',(s.potencia_kw||0)+' kW')}
-    ${kv('LED censo',(s.led_censo||0).toLocaleString('pt-BR'))}${kv('LED SECONSER',(s.led_seconser||0).toLocaleString('pt-BR'))}${kv('Pendentes',(s.pendente||0).toLocaleString('pt-BR'))}</div>`;
-  const rows=(porBairro||[]).map(b=>`<tr style="cursor:pointer" onclick="window._zoomBairro('${esc(b.bairro_nome).replace(/'/g,"\\'")}')">
-    <td>${esc(b.bairro_nome)}</td><td style="text-align:right">${b.total}</td>
-    <td style="text-align:right;color:#4ade80">${b.led}</td><td style="text-align:right;color:#fbbf24">${b.pendente}</td>
-    <td style="text-align:right">${b.pct_led}%</td></tr>`).join('');
+
+  const renderKPICard = (icon, label, value, color='text-slate-300', bgColor='bg-slate-800/50', subtext='') => {
+    const colorClass = color === 'text-green-400' ? 'border-green-900/50' : color === 'text-amber-400' ? 'border-amber-900/50' : 'border-slate-700';
+    return `<div class="relative overflow-hidden rounded-lg border ${colorClass} ${bgColor} p-4 hover:shadow-lg hover:${bgColor.replace('800', '700')} transition-all duration-300">
+      <div style="font-size:28px;opacity:0.3;position:absolute;right:-8px;top:-8px">${icon}</div>
+      <div style="color:#9ca3af;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">${label}</div>
+      <div style="font-size:24px;font-weight:700;margin-bottom:2px" class="${color}">${value}</div>
+      ${subtext ? `<div style="font-size:10px;color:#6b7280">${subtext}</div>` : ''}
+    </div>`;
+  };
+
+  const total = s.total || 0;
+  const pctLed = s.pct_led || 0;
+  const pendente = s.pendente || 0;
+  const ledStatus = pctLed >= 60 ? 'text-green-400' : pctLed >= 30 ? 'text-amber-400' : 'text-red-400';
+  const pendenteBg = pendente > total * 0.3 ? 'bg-red-950/20' : 'bg-slate-800/50';
+
+  const kpiGrid = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      ${renderKPICard('💡', 'Total de Luminárias', total.toLocaleString('pt-BR'), 'text-blue-400', 'bg-blue-950/20')}
+      ${renderKPICard('⚡', 'Modernização LED', pctLed + '%', ledStatus, pctLed >= 60 ? 'bg-green-950/20' : pctLed >= 30 ? 'bg-amber-950/20' : 'bg-red-950/20')}
+      ${renderKPICard('🔋', 'Potência LED', (s.potencia_kw || 0) + ' kW', 'text-indigo-400', 'bg-indigo-950/20')}
+      ${renderKPICard('⏳', 'Pendentes de Troca', pendente.toLocaleString('pt-BR'), pendente > 0 ? 'text-amber-400' : 'text-green-400', pendenteBg)}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      ${renderKPICard('📋', 'LED Censo', (s.led_censo || 0).toLocaleString('pt-BR'), 'text-slate-300', 'bg-slate-800/50')}
+      ${renderKPICard('✅', 'LED SECONSER', (s.led_seconser || 0).toLocaleString('pt-BR'), 'text-green-400', 'bg-slate-800/50')}
+    </div>`;
+
+  const rows=(porBairro||[]).map(b=>`<tr style="cursor:pointer;border-bottom:1px solid #1f2a37;transition:background-color 0.2s" class="hover:bg-slate-700/30" onclick="window._zoomBairro('${esc(b.bairro_nome).replace(/'/g,"\\'")}')">
+    <td style="padding:8px;font-size:13px">${esc(b.bairro_nome)}</td><td style="text-align:right;padding:8px;font-size:13px">${b.total}</td>
+    <td style="text-align:right;padding:8px;font-size:13px;color:#4ade80;font-weight:600">${b.led}</td><td style="text-align:right;padding:8px;font-size:13px;color:#fbbf24">${b.pendente}</td>
+    <td style="text-align:right;padding:8px;font-size:13px;font-weight:600">${b.pct_led}%</td></tr>`).join('');
+
   document.getElementById('stats').innerHTML = `
-    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>Indicadores${state.bairro?' · '+esc(state.bairro):''}</b><button class="btn" onclick="document.getElementById('stats').style.display='none'">✕</button></div>
-    ${bd}${sparkline(serie)}
-    <div style="margin:10px 0 4px;color:#9ca3af;font-size:12px">Passivo de troca por bairro</div>
-    <table style="width:100%;border-collapse:collapse"><thead><tr><th>Bairro</th><th style="text-align:right">Total</th><th style="text-align:right">LED</th><th style="text-align:right">Pend.</th><th style="text-align:right">%</th></tr></thead><tbody>${rows}</tbody></table>`;
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #1f2a37">
+      <div>
+        <div style="font-weight:700;font-size:15px;color:#e5e7eb">Indicadores</div>
+        ${state.bairro ? `<div style="font-size:12px;color:#9ca3af;margin-top:2px">📍 ${esc(state.bairro)}</div>` : ''}
+      </div>
+      <button class="btn" style="padding:6px 10px;font-size:16px" onclick="document.getElementById('stats').style.display='none'">✕</button>
+    </div>
+    ${kpiGrid}
+    ${sparkline(serie)}
+    <div style="margin:12px 0 8px;color:#9ca3af;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px">Passivo por Bairro</div>
+    <div style="border-radius:8px;border:1px solid #1f2a37;overflow:hidden">
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead style="background:#0f151c/50;border-bottom:1px solid #1f2a37">
+          <tr><th style="text-align:left;padding:8px;color:#9ca3af">Bairro</th><th style="text-align:right;padding:8px;color:#9ca3af">Total</th><th style="text-align:right;padding:8px;color:#9ca3af">LED</th><th style="text-align:right;padding:8px;color:#9ca3af">Pend.</th><th style="text-align:right;padding:8px;color:#9ca3af">%</th></tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
 }
 window._zoomBairro = (b)=>{ document.getElementById('fBairro').value=b; state.bairro=b; loadStatsChips(); highlightBairro(b); };
 
@@ -1331,7 +2840,7 @@ function updateFCount(){
 document.getElementById('btnFiltros').addEventListener('mouseenter',()=>{ document.getElementById('filtrosPop').style.display='flex'; });
 document.getElementById('filtrosPop').addEventListener('mouseleave',()=>{ document.getElementById('filtrosPop').style.display='none'; });
 document.addEventListener('click', e=>{
-  [['filtrosPop','btnFiltros'],['exportPop','btnExport'],['visPop','btnVis']].forEach(([pid,bid])=>{
+  [['filtrosPop','btnFiltros'],['visPop','btnVis']].forEach(([pid,bid])=>{
     const p=document.getElementById(pid);
     if(p && p.style.display==='flex' && !p.contains(e.target) && e.target.id!==bid) p.style.display='none';
   });
@@ -1339,8 +2848,8 @@ document.addEventListener('click', e=>{
 document.getElementById('btnVis').addEventListener('mouseenter',()=>{ document.getElementById('visPop').style.display='flex'; });
 document.getElementById('visPop').addEventListener('mouseleave',()=>{ document.getElementById('visPop').style.display='none'; });
 document.getElementById('fLimpar').onclick = ()=>{
-  state.bairro=state.tipo=state.estado=state.pot=state.fila='';
-  ['fBairro','fTipo','fEstado','fPot','fFila'].forEach(id=>document.getElementById(id).value='');
+  state.bairro=state.tipo=state.estado=state.pot=state.fila=state.saude='';
+  ['fBairro','fTipo','fEstado','fPot','fFila','fSaude'].forEach(id=>document.getElementById(id).value='');
   updateFCount(); loadStatsChips(); if(state.bairroLayer){map.removeLayer(state.bairroLayer);state.bairroLayer=null;}
   state.choroData=null; refresh();
 };
@@ -1351,13 +2860,14 @@ document.getElementById('fPot').onchange = e=>{ state.pot=e.target.value; update
 document.getElementById('fFila').onchange = async e=>{ state.fila=e.target.value; updateFCount(); state.choroData=null; refresh();
   if(e.target.value){ let q=sb.from('v_parque_export').select('id',{count:'exact',head:true}); q=aplicaFila(q);
     const {count}=await q; toast('Fila: '+((count||0).toLocaleString('pt-BR'))+' ponto(s)'); } };
+document.getElementById('fSaude').onchange = e=>{ state.saude=e.target.value; updateFCount(); refresh(); };
 document.getElementById('btnStats').onclick = ()=>{ const s=document.getElementById('stats'); if(s.style.display==='block'){s.style.display='none';} else {s.style.display='block'; loadStatsPanel();} };
 
 // ---------- Tabela ----------
 async function loadTable(){
   setBusy(true);
   document.getElementById('tBody').innerHTML='<tr><td colspan="8" style="text-align:center;color:#6b7280;padding:18px"><span class="spin"></span> Carregando…</td></tr>';
-  let q=sb.from('v_parque_export').select('id,codigo_seconser,numero_patrimonio,endereco,bairro_nome,tipo_lampada,potencia_w,modernizado_led,fonte_modernizacao,status,observacoes,lat,lon,tipo_ativo,tipo_luminaria,classe_nbr',{count:'exact'});
+  let q=sb.from('v_parque_export').select('id,codigo_seconser,numero_patrimonio,endereco,bairro_nome,tipo_lampada,potencia_w,modernizado_led,fonte_modernizacao,status,observacoes,lat,lon,tipo_ativo,tipo_luminaria,classe_nbr,health_status,verificado_em,angulo_inclinacao_graus,material_piso',{count:'exact'});
   const s=document.getElementById('tSearch').value.trim();
   const bb=document.getElementById('tBairro').value, st=document.getElementById('tStatus').value;
   if(s) q=q.or(`codigo_seconser.ilike.%${s}%,endereco.ilike.%${s}%,numero_patrimonio.ilike.%${s}%`);
@@ -1377,7 +2887,8 @@ async function loadTable(){
   const linhas=(data||[]).map(p=>{
     const origem=p.fonte_modernizacao==='censo_enel'?'censo':p.fonte_modernizacao==='seconser_pos_censo'?'SECONSER':p.fonte_modernizacao==='campo'?'campo':'—';
     const est=p.modernizado_led?`<span class="badge" style="background:#0d3d24;color:#4ade80">LED</span>`:`<span class="badge" style="background:#3d2f0d;color:#fbbf24">Pend.</span>`;
-    return `<tr><td>${esc(p.codigo_seconser)||'—'}</td><td>${esc(p.endereco)||'—'}</td><td>${esc(p.bairro_nome)||'—'}</td><td>${p.tipo_lampada}</td><td>${p.potencia_w||'—'}</td><td>${est}</td><td style="color:#9ca3af">${origem}</td>
+    const healthBadge = healthStatusBadge(p.health_status);
+    return `<tr><td>${esc(p.codigo_seconser)||'—'}</td><td>${esc(p.endereco)||'—'}</td><td>${esc(p.bairro_nome)||'—'}</td><td>${p.tipo_lampada}</td><td>${p.potencia_w||'—'}</td><td>${est}</td><td style="color:${healthBadge.color}">${healthBadge.emoji} ${healthBadge.label}</td><td style="color:#9ca3af">${origem}</td>
       <td>${podeEditar()?`<button class="btn" style="padding:2px 8px" onclick="window._editId('${p.id}')" aria-label="Editar luminária">editar</button>`:''}</td></tr>`;
   }).join('');
   document.getElementById('tBody').innerHTML = linhas || '<tr><td colspan="8" style="text-align:center;color:#6b7280;padding:18px">Nenhum registro encontrado</td></tr>';
@@ -1397,8 +2908,7 @@ async function setUser(u){
   if(u){ try{ const {data}=await sb.from('profiles').select('role').eq('id',u.id).single(); state.userRole=data?.role||'leitura'; }
          catch(e){ state.userRole='leitura'; } }
   document.getElementById('btnNovo').style.display = podeEditar()?'inline-block':'none';
-  document.getElementById('btnAdminConsole').style.display = state.userRole==='admin'?'inline-block':'none';
-  document.getElementById('exportContainer').style.display = u?'block':'none';
+  document.getElementById('btnAdminConsole').style.display = podeEditar()?'inline-block':'none';
 }
 document.getElementById('btnLogin').onclick=async ()=>{
   if(state.user){ await sb.auth.signOut(); setUser(null); toast('Sessão encerrada'); return; }
@@ -1421,12 +2931,100 @@ function acShow(sec){
   else if(sec==='usuarios') loadAdminUsers();
   else if(sec==='aparencia') fillConfigForm();
   else if(sec==='modelos') loadAdminModelos();
+  else if(sec==='campanhas') loadCampanhas();
 }
 document.getElementById('btnAdminConsole').onclick = ()=>{ document.getElementById('adminConsole').style.display='flex'; acShow('visao'); };
 document.getElementById('acVoltar').onclick = ()=>document.getElementById('adminConsole').style.display='none';
 document.querySelectorAll('.acnav').forEach(b=>b.onclick=()=>acShow(b.dataset.sec));
+// Legacy export handlers (if any data-exp buttons remain)
 document.getElementById('sec-dados').addEventListener('click',e=>{ const b=e.target.closest('[data-exp]'); if(!b)return;
   ({csv:()=>exportData('csv'),geojson:()=>exportData('geojson'),bairros:exportBairros,serie:exportSerie,grade:exportGrade})[b.dataset.exp]?.(); });
+
+// Advanced export handlers
+function applyExportFilters(){
+  const scope = document.querySelector('input[name="exportScope"]:checked')?.value || 'all';
+  const fmt = document.getElementById('exportFormat')?.value || 'csv';
+  const type = document.getElementById('exportType')?.value || 'luminárias';
+
+  // Temporarily apply scope (all vs filtered)
+  const origBairro = state.bairro, origTipo = state.tipo, origEstado = state.estado, origPot = state.pot, origFila = state.fila;
+  if(scope === 'all'){
+    state.bairro = ''; state.tipo = ''; state.estado = ''; state.pot = ''; state.fila = '';
+  }
+
+  // Export based on type
+  if(type === 'luminárias'){
+    exportData(fmt === 'pdf' ? 'pdf' : fmt);
+  } else if(type === 'bairros'){
+    exportBairros();
+  } else if(type === 'série'){
+    exportSerie();
+  } else if(type === 'grade'){
+    exportGrade();
+  }
+
+  // Restore filters
+  state.bairro = origBairro; state.tipo = origTipo; state.estado = origEstado;
+  state.pot = origPot; state.fila = origFila;
+}
+
+document.getElementById('btnExportAdvanced').onclick = applyExportFilters;
+document.getElementById('btnExportCustomAdvanced').onclick = ()=>document.getElementById('exportCustomModal').style.display='block';
+document.getElementById('btnExportBairros').onclick = ()=>{ const scope = document.querySelector('input[name="exportScope"]:checked')?.value || 'all'; if(scope==='all') state.bairro=''; exportBairros(); state.bairro=''; };
+document.getElementById('btnExportSerie').onclick = exportSerie;
+document.getElementById('btnExportGrade').onclick = exportGrade;
+// ---------- Campanhas de recenseamento ----------
+async function loadCampanhas(){
+  const box=document.getElementById('campBox');
+  box.innerHTML='<div style="color:#6b7280"><span class="spin"></span> Carregando…</div>';
+  const d=await rpc('ip_listar_campanhas'); if(d===null){ box.innerHTML='<div style="color:#f87171;font-size:12px">Falha ao carregar campanhas.</div>'; return; }
+  const ativa=(d||[]).find(c=>c.status==='ativa');
+  const isAdmin=state.userRole==='admin';
+  const criar = isAdmin && !ativa ? `
+    <div class="bg-blue-950/20 border border-blue-900/50 rounded-lg p-4 mb-5">
+      <div style="font-size:11px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">➕ Nova campanha</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input id="campNome" placeholder="Nome (ex.: Recenseamento ${CITY.nome} ${new Date().getFullYear()})" style="flex:2;min-width:220px" class="px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm"/>
+        <input id="campDesc" placeholder="Descrição (opcional)" style="flex:2;min-width:180px" class="px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm"/>
+        <button class="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm rounded-lg font-semibold" onclick="window._criarCampanha()">Iniciar</button>
+      </div>
+    </div>` : (isAdmin?'' : '<div style="color:#6b7280;font-size:12px;margin-bottom:12px">Apenas administradores criam/encerram campanhas.</div>');
+  const linhas=(d||[]).map(c=>{
+    const pct = c.total_parque>0 ? Math.round(100*c.verificados/c.total_parque) : 0;
+    const badge = c.status==='ativa' ? '<span class="badge" style="background:#0d3d24;color:#4ade80">ATIVA</span>' : '<span class="badge" style="background:#1f2a37;color:#9ca3af">encerrada</span>';
+    return `<div class="bg-slate-800/50 border ${c.status==='ativa'?'border-emerald-700':'border-slate-700'} rounded-lg p-4 mb-3">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <div><b style="font-size:13px">${esc(c.nome)}</b> ${badge}
+          <div style="font-size:11px;color:#9ca3af;margin-top:2px">${esc(c.descricao)||''} · início ${new Date(c.criado_em).toLocaleDateString('pt-BR')}${c.encerrada_em?(' · fim '+new Date(c.encerrada_em).toLocaleDateString('pt-BR')):''}</div></div>
+        ${c.status==='ativa'&&isAdmin?`<button class="btn" style="border-color:#7f1d1d;color:#f87171;padding:4px 10px;font-size:11px" onclick="window._encerrarCampanha('${c.id}')">Encerrar</button>`:''}
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#9ca3af;margin-top:10px">
+        <span>${(+c.verificados).toLocaleString('pt-BR')} de ${(+c.total_parque).toLocaleString('pt-BR')} pontos verificados</span><b style="color:#4ade80">${pct}%</b></div>
+      <div style="height:6px;border-radius:3px;background:#1f2a37;overflow:hidden;margin-top:4px"><div style="height:100%;width:${pct}%;background:linear-gradient(to right,#059669,#4ade80)"></div></div>
+    </div>`;
+  }).join('');
+  box.innerHTML = criar + (linhas || '<div style="color:#6b7280;font-size:12px">Nenhuma campanha ainda. O parque inteiro está com dado <b>herdado</b>.</div>');
+}
+window._criarCampanha = async ()=>{
+  const nome=document.getElementById('campNome').value.trim();
+  if(!nome){ toast('Informe o nome da campanha',true); return; }
+  setBusy(true);
+  const {data,error}=await sb.rpc('ip_criar_campanha',{ p_nome:nome, p_descricao:document.getElementById('campDesc').value||null });
+  setBusy(false);
+  if(error){ toast('Falha: '+error.message,true); return; }
+  if(data&&data.error){ toast(data.error,true); return; }
+  toast('Campanha iniciada — boas medições! 🧭'); loadCampanhas();
+};
+window._encerrarCampanha = async (id)=>{
+  if(!confirm('Encerrar esta campanha?\n\nEdições futuras deixarão de carimbar verificação até uma nova campanha ser criada.')) return;
+  setBusy(true);
+  const {data,error}=await sb.rpc('ip_encerrar_campanha',{ p_id:id });
+  setBusy(false);
+  if(error){ toast('Falha: '+error.message,true); return; }
+  if(data&&data.error){ toast(data.error,true); return; }
+  toast('Campanha encerrada'); loadCampanhas();
+};
+
 function qcard(label,n,fila,nota){
   return `<div class="chip" style="border-radius:10px;padding:12px;min-width:160px">
     <div style="color:#9ca3af;font-size:11px">${label}</div>
@@ -1466,16 +3064,35 @@ window._filaMapa=(fila)=>{
 // (maintained in git history for reference)
 async function loadAdminUsers(){
   const body=document.getElementById('admBody');
-  body.innerHTML='<tr><td colspan="3" style="text-align:center;color:#6b7280;padding:14px"><span class="spin"></span> Carregando…</td></tr>';
-  const {data,error}=await sb.from('profiles').select('id,email,role').order('email');
+  body.innerHTML='<tr><td colspan="4" style="text-align:center;color:#6b7280;padding:16px"><span class="spin"></span> Carregando…</td></tr>';
+  const {data,error}=await sb.from('profiles').select('id,email,role,created_at').order('email');
   if(error){ toast('Erro ao listar: '+error.message,true); body.innerHTML=''; return; }
+
+  state.adminUsers = data || [];
+  document.getElementById('userCount').textContent = state.adminUsers.length + ' usuário' + (state.adminUsers.length !== 1 ? 's' : '');
+
+  const roleBadge = (role) => {
+    const icons = { leitura: '👁️', editor: '✏️', admin: '🔑' };
+    const colors = { leitura: 'bg-slate-700/50 text-slate-200', editor: 'bg-blue-900/50 text-blue-200', admin: 'bg-amber-900/50 text-amber-200' };
+    return `<span style="display:inline-block;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600" class="${colors[role]}">${icons[role]} ${role}</span>`;
+  };
+
+  const formatDate = (date) => {
+    if (!date) return '—';
+    const d = new Date(date);
+    return d.toLocaleDateString('pt-BR', { year: '2-digit', month: '2-digit', day: '2-digit' });
+  };
+
   const roles=['leitura','editor','admin'];
-  body.innerHTML=(data||[]).map(u=>{
+  body.innerHTML=(state.adminUsers||[]).map(u=>{
     const eu=u.id===state.user.id;
-    return `<tr><td>${esc(u.email)}</td>
-      <td><select ${eu?'disabled':''} onchange="window._setRole('${u.id}',this.value)">${roles.map(r=>`<option value="${r}" ${u.role===r?'selected':''}>${r}</option>`).join('')}</select></td>
-      <td style="text-align:right">${eu?'<span style="color:#6b7280;font-size:11px">você</span>':`<button class="btn" style="padding:2px 8px;color:#f87171" onclick="window._delUser('${u.id}','${esc(u.email).replace(/'/g,"\\'")}')">remover</button>`}</td></tr>`;
-  }).join('') || '<tr><td colspan="3" style="text-align:center;color:#6b7280;padding:14px">Nenhum usuário</td></tr>';
+    return `<tr style="border-bottom:1px solid #1f2a37;transition:background 0.2s" class="hover:bg-slate-800/30">
+      <td style="padding:12px 16px">${esc(u.email)}</td>
+      <td style="padding:12px 16px">${eu ? roleBadge(u.role) : `<select style="background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;padding:4px 8px;border-radius:4px;font-size:12px;cursor:pointer" onchange="window._setRole('${u.id}',this.value)">${roles.map(r=>'<option value="'+r+'" '+(u.role===r?'selected':'')+'>'+r+'</option>').join('')}</select>`}</td>
+      <td style="padding:12px 16px;text-align:center;color:#9ca3af;font-size:12px">${formatDate(u.created_at)}</td>
+      <td style="padding:12px 16px;text-align:right">${eu?'<span style="color:#6b7280;font-size:11px;font-weight:600">VOCÊ</span>':`<button class="btn" style="padding:4px 10px;background:#1f2a37;color:#f87171;font-size:12px;border-radius:4px;cursor:pointer;border:1px solid #374151;transition:all 0.2s" onmouseover="this.style.background='#7f1d1d'" onmouseout="this.style.background='#1f2a37'" onclick="window._delUser('${u.id}','${esc(u.email).replace(/'/g,"\\'")}')">🗑️ Remover</button>`}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="4" style="text-align:center;color:#6b7280;padding:24px">Nenhum usuário cadastrado</td></tr>';
 }
 window._setRole = async (id,role)=>{ const {error}=await sb.from('profiles').update({role,atualizado_em:new Date().toISOString()}).eq('id',id);
   toast(error?('Erro: '+error.message):'Papel atualizado',!!error); };
@@ -1484,17 +3101,45 @@ window._delUser = async (id,email)=>{ if(!confirm('Remover '+email+'? Isso exclu
   if(error||data?.error){ toast('Erro ao remover: '+(data?.error||error.message),true); return; }
   toast('Usuário removido'); loadAdminUsers(); };
 document.getElementById('admCreate').onclick = async ()=>{
-  const email=document.getElementById('admEmail').value.trim(), password=document.getElementById('admPass').value.trim(), role=document.getElementById('admRole').value;
-  if(!email){ toast('Informe o e-mail',true); return; }
+  const emailInput=document.getElementById('admEmail');
+  const email=emailInput.value.trim(), password=document.getElementById('admPass').value.trim(), role=document.getElementById('admRole').value;
+  const emailError=document.getElementById('emailError'), formStatus=document.getElementById('formStatus');
+
+  if(!email){ emailError.textContent='E-mail obrigatório'; emailError.style.display='block'; emailInput.style.borderColor='#dc2626'; return; }
+  const emailRegex=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(!emailRegex.test(email)){ emailError.textContent='E-mail inválido'; emailError.style.display='block'; emailInput.style.borderColor='#dc2626'; return; }
+  if(state.adminUsers && state.adminUsers.some(u=>u.email===email)){ emailError.textContent='E-mail já existe'; emailError.style.display='block'; emailInput.style.borderColor='#dc2626'; return; }
+
+  emailError.style.display='none'; emailInput.style.borderColor='';
+  formStatus.textContent='⏳ Criando usuário…'; formStatus.style.display='block'; formStatus.style.color='#9ca3af';
+
   setBusy(true);
   const {data,error}=await sb.functions.invoke('admin-users',{body:{action:'create',email,password:password||undefined,role}});
   setBusy(false);
-  if(error||data?.error){ toast('Erro ao criar: '+(data?.error||error.message),true); return; }
+
+  if(error||data?.error){
+    formStatus.textContent='❌ Erro: '+(data?.error||error.message); formStatus.style.color='#ef4444'; formStatus.style.display='block';
+    return;
+  }
+
   document.getElementById('admEmail').value=''; document.getElementById('admPass').value='';
+  formStatus.textContent='✅ Usuário criado com sucesso!'; formStatus.style.color='#4ade80'; formStatus.style.display='block';
+
   if(data.senha_temporaria) alert('Usuário criado.\nE-mail: '+email+'\nSenha temporária: '+data.senha_temporaria+'\n\nComunique ao operador e peça que troque depois.');
   else toast('Usuário criado');
+
+  setTimeout(()=>{ formStatus.style.display='none'; }, 3000);
   loadAdminUsers();
 };
+
+document.getElementById('userSearch').addEventListener('input', (e)=>{
+  const query=e.target.value.toLowerCase();
+  const rows=document.querySelectorAll('#admBody tr');
+  rows.forEach(row=>{
+    const email=row.querySelector('td:first-child')?.textContent.toLowerCase() || '';
+    row.style.display=email.includes(query)?'':'none';
+  });
+});
 
 // ---------- Administração de Modelos ----------
 function initModelosForm(){
@@ -1504,6 +3149,109 @@ function initModelosForm(){
     const selLamp=document.getElementById('modTipoLamp');
     TIPOS.forEach(t=>selLamp.add(new Option(t,t)));
     selLamp.value='led';
+  }
+  setupTecnologiaCondicional();
+}
+
+function setupTecnologiaCondicional(){
+  const tecSelect=document.getElementById('modTecnologia');
+  const lampRow=document.getElementById('modTipoLampRow');
+  if(!tecSelect || !lampRow) return;
+
+  const updateVisibility=()=>{
+    if(tecSelect.value==='LED' || tecSelect.value===''){
+      lampRow.style.display='none';
+      document.getElementById('modTipoLamp').value='led';
+    }else{
+      lampRow.style.display='block';
+    }
+  };
+
+  tecSelect.addEventListener('change', updateVisibility);
+  updateVisibility();
+}
+
+async function compressImage(file, maxWidth=800, maxHeight=600, quality=0.75){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=(e)=>{
+      const img=new Image();
+      img.onload=()=>{
+        const canvas=document.createElement('canvas');
+        let width=img.width, height=img.height;
+
+        if(width>height){
+          if(width>maxWidth){ height=Math.round(height*(maxWidth/width)); width=maxWidth; }
+        }else{
+          if(height>maxHeight){ width=Math.round(width*(maxHeight/height)); height=maxHeight; }
+        }
+
+        canvas.width=width;
+        canvas.height=height;
+        const ctx=canvas.getContext('2d');
+        ctx.drawImage(img,0,0,width,height);
+
+        canvas.toBlob((blob)=>{
+          if(!blob){ reject(new Error('Erro ao comprimir imagem')); return; }
+          resolve(new File([blob],file.name,{type:'image/jpeg'}));
+        },'image/jpeg',quality);
+      };
+      img.onerror=()=>reject(new Error('Erro ao carregar imagem'));
+      img.src=e.target.result;
+    };
+    reader.onerror=()=>reject(new Error('Erro ao ler arquivo'));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadFoto(file){
+  if(!file) return null;
+
+  const statusEl=document.getElementById('modFotoStatus');
+  try{
+    statusEl.textContent='Compactando...';
+    const compressed=await compressImage(file,800,600,0.75);
+    const originalSize=(file.size/1024).toFixed(1);
+    const compressedSize=(compressed.size/1024).toFixed(1);
+    statusEl.textContent=`✓ ${originalSize}KB → ${compressedSize}KB`;
+
+    setBusy(true);
+    const fileName=`${Date.now()}-${file.name.replace(/[^a-z0-9.-]/gi,'_')}`;
+    const {data,error}=await sb.storage.from('luminarias-fotos').upload(fileName,compressed,{cacheControl:'3600',upsert:false});
+    if(error) throw error;
+
+    const {data:{publicUrl}}=sb.storage.from('luminarias-fotos').getPublicUrl(fileName);
+    setBusy(false);
+    return publicUrl;
+  }catch(err){
+    console.error('Erro upload foto:',err);
+    statusEl.textContent='❌ Erro ao fazer upload';
+    setBusy(false);
+    toast('Erro ao fazer upload da foto',true);
+    return null;
+  }
+}
+
+async function uploadArquivoIES(file){
+  if(!file) return null;
+  if(!file.name.toLowerCase().endsWith('.ies')){
+    toast('Arquivo deve ser .ies',true);
+    return null;
+  }
+  if(file.size > 5*1024*1024){
+    toast('Arquivo .IES maior que 5 MB',true);
+    return null;
+  }
+  try{
+    const fileName=`${Date.now()}-${file.name}`;
+    const {data,error}=await sb.storage.from('luminarias-ies').upload(fileName,file,{cacheControl:'3600',upsert:false});
+    if(error) throw error;
+    const {data:{publicUrl}}=sb.storage.from('luminarias-ies').getPublicUrl(fileName);
+    return publicUrl;
+  }catch(err){
+    console.error('Erro upload IES:',err);
+    toast('Erro ao fazer upload do .IES',true);
+    return null;
   }
 }
 async function loadAdminModelos(){
@@ -1545,6 +3293,45 @@ document.getElementById('modCreate').onclick = async ()=>{
     return;
   }
 
+  // Validate Tier 2 fields
+  const fluxo=document.getElementById('modFluxo').value.trim()?parseInt(document.getElementById('modFluxo').value):null;
+  const eficacia=document.getElementById('modEficacia').value.trim()?parseFloat(document.getElementById('modEficacia').value):null;
+  const fp=document.getElementById('modFP').value.trim()?parseFloat(document.getElementById('modFP').value):null;
+  const thd=document.getElementById('modTHD').value.trim()?parseFloat(document.getElementById('modTHD').value):null;
+
+  if(fluxo!==null && fluxo<=0){ toast('Fluxo luminoso deve ser > 0',true); return; }
+  if(eficacia!==null && eficacia<=0){ toast('Eficácia deve ser > 0',true); return; }
+  if(fp!==null && (fp<0.90 || fp>1.0)){ toast('Fator de potência deve estar entre 0.90 e 1.0',true); return; }
+  if(thd!==null && (thd<0 || thd>100)){ toast('THD deve estar entre 0 e 100%',true); return; }
+
+  // Validate Tier 1 fields
+  const inmetro=document.getElementById('modINMETRO').value.trim()||null;
+  const vidaUtil=document.getElementById('modVidaUtil').value.trim()?parseInt(document.getElementById('modVidaUtil').value):null;
+  const garantia=document.getElementById('modGarantia').value.trim()?parseInt(document.getElementById('modGarantia').value):null;
+  const manutencao=document.getElementById('modManutencao').value.trim()?parseInt(document.getElementById('modManutencao').value):null;
+
+  if(vidaUtil!==null && vidaUtil<=0){ toast('Vida útil deve ser > 0',true); return; }
+  if(garantia!==null && garantia<0){ toast('Garantia não pode ser negativa',true); return; }
+  if(manutencao!==null && manutencao<=0){ toast('Manutenção preventiva deve ser > 0',true); return; }
+
+  // Handle photo upload with compression if provided
+  let fotoUrl=document.getElementById('modFoto').value.trim()||null;
+  const fotoFile=document.getElementById('modFotoUpload').files[0];
+  if(fotoFile){
+    fotoUrl=await uploadFoto(fotoFile);
+    if(!fotoUrl) return;
+  }
+
+  // Handle .IES file upload if provided
+  let iesUrl=null;
+  const iesFile=document.getElementById('modArquivoIES').files[0];
+  if(iesFile){
+    setBusy(true);
+    iesUrl=await uploadArquivoIES(iesFile);
+    if(!iesUrl){ setBusy(false); return; }
+    setBusy(false);
+  }
+
   setBusy(true);
   const {error}=await sb.rpc('ip_criar_modelo',{
     p_fabricante:fab, p_modelo:mod, p_potencia_w:pot,
@@ -1555,16 +3342,37 @@ document.getElementById('modCreate').onclick = async ()=>{
     p_tecnologia:document.getElementById('modTecnologia').value.trim()||'LED',
     p_tipo_luminaria:document.getElementById('modTipoLum').value||null,
     p_tipo_lampada:document.getElementById('modTipoLamp').value||'led',
-    p_foto_url:document.getElementById('modFoto').value.trim()||null,
-    p_descricao:document.getElementById('modDescricao').value.trim()||null
+    p_foto_url:fotoUrl,
+    p_descricao:document.getElementById('modDescricao').value.trim()||null,
+    // Tier 2 fields
+    p_fluxo_luminoso_lm:fluxo,
+    p_eficacia_luminosa_lm_w:eficacia,
+    p_fator_potencia_fp:fp,
+    p_thd_percentual:thd,
+    p_grau_ik:document.getElementById('modGrauIK').value||null,
+    p_dps_especificacao:document.getElementById('modDPS').value.trim()||null,
+    p_tipo_conectividade:document.getElementById('modConectividade').value||null,
+    p_arquivo_ies_url:iesUrl,
+    // Tier 1 fields
+    p_inmetro_registro:inmetro,
+    p_vida_util_anos:vidaUtil,
+    p_garantia_anos:garantia,
+    p_dias_manutencao_preventiva:manutencao
   });
   setBusy(false);
   if(error){ toast('Erro ao criar: '+error.message,true); return; }
 
-  ['modFabricante','modModelo','modPotencia','modTemperatura','modTensao','modIp','modClasse','modFoto','modDescricao'].forEach(id=>document.getElementById(id).value='');
+  // Clear form
+  ['modFabricante','modModelo','modPotencia','modTemperatura','modTensao','modIp','modClasse','modFoto','modDescricao','modFluxo','modEficacia','modFP','modTHD','modDPS','modINMETRO','modVidaUtil','modGarantia','modManutencao'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('modTecnologia').value='LED';
   document.getElementById('modTipoLum').value='';
   document.getElementById('modTipoLamp').value='led';
+  document.getElementById('modGrauIK').value='';
+  document.getElementById('modFotoUpload').value='';
+  document.getElementById('modFotoStatus').textContent='';
+  document.getElementById('modConectividade').value='';
+  document.getElementById('modArquivoIES').value='';
+  setupTecnologiaCondicional();
 
   toast('Modelo adicionado ao catálogo');
   loadAdminModelos();
@@ -1680,17 +3488,8 @@ async function exportPDF(){
     doc.save(`relatorio_ip_${stamp()}.pdf`); toast('Relatório PDF gerado');
   }catch(e){ toast('Falha no PDF: '+e.message,true); } });
 }
-document.getElementById('btnExport').addEventListener('mouseenter',()=>{ document.getElementById('exportPop').style.display='flex'; });
-document.getElementById('exportPop').addEventListener('mouseleave',()=>{ document.getElementById('exportPop').style.display='none'; });
-document.getElementById('exportPop').addEventListener('click',e=>{ const b=e.target.closest('[data-exp]'); if(!b)return;
-  document.getElementById('exportPop').style.display='none';
-  ({csv:()=>exportData('csv'),geojson:()=>exportData('geojson'),bairros:exportBairros,
-    serie:exportSerie,grade:exportGrade,png:exportPNG,pdf:exportPDF})[b.dataset.exp]?.(); });
-
-// ---------- Custom Export (Seletor de Colunas) ----------
-document.getElementById('btnExportCustom').addEventListener('click',()=>{
-  document.getElementById('exportCustomModal').style.display='flex';
-});
+// Nota: Exportação movida para Admin Console (seção Dados)
+// Botões de exportação da barra principal foram removidos por segurança
 
 function toCSVCustom(rows, selectedCols){
   if(!rows||!rows.length) return '';
@@ -1726,7 +3525,7 @@ const FONTS={ system:{stack:"ui-sans-serif,system-ui,-apple-system,Segoe UI,Robo
 let cfgLogoUrl=null;
 function applyConfig(cfg){
   cfg=cfg||{}; state.config=cfg;
-  const titulo=cfg.titulo||'Iluminação Pública', sub=cfg.subtitulo||'Niterói · SECONSER';
+  const titulo=cfg.titulo||'Public Lighting Management', sub=cfg.subtitulo||'Powered by OpenLux';
   const t=document.getElementById('cfgTitulo'), s=document.getElementById('cfgSub');
   if(t) t.textContent=titulo; if(s) s.textContent=' · '+sub;
   document.title=titulo+' · '+sub;
@@ -1745,8 +3544,8 @@ function applyConfig(cfg){
 }
 async function loadConfig(){ try{ const {data}=await sb.from('site_config').select('dados').eq('id',1).single(); if(data) applyConfig(data.dados); }catch(e){} }
 function fillConfigForm(){ const c=state.config||{};
-  document.getElementById('cfgTit').value=c.titulo||'Iluminação Pública';
-  document.getElementById('cfgSubIn').value=c.subtitulo||'Niterói · SECONSER';
+  document.getElementById('cfgTit').value=c.titulo||'Public Lighting Management';
+  document.getElementById('cfgSubIn').value=c.subtitulo||'Powered by OpenLux';
   document.getElementById('cfgAccent').value=c.accent||'#1d4ed8';
   document.getElementById('cfgFonte').value=c.fonte||'system';
   document.getElementById('cfgPanel').value=c.panelBg||'#0f151c';
@@ -1772,8 +3571,8 @@ document.getElementById('cfgLogoRemove').onclick=()=>{ cfgLogoUrl=null;
   const pv=document.getElementById('cfgLogoPrev'); pv.style.display='none'; pv.removeAttribute('src');
   document.getElementById('cfgLogoFile').value=''; };
 document.getElementById('cfgSave').onclick=async()=>{
-  const dados={ titulo:document.getElementById('cfgTit').value.trim()||'Iluminação Pública',
-    subtitulo:document.getElementById('cfgSubIn').value.trim()||'Niterói · SECONSER',
+  const dados={ titulo:document.getElementById('cfgTit').value.trim()||'Public Lighting Management',
+    subtitulo:document.getElementById('cfgSubIn').value.trim()||'Powered by OpenLux',
     accent:document.getElementById('cfgAccent').value, fonte:document.getElementById('cfgFonte').value,
     panelBg:document.getElementById('cfgPanel').value, density:document.getElementById('cfgDensity').value,
     logo:cfgLogoUrl||null };
@@ -1943,8 +3742,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // ---------- acessibilidade ----------
 { const arias={fBairro:'Filtrar por bairro',fTipo:'Filtrar por tipo de lâmpada',fEstado:'Filtrar por estado',
     fPot:'Filtrar por potência mínima',fFila:'Fila de auditoria',fLimpar:'Limpar filtros',btnFiltros:'Abrir filtros',btnVis:'Alternar visualizações',
-    btnExport:'Abrir menu de exportação',btnChoro:'Alternar mapa coroplético',btnDens:'Alternar grade de densidade luminotécnica',btnTabela:'Abrir tabela de registros',
-    btnStats:'Abrir indicadores',btnNovo:'Cadastrar novo ponto',btnAdminConsole:'Abrir administração',btnLogin:'Entrar ou sair',
+    btnChoro:'Alternar mapa coroplético',btnDens:'Alternar grade de densidade luminotécnica',btnTabela:'Abrir tabela de registros',
+    btnStats:'Abrir indicadores',btnCharts:'Abrir série temporal e KPIs avançados',btnNovo:'Cadastrar novo ponto',btnAdminConsole:'Abrir administração',btnLogin:'Entrar ou sair',
     tSearch:'Buscar por endereço ou patrimônio',tBairro:'Filtrar tabela por bairro',tStatus:'Filtrar tabela por estado',
     tPrev:'Página anterior',tNext:'Próxima página',tClose:'Fechar tabela'};
   Object.entries(arias).forEach(([id,l])=>{const el=document.getElementById(id); if(el) el.setAttribute('aria-label',l);}); }

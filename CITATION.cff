@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: "If you use this software or method, please cite as below."
+title: "OpenLux — Georeferenced public lighting asset management system with first-order installation photometric indices"
+abstract: >-
+  Open-source platform for georeferenced management of public lighting parks, featuring
+  a lightweight method for capturing installation condition at scale (aiming angle and
+  ground material reflectance), first-order photometric indices (floor utilization,
+  light pollution, relative luminance), and polygon-based spatial analysis via PostGIS.
+  Designed for reproducibility, auditability, and deployment in any city.
+type: software
+authors:
+  - family-names: Valim
+    given-names: Danilo
+    orcid: "https://orcid.org/0009-0009-7250-6151"
+repository-code: "https://github.com/DaniloSFValim/openlux"
+url: "https://iluminacao-niteroi.netlify.app"
+license: MIT
+version: "1.3.0"
+date-released: "2026-07-11"
+keywords:
+  - iluminação pública
+  - public lighting
+  - fotometria
+  - poluição luminosa
+  - light pollution
+  - PostGIS
+  - SIG
+  - GIS
+  - modernização LED
+  - smart cities
+doi: "10.5281/zenodo.21305310"

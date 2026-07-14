@@ -10,7 +10,7 @@ Somos comprometidos com um ambiente respeitoso e inclusivo. Veja [CODE_OF_CONDUC
 
 ### 1. Report de Bug
 
-Se encontrar um bug, abra uma [issue](https://github.com/DaniloSFValim/iluminacao-led-niteroi/issues/new?template=bug.md):
+Se encontrar um bug, abra uma [issue](https://github.com/DaniloSFValim/openlux/issues/new?template=bug.md):
 
 **Inclua:**
 - Descrição clara do problema
@@ -21,7 +21,7 @@ Se encontrar um bug, abra uma [issue](https://github.com/DaniloSFValim/iluminaca
 
 ### 2. Feature Request
 
-Tem uma ideia? Abra uma [issue de feature](https://github.com/DaniloSFValim/iluminacao-led-niteroi/issues/new?template=feature.md):
+Tem uma ideia? Abra uma [issue de feature](https://github.com/DaniloSFValim/openlux/issues/new?template=feature.md):
 
 **Inclua:**
 - Descrição da feature
@@ -37,8 +37,8 @@ Pronto para contribuir com código?
 
 ```bash
 # 1. Fork e clone
-git clone https://github.com/seu-usuario/iluminacao-led-niteroi.git
-cd iluminacao-led-niteroi
+git clone https://github.com/seu-usuario/openlux.git
+cd openlux
 
 # 2. Criar branch
 git checkout -b feature/meu-recurso
@@ -122,11 +122,11 @@ Tipicamente leva **1-3 dias**.
 - [README.md](./README.md) — Setup e uso
 - [ARCHITECTURE.md](./ARCHITECTURE.md) — Design técnico
 - [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) — FAQ
-- [GitHub Issues](https://github.com/DaniloSFValim/iluminacao-led-niteroi/issues)
+- [GitHub Issues](https://github.com/DaniloSFValim/openlux/issues)
 
 ## ❓ Dúvidas?
 
-- 💬 Abra uma [discussion](https://github.com/DaniloSFValim/iluminacao-led-niteroi/discussions)
+- 💬 Abra uma [discussion](https://github.com/DaniloSFValim/openlux/discussions)
 - 📧 Contate o maintainer
 
 ---

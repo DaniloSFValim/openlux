@@ -130,7 +130,7 @@ git push origin claude/devops-reproducibility-audit-vgpxz9
 ### No GitHub
 
 ```
-1. Abra https://github.com/DaniloSFValim/iluminacao-led-niteroi
+1. Abra https://github.com/DaniloSFValim/openlux
 2. Vá para "Actions"
 3. Veja 3 workflows novos executando:
    - Security Scanning
