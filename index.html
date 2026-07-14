@@ -23,70 +23,344 @@
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 
+<link rel="stylesheet" href="design-tokens.css"/>
+
 <style>
-  html,body,#map{height:100%;margin:0}
-  body{background:#0b0f14;color:#e5e7eb;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-  .leaflet-container{background:#0b0f14}
-  .leaflet-interactive{cursor:pointer}
-  .panel{background:var(--panel);border:1px solid #1f2a37}
-  .chip{background:#111a24;border:1px solid #1f2a37}
-  .cluster-label{color:#0b0f14;font-weight:700;font-size:11px;text-align:center;line-height:1}
-  input,select,textarea{background:#0b1017;border:1px solid #24303d;color:#e5e7eb;border-radius:6px;padding:6px 8px;font-size:13px;width:100%}
-  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
-  button{cursor:pointer}
-  :root{--accent:#1d4ed8;--panel:#0f151c}
-  .btn{border:1px solid #24303d;background:#111a24;border-radius:6px;padding:6px 12px;font-size:13px;color:#e5e7eb}
-  .btn:hover{border-color:var(--accent)}
-  .btn.on{border-color:var(--accent);background:#16233a}
-  .btn-accent{background:var(--accent);border-color:var(--accent);color:#fff}
-  .btn-accent:hover{filter:brightness(1.12)}
-  ::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:#24303d;border-radius:4px}
-  .badge{font-size:11px;padding:2px 8px;border-radius:999px;font-weight:600}
-  table{font-size:12.5px}th,td{padding:6px 8px;text-align:left;border-bottom:1px solid #1a232e}
-  th{color:#9ca3af;font-weight:600;position:sticky;top:0;background:#0f151c}
-  tr:hover td{background:#111a24}
-  #toast{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:2000;display:none;padding:10px 16px;border-radius:8px;font-size:13px;max-width:80vw}
-  .spin{width:12px;height:12px;border:2px solid #24303d;border-top-color:#3b82f6;border-radius:50%;display:inline-block;animation:sp .7s linear infinite}
-  @keyframes sp{to{transform:rotate(360deg)}}
-  @keyframes scaleIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
-  .animate-scaleIn{animation:scaleIn 300ms cubic-bezier(0.34,1.56,0.64,1)}
-  .lamp-ic{background:none;border:none}
-  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
-  #cfgLogo{height:26px;width:auto;border-radius:4px;display:none;margin-right:8px}
-  body[data-density="compact"] .btn{padding:4px 9px;font-size:12px}
-  body[data-density="compact"] td,body[data-density="compact"] th{padding:4px 6px}
-  body[data-density="compact"] input,body[data-density="compact"] select,body[data-density="compact"] textarea{padding:4px 6px}
-  body[data-density="comfortable"] .btn{padding:9px 16px;font-size:14px}
-  body[data-density="comfortable"] td,body[data-density="comfortable"] th{padding:9px 11px}
-  body[data-density="comfortable"] input,body[data-density="comfortable"] select,body[data-density="comfortable"] textarea{padding:9px 11px}
-  @media (max-width:640px){
-    #tblReg th:nth-child(5),#tblReg td:nth-child(5),#tblReg th:nth-child(7),#tblReg td:nth-child(7){display:none}
+  html, body, #map {
+    height: 100%;
+    margin: 0;
   }
-  /* Light theme */
-  body[data-theme="light"]{background:#f5f5f5;color:#1a1a1a}
-  body[data-theme="light"] .leaflet-container{background:#f0f0f0}
-  body[data-theme="light"] .panel{background:#ffffff;border-color:#e0e0e0}
-  body[data-theme="light"] .chip{background:#f9f9f9;border-color:#e0e0e0}
-  body[data-theme="light"] input,body[data-theme="light"] select,body[data-theme="light"] textarea{background:#ffffff;border-color:#d0d0d0;color:#1a1a1a}
-  body[data-theme="light"] input:focus,body[data-theme="light"] select:focus,body[data-theme="light"] textarea:focus{border-color:#1d4ed8}
-  body[data-theme="light"] .btn{border-color:#d0d0d0;background:#f5f5f5;color:#1a1a1a}
-  body[data-theme="light"] .btn:hover{border-color:#1d4ed8;background:#e8e8e8}
-  body[data-theme="light"] table th{background:#f5f5f5;color:#1a1a1a}
-  body[data-theme="light"] table tr:hover td{background:#f9f9f9}
-  body[data-theme="light"] #toast{background:#f0f0f0;border-color:#ddd}
+
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-family-base);
+  }
+
+  .leaflet-container {
+    background: var(--bg-primary);
+  }
+
+  .leaflet-interactive {
+    cursor: pointer;
+  }
+
+  .panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color-lighter);
+  }
+
+  .chip {
+    background: var(--bg-chip);
+    border: 1px solid var(--border-color-lighter);
+  }
+
+  .cluster-label {
+    color: var(--bg-primary);
+    font-weight: 700;
+    font-size: var(--font-size-xs);
+    text-align: center;
+    line-height: var(--line-height-tight);
+  }
+
+  input, select, textarea {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--input-text);
+    border-radius: var(--radius-lg);
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-base);
+    width: 100%;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--input-border-focus);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  /* Backward compatibility: old --accent and --panel vars */
+  :root {
+    --accent: var(--color-primary-700);
+    --panel: var(--bg-panel);
+  }
+
+  .btn {
+    border: 1px solid var(--border-color-light);
+    background: var(--bg-chip);
+    border-radius: var(--radius-lg);
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-base);
+    color: var(--text-primary);
+    transition: border-color var(--transition-fast), background-color var(--transition-fast);
+  }
+
+  .btn:hover {
+    border-color: var(--color-primary-700);
+    background: var(--bg-secondary);
+  }
+
+  .btn.on {
+    border-color: var(--color-primary-700);
+    background: #16233a;
+  }
+
+  .btn-accent {
+    background: var(--color-primary-700);
+    border-color: var(--color-primary-700);
+    color: #fff;
+  }
+
+  .btn-accent:hover {
+    background: var(--color-primary-600);
+    border-color: var(--color-primary-600);
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-color-light);
+    border-radius: var(--radius-md);
+  }
+
+  .badge {
+    font-size: var(--font-size-xs);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  table {
+    font-size: 12.5px;
+  }
+
+  th, td {
+    padding: var(--space-sm) var(--space-md);
+    text-align: left;
+    border-bottom: 1px solid #1a232e;
+  }
+
+  th {
+    color: var(--text-tertiary);
+    font-weight: var(--font-weight-semibold);
+    position: sticky;
+    top: 0;
+    background: var(--bg-panel);
+  }
+
+  tr:hover td {
+    background: var(--bg-chip);
+  }
+
+  #toast {
+    position: absolute;
+    bottom: var(--space-lg);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: var(--z-toast);
+    display: none;
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-xl);
+    font-size: var(--font-size-base);
+    max-width: 80vw;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+  }
+
+  .spin {
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--border-color-light);
+    border-top-color: var(--color-primary-600);
+    border-radius: 50%;
+    display: inline-block;
+    animation: sp 0.7s linear infinite;
+  }
+
+  @keyframes sp {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-scaleIn {
+    animation: scaleIn 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .lamp-ic {
+    background: none;
+    border: none;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+
+  #cfgLogo {
+    height: 26px;
+    width: auto;
+    border-radius: var(--radius-md);
+    display: none;
+    margin-right: var(--space-md);
+  }
+
+  /* Density variants */
+  body[data-density="compact"] .btn {
+    padding: 4px 9px;
+    font-size: 12px;
+  }
+
+  body[data-density="compact"] td,
+  body[data-density="compact"] th {
+    padding: 4px 6px;
+  }
+
+  body[data-density="compact"] input,
+  body[data-density="compact"] select,
+  body[data-density="compact"] textarea {
+    padding: 4px 6px;
+  }
+
+  body[data-density="comfortable"] .btn {
+    padding: 9px 16px;
+    font-size: 14px;
+  }
+
+  body[data-density="comfortable"] td,
+  body[data-density="comfortable"] th {
+    padding: 9px 11px;
+  }
+
+  body[data-density="comfortable"] input,
+  body[data-density="comfortable"] select,
+  body[data-density="comfortable"] textarea {
+    padding: 9px 11px;
+  }
+
+  /* Mobile responsiveness */
+  @media (max-width: 640px) {
+    #tblReg th:nth-child(5),
+    #tblReg td:nth-child(5),
+    #tblReg th:nth-child(7),
+    #tblReg td:nth-child(7) {
+      display: none;
+    }
+  }
+
+  /* Light theme overrides */
+  body[data-theme="light"] {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+  }
+
+  body[data-theme="light"] .leaflet-container {
+    background: var(--bg-primary);
+  }
+
+  body[data-theme="light"] .panel {
+    background: var(--bg-panel);
+    border-color: var(--border-color);
+  }
+
+  body[data-theme="light"] .chip {
+    background: var(--bg-chip);
+    border-color: var(--border-color);
+  }
+
+  body[data-theme="light"] input,
+  body[data-theme="light"] select,
+  body[data-theme="light"] textarea {
+    background: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--input-text);
+  }
+
+  body[data-theme="light"] input:focus,
+  body[data-theme="light"] select:focus,
+  body[data-theme="light"] textarea:focus {
+    border-color: var(--input-border-focus);
+  }
+
+  body[data-theme="light"] .btn {
+    border-color: var(--border-color-light);
+    background: var(--bg-chip);
+    color: var(--text-primary);
+  }
+
+  body[data-theme="light"] .btn:hover {
+    border-color: var(--color-primary-700);
+    background: var(--bg-secondary);
+  }
+
+  body[data-theme="light"] table th {
+    background: var(--bg-panel);
+    color: var(--text-primary);
+  }
+
+  body[data-theme="light"] table tr:hover td {
+    background: var(--bg-chip);
+  }
+
+  body[data-theme="light"] #toast {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+  }
+
+  /* WCAG AA Focus Ring */
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--color-primary-600);
+    outline-offset: 2px;
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 </style>
 </head>
 <body>
 <div id="map" role="main" aria-label="Mapa de iluminação pública de Niterói"></div>
-<div id="splash" class="fixed inset-0 z-[3000] bg-slate-950 flex flex-col items-center justify-center gap-2 transition-opacity duration-500">
+<div id="splash" class="fixed inset-0 z-[3000] flex flex-col items-center justify-center gap-2 transition-opacity duration-500" style="background: var(--bg-primary);">
   <img id="splashLogo" alt="" class="h-14 hidden mb-2"/>
-  <div id="splashTitle" style="font-size:23px;font-weight:700;color:#e5e7eb;letter-spacing:.3px">OpenLux</div>
-  <div style="font-size:13px;color:#9ca3af">Public Lighting Asset Management</div>
-  <div style="font-size:12px;color:#6b7280;margin-top:16px">Desenvolvido por <span style="color:#cbd5e1">Danilo Valim</span></div>
-  <div style="font-size:11px;color:#5f6b78">v1.1</div>
+  <div id="splashTitle" style="font-size:23px;font-weight:700;color:var(--text-primary);letter-spacing:.3px">OpenLux</div>
+  <div style="font-size:13px;color:var(--text-tertiary)">Public Lighting Asset Management</div>
+  <div style="font-size:12px;color:var(--text-tertiary);margin-top:16px">Desenvolvido por <span style="color:var(--text-secondary)">Danilo Valim</span></div>
+  <div style="font-size:11px;color:var(--text-tertiary)">v1.1</div>
   <button class="btn" id="splashSkip" style="margin-top:16px">Entrar</button>
 </div>
-<div id="footerBand" role="contentinfo" style="position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:800;max-width:92vw;background:rgba(15,21,28,0.86);border:1px solid #1f2a37;border-radius:8px;padding:5px 14px;font-size:11px;color:#9ca3af;text-align:center;pointer-events:none">OpenLux · Desenvolvido por <span style="color:#cbd5e1">Danilo Valim</span> · v1.1</div>
+<div id="footerBand" role="contentinfo" style="position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:800;max-width:92vw;background:rgba(15,21,28,0.86);border:1px solid var(--border-color-lighter);border-radius:8px;padding:5px 14px;font-size:11px;color:var(--text-tertiary);text-align:center;pointer-events:none">OpenLux · Desenvolvido por <span style="color:var(--text-secondary)">Danilo Valim</span> · v1.1</div>
 
 <!-- TOP BAR - Modernized with Tailwind + Alpine -->
 <div x-data="{ showFilters: false, showExport: false, showVis: false }" class="fixed top-3 left-3 right-3 z-[1000] bg-slate-900/95 backdrop-blur border border-slate-700 rounded-xl shadow-xl p-3 flex items-center gap-3 flex-wrap" role="banner" aria-label="Barra principal">
