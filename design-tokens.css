@@ -163,6 +163,38 @@
      md: 768px (tablet)
      lg: 1024px (desktop)
      xl: 1400px (wide) */
+
+  /* =====================================================
+     COMPONENT TOKENS
+     ===================================================== */
+
+  /* Input & Form Elements */
+  --input-bg: var(--bg-primary);
+  --input-bg-focus: var(--bg-secondary);
+  --input-border: var(--border-color-lighter);
+  --input-border-focus: var(--color-primary-600);
+  --input-text: var(--text-primary);
+  --input-placeholder: var(--text-tertiary);
+
+  /* Buttons */
+  --btn-primary-bg: var(--color-primary-600);
+  --btn-primary-hover: var(--color-primary-700);
+  --btn-primary-text: #ffffff;
+  --btn-secondary-bg: var(--bg-tertiary);
+  --btn-secondary-hover: var(--bg-secondary);
+  --btn-secondary-text: var(--text-primary);
+  --btn-secondary-border: var(--border-color-light);
+
+  /* Cards & Panels */
+  --card-bg: var(--bg-secondary);
+  --card-border: var(--border-color);
+  --card-shadow: var(--shadow-md);
+  --card-shadow-hover: var(--shadow-lg);
+
+  /* Modal */
+  --modal-bg: var(--bg-secondary);
+  --modal-border: var(--border-color);
+  --modal-overlay: rgba(0, 0, 0, 0.5);
 }
 
 /* =====================================================
@@ -209,38 +241,6 @@
   --border-color-light: #4b5563;
   --border-color-lighter: #1f2a37;
 }
-
-/* =====================================================
-   COMPONENT TOKENS
-   ===================================================== */
-
-/* Input & Form Elements */
---input-bg: var(--bg-primary);
---input-bg-focus: var(--bg-secondary);
---input-border: var(--border-color-lighter);
---input-border-focus: var(--color-primary-600);
---input-text: var(--text-primary);
---input-placeholder: var(--text-tertiary);
-
-/* Buttons */
---btn-primary-bg: var(--color-primary-600);
---btn-primary-hover: var(--color-primary-700);
---btn-primary-text: #ffffff;
---btn-secondary-bg: var(--bg-tertiary);
---btn-secondary-hover: var(--bg-secondary);
---btn-secondary-text: var(--text-primary);
---btn-secondary-border: var(--border-color-light);
-
-/* Cards & Panels */
---card-bg: var(--bg-secondary);
---card-border: var(--border-color);
---card-shadow: var(--shadow-md);
---card-shadow-hover: var(--shadow-lg);
-
-/* Modal */
---modal-bg: var(--bg-secondary);
---modal-border: var(--border-color);
---modal-overlay: rgba(0, 0, 0, 0.5);
 
 /* =====================================================
    UTILITY CLASSES
