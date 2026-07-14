@@ -316,6 +316,136 @@
     #tblReg th:nth-child(5),#tblReg td:nth-child(5),#tblReg th:nth-child(7),#tblReg td:nth-child(7){display:none}
   }
 
+  /* ========== FASE 4: ANIMATIONS & POLISH ========== */
+  /* Smooth scroll behavior */
+  html { scroll-behavior: smooth; }
+
+  /* Modal fade-in animation */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  /* Apply animations to modals */
+  div[id*="Modal"] { animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  div[id*="Modal"][style*="display: none"] { animation: none; }
+
+  /* Panel animations */
+  div[role="complementary"] {
+    animation: slideInRight 0.3s ease;
+  }
+
+  /* Button micro-interactions */
+  .btn {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  .btn:active::after {
+    width: 300px;
+    height: 300px;
+  }
+
+  /* Card hover scale */
+  .chip:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.2);
+  }
+
+  /* Table row hover with smooth background */
+  table tbody tr {
+    transition: background-color 0.2s ease;
+  }
+
+  table tbody tr:hover {
+    background-color: rgba(6, 182, 212, 0.05);
+  }
+
+  /* Toast animation - fade in and out */
+  #toast {
+    animation: slideUp 0.3s ease;
+  }
+
+  /* Spinner pulse effect */
+  .spin {
+    animation: spin 0.8s linear infinite;
+    filter: drop-shadow(0 0 3px rgba(6, 182, 212, 0.5));
+  }
+
+  /* Loading state pulsing */
+  .pulsing {
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  /* Chart fade-in */
+  canvas {
+    animation: fadeIn 0.5s ease;
+  }
+
+  /* KPI card entrance animation */
+  #kpiSparklines > div {
+    animation: slideDown 0.4s ease-out;
+    animation-fill-mode: both;
+  }
+
+  #kpiSparklines > div:nth-child(1) { animation-delay: 0.05s; }
+  #kpiSparklines > div:nth-child(2) { animation-delay: 0.1s; }
+  #kpiSparklines > div:nth-child(3) { animation-delay: 0.15s; }
+  #kpiSparklines > div:nth-child(4) { animation-delay: 0.2s; }
+
+  /* Input focus glow */
+  input:focus, select:focus, textarea:focus {
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
+  }
+
+  /* Legend smooth transition */
+  #legend, #densCtl, #timelineCtl, #advancedFiltersCtl, #detail, #stats, #poligonoPanel, #modeloModal, #tableModal, #chartsModal {
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+  }
+
+  /* Hidden state for smooth fade */
+  .hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Visible state */
+  [style*="display: block"]:not(.hidden),
+  [style*="display: block"] { opacity: 1; }
+
   /* ========== DATA-THEME OVERRIDES (legacy support) ========== */
   body[data-theme="light"] {
     --bg: var(--bg-light);
@@ -1235,7 +1365,17 @@ function intervLabel(t){ return (INTERV.find(x=>x[0]===t)||[t,t])[1]; }
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 let busy=0;
-function setBusy(b){ busy+=b?1:-1; document.getElementById('loading').style.display = busy>0?'inline':'none'; }
+function setBusy(b){
+  busy+=b?1:-1;
+  const loader = document.getElementById('loading');
+  if(busy>0) {
+    loader.style.display = 'inline';
+    loader.classList.add('pulsing');
+  } else {
+    loader.classList.remove('pulsing');
+    loader.style.display = 'none';
+  }
+}
 function toast(msg,err){ const t=document.getElementById('toast'); t.textContent=msg;
   t.style.background=err?'#3b1113':'#0d2a1a'; t.style.color=err?'#fca5a5':'#86efac';
   t.style.border='1px solid '+(err?'#7f1d1d':'#14532d'); t.style.display='block';
@@ -1927,13 +2067,23 @@ window._showCharts = async () => {
   const modal = document.getElementById('chartsModal');
   if(!modal) return;
   modal.style.display = 'block';
+  // Trigger animation with small delay to allow display: block to take effect
+  setTimeout(() => {
+    modal.classList.remove('hidden');
+    modal.style.opacity = '1';
+  }, 10);
   await renderTimeSeriesChart();
   await renderKPISparklines();
 };
 
 window._closeCharts = () => {
   const modal = document.getElementById('chartsModal');
-  if(modal) modal.style.display = 'none';
+  if(!modal) return;
+  modal.style.opacity = '0';
+  setTimeout(() => {
+    modal.style.display = 'none';
+    modal.classList.add('hidden');
+  }, 300);
 };
 
 document.getElementById('btnDens').onclick = ()=>{
