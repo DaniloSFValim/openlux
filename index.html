@@ -1029,19 +1029,370 @@
     outline-offset: 2px;
   }
 
+  /* =====================================================
+     UTILITY CLASSES (Phase B Refactoring)
+     ===================================================== */
+
+  /* Text Utilities - Headings */
+  .h1 {
+    font-size: 23px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: 0.3px;
+  }
+
+  .h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  /* Text Utilities - Body & Captions */
+  .body {
+    font-size: 13px;
+    color: var(--text-primary);
+  }
+
+  .body-secondary {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .body-tertiary {
+    font-size: 13px;
+    color: var(--text-tertiary);
+  }
+
+  .caption {
+    font-size: 11px;
+    color: var(--text-tertiary);
+  }
+
+  .caption-sm {
+    font-size: 11px;
+    color: var(--text-tertiary);
+  }
+
+  .small {
+    font-size: 12px;
+    color: var(--text-tertiary);
+  }
+
+  /* Text Utilities - Semantic */
+  .text-muted {
+    color: var(--text-tertiary);
+  }
+
+  .text-secondary {
+    color: var(--text-secondary);
+  }
+
+  .text-error {
+    color: var(--color-error);
+  }
+
+  .text-success {
+    color: var(--color-success);
+  }
+
+  .text-warning {
+    color: var(--color-warning);
+  }
+
+  /* Spacing Utilities */
+  .mt-1 { margin-top: 4px; }
+  .mt-2 { margin-top: 8px; }
+  .mt-3 { margin-top: 12px; }
+  .mt-4 { margin-top: 16px; }
+  .mt-5 { margin-top: 24px; }
+  .mt-6 { margin-top: 32px; }
+
+  .mb-1 { margin-bottom: 4px; }
+  .mb-2 { margin-bottom: 8px; }
+  .mb-3 { margin-bottom: 12px; }
+  .mb-4 { margin-bottom: 16px; }
+
+  .px-1 { padding-left: 4px; padding-right: 4px; }
+  .px-2 { padding-left: 8px; padding-right: 8px; }
+  .px-3 { padding-left: 12px; padding-right: 12px; }
+  .px-4 { padding-left: 16px; padding-right: 16px; }
+
+  .py-1 { padding-top: 4px; padding-bottom: 4px; }
+  .py-2 { padding-top: 8px; padding-bottom: 8px; }
+  .py-3 { padding-top: 12px; padding-bottom: 12px; }
+
+  .gap-1 { gap: 4px; }
+  .gap-2 { gap: 8px; }
+  .gap-3 { gap: 12px; }
+  .gap-4 { gap: 16px; }
+
+  /* Positioning Utilities */
+  .absolute-center-x {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .absolute-center-y {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .absolute-center {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  /* Footer/Toast Band */
+  .toast-band {
+    position: absolute;
+    left: 50%;
+    bottom: 12px;
+    transform: translateX(-50%);
+    z-index: 800;
+    max-width: 92vw;
+    background: rgba(15, 21, 28, 0.86);
+    border: 1px solid var(--border-color-lighter);
+    border-radius: 8px;
+    padding: 5px 14px;
+    font-size: 11px;
+    color: var(--text-tertiary);
+    text-align: center;
+    pointer-events: none;
+  }
+
+  /* Splash Screen */
+  .splash-title {
+    font-size: 23px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: 0.3px;
+  }
+
+  .splash-subtitle {
+    font-size: 13px;
+    color: var(--text-tertiary);
+  }
+
+  .splash-credit {
+    font-size: 12px;
+    color: var(--text-tertiary);
+  }
+
+  .splash-version {
+    font-size: 11px;
+    color: var(--text-tertiary);
+  }
+
+  /* Panel & Card Utilities */
+  .panel-bg {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+  }
+
+  .panel-compact {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Button States */
+  .btn-primary-solid {
+    background: var(--color-primary-600);
+    color: white;
+  }
+
+  .btn-primary-solid:hover {
+    background: var(--color-primary-700);
+  }
+
+  .btn-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Input Wrapper Utilities */
+  .input-wrapper {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--input-text);
+  }
+
+  .input-focus {
+    border-color: var(--input-border-focus);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+  }
+
+  /* Loading Spinner */
+  .spinner-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    min-height: 200px;
+  }
+
+  /* Hidden/Shown */
+  .hidden { display: none !important; }
+  .visible { display: block !important; }
+  .flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Button Group Utilities */
+  .btn-secondary-solid {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    min-height: 44px;
+  }
+
+  .btn-secondary-solid:hover {
+    background: var(--bg-secondary);
+    border-color: var(--border-color-light);
+  }
+
+  .btn-icon {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .btn-icon:hover {
+    background: var(--bg-secondary);
+  }
+
+  .btn-badge {
+    background: var(--color-primary-600);
+    color: white;
+    font-weight: 600;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 9999px;
+  }
+
+  /* Form Label Utilities */
+  .form-label-inline {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: var(--text-tertiary);
+  }
+
+  /* Input Variants */
+  .input-default {
+    width: 100%;
+    padding: 10px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--input-text);
+  }
+
+  .dropdown-panel {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    width: 224px;
+    border-radius: 8px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 1001;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+  }
+
+  .progress-bar {
+    width: 80px;
+    height: 4px;
+    border-radius: 9999px;
+    overflow: hidden;
+    background: var(--bg-tertiary);
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(to right, #f59e0b, #10b981);
+    transition: width 0.5s ease-out;
+  }
+
+  /* Button Variants - Action Buttons */
+  .btn-info-border {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--color-info);
+    color: var(--color-info);
+    min-height: 44px;
+  }
+
+  .btn-info-border:hover {
+    background: rgba(6, 182, 212, 0.1);
+  }
+
+  .btn-success-solid {
+    background: var(--color-success);
+    color: white;
+    min-height: 44px;
+    font-weight: 500;
+  }
+
+  .btn-success-solid:hover {
+    background: #059669;
+  }
+
+  .btn-error-border {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--color-error);
+    color: var(--color-error);
+    min-height: 44px;
+  }
+
+  .btn-error-border:hover {
+    background: rgba(239, 68, 68, 0.1);
+  }
+
 </style>
 </head>
 <body>
 <div id="map" role="main" aria-label="Mapa de iluminação pública de Niterói"></div>
 <div id="splash" class="fixed inset-0 z-[3000] flex flex-col items-center justify-center gap-2 transition-opacity duration-500" style="background: var(--bg-primary);">
   <img id="splashLogo" alt="" class="h-14 hidden mb-2"/>
-  <div id="splashTitle" style="font-size:23px;font-weight:700;color:var(--text-primary);letter-spacing:.3px">OpenLux</div>
-  <div style="font-size:13px;color:var(--text-tertiary)">Public Lighting Asset Management</div>
-  <div style="font-size:12px;color:var(--text-tertiary);margin-top:16px">Desenvolvido por <span style="color:var(--text-secondary)">Danilo Valim</span></div>
-  <div style="font-size:11px;color:var(--text-tertiary)">v1.1</div>
-  <button class="btn" id="splashSkip" style="margin-top:16px">Entrar</button>
+  <div id="splashTitle" class="splash-title">OpenLux</div>
+  <div class="splash-subtitle">Public Lighting Asset Management</div>
+  <div class="splash-credit mt-4">Desenvolvido por <span style="color:var(--text-secondary)">Danilo Valim</span></div>
+  <div class="splash-version">v1.1</div>
+  <button class="btn mt-4" id="splashSkip">Entrar</button>
 </div>
-<div id="footerBand" role="contentinfo" style="position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:800;max-width:92vw;background:rgba(15,21,28,0.86);border:1px solid var(--border-color-lighter);border-radius:8px;padding:5px 14px;font-size:11px;color:var(--text-tertiary);text-align:center;pointer-events:none">OpenLux · Desenvolvido por <span style="color:var(--text-secondary)">Danilo Valim</span> · v1.1</div>
+<div id="footerBand" role="contentinfo" class="toast-band">OpenLux · Desenvolvido por <span style="color:var(--text-secondary)">Danilo Valim</span> · v1.1</div>
 
 <!-- TOP BAR - Phase 2: Modernized Design with Responsive Layout -->
 <header x-data="{
@@ -1080,13 +1431,11 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
       <!-- Right Actions: Theme Toggle + Login (Always Visible) -->
       <div class="flex items-center gap-2 ml-auto flex-shrink-0">
         <button id="themeToggle"
-          class="p-2 rounded-lg transition-all"
+          class="p-2 rounded-lg transition-all btn-icon"
           title="Alternar tema claro/escuro"
-          aria-label="Alternar tema"
-          style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary); min-height: 44px; min-width: 44px;">🌙</button>
+          aria-label="Alternar tema">🌙</button>
         <button id="btnLogin"
-          class="px-3 py-2 rounded-lg font-medium text-sm sm:text-base text-white transition-all"
-          style="background: var(--color-primary-600); min-height: 44px;">🔑 <span class="hidden sm:inline">Entrar</span></button>
+          class="px-3 py-2 rounded-lg font-medium text-sm sm:text-base transition-all btn-primary-solid">🔑 <span class="hidden sm:inline">Entrar</span></button>
       </div>
     </div>
 
@@ -1097,52 +1446,48 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
         <!-- Filters -->
         <div class="relative">
           <button @click="showFilters = !showFilters"
-            class="px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 flex-shrink-0"
-            style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary); min-height: 44px;"
+            class="px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 flex-shrink-0 btn-secondary-solid"
             id="btnFiltros">
             <span class="hidden sm:inline">⚙️ Filtros</span>
             <span class="sm:hidden">⚙️</span>
-            <span id="fCount" class="hidden ml-1 rounded-full px-2 text-xs font-semibold" style="background: var(--color-primary-600); color: white;"></span>
+            <span id="fCount" class="hidden ml-1 btn-badge"></span>
           </button>
           <div x-show="showFilters"
             @click.away="showFilters = false"
-            class="absolute top-full right-0 mt-2 w-56 rounded-lg shadow-xl p-4 flex flex-col gap-3 z-[1001]"
+            class="dropdown-panel"
             id="filtrosPop"
-            style="display: none; background: var(--bg-secondary); border: 1px solid var(--border-color);">
+            style="display: none;">
             <!-- Bairro Select -->
             <div>
-              <label class="block text-xs font-medium mb-1.5" style="color: var(--text-tertiary);">🏢 Bairro</label>
+              <label class="form-label-inline">🏢 Bairro</label>
               <select id="fBairro"
                 hx-get="/api/v1/bairros"
                 hx-target="#fTipo"
                 hx-trigger="change"
                 hx-swap="innerHTML swap:200ms"
                 hx-indicator="#loading"
-                class="w-full px-2.5 py-1.5 rounded-lg text-sm transition-colors"
-                style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
+                class="input-default">
                 <option value="">Todos</option>
               </select>
             </div>
             <!-- Tipo Select -->
             <div>
-              <label class="block text-xs font-medium mb-1.5" style="color: var(--text-tertiary);">💡 Tipo</label>
+              <label class="form-label-inline">💡 Tipo</label>
               <select id="fTipo"
                 hx-get="/api/v1/tipos-por-bairro"
                 hx-trigger="change"
                 hx-swap="innerHTML swap:200ms"
                 hx-indicator="#loading"
-                class="w-full px-2.5 py-1.5 rounded-lg text-sm transition-colors"
-                style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
+                class="input-default">
                 <option value="">Todos</option>
               </select>
             </div>
             <!-- Estado Select -->
             <div>
-              <label class="block text-xs font-medium mb-1.5" style="color: var(--text-tertiary);">🔆 Estado</label>
+              <label class="form-label-inline">🔆 Estado</label>
               <select id="fEstado"
                 hx-trigger="change"
-                class="w-full px-2.5 py-1.5 rounded-lg text-sm transition-colors"
-                style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
+                class="input-default">
                 <option value="">Todos</option>
                 <option value="led">LED</option>
                 <option value="pendente">Pendente</option>
@@ -1151,9 +1496,8 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
             </div>
             <!-- Potência Select -->
             <div>
-              <label class="block text-xs font-medium mb-1.5" style="color: var(--text-tertiary);">⚡ Potência mínima</label>
-              <select id="fPot" class="w-full px-2.5 py-1.5 rounded-lg text-sm transition-colors"
-                style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
+              <label class="form-label-inline">⚡ Potência mínima</label>
+              <select id="fPot" class="input-default">
                 <option value="">Qualquer</option>
                 <option value="150">≥ 150 W</option>
                 <option value="250">≥ 250 W</option>
@@ -1162,9 +1506,8 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
             </div>
             <!-- Fila Select -->
             <div>
-              <label class="block text-xs font-medium mb-1.5" style="color: var(--text-tertiary);">📋 Fila</label>
-              <select id="fFila" class="w-full px-2.5 py-1.5 rounded-lg text-sm transition-colors"
-                style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
+              <label class="form-label-inline">📋 Fila</label>
+              <select id="fFila" class="input-default">
                 <option value="">— nenhuma —</option>
                 <option value="nao_verificado">🧭 Não verificados</option>
                 <option value="revisao">Marcados p/ revisão</option>
@@ -1173,9 +1516,8 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
             </div>
             <!-- Saúde Select -->
             <div>
-              <label class="block text-xs font-medium mb-1.5" style="color: var(--text-tertiary);">🏥 Status</label>
-              <select id="fSaude" class="w-full px-2.5 py-1.5 rounded-lg text-sm transition-colors"
-                style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
+              <label class="form-label-inline">🏥 Status</label>
+              <select id="fSaude" class="input-default">
                 <option value="">Qualquer</option>
                 <option value="verde">🟢 Bom</option>
                 <option value="amarelo">🟡 Manutenção</option>
@@ -1183,32 +1525,30 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
               </select>
             </div>
             <button id="fLimpar"
-              class="w-full px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-              style="background: var(--bg-tertiary); color: var(--text-primary);">Limpar</button>
+              class="w-full px-3 py-2 rounded-lg text-sm font-medium transition-colors btn-secondary-solid">Limpar</button>
           </div>
         </div>
 
         <!-- Visualize -->
         <div class="relative">
           <button @click="showVis = !showVis"
-            class="px-3 py-2 rounded-lg text-sm font-medium transition-all flex-shrink-0"
-            style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary); min-height: 44px;"
+            class="px-3 py-2 rounded-lg text-sm font-medium transition-all flex-shrink-0 btn-secondary-solid"
             id="btnVis">
             <span class="hidden sm:inline">👁️ Visualizar</span>
             <span class="sm:hidden">👁️</span>
           </button>
           <div x-show="showVis"
             @click.away="showVis = false"
-            class="absolute top-full right-0 mt-2 w-52 rounded-lg shadow-xl p-2 flex flex-col gap-1 z-[1001]"
+            class="dropdown-panel"
             id="visPop"
-            style="display: none; background: var(--bg-secondary); border: 1px solid var(--border-color);">
-            <button id="btnChoro" class="px-3 py-2 text-left text-sm rounded-lg transition-colors" style="color: var(--text-primary);" title="Colorir bairros por % LED">🎨 Coroplético</button>
-            <button id="btnDens" class="px-3 py-2 text-left text-sm rounded-lg transition-colors" style="color: var(--text-primary);" title="Grade 250 m">📊 Densidade</button>
-            <button id="btnTimeline" class="px-3 py-2 text-left text-sm rounded-lg transition-colors" style="color: var(--text-primary);" title="Filtrar por período">📅 Timeline</button>
-            <button id="btnTabela" class="px-3 py-2 text-left text-sm rounded-lg transition-colors" style="color: var(--text-primary);">📋 Tabela</button>
-            <button id="btnStats" class="px-3 py-2 text-left text-sm rounded-lg transition-colors" style="color: var(--text-primary);">📈 Indicadores</button>
-            <button id="btnAdvancedFilters" class="px-3 py-2 text-left text-sm rounded-lg transition-colors" style="color: var(--text-primary);" title="Filtros avançados">🎯 Avançados</button>
-            <button id="btnCharts" class="px-3 py-2 text-left text-sm rounded-lg transition-colors" style="color: var(--text-primary);" onclick="window._showCharts()">📈 Gráficos</button>
+            style="display: none; width: 208px; padding: 8px; gap: 4px;">
+            <button id="btnChoro" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Colorir bairros por % LED">🎨 Coroplético</button>
+            <button id="btnDens" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Grade 250 m">📊 Densidade</button>
+            <button id="btnTimeline" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Filtrar por período">📅 Timeline</button>
+            <button id="btnTabela" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body">📋 Tabela</button>
+            <button id="btnStats" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body">📈 Indicadores</button>
+            <button id="btnAdvancedFilters" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Filtros avançados">🎯 Avançados</button>
+            <button id="btnCharts" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" onclick="window._showCharts()">📈 Gráficos</button>
           </div>
         </div>
       </div>
@@ -1216,15 +1556,12 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
       <!-- Right: Action Buttons (Responsive) -->
       <div class="flex items-center gap-2 w-full sm:w-auto">
         <button id="btnArea"
-          class="px-3 py-2 rounded-lg text-sm font-medium transition-all flex-1 sm:flex-none"
-          style="background: var(--bg-tertiary); border: 1px solid var(--color-info); color: var(--color-info); min-height: 44px;"
+          class="px-3 py-2 rounded-lg text-sm font-medium transition-all flex-1 sm:flex-none btn-info-border"
           title="Selecionar uma área">✏️ <span class="hidden sm:inline">Área</span></button>
         <button id="btnNovo"
-          class="hidden px-3 py-2 rounded-lg text-sm font-medium text-white transition-all"
-          style="background: var(--color-success); min-height: 44px;">+ Ponto</button>
+          class="hidden px-3 py-2 rounded-lg text-sm font-medium transition-all btn-success-solid">+ Ponto</button>
         <button id="btnAdminConsole"
-          class="hidden px-3 py-2 rounded-lg text-sm font-medium transition-all"
-          style="background: var(--bg-tertiary); border: 1px solid var(--color-error); color: var(--color-error); min-height: 44px;">⚙️ <span class="hidden sm:inline">Admin</span></button>
+          class="hidden px-3 py-2 rounded-lg text-sm font-medium transition-all btn-error-border">⚙️ <span class="hidden sm:inline">Admin</span></button>
       </div>
     </div>
   </div>
