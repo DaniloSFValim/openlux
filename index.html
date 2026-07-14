@@ -8,6 +8,10 @@
 <link id="favicon" rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Crect%20width%3D%2732%27%20height%3D%2732%27%20rx%3D%276%27%20fill%3D%27%230b0f14%27/%3E%3Ccircle%20cx%3D%2716%27%20cy%3D%2714%27%20r%3D%276%27%20fill%3D%27%23fbbf24%27/%3E%3Crect%20x%3D%2713%27%20y%3D%2719.5%27%20width%3D%276%27%20height%3D%274%27%20rx%3D%271%27%20fill%3D%27%239ca3af%27/%3E%3Cg%20stroke%3D%27%23fbbf24%27%20stroke-width%3D%271.6%27%20stroke-linecap%3D%27round%27%3E%3Cline%20x1%3D%2716%27%20y1%3D%272.5%27%20x2%3D%2716%27%20y2%3D%275.5%27/%3E%3Cline%20x1%3D%275.5%27%20y1%3D%2714%27%20x2%3D%272.5%27%20y2%3D%2714%27/%3E%3Cline%20x1%3D%2729.5%27%20y1%3D%2714%27%20x2%3D%2726.5%27%20y2%3D%2714%27/%3E%3Cline%20x1%3D%278%27%20y1%3D%276.5%27%20x2%3D%276%27%20y2%3D%274.5%27/%3E%3Cline%20x1%3D%2724%27%20y1%3D%276.5%27%20x2%3D%2726%27%20y2%3D%274.5%27/%3E%3C/g%3E%3C/svg%3E"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Leaflet MarkerCluster for Fase 3 - Multi-cidade (improves performance with 50k+ points) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"/>
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -879,7 +883,8 @@ const sb = window.supabase.createClient(URL_SB, ANON);
 
 const state = { user:null, userRole:null, bairro:"", tipo:"", estado:"", pot:"", fila:"", layer:null, mode:"", tPage:0, tSize:50,
   bairroLayer:null, choropleth:false, choroLayer:null, choroData:null, current:null, tCache:{}, config:null,
-  densidade:false, densLayer:null, densMunLayer:null, densData:null, densMetric:'klm' };
+  densidade:false, densLayer:null, densMunLayer:null, densData:null, densMetric:'klm',
+  markerCluster:null }; // FASE 3: Client-side clustering for multi-cidade
 const TIPOS = ["led","vapor_sodio","metalico","vapor_mercurio","fluorescente","sem_lampada","desconhecido"];
 const STATUS = ["led_instalado","pendente_troca","a_verificar"];
 const TIPO_ATIVO = [['luminaria','Luminária'],['caixa_comando','Caixa de comando'],['chave_magnetica','Chave magnética'],['rele_fotoeletrico','Relé fotoelétrico'],['poste','Poste'],['braco','Braço'],['outro','Outro']];
@@ -1083,6 +1088,30 @@ function aplicaFila(q){ const f=state.fila;
 
 function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
 
+// Initialize markerClusterGroup for Fase 3 multi-cidade support
+function initClusterGroup(){
+  return L.markerClusterGroup({
+    maxClusterRadius: 80,
+    disableClusteringAtZoom: POINT_ZOOM, // Disable clustering at detailed zoom
+    iconCreateFunction: function(cluster){
+      const count = cluster.getChildCount();
+      let c = ' marker-cluster-';
+      if(count < 10) c += 'small';
+      else if(count < 100) c += 'medium';
+      else c += 'large';
+
+      const pct = cluster.getAllChildMarkers().reduce((sum, m)=>sum+(m.options.ledStatus ? 1:0),0)/count;
+      const color = mix(pct);
+
+      return L.divIcon({
+        html: `<div style="background-color:${color};border:2px solid #0b0f14;width:100%;height:100%;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#0b0f14;font-weight:bold;font-size:13px">${count}</div>`,
+        className: 'marker-cluster' + c,
+        iconSize: new L.Point(40, 40)
+      });
+    }
+  });
+}
+
 async function _refresh(){
   if(state.poligono){ return; } // área desenhada fixa o conteúdo; pan/zoom não recarrega
   if(state.densidade){ if(!state.densLayer) renderDensidade(); return; }
@@ -1095,14 +1124,36 @@ async function _refresh(){
   if(z >= POINT_ZOOM){
     state.mode="pontos";
     const data = await rpc('ip_pontos_bbox', {...box, limite:4000, ...filtros()});
-    const usarIcones = (data||[]).length <= 1000;
-    (data||[]).forEach(p=>{
-      let mk;
-      if(usarIcones){ mk = L.marker([p.lat,p.lon],{icon:iconFor(p),keyboard:false}); }
-      else { const rad = z>=18?9:(z>=17?7:6);
-        mk = L.circleMarker([p.lat,p.lon],{radius:rad,weight:1,color:'#0b0f14',fillColor:colorForHealth(p),fillOpacity:.95,bubblingMouseEvents:false}); }
-      mk.on('click',()=>openDetail(p)).addTo(state.layer);
-    });
+
+    // FASE 3: Use client-side clustering for large datasets (50k+ points in multi-city)
+    if((data||[]).length > 500){
+      // Switch to markerClusterGroup for better performance
+      if(!state.markerCluster){ state.markerCluster = initClusterGroup(); }
+      state.markerCluster.clearLayers();
+      const usarIcones = (data||[]).length <= 1000;
+      (data||[]).forEach(p=>{
+        let mk;
+        if(usarIcones){ mk = L.marker([p.lat,p.lon],{icon:iconFor(p),keyboard:false}); }
+        else { const rad = z>=18?9:(z>=17?7:6);
+          mk = L.circleMarker([p.lat,p.lon],{radius:rad,weight:1,color:'#0b0f14',fillColor:colorForHealth(p),fillOpacity:.95,bubblingMouseEvents:false});
+          mk.options.ledStatus = p.led_instalado; // Store LED status for cluster coloring
+        }
+        mk.on('click',()=>openDetail(p));
+        state.markerCluster.addLayer(mk);
+      });
+      if(!map.hasLayer(state.markerCluster)) map.addLayer(state.markerCluster);
+    } else {
+      // Small dataset: use simple layerGroup (no clustering overhead)
+      if(state.markerCluster && map.hasLayer(state.markerCluster)) map.removeLayer(state.markerCluster);
+      const usarIcones = (data||[]).length <= 1000;
+      (data||[]).forEach(p=>{
+        let mk;
+        if(usarIcones){ mk = L.marker([p.lat,p.lon],{icon:iconFor(p),keyboard:false}); }
+        else { const rad = z>=18?9:(z>=17?7:6);
+          mk = L.circleMarker([p.lat,p.lon],{radius:rad,weight:1,color:'#0b0f14',fillColor:colorForHealth(p),fillOpacity:.95,bubblingMouseEvents:false}); }
+        mk.on('click',()=>openDetail(p)).addTo(state.layer);
+      });
+    }
     const mh=document.getElementById('modeHint');
     if(!(data||[]).length){ mh.textContent='Nenhum ponto atende aos filtros nesta região'; mh.style.color='#fbbf24'; }
     else { mh.textContent=`${data.length} pontos nesta área`; mh.style.color='#6b7280'; }
