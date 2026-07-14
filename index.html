@@ -1411,7 +1411,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
       <div class="flex items-center gap-2 flex-shrink-0">
         <img id="cfgLogo" alt="Logo" class="h-6 w-auto rounded hidden mr-1"/>
         <div class="min-w-0 flex-shrink-0">
-          <div class="font-bold text-sm sm:text-base lg:text-lg leading-tight whitespace-nowrap" style="color: var(--text-primary);">
+          <div class="font-bold text-sm sm:text-base lg:text-lg leading-tight whitespace-nowrap text-primary">
             <span id="cfgTitulo">Iluminação Pública</span>
           </div>
           <div class="flex items-center gap-2 mt-0.5">
@@ -1648,7 +1648,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
   <div class="rounded-xl w-[min(1050px,95vw)] h-[min(80vh,760px)] flex flex-col overflow-hidden" style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
     <!-- Header -->
     <div class="flex gap-3 items-center px-5 py-4 border-b flex-wrap" style="background: var(--bg-tertiary); border-color: var(--border-color);">
-      <h3 class="font-semibold text-sm" style="color: var(--text-primary);">📋 Registro de luminárias</h3>
+      <h3 class="font-semibold text-sm text-primary">📋 Registro de luminárias</h3>
       <input id="tSearch" placeholder="Código, endereço ou patrimônio…" class="flex-1 min-w-[200px] px-3 py-2 rounded-lg text-xs transition-all form-input" />
       <select id="tBairro" class="w-40 px-3 py-2 rounded-lg text-xs transition-all form-input"><option value="">Bairro: todos</option></select>
       <select id="tStatus" class="w-40 px-3 py-2 rounded-lg text-xs transition-all form-input">
@@ -1696,7 +1696,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
   <div class="rounded-xl w-[min(500px,95vw)] flex flex-col overflow-hidden" style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
     <!-- Header -->
     <div class="flex gap-3 items-center px-5 py-4 border-b" style="background: var(--bg-tertiary); border-color: var(--border-color);">
-      <h3 class="font-semibold text-base" style="color: var(--text-primary);">📥 Personalizar exportação CSV</h3>
+      <h3 class="font-semibold text-base text-primary">📥 Personalizar exportação CSV</h3>
       <div class="flex-1"></div>
       <button class="px-2 py-1 rounded-lg text-base transition-all" style="background: transparent; color: var(--text-secondary);" onclick="document.getElementById('exportCustomModal').style.display='none'">✕</button>
     </div>
@@ -1707,27 +1707,27 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
 
       <label class="flex items-center gap-3 p-2 cursor-pointer rounded-lg transition-colors" style="hover: var(--bg-tertiary);">
         <input type="checkbox" id="expCol-codigo" class="exp-col-checkbox" value="codigo" checked/>
-        <span class="text-sm" style="color: var(--text-primary);">Código</span>
+        <span class="text-sm text-primary">Código</span>
       </label>
 
       <label class="flex items-center gap-3 p-2 cursor-pointer rounded-lg transition-colors" style="hover: var(--bg-tertiary);">
         <input type="checkbox" id="expCol-endereco" class="exp-col-checkbox" value="endereco" checked/>
-        <span class="text-sm" style="color: var(--text-primary);">Endereço</span>
+        <span class="text-sm text-primary">Endereço</span>
       </label>
 
       <label class="flex items-center gap-3 p-2 cursor-pointer rounded-lg transition-colors" style="hover: var(--bg-tertiary);">
         <input type="checkbox" id="expCol-bairro" class="exp-col-checkbox" value="bairro" checked/>
-        <span class="text-sm" style="color: var(--text-primary);">Bairro</span>
+        <span class="text-sm text-primary">Bairro</span>
       </label>
 
       <label class="flex items-center gap-3 p-2 cursor-pointer rounded-lg transition-colors" style="hover: var(--bg-tertiary);">
         <input type="checkbox" id="expCol-tipo" class="exp-col-checkbox" value="tipo" checked/>
-        <span class="text-sm" style="color: var(--text-primary);">Tipo de Luminária</span>
+        <span class="text-sm text-primary">Tipo de Luminária</span>
       </label>
 
       <label class="flex items-center gap-3 p-2 cursor-pointer rounded-lg transition-colors" style="hover: var(--bg-tertiary);">
         <input type="checkbox" id="expCol-potencia" class="exp-col-checkbox" value="potencia" checked/>
-        <span class="text-sm" style="color: var(--text-primary);">Potência (W)</span>
+        <span class="text-sm text-primary">Potência (W)</span>
       </label>
 
       <label class="flex items-center gap-3 p-2 cursor-pointer hover:bg-slate-700/50 rounded-lg transition-colors">
@@ -1769,9 +1769,9 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
 
 <div id="adminConsole" x-data="{ activeTab: 'visao' }" class="fixed inset-0 z-[1400] flex flex-col hidden" style="background: var(--bg-primary);">
   <!-- Header -->
-  <header class="flex items-center justify-between gap-4 px-6 py-4 border-b" style="background: var(--bg-secondary); border-color: var(--border-color);">
+  <header class="flex items-center justify-between gap-4 px-6 py-4 border-b panel-secondary">
     <div class="flex-1">
-      <h2 class="text-lg font-bold leading-tight" style="color: var(--text-primary);">Administração</h2>
+      <h2 class="text-lg font-bold leading-tight text-primary">Administração</h2>
       <p class="text-xs mt-1 text-muted">OpenLux — Public Lighting Management</p>
     </div>
     <button class="px-4 py-2 rounded-lg text-sm font-medium transition-all" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary);" id="acVoltar">← Voltar</button>
@@ -1780,7 +1780,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
   <!-- Main Content -->
   <div class="flex-1 flex min-h-0 overflow-hidden">
     <!-- Sidebar Navigation - Improved -->
-    <nav role="navigation" aria-label="Seções da administração" class="w-52 border-r p-4 flex flex-col gap-2 overflow-y-auto" style="background: var(--bg-secondary); border-color: var(--border-color);">
+    <nav role="navigation" aria-label="Seções da administração" class="w-52 border-r p-4 flex flex-col gap-2 overflow-y-auto panel-secondary">
       <button @click="activeTab = 'visao'"
         :class="{ 'font-semibold': activeTab === 'visao' }"
         :style="{ background: activeTab === 'visao' ? 'var(--color-primary-600)' : 'transparent', color: activeTab === 'visao' ? 'white' : 'var(--text-secondary)' }"
@@ -1817,12 +1817,12 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
     <div class="flex-1 overflow-auto px-6 py-6 lg:px-8" style="background: var(--bg-primary);">
       <!-- Visão Geral: KPI Dashboard -->
       <section id="sec-visao" :style="{ display: activeTab === 'visao' ? 'block' : 'none' }" class="acsec">
-        <h2 class="text-2xl font-bold mb-6" style="color: var(--text-primary);">Visão Geral do Sistema</h2>
+        <h2 class="text-2xl font-bold mb-6 text-primary">Visão Geral do Sistema</h2>
 
         <!-- KPI Cards Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <!-- Total Luminárias Card -->
-          <div class="p-6 rounded-lg border" style="background: var(--bg-secondary); border-color: var(--border-color);">
+          <div class="p-6 rounded-lg border panel-secondary">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm font-medium mb-2 text-muted">Total de Luminárias</p>
@@ -1833,7 +1833,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
           </div>
 
           <!-- LED Instalado Card -->
-          <div class="p-6 rounded-lg border" style="background: var(--bg-secondary); border-color: var(--border-color);">
+          <div class="p-6 rounded-lg border panel-secondary">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm font-medium mb-2 text-muted">LED Instalado (%)</p>
@@ -1844,7 +1844,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
           </div>
 
           <!-- Potência Média Card -->
-          <div class="p-6 rounded-lg border" style="background: var(--bg-secondary); border-color: var(--border-color);">
+          <div class="p-6 rounded-lg border panel-secondary">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm font-medium mb-2 text-muted">Potência Média (W)</p>
@@ -1855,7 +1855,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
           </div>
 
           <!-- Eficácia Média Card -->
-          <div class="p-6 rounded-lg border" style="background: var(--bg-secondary); border-color: var(--border-color);">
+          <div class="p-6 rounded-lg border panel-secondary">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm font-medium mb-2 text-muted">Eficácia Média (lm/W)</p>
@@ -1868,7 +1868,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
 
         <!-- System Status Section -->
         <div class="bg-slate-900/30 border rounded-lg p-6" style="border-color: var(--border-color);">
-          <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">Status do Sistema</h3>
+          <h3 class="text-lg font-semibold mb-4 text-primary">Status do Sistema</h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div class="flex items-center gap-3">
               <span class="text-2xl">✅</span>
@@ -1898,13 +1898,13 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
       <!-- Usuários Section -->
       <section id="sec-usuarios" :style="{ display: activeTab === 'usuarios' ? 'block' : 'none' }" class="acsec">
         <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-bold" style="color: var(--text-primary);">Gestão de Usuários</h2>
+          <h2 class="text-2xl font-bold text-primary">Gestão de Usuários</h2>
           <div class="px-4 py-2 rounded-lg text-sm font-medium" id="userCount" style="background: var(--bg-tertiary); color: var(--text-secondary);">0 usuários</div>
         </div>
 
         <!-- New User Form Card -->
-        <div class="p-6 rounded-lg border mb-6 max-w-3xl" style="background: var(--bg-secondary); border-color: var(--border-color);">
-          <h3 class="text-lg font-semibold mb-4 flex items-center gap-2" style="color: var(--text-primary);">
+        <div class="p-6 rounded-lg border mb-6 max-w-3xl panel-secondary">
+          <h3 class="text-lg font-semibold mb-4 flex items-center gap-2 text-primary">
             <span>➕</span> Novo operador
           </h3>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1936,7 +1936,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
         </div>
 
         <!-- Users Table -->
-        <div class="rounded-lg border overflow-hidden" style="background: var(--bg-secondary); border-color: var(--border-color);">
+        <div class="rounded-lg border overflow-hidden panel-secondary">
           <table class="w-full" style="font-size:13px;">
             <thead style="background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color);">
               <tr>
@@ -1953,12 +1953,12 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
 
       <!-- Aparência Section -->
       <section id="sec-aparencia" :style="{ display: activeTab === 'aparencia' ? 'block' : 'none' }" class="acsec">
-        <h2 class="text-2xl font-bold mb-6" style="color: var(--text-primary);">Aparência do Site</h2>
+        <h2 class="text-2xl font-bold mb-6 text-primary">Aparência do Site</h2>
 
         <div class="max-w-3xl space-y-6">
           <!-- Branding Card -->
-          <div class="p-6 rounded-lg border" style="background: var(--bg-secondary); border-color: var(--border-color);">
-            <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">Identidade Visual</h3>
+          <div class="p-6 rounded-lg border panel-secondary">
+            <h3 class="text-lg font-semibold mb-4 text-primary">Identidade Visual</h3>
             <div class="space-y-4">
               <!-- Title Input -->
               <div>
@@ -1985,8 +1985,8 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
           </div>
 
           <!-- Colors & Typography Card -->
-          <div class="p-6 rounded-lg border" style="background: var(--bg-secondary); border-color: var(--border-color);">
-            <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">Cores e Tipografia</h3>
+          <div class="p-6 rounded-lg border panel-secondary">
+            <h3 class="text-lg font-semibold mb-4 text-primary">Cores e Tipografia</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <!-- Accent Color -->
               <div>
@@ -2447,9 +2447,9 @@ function fotoIdxHtml(anguloDeg, materialKey){
                              : (v<=0.33?'#4ade80':v<=0.66?'#fbbf24':'#f87171');
   const bar = (v,bom) => `<div style="height:5px;border-radius:3px;background:#1f2a37;overflow:hidden;margin-top:2px"><div style="height:100%;width:${pct(v)};background:${cor(v,bom)}"></div></div>`;
   return `<div style="font-weight:600;color:#cbd5e1;margin-bottom:4px">📐 Índices fotométricos (proxy 1ª ordem)</div>
-    <div style="display:flex;justify-content:space-between"><span>Aproveitamento no piso</span><b style="color:${cor(r.etaPiso,true)}">${pct(r.etaPiso)}</b></div>${bar(r.etaPiso,true)}
-    <div style="display:flex;justify-content:space-between;margin-top:5px"><span>Poluição luminosa</span><b style="color:${cor(r.P,false)}">${pct(r.P)}</b></div>${bar(r.P,false)}
-    <div style="display:flex;justify-content:space-between;margin-top:5px"><span>Luminância relativa (percepção)</span><b>${pct(r.Lrel)}</b></div>${bar(r.Lrel,true)}
+    <div class="flex-between"><span>Aproveitamento no piso</span><b style="color:${cor(r.etaPiso,true)}">${pct(r.etaPiso)}</b></div>${bar(r.etaPiso,true)}
+    <div class="flex-between" style="margin-top:5px"><span>Poluição luminosa</span><b style="color:${cor(r.P,false)}">${pct(r.P)}</b></div>${bar(r.P,false)}
+    <div class="flex-between" style="margin-top:5px"><span>Luminância relativa (percepção)</span><b>${pct(r.Lrel)}</b></div>${bar(r.Lrel,true)}
     <div style="color:#6b7280;margin-top:5px;font-size:9.5px">ρ=${r.rho.toFixed(2)} · modelo geométrico documentado em docs/FIELD_REFERENCE_TIER3_PHOTOMETRY.md</div>`;
 }
 function intervLabel(t){ return (INTERV.find(x=>x[0]===t)||[t,t])[1]; }
@@ -2873,7 +2873,7 @@ function buildDensCtl(breaks,cfg){
     const rot=lo==null?('&lt; '+fmtDens(hi)):hi==null?('≥ '+fmtDens(lo)):(fmtDens(lo)+' – '+fmtDens(hi));
     return `<div style="display:flex;align-items:center;gap:6px;margin-top:2px"><span style="width:14px;height:11px;border-radius:2px;background:${cor};display:inline-block;flex-shrink:0"></span><span>${rot}</span></div>`; }).join('');
   c.innerHTML=`<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">${mBtns}</div>
-    <div style="color:#9ca3af;margin-bottom:2px">${cfg.unid}${cfg.fixo?'':' · quintis'}</div>${sw}
+    <div class="text-gray" style="margin-bottom:2px">${cfg.unid}${cfg.fixo?'':' · quintis'}</div>${sw}
     <div style="color:#6b7280;margin-top:5px;font-size:10.5px">Estimativa de fluxo instalado — não é medição NBR 5101</div>`;
   c.style.display='block';
 }
@@ -3148,12 +3148,12 @@ function renderPoligonoPanel(s){
   const box=document.getElementById('poligonoPanel'); if(!box) return;
   if(!s){ box.style.display='none'; return; }
   const fmt=n=>(n||0).toLocaleString('pt-BR');
-  const tipoRows=Object.entries(s.por_tipo_lampada||{}).map(([k,v])=>`<div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">${esc(k)}</span><b>${fmt(v)}</b></div>`).join('');
+  const tipoRows=Object.entries(s.por_tipo_lampada||{}).map(([k,v])=>`<div class="flex-between"><span class="text-gray">${esc(k)}</span><b>${fmt(v)}</b></div>`).join('');
   const foto = (s.aproveitamento_medio!=null)
     ? `<div style="margin-top:8px;padding-top:8px;border-top:1px solid #1f2a37">
-         <div style="color:#9ca3af;margin-bottom:3px">📐 Fotometria média (${fmt(s.classificados_foto)} classificados)</div>
-         <div style="display:flex;justify-content:space-between"><span>Aproveitamento no piso</span><b style="color:#4ade80">${Math.round(s.aproveitamento_medio*100)}%</b></div>
-         <div style="display:flex;justify-content:space-between"><span>Poluição luminosa</span><b style="color:#fbbf24">${Math.round((s.poluicao_media||0)*100)}%</b></div>
+         <div class="text-gray" style="margin-bottom:3px">📐 Fotometria média (${fmt(s.classificados_foto)} classificados)</div>
+         <div class="flex-between"><span>Aproveitamento no piso</span><b style="color:#4ade80">${Math.round(s.aproveitamento_medio*100)}%</b></div>
+         <div class="flex-between"><span>Poluição luminosa</span><b style="color:#fbbf24">${Math.round((s.poluicao_media||0)*100)}%</b></div>
        </div>`
     : `<div style="margin-top:8px;color:#6b7280;font-size:10.5px">Sem pontos classificados por fotometria nesta área.</div>`;
   const exportar = podeEditar()
@@ -3162,20 +3162,20 @@ function renderPoligonoPanel(s){
          <button class="btn" style="flex:1;font-size:11px" onclick="exportarPoligono('geojson')">⬇️ GeoJSON</button>
        </div>` : '';
   box.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <div class="flex-between" style="align-items:center;margin-bottom:8px">
       <b style="font-size:13px;color:#38bdf8">🗺️ Área selecionada</b>
       <button class="btn" style="padding:2px 8px;font-size:11px" onclick="limparPoligono()">✕ Limpar</button>
     </div>
     <div style="font-size:12px;display:flex;flex-direction:column;gap:3px">
-      <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Luminárias</span><b>${fmt(s.total)}</b></div>
-      <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Área</span><b>${s.area_km2} km²</b></div>
-      <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Densidade</span><b>${s.densidade_km2} /km²</b></div>
-      <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">LED</span><b style="color:#4ade80">${fmt(s.led)} (${s.pct_led}%)</b></div>
-      <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Pendentes</span><b style="color:#fbbf24">${fmt(s.pendente)}</b></div>
-      <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Potência instalada</span><b>${s.potencia_kw} kW</b></div>
+      <div class="flex-between"><span class="text-gray">Luminárias</span><b>${fmt(s.total)}</b></div>
+      <div class="flex-between"><span class="text-gray">Área</span><b>${s.area_km2} km²</b></div>
+      <div class="flex-between"><span class="text-gray">Densidade</span><b>${s.densidade_km2} /km²</b></div>
+      <div class="flex-between"><span class="text-gray">LED</span><b style="color:#4ade80">${fmt(s.led)} (${s.pct_led}%)</b></div>
+      <div class="flex-between"><span class="text-gray">Pendentes</span><b style="color:#fbbf24">${fmt(s.pendente)}</b></div>
+      <div class="flex-between"><span class="text-gray">Potência instalada</span><b>${s.potencia_kw} kW</b></div>
     </div>
     <div style="margin-top:8px;padding-top:8px;border-top:1px solid #1f2a37;font-size:11px">
-      <div style="color:#9ca3af;margin-bottom:3px">Por tipo de lâmpada</div>${tipoRows||'<span style="color:#6b7280">—</span>'}
+      <div class="text-gray" style="margin-bottom:3px">Por tipo de lâmpada</div>${tipoRows||'<span style="color:#6b7280">—</span>'}
     </div>
     ${foto}
     ${exportar}`;
@@ -3281,7 +3281,7 @@ async function renderMunicipioLimites(){
 }
 
 // ---------- Detalhe ----------
-function fld(label,val){ return `<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid #161f29"><span style="color:#9ca3af">${label}</span><span style="text-align:right">${esc(val)||'—'}</span></div>`; }
+function fld(label,val){ return `<div class="flex-between" style="gap:10px;padding:3px 0;border-bottom:1px solid #161f29"><span class="text-gray">${label}</span><span style="text-align:right">${esc(val)||'—'}</span></div>`; }
 function openDetail(p){
   state.current=p;
   const d=document.getElementById('detail'); d.style.display='block';
@@ -3291,7 +3291,7 @@ function openDetail(p){
   const origem=p.fonte_modernizacao==='censo_enel'?'Censo ENEL':p.fonte_modernizacao==='seconser_pos_censo'?'SECONSER (pós-censo)':p.fonte_modernizacao==='campo'?'Campo':'—';
   const ehLum=(p.tipo_ativo||'luminaria')==='luminaria';
   d.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <div class="flex-between" style="align-items:center;margin-bottom:8px">
       <b style="font-size:13px">${esc(p.codigo_seconser)||'—'}</b> ${ehLum?badge+' '+healthSpan:healthSpan}</div>
     ${fld('Referência ENEL', p.numero_patrimonio)}
     ${fld('Tipo de ativo', ativoLabel(p.tipo_ativo||'luminaria'))}
@@ -3308,7 +3308,7 @@ function openDetail(p){
     ${ehLum&&p.material_piso?fld('Material do piso', materialLabel(p.material_piso)):''}
     ${ehLum&&fotometriaIndices(p.angulo_inclinacao_graus, p.material_piso)?`<div style="font-size:10.5px;color:#9ca3af;background:#0f151c;border:1px solid #1f2a37;border-radius:6px;padding:7px;margin-top:6px">${fotoIdxHtml(p.angulo_inclinacao_graus, p.material_piso)}</div>`:''}
     ${p.flag_revisao_censo?`<div style="color:#fbbf24;font-size:11px;margin-top:4px">⚑ marcado para revisão</div>`:''}
-    ${p.observacoes?`<div style="color:#9ca3af;font-size:11px;margin-top:6px">${esc(p.observacoes)}</div>`:''}
+    ${p.observacoes?`<div class="text-gray" style="font-size:11px;margin-top:6px">${esc(p.observacoes)}</div>`:''}
     ${state.user?`<div style="display:flex;gap:6px;margin-top:8px">
         <button class="btn" style="flex:1" onclick="window._interv('${p.id}')">Intervenções</button>
         <button class="btn" style="flex:1" onclick="window._hist('${p.id}')">Histórico</button>
@@ -3340,42 +3340,42 @@ window._edit = function(){
   };
 
   d.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #1f2a37">
+    <div class="flex-between" style="align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #1f2a37">
       <div>
         <b style="font-size:13px">✏️ Editar Ativo</b>
-        <div style="font-size:11px;color:#9ca3af;margin-top:2px">${esc(p.numero_patrimonio)}</div>
+        <div class="text-gray" style="font-size:11px;margin-top:2px">${esc(p.numero_patrimonio)}</div>
       </div>
-      <div id="editChangedCount" style="background:#1f2a37;padding:4px 8px;border-radius:8px;font-size:11px;color:#9ca3af;font-weight:600;display:none">0 campos</div>
+      <div id="editChangedCount" class="text-gray" style="background:#1f2a37;padding:4px 8px;border-radius:8px;font-size:11px;font-weight:600;display:none">0 campos</div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+    <div class="grid-cols-2-gap">
       <div>
-        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">📍 Latitude</label>
+        <label class="label-small">📍 Latitude</label>
         <input id="eLat" type="number" step="0.000001" value="${initialValues.lat}" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;transition:all 0.2s" placeholder="-22.90"/>
         <div id="latError" style="font-size:9px;color:#ef4444;margin-top:2px;display:none"></div>
       </div>
       <div>
-        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">📍 Longitude</label>
+        <label class="label-small">📍 Longitude</label>
         <input id="eLng" type="number" step="0.000001" value="${initialValues.lng}" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;transition:all 0.2s" placeholder="-43.10"/>
         <div id="lngError" style="font-size:9px;color:#ef4444;margin-top:2px;display:none"></div>
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+    <div class="grid-cols-2-gap">
       <div>
-        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">💡 Tipo</label>
+        <label class="label-small">💡 Tipo</label>
         <select id="eTipo" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;cursor:pointer">${TIPOS.map(t=>'<option '+((t===initialValues.tipo)?'selected':'')+'>'+t+'</option>').join('')}</select>
       </div>
       <div>
-        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">⚡ Potência (W)</label>
+        <label class="label-small">⚡ Potência (W)</label>
         <input id="ePot" type="number" value="${initialValues.pot}" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px" placeholder="0-2000"/>
         <div id="potError" style="font-size:9px;color:#ef4444;margin-top:2px;display:none"></div>
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+    <div class="grid-cols-2-gap">
       <div>
-        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">🔧 Estado</label>
+        <label class="label-small">🔧 Estado</label>
         <select id="eStatus" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;cursor:pointer">${STATUS.map(s=>'<option '+(s===initialValues.status?'selected':'')+'>'+s+'</option>').join('')}</select>
       </div>
       <div style="display:flex;align-items:flex-end">
@@ -3386,31 +3386,31 @@ window._edit = function(){
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+    <div class="grid-cols-2-gap">
       <div>
-        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">🏷️ Tipo Luminária</label>
+        <label class="label-small">🏷️ Tipo Luminária</label>
         <select id="eTipoLum" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;cursor:pointer"><option value="">—</option>${TIPO_LUM.map(t=>'<option '+(t===initialValues.tipoLum?'selected':'')+'>'+t+'</option>').join('')}</select>
       </div>
       <div>
-        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">📋 Classe NBR</label>
+        <label class="label-small">📋 Classe NBR</label>
         <input id="eClasse" value="${initialValues.classe}" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px" placeholder="V3, P2…"/>
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+    <div class="grid-cols-2-gap">
       <div>
-        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">📐 Ângulo (nadir)</label>
+        <label class="label-small">📐 Ângulo (nadir)</label>
         <select id="eAngulo" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;cursor:pointer"><option value="">— não classificado</option>${ANGULOS_INCLINACAO.map(([v,l])=>'<option value="'+v+'"'+(String(v)===initialValues.angulo?' selected':'')+'>'+l+'</option>').join('')}</select>
       </div>
       <div>
-        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">🧱 Material do piso</label>
+        <label class="label-small">🧱 Material do piso</label>
         <select id="eMaterial" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;cursor:pointer"><option value="">— não classificado</option>${MATERIAIS_PISO.map(([v,l])=>'<option value="'+v+'"'+(v===initialValues.material?' selected':'')+'>'+l+'</option>').join('')}</select>
       </div>
     </div>
     <div id="eFotoIdx" style="font-size:10.5px;color:#9ca3af;background:#0f151c;border:1px solid #1f2a37;border-radius:4px;padding:6px;margin-bottom:8px;display:none"></div>
 
     <div style="margin-bottom:8px">
-      <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">📝 Observações</label>
+      <label class="label-small">📝 Observações</label>
       <textarea id="eObs" rows="2" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;font-family:monospace;resize:vertical">${esc(initialValues.obs)}</textarea>
     </div>
 
@@ -3527,7 +3527,7 @@ window._interv = async (id)=>{
     const extra=h.lampada_nova?` → ${esc(h.lampada_nova)}${h.potencia_nova?(' '+h.potencia_nova+' W'):''}`:'';
     return `<div style="border-bottom:1px solid #161f29;padding:4px 0;font-size:11px">
       <div style="color:#cbd5e1">${esc(intervLabel(h.tipo))}${extra}</div>
-      ${h.descricao?`<div style="color:#9ca3af">${esc(h.descricao)}</div>`:''}
+      ${h.descricao?`<div class="text-gray">${esc(h.descricao)}</div>`:''}
       <div style="color:#6b7280">${h.data} · ${esc(h.responsavel||h.registrado_por||'—')}</div></div>`;
   }).join('');
   box.innerHTML=html;
@@ -3665,7 +3665,7 @@ window._selecionarModelo = async ()=>{
       ${m.foto_url?`<img src="${esc(m.foto_url)}" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:6px;flex-shrink:0"/>`:''}
       <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
         <div style="font-weight:600;font-size:12px">${esc(m.fabricante)} · ${esc(m.modelo)}</div>
-        <div style="color:#9ca3af;font-size:11px">${m.potencia_w} W${m.temperatura_cor_k?' · '+m.temperatura_cor_k+' K':''}${m.tensao?' · '+esc(m.tensao)+' V':''}${m.ip?' · '+esc(m.ip):''}${m.classe_nbr?' · '+esc(m.classe_nbr):''}</div>
+        <div class="text-gray" style="font-size:11px">${m.potencia_w} W${m.temperatura_cor_k?' · '+m.temperatura_cor_k+' K':''}${m.tensao?' · '+esc(m.tensao)+' V':''}${m.ip?' · '+esc(m.ip):''}${m.classe_nbr?' · '+esc(m.classe_nbr):''}</div>
         <div style="color:#6b7280;font-size:10.5px">${esc(m.tipo_luminaria||'')}${m.tipo_luminaria&&m.tipo_lampada?' · ':''}${esc(m.tipo_lampada||'')}${m.descricao?' — '+esc(m.descricao):''}</div>
       </div>
     </div>
@@ -3696,7 +3696,7 @@ async function loadStatsChips(){
   if(!data) return;
   state.stats=data;
   const scope = state.bairro? esc(state.bairro) : 'Niterói';
-  document.getElementById('kpi').innerHTML = `<b>${data.total.toLocaleString('pt-BR')}</b> lum · <b style="color:#4ade80">${data.pct_led}%</b> LED · <b style="color:#fbbf24">${data.pendente.toLocaleString('pt-BR')}</b> pend · <span style="color:#9ca3af">${scope}</span>`;
+  document.getElementById('kpi').innerHTML = `<b>${data.total.toLocaleString('pt-BR')}</b> lum · <b style="color:#4ade80">${data.pct_led}%</b> LED · <b style="color:#fbbf24">${data.pendente.toLocaleString('pt-BR')}</b> pend · <span class="text-gray">${scope}</span>`;
   document.getElementById('pctBar').style.width = (data.pct_led||0)+'%';
 }
 function sparkline(serie){
@@ -3727,7 +3727,7 @@ async function loadStatsPanel(){
     const colorClass = color === 'text-green-400' ? 'border-green-900/50' : color === 'text-amber-400' ? 'border-amber-900/50' : 'border-slate-700';
     return `<div class="relative overflow-hidden rounded-lg border ${colorClass} ${bgColor} p-4 hover:shadow-lg hover:${bgColor.replace('800', '700')} transition-all duration-300">
       <div style="font-size:28px;opacity:0.3;position:absolute;right:-8px;top:-8px">${icon}</div>
-      <div style="color:#9ca3af;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">${label}</div>
+      <div class="text-gray" style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">${label}</div>
       <div style="font-size:24px;font-weight:700;margin-bottom:2px" class="${color}">${value}</div>
       ${subtext ? `<div style="font-size:10px;color:#6b7280">${subtext}</div>` : ''}
     </div>`;
@@ -3757,10 +3757,10 @@ async function loadStatsPanel(){
     <td style="text-align:right;padding:8px;font-size:13px;font-weight:600">${b.pct_led}%</td></tr>`).join('');
 
   document.getElementById('stats').innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #1f2a37">
+    <div class="flex-between" style="align-items:center;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #1f2a37">
       <div>
         <div style="font-weight:700;font-size:15px;color:#e5e7eb">Indicadores</div>
-        ${state.bairro ? `<div style="font-size:12px;color:#9ca3af;margin-top:2px">📍 ${esc(state.bairro)}</div>` : ''}
+        ${state.bairro ? `<div class="text-gray" style="font-size:12px;margin-top:2px">📍 ${esc(state.bairro)}</div>` : ''}
       </div>
       <button class="btn" style="padding:6px 10px;font-size:16px" onclick="document.getElementById('stats').style.display='none'">✕</button>
     </div>
@@ -3841,7 +3841,7 @@ async function loadTable(){
     const origem=p.fonte_modernizacao==='censo_enel'?'censo':p.fonte_modernizacao==='seconser_pos_censo'?'SECONSER':p.fonte_modernizacao==='campo'?'campo':'—';
     const est=p.modernizado_led?`<span class="badge" style="background:#0d3d24;color:#4ade80">LED</span>`:`<span class="badge" style="background:#3d2f0d;color:#fbbf24">Pend.</span>`;
     const healthBadge = healthStatusBadge(p.health_status);
-    return `<tr><td>${esc(p.codigo_seconser)||'—'}</td><td>${esc(p.endereco)||'—'}</td><td>${esc(p.bairro_nome)||'—'}</td><td>${p.tipo_lampada}</td><td>${p.potencia_w||'—'}</td><td>${est}</td><td style="color:${healthBadge.color}">${healthBadge.emoji} ${healthBadge.label}</td><td style="color:#9ca3af">${origem}</td>
+    return `<tr><td>${esc(p.codigo_seconser)||'—'}</td><td>${esc(p.endereco)||'—'}</td><td>${esc(p.bairro_nome)||'—'}</td><td>${p.tipo_lampada}</td><td>${p.potencia_w||'—'}</td><td>${est}</td><td style="color:${healthBadge.color}">${healthBadge.emoji} ${healthBadge.label}</td><td class="text-gray">${origem}</td>
       <td>${podeEditar()?`<button class="btn" style="padding:2px 8px" onclick="window._editId('${p.id}')" aria-label="Editar luminária">editar</button>`:''}</td></tr>`;
   }).join('');
   document.getElementById('tBody').innerHTML = linhas || '<tr><td colspan="8" style="text-align:center;color:#6b7280;padding:18px">Nenhum registro encontrado</td></tr>';
@@ -3948,12 +3948,12 @@ async function loadCampanhas(){
     const pct = c.total_parque>0 ? Math.round(100*c.verificados/c.total_parque) : 0;
     const badge = c.status==='ativa' ? '<span class="badge" style="background:#0d3d24;color:#4ade80">ATIVA</span>' : '<span class="badge" style="background:#1f2a37;color:#9ca3af">encerrada</span>';
     return `<div class="bg-slate-800/50 border ${c.status==='ativa'?'border-emerald-700':'border-slate-700'} rounded-lg p-4 mb-3">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+      <div class="flex-between" style="align-items:center;gap:8px;flex-wrap:wrap">
         <div><b style="font-size:13px">${esc(c.nome)}</b> ${badge}
-          <div style="font-size:11px;color:#9ca3af;margin-top:2px">${esc(c.descricao)||''} · início ${new Date(c.criado_em).toLocaleDateString('pt-BR')}${c.encerrada_em?(' · fim '+new Date(c.encerrada_em).toLocaleDateString('pt-BR')):''}</div></div>
+          <div class="text-gray" style="font-size:11px;margin-top:2px">${esc(c.descricao)||''} · início ${new Date(c.criado_em).toLocaleDateString('pt-BR')}${c.encerrada_em?(' · fim '+new Date(c.encerrada_em).toLocaleDateString('pt-BR')):''}</div></div>
         ${c.status==='ativa'&&isAdmin?`<button class="btn" style="border-color:#7f1d1d;color:#f87171;padding:4px 10px;font-size:11px" onclick="window._encerrarCampanha('${c.id}')">Encerrar</button>`:''}
       </div>
-      <div style="display:flex;justify-content:space-between;font-size:11px;color:#9ca3af;margin-top:10px">
+      <div class="flex-between text-gray" style="font-size:11px;margin-top:10px">
         <span>${(+c.verificados).toLocaleString('pt-BR')} de ${(+c.total_parque).toLocaleString('pt-BR')} pontos verificados</span><b style="color:#4ade80">${pct}%</b></div>
       <div style="height:6px;border-radius:3px;background:#1f2a37;overflow:hidden;margin-top:4px"><div style="height:100%;width:${pct}%;background:linear-gradient(to right,#059669,#4ade80)"></div></div>
     </div>`;
@@ -3982,7 +3982,7 @@ window._encerrarCampanha = async (id)=>{
 
 function qcard(label,n,fila,nota){
   return `<div class="chip" style="border-radius:10px;padding:12px;min-width:160px">
-    <div style="color:#9ca3af;font-size:11px">${label}</div>
+    <div class="text-gray" style="font-size:11px">${label}</div>
     <div style="font-weight:700;font-size:20px">${(n||0).toLocaleString('pt-BR')}</div>
     ${fila?`<button class="btn" style="margin-top:6px;padding:3px 8px;font-size:11px" onclick="window._filaMapa('${fila}')">abrir no mapa</button>`:`<div style="color:#6b7280;font-size:11px;margin-top:6px">${nota||''}</div>`}</div>`;
 }
@@ -3991,7 +3991,7 @@ async function loadVisaoGeral(){
   box.innerHTML='<div style="color:#6b7280"><span class="spin"></span> Carregando…</div>';
   const [s,serie,q]=await Promise.all([ rpc('ip_estatisticas',{p_bairro:null}), rpc('ip_serie_metricas'), rpc('ip_qualidade_dado') ]);
   const S=s||{}, Q=q||{};
-  const kv=(k,v,c)=>`<div class="chip" style="border-radius:10px;padding:12px;min-width:120px"><div style="color:#9ca3af;font-size:11px">${k}</div><div style="font-weight:700;font-size:20px;color:${c||'#e5e7eb'}">${v}</div></div>`;
+  const kv=(k,v,c)=>`<div class="chip" style="border-radius:10px;padding:12px;min-width:120px"><div class="text-gray" style="font-size:11px">${k}</div><div style="font-weight:700;font-size:20px;color:${c||'#e5e7eb'}">${v}</div></div>`;
   box.innerHTML = `<h3 style="margin:0 0 12px;font-size:15px">Visão geral</h3>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
       ${kv('Luminárias',(S.total||0).toLocaleString('pt-BR'))}
