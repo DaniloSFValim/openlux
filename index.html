@@ -1138,6 +1138,17 @@
   .gap-3 { gap: 12px; }
   .gap-4 { gap: 16px; }
 
+  /* Flex & Display Utilities */
+  .flex { display: flex; }
+  .flex-1 { flex: 1; }
+  .text-right { text-align: right; }
+
+  /* Label & Typography Utilities */
+  .label-micro {
+    font-size: 11px;
+    color: #9ca3af;
+  }
+
   /* Positioning Utilities */
   .absolute-center-x {
     position: absolute;
@@ -1761,7 +1772,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
       <button class="btn px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-100 text-sm rounded-lg border border-slate-600 transition-colors" onclick="document.getElementById('exportCustomModal').style.display='none'">Cancelar</button>
       <button class="btn px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-100 text-sm rounded-lg border border-slate-600 transition-colors" onclick="document.querySelectorAll('.exp-col-checkbox').forEach(cb=>cb.checked=true)">Todas</button>
       <button class="btn px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-100 text-sm rounded-lg border border-slate-600 transition-colors" onclick="document.querySelectorAll('.exp-col-checkbox').forEach(cb=>cb.checked=false)">Nenhuma</button>
-      <div style="flex:1"></div>
+      <div class="flex-1"></div>
       <button class="btn btn-accent" id="btnExportWithSettings">Exportar CSV</button>
     </div>
   </div>
@@ -1837,7 +1848,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm font-medium mb-2 text-muted">LED Instalado (%)</p>
-                <p class="text-3xl font-bold" id="kpiLedPct" style="color: var(--color-success);">—</p>
+                <p class="text-3xl font-bold text-success" id="kpiLedPct">—</p>
               </div>
               <div class="text-4xl opacity-30">⚡</div>
             </div>
@@ -1874,21 +1885,21 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
               <span class="text-2xl">✅</span>
               <div>
                 <p class="text-muted">Base de Dados</p>
-                <p class="font-medium" style="color: var(--color-success);">Conectado</p>
+                <p class="font-medium text-success">Conectado</p>
               </div>
             </div>
             <div class="flex items-center gap-3">
               <span class="text-2xl">✅</span>
               <div>
                 <p class="text-muted">Autenticação</p>
-                <p class="font-medium" style="color: var(--color-success);">Ativo</p>
+                <p class="font-medium text-success">Ativo</p>
               </div>
             </div>
             <div class="flex items-center gap-3">
               <span class="text-2xl">✅</span>
               <div>
                 <p class="text-muted">API Supabase</p>
-                <p class="font-medium" style="color: var(--color-success);">Online</p>
+                <p class="font-medium text-success">Online</p>
               </div>
             </div>
           </div>
@@ -1927,7 +1938,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
             </div>
             <button class="px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all" style="background: var(--color-primary-600);" id="admCreate">Adicionar</button>
           </div>
-          <div id="formStatus" class="text-xs mt-3" style="color: var(--color-success); display:none; font-weight:600;"></div>
+          <div id="formStatus" class="text-xs mt-3 text-success" style="display:none; font-weight:600;"></div>
         </div>
 
         <!-- Search Bar -->
@@ -2711,18 +2722,18 @@ map.on('click', function(e){
   const tipoOpts = TIPOS.map(t => '<option>' + t + '</option>').join('');
   const statusOpts = STATUS.map(s => '<option>' + s + '</option>').join('');
   d.innerHTML = `
-    <b style="font-size:13px">Novo ativo (mapa)</b>
+    <b class="body">Novo ativo (mapa)</b>
     <div style="font-size:11px;color:#6b7280;margin-top:2px">O código IPNIT é gerado automaticamente.</div>
     <div style="display:flex;flex-direction:column;gap:7px;margin-top:8px">
       <div style="display:flex;gap:6px">
         <label style="font-size:11px;color:#9ca3af;flex:1">Latitude<input id="nLat" type="number" step="0.000001" value="${lat.toFixed(6)}"/></label>
         <label style="font-size:11px;color:#9ca3af;flex:1">Longitude<input id="nLng" type="number" step="0.000001" value="${lng.toFixed(6)}"/></label>
       </div>
-      <label style="font-size:11px;color:#9ca3af">Tipo de ativo<select id="nAtivo">${ativoOpts}</select></label>
+      <label class="label-micro">Tipo de ativo<select id="nAtivo">${ativoOpts}</select></label>
       <input id="nPatr" placeholder="Referência ENEL (opcional)"/>
-      <div style="display:flex;gap:6px;align-items:center"><input id="nEnd" placeholder="Endereço" style="flex:1"/><span id="nEndLoading" style="font-size:12px;color:#6b7280;display:none"><span class="spin"></span></span></div>
+      <div class="flex gap-1" style="align-items:center"><input id="nEnd" placeholder="Endereço" class="flex-1"/><span id="nEndLoading" style="font-size:12px;color:#6b7280;display:none"><span class="spin"></span></span></div>
       <div id="nLumFields" style="display:flex;flex-direction:column;gap:7px">
-        <label style="font-size:11px;color:#9ca3af">Tipo de luminária<select id="nTipoLum"><option value="">—</option>${tipoLumOpts}</select></label>
+        <label class="label-micro">Tipo de luminária<select id="nTipoLum"><option value="">—</option>${tipoLumOpts}</select></label>
         <input id="nClasse" placeholder="Classe NBR (V3, P2, C4…)"/>
         <select id="nTipo">${tipoOpts}</select>
         <input id="nPot" type="number" placeholder="Potência (W)"/>
@@ -2730,11 +2741,11 @@ map.on('click', function(e){
         <label style="font-size:12px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="nMod" style="width:auto"/> LED</label>
         <div style="margin-top:2px;padding-top:6px;border-top:1px solid #1f2a37;display:flex;flex-direction:column;gap:6px">
           <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.4px">📐 Fotometria da instalação (opcional)</div>
-          <label style="font-size:11px;color:#9ca3af">Ângulo de apontamento<select id="nAngulo"><option value="">— não classificado</option>${ANGULOS_INCLINACAO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
-          <label style="font-size:11px;color:#9ca3af">Material do piso<select id="nMaterial"><option value="">— não classificado</option>${MATERIAIS_PISO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
+          <label class="label-micro">Ângulo de apontamento<select id="nAngulo"><option value="">— não classificado</option>${ANGULOS_INCLINACAO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
+          <label class="label-micro">Material do piso<select id="nMaterial"><option value="">— não classificado</option>${MATERIAIS_PISO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
         </div>
       </div>
-      <div style="display:flex;gap:8px"><button class="btn btn-accent" style="flex:1" id="nSave">Cadastrar</button><button class="btn" onclick="document.getElementById('detail').style.display='none'">Cancelar</button></div>
+      <div class="flex gap-2"><button class="btn btn-accent flex-1" id="nSave">Cadastrar</button><button class="btn" onclick="document.getElementById('detail').style.display='none'">Cancelar</button></div>
     </div>`;
   const nAtivo = document.getElementById('nAtivo');
   const toggleLum = () => { document.getElementById('nLumFields').style.display = nAtivo.value === 'luminaria' ? 'flex' : 'none'; };
@@ -3281,7 +3292,7 @@ async function renderMunicipioLimites(){
 }
 
 // ---------- Detalhe ----------
-function fld(label,val){ return `<div class="flex-between" style="gap:10px;padding:3px 0;border-bottom:1px solid #161f29"><span class="text-gray">${label}</span><span style="text-align:right">${esc(val)||'—'}</span></div>`; }
+function fld(label,val){ return `<div class="flex-between" style="gap:10px;padding:3px 0;border-bottom:1px solid #161f29"><span class="text-gray">${label}</span><span class="text-right">${esc(val)||'—'}</span></div>`; }
 function openDetail(p){
   state.current=p;
   const d=document.getElementById('detail'); d.style.display='block';
@@ -3292,7 +3303,7 @@ function openDetail(p){
   const ehLum=(p.tipo_ativo||'luminaria')==='luminaria';
   d.innerHTML = `
     <div class="flex-between" style="align-items:center;margin-bottom:8px">
-      <b style="font-size:13px">${esc(p.codigo_seconser)||'—'}</b> ${ehLum?badge+' '+healthSpan:healthSpan}</div>
+      <b class="body">${esc(p.codigo_seconser)||'—'}</b> ${ehLum?badge+' '+healthSpan:healthSpan}</div>
     ${fld('Referência ENEL', p.numero_patrimonio)}
     ${fld('Tipo de ativo', ativoLabel(p.tipo_ativo||'luminaria'))}
     ${ehLum?fld('Tipo de luminária', p.tipo_luminaria):''}
@@ -3310,12 +3321,12 @@ function openDetail(p){
     ${p.flag_revisao_censo?`<div style="color:#fbbf24;font-size:11px;margin-top:4px">⚑ marcado para revisão</div>`:''}
     ${p.observacoes?`<div class="text-gray" style="font-size:11px;margin-top:6px">${esc(p.observacoes)}</div>`:''}
     ${state.user?`<div style="display:flex;gap:6px;margin-top:8px">
-        <button class="btn" style="flex:1" onclick="window._interv('${p.id}')">Intervenções</button>
-        <button class="btn" style="flex:1" onclick="window._hist('${p.id}')">Histórico</button>
+        <button class="btn flex-1" onclick="window._interv('${p.id}')">Intervenções</button>
+        <button class="btn flex-1" onclick="window._hist('${p.id}')">Histórico</button>
       </div><div id="histBox"></div>`:''}
     ${podeEditar()?`<button class="btn" style="width:100%;margin-top:8px;border-color:#14532d;color:#4ade80" onclick="window._confirmarPonto('${p.id}')" title="Recenseamento: confirma que os dados conferem com a realidade em campo, sem alterá-los">✓ Confirmar em campo (dados corretos)</button>`:''}
     <div style="margin-top:10px;display:flex;gap:8px">
-      ${podeEditar()?`<button class="btn btn-accent" style="flex:1" onclick="window._edit()">Editar</button>`:''}
+      ${podeEditar()?`<button class="btn btn-accent flex-1" onclick="window._edit()">Editar</button>`:''}
       <button class="btn" onclick="document.getElementById('detail').style.display='none'">Fechar</button></div>`;
 }
 window._confirmarPonto = async (id)=>{
@@ -3342,7 +3353,7 @@ window._edit = function(){
   d.innerHTML = `
     <div class="flex-between" style="align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #1f2a37">
       <div>
-        <b style="font-size:13px">✏️ Editar Ativo</b>
+        <b class="body">✏️ Editar Ativo</b>
         <div class="text-gray" style="font-size:11px;margin-top:2px">${esc(p.numero_patrimonio)}</div>
       </div>
       <div id="editChangedCount" class="text-gray" style="background:#1f2a37;padding:4px 8px;border-radius:8px;font-size:11px;font-weight:600;display:none">0 campos</div>
@@ -3544,7 +3555,7 @@ window._formInterv = (id)=>{
       <select id="ivLamp"><option value="">— lâmpada nova —</option>${TIPOS.map(t=>`<option>${t}</option>`).join('')}</select>
       <input id="ivPot" type="number" placeholder="Potência nova (W)"/>
     </div>
-    <div style="display:flex;gap:6px"><button class="btn btn-accent" style="flex:1" id="ivSave">Salvar</button><button class="btn" onclick="window._interv('${id}')">Cancelar</button></div>
+    <div class="flex gap-1"><button class="btn btn-accent flex-1" id="ivSave">Salvar</button><button class="btn" onclick="window._interv('${id}')">Cancelar</button></div>
   </div>`;
   const tipoSel=document.getElementById('ivTipo');
   const toggleSub=()=>{ document.getElementById('ivSub').style.display = tipoSel.value==='substituicao'?'flex':'none'; };
@@ -3591,19 +3602,19 @@ document.getElementById('btnNovo').onclick = ()=>{
   const c=map.getCenter();
   const d=document.getElementById('detail'); d.style.display='block';
   d.innerHTML = `
-    <b style="font-size:13px">Novo ativo</b>
+    <b class="body">Novo ativo</b>
     <div style="font-size:11px;color:#6b7280;margin-top:2px">O código IPNIT é gerado automaticamente.</div>
     <div style="display:flex;flex-direction:column;gap:7px;margin-top:8px">
       <div style="display:flex;gap:6px">
         <label style="font-size:11px;color:#9ca3af;flex:1">Latitude<input id="nLat" type="number" step="0.000001" value="${c.lat.toFixed(6)}"/></label>
         <label style="font-size:11px;color:#9ca3af;flex:1">Longitude<input id="nLng" type="number" step="0.000001" value="${c.lng.toFixed(6)}"/></label>
       </div>
-      <label style="font-size:11px;color:#9ca3af">Tipo de ativo<select id="nAtivo">${TIPO_ATIVO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
+      <label class="label-micro">Tipo de ativo<select id="nAtivo">${TIPO_ATIVO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
       <input id="nPatr" placeholder="Referência ENEL (opcional)"/>
       <input id="nEnd" placeholder="Endereço"/>
       <div id="nLumFields" style="display:flex;flex-direction:column;gap:7px">
         <button class="btn" style="width:100%;margin-bottom:8px;border-color:var(--accent);color:var(--accent)" id="nBtnModelo">📋 Inserir com modelo</button>
-        <label style="font-size:11px;color:#9ca3af">Tipo de luminária<select id="nTipoLum"><option value="">—</option>${TIPO_LUM.map(t=>`<option>${t}</option>`).join('')}</select></label>
+        <label class="label-micro">Tipo de luminária<select id="nTipoLum"><option value="">—</option>${TIPO_LUM.map(t=>`<option>${t}</option>`).join('')}</select></label>
         <input id="nClasse" placeholder="Classe NBR (V3, P2, C4…)"/>
         <select id="nTipo">${TIPOS.map(t=>`<option>${t}</option>`).join('')}</select>
         <input id="nPot" type="number" placeholder="Potência (W)"/>
@@ -3611,11 +3622,11 @@ document.getElementById('btnNovo').onclick = ()=>{
         <label style="font-size:12px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="nMod" style="width:auto"/> LED</label>
         <div style="margin-top:2px;padding-top:6px;border-top:1px solid #1f2a37;display:flex;flex-direction:column;gap:6px">
           <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.4px">📐 Fotometria da instalação (opcional)</div>
-          <label style="font-size:11px;color:#9ca3af">Ângulo de apontamento<select id="nAngulo"><option value="">— não classificado</option>${ANGULOS_INCLINACAO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
-          <label style="font-size:11px;color:#9ca3af">Material do piso<select id="nMaterial"><option value="">— não classificado</option>${MATERIAIS_PISO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
+          <label class="label-micro">Ângulo de apontamento<select id="nAngulo"><option value="">— não classificado</option>${ANGULOS_INCLINACAO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
+          <label class="label-micro">Material do piso<select id="nMaterial"><option value="">— não classificado</option>${MATERIAIS_PISO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
         </div>
       </div>
-      <div style="display:flex;gap:8px"><button class="btn btn-accent" style="flex:1" id="nSave">Cadastrar</button><button class="btn" onclick="document.getElementById('detail').style.display='none'">Cancelar</button></div>
+      <div class="flex gap-2"><button class="btn btn-accent flex-1" id="nSave">Cadastrar</button><button class="btn" onclick="document.getElementById('detail').style.display='none'">Cancelar</button></div>
     </div>`;
   const nAtivo=document.getElementById('nAtivo');
   const toggleLum=()=>{ document.getElementById('nLumFields').style.display = nAtivo.value==='luminaria'?'flex':'none'; };
@@ -3709,7 +3720,7 @@ function sparkline(serie){
   const last=serie[serie.length-1];
   return `<div style="margin-top:4px"><svg width="${w}" height="${h}" style="max-width:100%">
     <polyline points="${pts}" fill="none" stroke="#22c55e" stroke-width="2"/>${dots}</svg>
-    <div style="font-size:11px;color:#9ca3af">Evolução do % LED — ${serie.length} ponto(s), atual ${last.pct_led}%</div></div>`;
+    <div class="label-micro">Evolução do % LED — ${serie.length} ponto(s), atual ${last.pct_led}%</div></div>`;
 }
 async function loadStatsPanel(){
   try {
@@ -3949,7 +3960,7 @@ async function loadCampanhas(){
     const badge = c.status==='ativa' ? '<span class="badge" style="background:#0d3d24;color:#4ade80">ATIVA</span>' : '<span class="badge" style="background:#1f2a37;color:#9ca3af">encerrada</span>';
     return `<div class="bg-slate-800/50 border ${c.status==='ativa'?'border-emerald-700':'border-slate-700'} rounded-lg p-4 mb-3">
       <div class="flex-between" style="align-items:center;gap:8px;flex-wrap:wrap">
-        <div><b style="font-size:13px">${esc(c.nome)}</b> ${badge}
+        <div><b class="body">${esc(c.nome)}</b> ${badge}
           <div class="text-gray" style="font-size:11px;margin-top:2px">${esc(c.descricao)||''} · início ${new Date(c.criado_em).toLocaleDateString('pt-BR')}${c.encerrada_em?(' · fim '+new Date(c.encerrada_em).toLocaleDateString('pt-BR')):''}</div></div>
         ${c.status==='ativa'&&isAdmin?`<button class="btn" style="border-color:#7f1d1d;color:#f87171;padding:4px 10px;font-size:11px" onclick="window._encerrarCampanha('${c.id}')">Encerrar</button>`:''}
       </div>
@@ -4219,7 +4230,7 @@ async function loadAdminModelos(){
     <tr>
       <td>${esc(m.fabricante)}</td>
       <td>${esc(m.modelo)}${m.descricao?`<div style="color:#6b7280;font-size:10.5px">${esc(m.descricao)}</div>`:''}</td>
-      <td style="text-align:right">${m.potencia_w} W</td>
+      <td class="text-right">${m.potencia_w} W</td>
       <td>${esc(m.tipo_luminaria||'—')}</td>
       <td>${esc(m.tipo_lampada||'—')}</td>
       <td>${esc(m.classe_nbr||'—')}</td>
