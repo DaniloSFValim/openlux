@@ -327,6 +327,21 @@ O GitHub também gera a citação a partir do [`CITATION.cff`](CITATION.cff) (bo
 *"Cite this repository"*, com o iD do ORCID e o DOI). O marco v1.3.0 (Niterói)
 permanece o registro citável até o release `v2.0.0` da plataforma.
 
+## ⚠️ Limitações Conhecidas
+
+| Limitação | Contexto | Roadmap |
+|-----------|----------|---------|
+| **Implantação manual** | Setup leva ~1 dia (leitura de dados, schema, config) | Fase 3: onboarding guiado (~1 hora) |
+| **Single-tenant por projeto** | Cada cidade = projeto Supabase separado | Fase 3: multi-tenant com RLS |
+| **Export max 4.000 pontos** | Limite por performance/memória no PDF | Chunk export ou server-side rendering (Fase 4) |
+| **Sem offline para campo** | Edições perdem-se se desconectar | Fase 4: PWA com queue offline + sync |
+| **Fotometria .IES sem visualizador** | .IES uploadado mas não parseado | Fase 3.1: parser + curvas polares interativas |
+| **Sem imagens em ponto** | Campo foto comentado; apenas modelo tem .IES | Fase 4: galeria por ponto + compressão automática |
+| **API interna apenas** | RPC functions não têm versionamento público | Fase 5: API externa com SLA |
+| **Sem notificações em tempo real** | Edições de outros usuários require refresh | Futuro: WebSocket + Supabase realtime |
+
+**Nota:** Limitações são **por design** (MVP mindset) e roadmapped. Antes de reportar como bug, verificar esta tabela.
+
 ## 📄 Licença
 
 Código sob licença MIT — veja [`LICENSE`](LICENSE). **Os dados de cada implantação
@@ -338,7 +353,7 @@ pertencem ao respectivo município** ([governança](GOVERNANCE.md)).
 
 **OpenLux** · concebido e mantido por [Danilo Valim](https://github.com/DaniloSFValim)
 
-Nascido em Niterói/RJ (SECONSER · Diretoria de Iluminação Pública) · feito para qualquer cidade
+Nascido em Niterói/RJ · feito para qualquer cidade
 
 Feito com 💛 para iluminar melhor — com menos poluição luminosa
 

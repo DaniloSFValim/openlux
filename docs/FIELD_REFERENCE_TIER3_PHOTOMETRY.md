@@ -4,7 +4,7 @@
 
 ### Ângulo de apontamento · Material do piso · Índices de aproveitamento e poluição luminosa
 
-*Referência técnica e modelo de cálculo — Cadastro de Iluminação Pública de Niterói / SECONSER*
+*Referência técnica e modelo de cálculo para índices fotométricos de instalação*
 
 </div>
 
@@ -208,6 +208,85 @@ GROUP BY 1, 2
 ORDER BY eta_piso_medio;
 ```
 
+### 6.4 Exemplo Prático com Coordenadas Reais
+
+**Local:** Rua Quinze de Novembro, Centro de Niterói — Poste ID `c8f4a92c-1234-5678-abcd-ef0123456789`
+
+**Dados brutos (coletados em campo ou do modelo):**
+
+| Campo | Valor | Unidade |
+|-------|-------|--------|
+| Latitude | -22.8850 | ° |
+| Longitude | -43.1050 | ° |
+| Potência | 150 | W |
+| Tipo lâmpada | LED | — |
+| **Ângulo de apontamento (θ)** | **30°** | graus (nadir) |
+| **Material do piso (ρ)** | **0,12** | asfalto desgastado |
+
+**Cálculo dos índices de primeira ordem:**
+
+1. **Aproveitamento no piso (η):**
+   ```
+   η = max(0, cos θ)
+     = max(0, cos 30°)
+     = max(0, 0,866)
+     = 0,866  ← 86,6% do fluxo vai para o piso
+   ```
+
+2. **Poluição luminosa (P):**
+   ```
+   P = (1 − η) + ρ·η·0,5
+     = (1 − 0,866) + 0,12 × 0,866 × 0,5
+     = 0,134 + 0,052
+     = 0,186  ← 18,6% do fluxo escapa ao céu (direto + refletido)
+   ```
+
+3. **Luminância relativa (L):**
+   ```
+   L = η · ρ
+     = 0,866 × 0,12
+     = 0,104  ← fração percebida pelo olho
+   ```
+
+**Interpretação:**
+- ✅ **Η = 0,866** (excelente) — facho bem dirigido ao piso (θ = 30°)
+- ⚠️ **P = 0,186** (aceitável) — poluição luminosa controlada, mas asfalto desgastado (ρ = 0,12 é baixo) contribui para pouco reflexo útil
+- 📊 **L = 0,104** — luminância percebida é moderada; asfalto novo (ρ = 0,07) resultaria em L = 0,061 (mais escuro)
+
+**Comparação com instalações ruins:**
+
+| Cenário | θ | ρ | η | P | L | Qualidade |
+|---------|---|---|---|---|---|-----------|
+| Exemplo acima (bom) | 30° | 0,12 | 0,866 | 0,186 | 0,104 | 🟢 boa |
+| Apontamento alto | 60° | 0,12 | 0,500 | 0,530 | 0,060 | 🟡 ruim (muita poluição) |
+| Uplight | 120° | 0,12 | −0,500 → 0 | >0,5 | 0 | 🔴 crítica |
+
+**Expressão no JSON de exportação (CSV/GeoJSON):**
+
+```json
+{
+  "id": "c8f4a92c-1234-5678-abcd-ef0123456789",
+  "codigo": "LM-00123",
+  "latitude": -22.8850,
+  "longitude": -43.1050,
+  "potencia": 150,
+  "tipo_lampada": "led",
+  "angulo_inclinacao_graus": 30,
+  "material_piso": "asfalto_desgastado",
+  "indices_fotometricos": {
+    "aproveitamento_piso": 0.866,
+    "poluicao_luminosa": 0.186,
+    "luminancia_relativa": 0.104
+  },
+  "bairro": "Centro",
+  "status": "ok"
+}
+```
+
+**Simulação interativa:**
+
+Estes cálculos estão implementados em tempo real no painel de detalhes (`index.html`, função `fotometriaIndices()`). Alterar θ ou material no formulário de edição recalcula os índices instantaneamente.
+
 ---
 
 ## 7. Limitações e caminho para a Fase 3
@@ -245,6 +324,8 @@ reprocessado ao evoluir o modelo.
 [`index.html`](../index.html) (`fotometriaIndices`) e no banco pela migration
 [`20260710160356_expand_pontos_tier3_photometry.sql`](../supabase/migrations/20260710160356_expand_pontos_tier3_photometry.sql).*
 
-SECONSER · Diretoria de Iluminação Pública · Prefeitura de Niterói
+---
+
+**Autor:** Danilo Valim · **DOI:** [10.5281/zenodo.21305310](https://doi.org/10.5281/zenodo.21305310)
 
 </div>
