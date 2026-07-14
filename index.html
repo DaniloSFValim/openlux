@@ -1777,9 +1777,16 @@ window._densMetric=(m)=>{ state.densMetric=m; if(state.densMode==='grade') rende
 // ---------- CHARTS & DASHBOARDS (Fase 2) ----------
 async function loadTimeSeriesData(){
   try{
-    // RPC returns: { mes: string, total: int, led: int, pct_led: float }
-    const data = await rpc('ip_serie_metricas', {});
-    return data || [];
+    // RPC returns JSON array from metricas_diarias: { data, pct_led, led, pendente, total }
+    const response = await rpc('ip_serie_metricas', {});
+    if(!Array.isArray(response)) return [];
+    // Map 'data' field to 'mes' for chart labels
+    return response.map(item => ({
+      mes: item.data,
+      total: item.total,
+      led: item.led,
+      pct_led: item.pct_led
+    }));
   }catch(e){
     console.error('Erro ao carregar série temporal:', e);
     return [];
