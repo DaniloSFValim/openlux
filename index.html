@@ -968,14 +968,6 @@
     outline-offset: 2px;
   }
 
-  /* Reduced motion support */
-  @media (prefers-reduced-motion: reduce) {
-    * {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-    }
-  }
 </style>
 </head>
 <body>
@@ -2199,7 +2191,7 @@ function aplicaFila(q){ const f=state.fila;
   else if(f==='mod_campo') q=q.eq('fonte_modernizacao','campo');
   return q; }
 
-function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
+function debounce(fn,ms){let t;return(...a)=>new Promise(r=>{clearTimeout(t);t=setTimeout(()=>Promise.resolve(fn(...a)).then(r),ms);});}
 
 // Initialize markerClusterGroup for Fase 3 multi-cidade support
 function initClusterGroup(){
@@ -3038,7 +3030,7 @@ window._edit = function(){
       const el = document.getElementById({lat:'eLat',lng:'eLng',tipo:'eTipo',pot:'ePot',status:'eStatus',mod:'eMod',tipoLum:'eTipoLum',classe:'eClasse',obs:'eObs',angulo:'eAngulo',material:'eMaterial'}[k]);
       if (!el) return false;
       const current = el.type === 'checkbox' ? el.checked : el.value;
-      return current != initialValues[k];
+      return current !== initialValues[k];
     });
     const counter = document.getElementById('editChangedCount');
     if (changed.length > 0) {
@@ -3315,8 +3307,15 @@ function sparkline(serie){
     <div style="font-size:11px;color:#9ca3af">Evolução do % LED — ${serie.length} ponto(s), atual ${last.pct_led}%</div></div>`;
 }
 async function loadStatsPanel(){
-  const [porBairro, serie] = await Promise.all([ rpc('ip_por_bairro'), rpc('ip_serie_metricas') ]);
-  if(!state.stats){ state.stats = await rpc('ip_estatisticas',{p_bairro:state.bairro||null}); }
+  try {
+    const result = await Promise.all([ rpc('ip_por_bairro'), rpc('ip_serie_metricas') ]);
+    const [porBairro, serie] = result;
+    if(!porBairro || !serie) throw new Error('Stats data incomplete');
+    if(!state.stats){ state.stats = await rpc('ip_estatisticas',{p_bairro:state.bairro||null}); }
+  } catch (err) {
+    toast(`Erro ao carregar estatísticas: ${err.message}`, true);
+    return;
+  }
   const s=state.stats||{};
 
   const renderKPICard = (icon, label, value, color='text-slate-300', bgColor='bg-slate-800/50', subtext='') => {
@@ -3978,8 +3977,8 @@ async function exportGrade(){
   state.densData=d;
   const rows=d.map(r=>{
     const ring=(r.gj&&r.gj.coordinates&&r.gj.coordinates[0])||null;
-    const lon=ring?((ring[0][0]+ring[2][0])/2).toFixed(6):'';
-    const lat=ring?((ring[0][1]+ring[2][1])/2).toFixed(6):'';
+    const lon=ring&&ring.length>=3?((ring[0][0]+ring[2][0])/2).toFixed(6):'';
+    const lat=ring&&ring.length>=3?((ring[0][1]+ring[2][1])/2).toFixed(6):'';
     return { lon_centro:lon, lat_centro:lat, luminarias:r.n, led:r.n_led, pct_led:r.pct_led,
       potencia_kw:r.kw, fluxo_klm:r.klm, lm_w_medio:r.lm_w, cobertura_pot_pct:r.cobertura_pot };
   });
@@ -4044,7 +4043,6 @@ function toCSVCustom(rows, selectedCols){
   if(!rows||!rows.length) return '';
   const allCols=Object.keys(rows[0]);
   const cols=selectedCols && selectedCols.length ? selectedCols.filter(c=>allCols.includes(c)) : allCols;
-  if(!cols.length) cols=allCols;
   const cell=v=>{ if(v==null)return''; v=String(v); return /[";\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
   return cols.join(';')+'\n'+rows.map(r=>cols.map(c=>cell(r[c])).join(';')).join('\n');
 }
@@ -4076,7 +4074,8 @@ function applyConfig(cfg){
   cfg=cfg||{}; state.config=cfg;
   const titulo=cfg.titulo||'Public Lighting Management', sub=cfg.subtitulo||'Powered by OpenLux';
   const t=document.getElementById('cfgTitulo'), s=document.getElementById('cfgSub');
-  if(t) t.textContent=titulo; if(s) s.textContent=' · '+sub;
+  if(t) t.textContent=titulo;
+  if(s) s.textContent=' · '+sub;
   document.title=titulo+' · '+sub;
   document.documentElement.style.setProperty('--accent',cfg.accent||'#1d4ed8');
   document.documentElement.style.setProperty('--panel',cfg.panelBg||'#0f151c');
