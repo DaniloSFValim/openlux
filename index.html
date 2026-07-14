@@ -365,6 +365,389 @@
     border-color: var(--border-color);
   }
 
+  /* =====================================================
+     ANIMATIONS & TRANSITIONS (Phase 5)
+     ===================================================== */
+
+  /* Global Transitions */
+  button,
+  input,
+  select,
+  textarea,
+  a {
+    transition: all var(--transition-fast);
+  }
+
+  /* Button Interactions */
+  button:active {
+    transform: scale(0.98);
+  }
+
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Modal Animations */
+  @keyframes modalFadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes modalSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  #tableModal,
+  #exportCustomModal,
+  #adminConsole {
+    animation: modalFadeIn var(--transition-base);
+  }
+
+  #tableModal > div,
+  #exportCustomModal > div,
+  #adminConsole {
+    animation: modalSlideUp var(--transition-base);
+  }
+
+  /* Loading Spinner Animation */
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .animate-spin,
+  .spin {
+    animation: spin 0.7s linear infinite;
+  }
+
+  /* Dropdown Animations */
+  @keyframes dropdownSlide {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  #filtrosPop,
+  #visPop {
+    animation: dropdownSlide var(--transition-fast);
+  }
+
+  /* Progress Bar Animation */
+  @keyframes progressPulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+
+  #pctBar {
+    animation: progressPulse 2s ease-in-out infinite;
+  }
+
+  /* Hover Lift Effect */
+  .card {
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+  }
+
+  /* Input Focus Animation */
+  input:focus,
+  select:focus,
+  textarea:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  /* Badge Pulse */
+  @keyframes badgePulse {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+    }
+    70% {
+      box-shadow: 0 0 0 6px rgba(59, 130, 246, 0);
+    }
+  }
+
+  .badge {
+    animation: badgePulse 2s infinite;
+  }
+
+  /* =====================================================
+     MOBILE RESPONSIVENESS (Phase 5)
+     ===================================================== */
+
+  /* Extra Small (Mobile) - Base: 375px */
+  @media (max-width: 640px) {
+    /* Header Responsiveness */
+    header {
+      flex-direction: column;
+      gap: var(--space-md) !important;
+    }
+
+    /* Button sizing for touch */
+    button {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    /* Hide labels on small screens */
+    .hide-sm {
+      display: none;
+    }
+
+    /* Stack form fields */
+    .form-grid.cols-2,
+    .form-grid.cols-3,
+    .form-grid.cols-4 {
+      grid-template-columns: 1fr;
+    }
+
+    /* Table responsive */
+    table {
+      font-size: var(--font-size-sm);
+    }
+
+    thead th,
+    tbody td {
+      padding: var(--space-sm);
+    }
+
+    /* Hide non-essential columns */
+    #tblReg th:nth-child(5),
+    #tblReg td:nth-child(5),
+    #tblReg th:nth-child(7),
+    #tblReg td:nth-child(7) {
+      display: none;
+    }
+
+    /* Modal width on mobile */
+    #tableModal > div,
+    #exportCustomModal > div {
+      width: 95vw !important;
+      height: auto !important;
+      max-height: 90vh;
+    }
+
+    /* Admin console responsive */
+    #adminConsole nav {
+      width: 100%;
+      flex-direction: row;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--border-color);
+      border-right: none;
+    }
+
+    #adminConsole nav button {
+      white-space: nowrap;
+    }
+
+    /* Text sizing */
+    h1, .text-2xl {
+      font-size: 1.5rem;
+    }
+
+    h2, .text-lg {
+      font-size: 1.125rem;
+    }
+
+    /* Grid adjustments */
+    .grid-cols-1.md\:grid-cols-2 {
+      grid-template-columns: 1fr;
+    }
+
+    .grid-cols-1.md\:grid-cols-3 {
+      grid-template-columns: 1fr;
+    }
+
+    .grid-cols-1.md\:grid-cols-4 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* Small (Tablets) - 640px+ */
+  @media (min-width: 640px) {
+    .show-sm {
+      display: none;
+    }
+  }
+
+  /* Medium (Small Tablets) - 768px+ */
+  @media (min-width: 768px) {
+    /* Better spacing on tablets */
+    body {
+      font-size: var(--font-size-base);
+    }
+
+    /* Grid adjustments */
+    .grid-cols-1.md\:grid-cols-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grid-cols-1.md\:grid-cols-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* Sidebar restore */
+    #adminConsole nav {
+      flex-direction: column;
+      width: auto;
+      border-right: 1px solid var(--border-color);
+      border-bottom: none;
+    }
+  }
+
+  /* Large (Desktop) - 1024px+ */
+  @media (min-width: 1024px) {
+    /* Better spacing on desktop */
+    body {
+      font-size: var(--font-size-lg);
+    }
+
+    /* KPI cards grid */
+    .grid-cols-1.md\:grid-cols-4 {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    /* Show all columns in table */
+    #tblReg th:nth-child(5),
+    #tblReg td:nth-child(5),
+    #tblReg th:nth-child(7),
+    #tblReg td:nth-child(7) {
+      display: table-cell;
+    }
+  }
+
+  /* Extra Large (Wide Screens) - 1400px+ */
+  @media (min-width: 1400px) {
+    /* Even better spacing on wide screens */
+    body {
+      padding: 0 var(--space-xl);
+    }
+
+    /* Wider content on ultra-wide */
+    .max-w-2xl {
+      max-width: 56rem;
+    }
+
+    .max-w-3xl {
+      max-width: 64rem;
+    }
+  }
+
+  /* Touch Device Optimizations */
+  @media (hover: none) and (pointer: coarse) {
+    /* Larger touch targets */
+    button,
+    input[type="checkbox"],
+    input[type="radio"] {
+      min-height: 48px;
+      min-width: 48px;
+    }
+
+    /* Remove hover effects on touch */
+    button:hover {
+      background-color: inherit;
+    }
+
+    /* Better spacing for touch */
+    .p-2 {
+      padding: var(--space-md);
+    }
+
+    .gap-1 {
+      gap: var(--space-md);
+    }
+
+    /* Add active state feedback */
+    button:active,
+    input:active {
+      opacity: 0.8;
+    }
+  }
+
+  /* Landscape orientation optimizations */
+  @media (orientation: landscape) and (max-height: 600px) {
+    /* Reduce vertical spacing in landscape */
+    .py-4 {
+      padding-top: var(--space-sm);
+      padding-bottom: var(--space-sm);
+    }
+
+    /* Compact form on landscape mobile */
+    .form-grid {
+      gap: var(--space-sm);
+    }
+  }
+
+  /* =====================================================
+     ACCESSIBILITY & REDUCED MOTION
+     ===================================================== */
+
+  /* Prefers Reduced Motion */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+
+    /* Remove transform effects */
+    button:active {
+      transform: none;
+    }
+
+    .card:hover {
+      transform: none;
+    }
+  }
+
+  /* High Contrast Mode */
+  @media (prefers-contrast: more) {
+    * {
+      border-width: 2px;
+    }
+
+    button:focus-visible {
+      outline-width: 3px;
+    }
+  }
+
+  /* Dark Mode Preference */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+    }
+  }
+
+  /* Light Mode Preference */
+  @media (prefers-color-scheme: light) {
+    :root {
+      color-scheme: light;
+    }
+  }
+
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -644,13 +1027,13 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
       <!-- Right Actions: Theme Toggle + Login (Always Visible) -->
       <div class="flex items-center gap-2 ml-auto flex-shrink-0">
         <button id="themeToggle"
-          class="p-2 rounded-lg transition-colors"
+          class="p-2 rounded-lg transition-all"
           title="Alternar tema claro/escuro"
           aria-label="Alternar tema"
-          style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary);">🌙</button>
+          style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary); min-height: 44px; min-width: 44px;">🌙</button>
         <button id="btnLogin"
           class="px-3 py-2 rounded-lg font-medium text-sm sm:text-base text-white transition-all"
-          style="background: var(--color-primary-600);">🔑 Entrar</button>
+          style="background: var(--color-primary-600); min-height: 44px;">🔑 <span class="hidden sm:inline">Entrar</span></button>
       </div>
     </div>
 
@@ -662,7 +1045,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
         <div class="relative">
           <button @click="showFilters = !showFilters"
             class="px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 flex-shrink-0"
-            style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary);"
+            style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary); min-height: 44px;"
             id="btnFiltros">
             <span class="hidden sm:inline">⚙️ Filtros</span>
             <span class="sm:hidden">⚙️</span>
@@ -756,7 +1139,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
         <div class="relative">
           <button @click="showVis = !showVis"
             class="px-3 py-2 rounded-lg text-sm font-medium transition-all flex-shrink-0"
-            style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary);"
+            style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary); min-height: 44px;"
             id="btnVis">
             <span class="hidden sm:inline">👁️ Visualizar</span>
             <span class="sm:hidden">👁️</span>
@@ -781,14 +1164,14 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
       <div class="flex items-center gap-2 w-full sm:w-auto">
         <button id="btnArea"
           class="px-3 py-2 rounded-lg text-sm font-medium transition-all flex-1 sm:flex-none"
-          style="background: var(--bg-tertiary); border: 1px solid var(--color-info); color: var(--color-info);"
-          title="Selecionar uma área">✏️ Área</button>
+          style="background: var(--bg-tertiary); border: 1px solid var(--color-info); color: var(--color-info); min-height: 44px;"
+          title="Selecionar uma área">✏️ <span class="hidden sm:inline">Área</span></button>
         <button id="btnNovo"
           class="hidden px-3 py-2 rounded-lg text-sm font-medium text-white transition-all"
-          style="background: var(--color-success);">+ Ponto</button>
+          style="background: var(--color-success); min-height: 44px;">+ Ponto</button>
         <button id="btnAdminConsole"
           class="hidden px-3 py-2 rounded-lg text-sm font-medium transition-all"
-          style="background: var(--bg-tertiary); border: 1px solid var(--color-error); color: var(--color-error);">⚙️ Admin</button>
+          style="background: var(--bg-tertiary); border: 1px solid var(--color-error); color: var(--color-error); min-height: 44px;">⚙️ <span class="hidden sm:inline">Admin</span></button>
       </div>
     </div>
   </div>
