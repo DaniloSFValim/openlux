@@ -172,6 +172,67 @@
   }
 
   /* =====================================================
+     RESPONSIVE LAYOUT FIXES - Ensure panels don't overflow viewport
+     ===================================================== */
+
+  /* Map and absolute panels container */
+  #map {
+    position: relative;
+  }
+
+  /* Adjust panel positioning for small screens */
+  @media (max-width: 768px) {
+    #legend, #densCtl, #poligonoPanel, #detail, #stats, #timelineCtl, #advancedFiltersCtl, #drawCtl {
+      left: 2.5px !important;
+      right: auto !important;
+      max-width: calc(100vw - 20px) !important;
+    }
+
+    /* On mobile, ensure left panels don't get cut off */
+    #poligonoPanel {
+      width: calc(100vw - 20px) !important;
+      max-width: 340px !important;
+    }
+
+    #detail, #stats {
+      width: calc(100vw - 20px) !important;
+      max-width: 340px !important;
+    }
+
+    #legend {
+      left: 2.5px !important;
+      bottom: 3.5px !important;
+      max-width: calc(100vw - 20px) !important;
+    }
+
+    #densCtl {
+      left: 2.5px !important;
+      max-width: calc(100vw - 20px) !important;
+    }
+  }
+
+  /* Tablet adjustments */
+  @media (min-width: 769px) and (max-width: 1024px) {
+    #poligonoPanel, #detail, #stats {
+      max-width: calc(100vw - 30px) !important;
+    }
+  }
+
+  /* Ensure dropdowns don't get cut off */
+  #filtrosPop, #visPop {
+    max-width: calc(100vw - 30px) !important;
+    right: auto !important;
+    left: 0 !important;
+  }
+
+  @media (min-width: 640px) {
+    #filtrosPop, #visPop {
+      right: auto !important;
+      left: auto !important;
+    }
+  }
+
+  /* =====================================================
      FORM & TABLE STYLING (Phase 4)
      ===================================================== */
 
