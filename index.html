@@ -47,6 +47,8 @@
   #toast{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:2000;display:none;padding:10px 16px;border-radius:8px;font-size:13px;max-width:80vw}
   .spin{width:12px;height:12px;border:2px solid #24303d;border-top-color:#3b82f6;border-radius:50%;display:inline-block;animation:sp .7s linear infinite}
   @keyframes sp{to{transform:rotate(360deg)}}
+  @keyframes scaleIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
+  .animate-scaleIn{animation:scaleIn 300ms cubic-bezier(0.34,1.56,0.64,1)}
   .lamp-ic{background:none;border:none}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
   #cfgLogo{height:26px;width:auto;border-radius:4px;display:none;margin-right:8px}
@@ -187,6 +189,7 @@
       <button id="btnTabela" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors">📋 Tabela</button>
       <button id="btnStats" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors">📈 Indicadores</button>
       <button id="btnAdvancedFilters" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Filtros avançados por múltiplos critérios">🎯 Filtros Avançados</button>
+      <button id="btnCharts" class="px-2.5 py-1.5 text-left text-sm hover:bg-slate-800 rounded-lg transition-colors" title="Série temporal e KPIs avançados" onclick="window._showCharts()">📈 Gráficos Avançados</button>
     </div>
   </div>
 
@@ -851,6 +854,24 @@
   </div>
 </div>
 
+<!-- CHARTS MODAL - Fase 2: Gráficos & Dashboards -->
+<div id="chartsModal" class="fixed inset-0 z-[1150] bg-black/60 flex items-center justify-center hidden" style="opacity:0;transition:opacity 300ms;">
+  <div class="bg-slate-800 border border-slate-700 rounded-xl w-[min(1000px,95vw)] h-[min(80vh,700px)] flex flex-col overflow-hidden shadow-2xl">
+    <!-- Header -->
+    <div class="flex gap-2 items-center px-4 py-3 border-b border-slate-700 bg-slate-700/50">
+      <h3 class="font-semibold text-white text-base">Gráficos & KPIs</h3>
+      <div class="flex-1"></div>
+      <button class="btn px-1.5 py-1 text-slate-300 hover:text-white text-base" onclick="window._closeCharts()">✕</button>
+    </div>
+    <!-- KPI Sparklines -->
+    <div id="kpiSparklines" class="flex gap-3 flex-wrap p-4 bg-slate-700/30 border-b border-slate-700"></div>
+    <!-- Chart Canvas -->
+    <div class="flex-1 overflow-auto p-4">
+      <canvas id="chartTimeSeries" style="max-height:100%;"></canvas>
+    </div>
+  </div>
+</div>
+
 <div id="loginModal" class="fixed inset-0 z-[1200] bg-black/60 flex items-center justify-center hidden">
   <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 w-80 shadow-2xl">
     <h3 class="text-base font-semibold text-white">Entrar para editar</h3>
@@ -884,7 +905,7 @@ const sb = window.supabase.createClient(URL_SB, ANON);
 const state = { user:null, userRole:null, bairro:"", tipo:"", estado:"", pot:"", fila:"", layer:null, mode:"", tPage:0, tSize:50,
   bairroLayer:null, choropleth:false, choroLayer:null, choroData:null, current:null, tCache:{}, config:null,
   densidade:false, densLayer:null, densMunLayer:null, densData:null, densMetric:'klm',
-  markerCluster:null }; // FASE 3: Client-side clustering for multi-cidade
+  markerCluster:null, charts: {} }; // FASE 3: clustering; Fase 2: charts (Chart.js instances)
 const TIPOS = ["led","vapor_sodio","metalico","vapor_mercurio","fluorescente","sem_lampada","desconhecido"];
 const STATUS = ["led_instalado","pendente_troca","a_verificar"];
 const TIPO_ATIVO = [['luminaria','Luminária'],['caixa_comando','Caixa de comando'],['chave_magnetica','Chave magnética'],['rele_fotoeletrico','Relé fotoelétrico'],['poste','Poste'],['braco','Braço'],['outro','Outro']];
@@ -1392,6 +1413,158 @@ document.getElementById('btnDens').onclick = ()=>{
     renderMunicipioLimites();
   }
   refresh();
+};
+
+// ---------- Fase 2: Gráficos & Dashboards (Chart.js) ----------
+async function loadTimeSeriesData(){
+  try{
+    const response = await rpc('ip_serie_metricas', {});
+    if(!Array.isArray(response)) return [];
+    return response.map(item => ({
+      mes: item.data,
+      total: item.total,
+      led: item.led,
+      pct_led: item.pct_led
+    }));
+  }catch(e){
+    console.error('Erro ao carregar série temporal:', e);
+    return [];
+  }
+}
+
+async function renderTimeSeriesChart(){
+  const data = await loadTimeSeriesData();
+  if(!data || !data.length){
+    toast('Sem dados para gráfico', true);
+    return;
+  }
+
+  const ctx = document.getElementById('chartTimeSeries');
+  if(!ctx) return;
+
+  if(state.charts.timeSeries){
+    state.charts.timeSeries.destroy();
+  }
+
+  state.charts.timeSeries = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.map(d => d.mes),
+      datasets: [
+        {
+          label: 'Luminárias (total)',
+          data: data.map(d => d.total),
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59, 130, 246, 0.05)',
+          yAxisID: 'y',
+          tension: 0.4,
+          fill: true
+        },
+        {
+          label: 'LED (unidades)',
+          data: data.map(d => d.led),
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16, 185, 129, 0.05)',
+          yAxisID: 'y',
+          tension: 0.4,
+          fill: true
+        },
+        {
+          label: '% LED',
+          data: data.map(d => d.pct_led),
+          borderColor: '#f59e0b',
+          backgroundColor: 'rgba(245, 158, 11, 0.05)',
+          yAxisID: 'y1',
+          borderDash: [5, 5],
+          tension: 0.4
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: true, labels: { color: '#d1d5db' } },
+        title: { display: true, text: 'Série Temporal: Luminárias e % LED', color: '#fff' }
+      },
+      scales: {
+        y: {
+          type: 'linear',
+          display: true,
+          position: 'left',
+          title: { display: true, text: 'Unidades', color: '#9ca3af' },
+          ticks: { color: '#9ca3af' },
+          grid: { color: 'rgba(148, 163, 175, 0.1)' }
+        },
+        y1: {
+          type: 'linear',
+          display: true,
+          position: 'right',
+          title: { display: true, text: '% LED', color: '#9ca3af' },
+          min: 0,
+          max: 100,
+          ticks: { color: '#9ca3af' },
+          grid: { drawOnChartArea: false }
+        },
+        x: {
+          ticks: { color: '#9ca3af' },
+          grid: { color: 'rgba(148, 163, 175, 0.1)' }
+        }
+      }
+    }
+  });
+}
+
+async function renderKPISparklines(){
+  try{
+    const stats = await rpc('ip_estatisticas_gerais', {});
+    if(!stats) return;
+
+    const container = document.getElementById('kpiSparklines');
+    if(!container) return;
+
+    const kpis = [
+      { label: 'Luminárias', value: stats.total_luminas, icon: '💡', color: 'bg-blue-500/20 border-blue-500/50' },
+      { label: 'LED (%)', value: stats.led_total + '%', icon: '✨', color: 'bg-green-500/20 border-green-500/50' },
+      { label: 'Potência Média (W)', value: Math.round(stats.potencia_media), icon: '⚡', color: 'bg-yellow-500/20 border-yellow-500/50' },
+      { label: 'Eficácia Média (lm/W)', value: Math.round(stats.eficacia_media), icon: '💫', color: 'bg-purple-500/20 border-purple-500/50' }
+    ];
+
+    container.innerHTML = kpis.map((kpi, idx) => `
+      <div class="flex-1 min-w-[200px] p-3 rounded-lg border ${kpi.color} bg-slate-800/50 animate-scaleIn" style="animation-delay:${idx*0.05}s">
+        <div class="flex items-center gap-2 mb-1">
+          <span style="font-size:20px">${kpi.icon}</span>
+          <span class="text-xs text-slate-400">${kpi.label}</span>
+        </div>
+        <div class="text-lg font-bold text-slate-100">${kpi.value}</div>
+      </div>
+    `).join('');
+  }catch(e){
+    console.error('Erro ao carregar KPIs:', e);
+  }
+}
+
+window._showCharts = async () => {
+  const modal = document.getElementById('chartsModal');
+  if(!modal) return;
+  modal.style.display = 'block';
+  setTimeout(() => {
+    modal.classList.remove('hidden');
+    modal.style.opacity = '1';
+  }, 10);
+  await renderTimeSeriesChart();
+  await renderKPISparklines();
+};
+
+window._closeCharts = () => {
+  const modal = document.getElementById('chartsModal');
+  if(!modal) return;
+  modal.style.opacity = '0';
+  setTimeout(() => {
+    modal.style.display = 'none';
+    modal.classList.add('hidden');
+  }, 300);
 };
 
 // ---------- Timeline Visualization ----------
