@@ -1418,7 +1418,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
             <div class="w-20 sm:w-24 h-1 rounded-full overflow-hidden" style="background: var(--bg-tertiary);">
               <div id="pctBar" class="h-full w-0 bg-gradient-to-r from-amber-400 to-green-500 transition-all duration-500"></div>
             </div>
-            <span id="kpi" class="text-xs" style="color: var(--text-tertiary);">—</span>
+            <span id="kpi" class="text-xs text-muted">—</span>
           </div>
         </div>
       </div>
@@ -1657,7 +1657,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
         <option value="pendente">Pendente</option>
         <option value="sem_lampada">Sem lâmpada</option>
       </select>
-      <span id="tCount" class="text-xs ml-auto" style="color: var(--text-tertiary);"></span>
+      <span id="tCount" class="text-xs ml-auto text-muted"></span>
       <button class="px-3 py-2 rounded-lg text-xs font-medium transition-all" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);" id="tClose">✕ Fechar</button>
     </div>
 
@@ -1667,15 +1667,15 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
         <caption class="sr-only">Registro de luminárias de iluminação pública de Niterói, com endereço, bairro, tipo, potência, estado e origem da modernização.</caption>
         <thead style="background: var(--bg-tertiary); border-bottom-color: var(--border-color);">
           <tr>
-            <th class="text-left" style="color: var(--text-tertiary);">Código</th>
-            <th class="text-left" style="color: var(--text-tertiary);">Endereço</th>
-            <th class="text-left" style="color: var(--text-tertiary);">Bairro</th>
-            <th class="text-left" style="color: var(--text-tertiary);">Tipo</th>
-            <th class="text-right" style="color: var(--text-tertiary);">Pot.</th>
-            <th class="text-left" style="color: var(--text-tertiary);">Estado</th>
-            <th class="text-left" style="color: var(--text-tertiary);">🏥 Saúde</th>
-            <th class="text-left" style="color: var(--text-tertiary);">Origem mod.</th>
-            <th class="text-right" style="color: var(--text-tertiary);">Ações</th>
+            <th class="text-left text-muted">Código</th>
+            <th class="text-left text-muted">Endereço</th>
+            <th class="text-left text-muted">Bairro</th>
+            <th class="text-left text-muted">Tipo</th>
+            <th class="text-right text-muted">Pot.</th>
+            <th class="text-left text-muted">Estado</th>
+            <th class="text-left text-muted">🏥 Saúde</th>
+            <th class="text-left text-muted">Origem mod.</th>
+            <th class="text-right text-muted">Ações</th>
           </tr>
         </thead>
         <tbody id="tBody" style="border-color: var(--border-color);"></tbody>
@@ -1685,7 +1685,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
     <!-- Footer Pagination -->
     <div class="flex gap-3 items-center justify-center px-5 py-3 border-t" style="background: var(--bg-tertiary); border-color: var(--border-color);">
       <button class="px-3 py-2 rounded-lg text-xs font-medium transition-all" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);" id="tPrev">‹ Anterior</button>
-      <span id="tPage" class="text-xs" style="color: var(--text-tertiary);"></span>
+      <span id="tPage" class="text-xs text-muted"></span>
       <button class="px-3 py-2 rounded-lg text-xs font-medium transition-all" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);" id="tNext">Próxima ›</button>
     </div>
   </div>
@@ -1703,7 +1703,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
 
     <!-- Checkboxes List -->
     <div class="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-2 max-h-[60vh]">
-      <div class="text-xs mb-3" style="color: var(--text-tertiary);">Selecione as colunas que deseja exportar:</div>
+      <div class="text-xs mb-3 text-muted">Selecione as colunas que deseja exportar:</div>
 
       <label class="flex items-center gap-3 p-2 cursor-pointer rounded-lg transition-colors" style="hover: var(--bg-tertiary);">
         <input type="checkbox" id="expCol-codigo" class="exp-col-checkbox" value="codigo" checked/>
@@ -1772,7 +1772,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
   <header class="flex items-center justify-between gap-4 px-6 py-4 border-b" style="background: var(--bg-secondary); border-color: var(--border-color);">
     <div class="flex-1">
       <h2 class="text-lg font-bold leading-tight" style="color: var(--text-primary);">Administração</h2>
-      <p class="text-xs mt-1" style="color: var(--text-tertiary);">OpenLux — Public Lighting Management</p>
+      <p class="text-xs mt-1 text-muted">OpenLux — Public Lighting Management</p>
     </div>
     <button class="px-4 py-2 rounded-lg text-sm font-medium transition-all" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary);" id="acVoltar">← Voltar</button>
   </header>
@@ -1825,7 +1825,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
           <div class="p-6 rounded-lg border" style="background: var(--bg-secondary); border-color: var(--border-color);">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm font-medium mb-2" style="color: var(--text-tertiary);">Total de Luminárias</p>
+                <p class="text-sm font-medium mb-2 text-muted">Total de Luminárias</p>
                 <p class="text-3xl font-bold" id="kpiTotal" style="color: var(--color-primary-600);">—</p>
               </div>
               <div class="text-4xl opacity-30">💡</div>
@@ -1836,7 +1836,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
           <div class="p-6 rounded-lg border" style="background: var(--bg-secondary); border-color: var(--border-color);">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm font-medium mb-2" style="color: var(--text-tertiary);">LED Instalado (%)</p>
+                <p class="text-sm font-medium mb-2 text-muted">LED Instalado (%)</p>
                 <p class="text-3xl font-bold" id="kpiLedPct" style="color: var(--color-success);">—</p>
               </div>
               <div class="text-4xl opacity-30">⚡</div>
@@ -1847,7 +1847,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
           <div class="p-6 rounded-lg border" style="background: var(--bg-secondary); border-color: var(--border-color);">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm font-medium mb-2" style="color: var(--text-tertiary);">Potência Média (W)</p>
+                <p class="text-sm font-medium mb-2 text-muted">Potência Média (W)</p>
                 <p class="text-3xl font-bold" id="kpiPotencia" style="color: var(--color-accent);">—</p>
               </div>
               <div class="text-4xl opacity-30">⚙️</div>
@@ -1858,7 +1858,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
           <div class="p-6 rounded-lg border" style="background: var(--bg-secondary); border-color: var(--border-color);">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm font-medium mb-2" style="color: var(--text-tertiary);">Eficácia Média (lm/W)</p>
+                <p class="text-sm font-medium mb-2 text-muted">Eficácia Média (lm/W)</p>
                 <p class="text-3xl font-bold" id="kpiEficacia" style="color: var(--color-info);">—</p>
               </div>
               <div class="text-4xl opacity-30">📊</div>
@@ -1873,21 +1873,21 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
             <div class="flex items-center gap-3">
               <span class="text-2xl">✅</span>
               <div>
-                <p style="color: var(--text-tertiary);">Base de Dados</p>
+                <p class="text-muted">Base de Dados</p>
                 <p class="font-medium" style="color: var(--color-success);">Conectado</p>
               </div>
             </div>
             <div class="flex items-center gap-3">
               <span class="text-2xl">✅</span>
               <div>
-                <p style="color: var(--text-tertiary);">Autenticação</p>
+                <p class="text-muted">Autenticação</p>
                 <p class="font-medium" style="color: var(--color-success);">Ativo</p>
               </div>
             </div>
             <div class="flex items-center gap-3">
               <span class="text-2xl">✅</span>
               <div>
-                <p style="color: var(--text-tertiary);">API Supabase</p>
+                <p class="text-muted">API Supabase</p>
                 <p class="font-medium" style="color: var(--color-success);">Online</p>
               </div>
             </div>
@@ -1909,16 +1909,16 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
           </h3>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">E-mail *</label>
+              <label class="block text-xs font-medium mb-2 text-muted">E-mail *</label>
               <input id="admEmail" type="email" placeholder="usuario@example.com" class="w-full px-3 py-2 rounded-lg text-sm transition-all" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);" />
               <div id="emailError" class="text-xs mt-1" style="color: var(--color-error); display:none;"></div>
             </div>
             <div>
-              <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">Senha (opt.)</label>
+              <label class="block text-xs font-medium mb-2 text-muted">Senha (opt.)</label>
               <input id="admPass" type="password" placeholder="•••••••" class="w-full px-3 py-2 rounded-lg text-sm transition-all" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);" />
             </div>
             <div>
-              <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">Papel *</label>
+              <label class="block text-xs font-medium mb-2 text-muted">Papel *</label>
               <select id="admRole" class="w-full px-3 py-2 rounded-lg text-sm transition-all" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
                 <option value="leitura">👁️ Leitura</option>
                 <option value="editor">✏️ Editor</option>
@@ -1940,10 +1940,10 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
           <table class="w-full" style="font-size:13px;">
             <thead style="background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color);">
               <tr>
-                <th class="px-4 py-3 text-left font-semibold" style="color: var(--text-tertiary);">👤 E-mail</th>
-                <th class="px-4 py-3 text-left font-semibold" style="color: var(--text-tertiary);">Papel</th>
-                <th class="px-4 py-3 text-center font-semibold" style="color: var(--text-tertiary);">Criado</th>
-                <th class="px-4 py-3 text-right font-semibold" style="color: var(--text-tertiary);">Ações</th>
+                <th class="px-4 py-3 text-left font-semibold text-muted">👤 E-mail</th>
+                <th class="px-4 py-3 text-left font-semibold text-muted">Papel</th>
+                <th class="px-4 py-3 text-center font-semibold text-muted">Criado</th>
+                <th class="px-4 py-3 text-right font-semibold text-muted">Ações</th>
               </tr>
             </thead>
             <tbody id="admBody" style="border-bottom: 1px solid var(--border-color);"></tbody>
@@ -1962,22 +1962,22 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
             <div class="space-y-4">
               <!-- Title Input -->
               <div>
-                <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">Título do site</label>
+                <label class="block text-xs font-medium mb-2 text-muted">Título do site</label>
                 <input id="cfgTit" class="w-full px-3 py-2 rounded-lg text-sm" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);" />
               </div>
 
               <!-- Subtitle Input -->
               <div>
-                <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">Subtítulo</label>
+                <label class="block text-xs font-medium mb-2 text-muted">Subtítulo</label>
                 <input id="cfgSubIn" class="w-full px-3 py-2 rounded-lg text-sm" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);" />
               </div>
 
               <!-- Logo Section -->
               <div>
-                <label class="block text-xs font-medium mb-3" style="color: var(--text-tertiary);">Logotipo / Brasão</label>
+                <label class="block text-xs font-medium mb-3 text-muted">Logotipo / Brasão</label>
                 <div class="flex items-center gap-3">
                   <img id="cfgLogoPrev" class="h-8 rounded-lg border" style="border-color: var(--border-color); display: none;" />
-                  <input id="cfgLogoFile" type="file" accept="image/*" class="flex-1 text-xs" style="color: var(--text-tertiary);" />
+                  <input id="cfgLogoFile" type="file" accept="image/*" class="flex-1 text-xs text-muted" />
                   <button class="px-3 py-2 rounded-lg text-xs font-medium transition-all" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary);" id="cfgLogoRemove">Remover</button>
                 </div>
               </div>
@@ -1990,13 +1990,13 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <!-- Accent Color -->
               <div>
-                <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">Cor de destaque</label>
+                <label class="block text-xs font-medium mb-2 text-muted">Cor de destaque</label>
                 <input id="cfgAccent" type="color" class="w-full h-10 rounded-lg cursor-pointer" style="border: 1px solid var(--border-color);" />
               </div>
 
               <!-- Font -->
               <div>
-                <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">Fonte</label>
+                <label class="block text-xs font-medium mb-2 text-muted">Fonte</label>
                 <select id="cfgFonte" class="w-full px-3 py-2 rounded-lg text-sm" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
                   <option value="system">Sistema</option>
                   <option value="inter">Inter</option>
@@ -2008,13 +2008,13 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
 
               <!-- Panel Color -->
               <div>
-                <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">Fundo dos painéis</label>
+                <label class="block text-xs font-medium mb-2 text-muted">Fundo dos painéis</label>
                 <input id="cfgPanel" type="color" class="w-full h-10 rounded-lg cursor-pointer" style="border: 1px solid var(--border-color);" />
               </div>
 
               <!-- Density -->
               <div>
-                <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">Densidade</label>
+                <label class="block text-xs font-medium mb-2 text-muted">Densidade</label>
                 <select id="cfgDensity" class="w-full px-3 py-2 rounded-lg text-sm" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
                   <option value="normal">Normal</option>
                   <option value="compact">Compacta</option>
