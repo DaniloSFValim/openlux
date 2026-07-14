@@ -1116,8 +1116,8 @@
   .mt-2 { margin-top: 8px; }
   .mt-3 { margin-top: 12px; }
   .mt-4 { margin-top: 16px; }
-  .mt-5 { margin-top: 24px; }
-  .mt-6 { margin-top: 32px; }
+  .mt-5 { margin-top: 20px; } /* alinhado à escala do Tailwind */
+  .mt-6 { margin-top: 24px; }
 
   .mb-1 { margin-bottom: 4px; }
   .mb-2 { margin-bottom: 8px; }
@@ -1138,8 +1138,10 @@
   .gap-3 { gap: 12px; }
   .gap-4 { gap: 16px; }
 
-  /* Flex & Display Utilities */
-  .flex { display: flex; }
+  /* Flex & Display Utilities
+     NÃO definir .flex aqui: o Tailwind injeta seu CSS na posição do
+     <script> (antes deste bloco), então um .flex estático venceria o
+     .hidden do Tailwind em elementos com as duas classes (modais). */
   .flex-1 { flex: 1; }
   .text-right { text-align: right; }
 
