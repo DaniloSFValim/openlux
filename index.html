@@ -1029,381 +1029,19 @@
     outline-offset: 2px;
   }
 
-  /* =====================================================
-     UTILITY CLASSES (Phase B Refactoring)
-     ===================================================== */
-
-  /* Text Utilities - Headings */
-  .h1 {
-    font-size: 23px;
-    font-weight: 700;
-    color: var(--text-primary);
-    letter-spacing: 0.3px;
-  }
-
-  .h2 {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--text-primary);
-  }
-
-  .h3 {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text-primary);
-  }
-
-  .h4 {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-primary);
-  }
-
-  /* Text Utilities - Body & Captions */
-  .body {
-    font-size: 13px;
-    color: var(--text-primary);
-  }
-
-  .body-secondary {
-    font-size: 13px;
-    color: var(--text-secondary);
-  }
-
-  .body-tertiary {
-    font-size: 13px;
-    color: var(--text-tertiary);
-  }
-
-  .caption {
-    font-size: 11px;
-    color: var(--text-tertiary);
-  }
-
-  .caption-sm {
-    font-size: 11px;
-    color: var(--text-tertiary);
-  }
-
-  .small {
-    font-size: 12px;
-    color: var(--text-tertiary);
-  }
-
-  /* Text Utilities - Semantic */
-  .text-muted {
-    color: var(--text-tertiary);
-  }
-
-  .text-secondary {
-    color: var(--text-secondary);
-  }
-
-  .text-error {
-    color: var(--color-error);
-  }
-
-  .text-success {
-    color: var(--color-success);
-  }
-
-  .text-warning {
-    color: var(--color-warning);
-  }
-
-  /* Spacing Utilities */
-  .mt-1 { margin-top: 4px; }
-  .mt-2 { margin-top: 8px; }
-  .mt-3 { margin-top: 12px; }
-  .mt-4 { margin-top: 16px; }
-  .mt-5 { margin-top: 24px; }
-  .mt-6 { margin-top: 32px; }
-
-  .mb-1 { margin-bottom: 4px; }
-  .mb-2 { margin-bottom: 8px; }
-  .mb-3 { margin-bottom: 12px; }
-  .mb-4 { margin-bottom: 16px; }
-
-  .px-1 { padding-left: 4px; padding-right: 4px; }
-  .px-2 { padding-left: 8px; padding-right: 8px; }
-  .px-3 { padding-left: 12px; padding-right: 12px; }
-  .px-4 { padding-left: 16px; padding-right: 16px; }
-
-  .py-1 { padding-top: 4px; padding-bottom: 4px; }
-  .py-2 { padding-top: 8px; padding-bottom: 8px; }
-  .py-3 { padding-top: 12px; padding-bottom: 12px; }
-
-  .gap-1 { gap: 4px; }
-  .gap-2 { gap: 8px; }
-  .gap-3 { gap: 12px; }
-  .gap-4 { gap: 16px; }
-
-  /* Flex & Display Utilities */
-  .flex { display: flex; }
-  .flex-1 { flex: 1; }
-  .text-right { text-align: right; }
-
-  /* Label & Typography Utilities */
-  .label-micro {
-    font-size: 11px;
-    color: #9ca3af;
-  }
-
-  /* Positioning Utilities */
-  .absolute-center-x {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  .absolute-center-y {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-
-  .absolute-center {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-  }
-
-  /* Footer/Toast Band */
-  .toast-band {
-    position: absolute;
-    left: 50%;
-    bottom: 12px;
-    transform: translateX(-50%);
-    z-index: 800;
-    max-width: 92vw;
-    background: rgba(15, 21, 28, 0.86);
-    border: 1px solid var(--border-color-lighter);
-    border-radius: 8px;
-    padding: 5px 14px;
-    font-size: 11px;
-    color: var(--text-tertiary);
-    text-align: center;
-    pointer-events: none;
-  }
-
-  /* Splash Screen */
-  .splash-title {
-    font-size: 23px;
-    font-weight: 700;
-    color: var(--text-primary);
-    letter-spacing: 0.3px;
-  }
-
-  .splash-subtitle {
-    font-size: 13px;
-    color: var(--text-tertiary);
-  }
-
-  .splash-credit {
-    font-size: 12px;
-    color: var(--text-tertiary);
-  }
-
-  .splash-version {
-    font-size: 11px;
-    color: var(--text-tertiary);
-  }
-
-  /* Panel & Card Utilities */
-  .panel-bg {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-  }
-
-  .panel-compact {
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    min-height: 44px;
-    min-width: 44px;
-  }
-
-  /* Button States */
-  .btn-primary-solid {
-    background: var(--color-primary-600);
-    color: white;
-  }
-
-  .btn-primary-solid:hover {
-    background: var(--color-primary-700);
-  }
-
-  .btn-disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  /* Input Wrapper Utilities */
-  .input-wrapper {
-    background: var(--input-bg);
-    border: 1px solid var(--input-border);
-    color: var(--input-text);
-  }
-
-  .input-focus {
-    border-color: var(--input-border-focus);
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-  }
-
-  /* Loading Spinner */
-  .spinner-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    min-height: 200px;
-  }
-
-  /* Hidden/Shown */
-  .hidden { display: none !important; }
-  .visible { display: block !important; }
-  .flex-center {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* Button Group Utilities */
-  .btn-secondary-solid {
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    min-height: 44px;
-  }
-
-  .btn-secondary-solid:hover {
-    background: var(--bg-secondary);
-    border-color: var(--border-color-light);
-  }
-
-  .btn-icon {
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    min-height: 44px;
-    min-width: 44px;
-  }
-
-  .btn-icon:hover {
-    background: var(--bg-secondary);
-  }
-
-  .btn-badge {
-    background: var(--color-primary-600);
-    color: white;
-    font-weight: 600;
-    font-size: 12px;
-    padding: 4px 8px;
-    border-radius: 9999px;
-  }
-
-  /* Form Label Utilities */
-  .form-label-inline {
-    display: block;
-    font-size: 12px;
-    font-weight: 500;
-    margin-bottom: 6px;
-    color: var(--text-tertiary);
-  }
-
-  /* Input Variants */
-  .input-default {
-    width: 100%;
-    padding: 10px 10px;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    background: var(--input-bg);
-    border: 1px solid var(--input-border);
-    color: var(--input-text);
-  }
-
-  .dropdown-panel {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    margin-top: 8px;
-    width: 224px;
-    border-radius: 8px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    z-index: 1001;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-  }
-
-  .progress-bar {
-    width: 80px;
-    height: 4px;
-    border-radius: 9999px;
-    overflow: hidden;
-    background: var(--bg-tertiary);
-  }
-
-  .progress-bar-fill {
-    height: 100%;
-    width: 0;
-    background: linear-gradient(to right, #f59e0b, #10b981);
-    transition: width 0.5s ease-out;
-  }
-
-  /* Button Variants - Action Buttons */
-  .btn-info-border {
-    background: var(--bg-tertiary);
-    border: 1px solid var(--color-info);
-    color: var(--color-info);
-    min-height: 44px;
-  }
-
-  .btn-info-border:hover {
-    background: rgba(6, 182, 212, 0.1);
-  }
-
-  .btn-success-solid {
-    background: var(--color-success);
-    color: white;
-    min-height: 44px;
-    font-weight: 500;
-  }
-
-  .btn-success-solid:hover {
-    background: #059669;
-  }
-
-  .btn-error-border {
-    background: var(--bg-tertiary);
-    border: 1px solid var(--color-error);
-    color: var(--color-error);
-    min-height: 44px;
-  }
-
-  .btn-error-border:hover {
-    background: rgba(239, 68, 68, 0.1);
-  }
-
 </style>
 </head>
 <body>
 <div id="map" role="main" aria-label="Mapa de iluminação pública de Niterói"></div>
 <div id="splash" class="fixed inset-0 z-[3000] flex flex-col items-center justify-center gap-2 transition-opacity duration-500" style="background: var(--bg-primary);">
   <img id="splashLogo" alt="" class="h-14 hidden mb-2"/>
-  <div id="splashTitle" class="splash-title">OpenLux</div>
-  <div class="splash-subtitle">Public Lighting Asset Management</div>
-  <div class="splash-credit mt-4">Desenvolvido por <span style="color:var(--text-secondary)">Danilo Valim</span></div>
-  <div class="splash-version">v1.1</div>
-  <button class="btn mt-4" id="splashSkip">Entrar</button>
+  <div id="splashTitle" style="font-size:23px;font-weight:700;color:var(--text-primary);letter-spacing:.3px">OpenLux</div>
+  <div style="font-size:13px;color:var(--text-tertiary)">Public Lighting Asset Management</div>
+  <div style="font-size:12px;color:var(--text-tertiary);margin-top:16px">Desenvolvido por <span style="color:var(--text-secondary)">Danilo Valim</span></div>
+  <div style="font-size:11px;color:var(--text-tertiary)">v1.1</div>
+  <button class="btn" id="splashSkip" style="margin-top:16px">Entrar</button>
 </div>
-<div id="footerBand" role="contentinfo" class="toast-band">OpenLux · Desenvolvido por <span style="color:var(--text-secondary)">Danilo Valim</span> · v1.1</div>
+<div id="footerBand" role="contentinfo" style="position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:800;max-width:92vw;background:rgba(15,21,28,0.86);border:1px solid var(--border-color-lighter);border-radius:8px;padding:5px 14px;font-size:11px;color:var(--text-tertiary);text-align:center;pointer-events:none">OpenLux · Desenvolvido por <span style="color:var(--text-secondary)">Danilo Valim</span> · v1.1</div>
 
 <!-- TOP BAR - Phase 2: Modernized Design with Responsive Layout -->
 <header x-data="{
@@ -1422,14 +1060,14 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
       <div class="flex items-center gap-2 flex-shrink-0">
         <img id="cfgLogo" alt="Logo" class="h-6 w-auto rounded hidden mr-1"/>
         <div class="min-w-0 flex-shrink-0">
-          <div class="font-bold text-sm sm:text-base lg:text-lg leading-tight whitespace-nowrap text-primary">
+          <div class="font-bold text-sm sm:text-base lg:text-lg leading-tight whitespace-nowrap" style="color: var(--text-primary);">
             <span id="cfgTitulo">Iluminação Pública</span>
           </div>
           <div class="flex items-center gap-2 mt-0.5">
             <div class="w-20 sm:w-24 h-1 rounded-full overflow-hidden" style="background: var(--bg-tertiary);">
               <div id="pctBar" class="h-full w-0 bg-gradient-to-r from-amber-400 to-green-500 transition-all duration-500"></div>
             </div>
-            <span id="kpi" class="text-xs text-muted">—</span>
+            <span id="kpi" class="text-xs" style="color: var(--text-tertiary);">—</span>
           </div>
         </div>
       </div>
@@ -1442,11 +1080,13 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
       <!-- Right Actions: Theme Toggle + Login (Always Visible) -->
       <div class="flex items-center gap-2 ml-auto flex-shrink-0">
         <button id="themeToggle"
-          class="p-2 rounded-lg transition-all btn-icon"
+          class="p-2 rounded-lg transition-all"
           title="Alternar tema claro/escuro"
-          aria-label="Alternar tema">🌙</button>
+          aria-label="Alternar tema"
+          style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary); min-height: 44px; min-width: 44px;">🌙</button>
         <button id="btnLogin"
-          class="px-3 py-2 rounded-lg font-medium text-sm sm:text-base transition-all btn-primary-solid">🔑 <span class="hidden sm:inline">Entrar</span></button>
+          class="px-3 py-2 rounded-lg font-medium text-sm sm:text-base text-white transition-all"
+          style="background: var(--color-primary-600); min-height: 44px;">🔑 <span class="hidden sm:inline">Entrar</span></button>
       </div>
     </div>
 
@@ -1457,48 +1097,52 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
         <!-- Filters -->
         <div class="relative">
           <button @click="showFilters = !showFilters"
-            class="px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 flex-shrink-0 btn-secondary-solid"
+            class="px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 flex-shrink-0"
+            style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary); min-height: 44px;"
             id="btnFiltros">
             <span class="hidden sm:inline">⚙️ Filtros</span>
             <span class="sm:hidden">⚙️</span>
-            <span id="fCount" class="hidden ml-1 btn-badge"></span>
+            <span id="fCount" class="hidden ml-1 rounded-full px-2 text-xs font-semibold" style="background: var(--color-primary-600); color: white;"></span>
           </button>
           <div x-show="showFilters"
             @click.away="showFilters = false"
-            class="dropdown-panel"
+            class="absolute top-full right-0 mt-2 w-56 rounded-lg shadow-xl p-4 flex flex-col gap-3 z-[1001]"
             id="filtrosPop"
-            style="display: none;">
+            style="display: none; background: var(--bg-secondary); border: 1px solid var(--border-color);">
             <!-- Bairro Select -->
             <div>
-              <label class="form-label-inline">🏢 Bairro</label>
+              <label class="block text-xs font-medium mb-1.5" style="color: var(--text-tertiary);">🏢 Bairro</label>
               <select id="fBairro"
                 hx-get="/api/v1/bairros"
                 hx-target="#fTipo"
                 hx-trigger="change"
                 hx-swap="innerHTML swap:200ms"
                 hx-indicator="#loading"
-                class="input-default">
+                class="w-full px-2.5 py-1.5 rounded-lg text-sm transition-colors"
+                style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
                 <option value="">Todos</option>
               </select>
             </div>
             <!-- Tipo Select -->
             <div>
-              <label class="form-label-inline">💡 Tipo</label>
+              <label class="block text-xs font-medium mb-1.5" style="color: var(--text-tertiary);">💡 Tipo</label>
               <select id="fTipo"
                 hx-get="/api/v1/tipos-por-bairro"
                 hx-trigger="change"
                 hx-swap="innerHTML swap:200ms"
                 hx-indicator="#loading"
-                class="input-default">
+                class="w-full px-2.5 py-1.5 rounded-lg text-sm transition-colors"
+                style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
                 <option value="">Todos</option>
               </select>
             </div>
             <!-- Estado Select -->
             <div>
-              <label class="form-label-inline">🔆 Estado</label>
+              <label class="block text-xs font-medium mb-1.5" style="color: var(--text-tertiary);">🔆 Estado</label>
               <select id="fEstado"
                 hx-trigger="change"
-                class="input-default">
+                class="w-full px-2.5 py-1.5 rounded-lg text-sm transition-colors"
+                style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
                 <option value="">Todos</option>
                 <option value="led">LED</option>
                 <option value="pendente">Pendente</option>
@@ -1507,8 +1151,9 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
             </div>
             <!-- Potência Select -->
             <div>
-              <label class="form-label-inline">⚡ Potência mínima</label>
-              <select id="fPot" class="input-default">
+              <label class="block text-xs font-medium mb-1.5" style="color: var(--text-tertiary);">⚡ Potência mínima</label>
+              <select id="fPot" class="w-full px-2.5 py-1.5 rounded-lg text-sm transition-colors"
+                style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
                 <option value="">Qualquer</option>
                 <option value="150">≥ 150 W</option>
                 <option value="250">≥ 250 W</option>
@@ -1517,8 +1162,9 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
             </div>
             <!-- Fila Select -->
             <div>
-              <label class="form-label-inline">📋 Fila</label>
-              <select id="fFila" class="input-default">
+              <label class="block text-xs font-medium mb-1.5" style="color: var(--text-tertiary);">📋 Fila</label>
+              <select id="fFila" class="w-full px-2.5 py-1.5 rounded-lg text-sm transition-colors"
+                style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
                 <option value="">— nenhuma —</option>
                 <option value="nao_verificado">🧭 Não verificados</option>
                 <option value="revisao">Marcados p/ revisão</option>
@@ -1527,8 +1173,9 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
             </div>
             <!-- Saúde Select -->
             <div>
-              <label class="form-label-inline">🏥 Status</label>
-              <select id="fSaude" class="input-default">
+              <label class="block text-xs font-medium mb-1.5" style="color: var(--text-tertiary);">🏥 Status</label>
+              <select id="fSaude" class="w-full px-2.5 py-1.5 rounded-lg text-sm transition-colors"
+                style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
                 <option value="">Qualquer</option>
                 <option value="verde">🟢 Bom</option>
                 <option value="amarelo">🟡 Manutenção</option>
@@ -1536,30 +1183,32 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
               </select>
             </div>
             <button id="fLimpar"
-              class="w-full px-3 py-2 rounded-lg text-sm font-medium transition-colors btn-secondary-solid">Limpar</button>
+              class="w-full px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+              style="background: var(--bg-tertiary); color: var(--text-primary);">Limpar</button>
           </div>
         </div>
 
         <!-- Visualize -->
         <div class="relative">
           <button @click="showVis = !showVis"
-            class="px-3 py-2 rounded-lg text-sm font-medium transition-all flex-shrink-0 btn-secondary-solid"
+            class="px-3 py-2 rounded-lg text-sm font-medium transition-all flex-shrink-0"
+            style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary); min-height: 44px;"
             id="btnVis">
             <span class="hidden sm:inline">👁️ Visualizar</span>
             <span class="sm:hidden">👁️</span>
           </button>
           <div x-show="showVis"
             @click.away="showVis = false"
-            class="dropdown-panel"
+            class="absolute top-full right-0 mt-2 w-52 rounded-lg shadow-xl p-2 flex flex-col gap-1 z-[1001]"
             id="visPop"
-            style="display: none; width: 208px; padding: 8px; gap: 4px;">
-            <button id="btnChoro" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Colorir bairros por % LED">🎨 Coroplético</button>
-            <button id="btnDens" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Grade 250 m">📊 Densidade</button>
-            <button id="btnTimeline" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Filtrar por período">📅 Timeline</button>
-            <button id="btnTabela" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body">📋 Tabela</button>
-            <button id="btnStats" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body">📈 Indicadores</button>
-            <button id="btnAdvancedFilters" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Filtros avançados">🎯 Avançados</button>
-            <button id="btnCharts" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" onclick="window._showCharts()">📈 Gráficos</button>
+            style="display: none; background: var(--bg-secondary); border: 1px solid var(--border-color);">
+            <button id="btnChoro" class="px-3 py-2 text-left text-sm rounded-lg transition-colors" style="color: var(--text-primary);" title="Colorir bairros por % LED">🎨 Coroplético</button>
+            <button id="btnDens" class="px-3 py-2 text-left text-sm rounded-lg transition-colors" style="color: var(--text-primary);" title="Grade 250 m">📊 Densidade</button>
+            <button id="btnTimeline" class="px-3 py-2 text-left text-sm rounded-lg transition-colors" style="color: var(--text-primary);" title="Filtrar por período">📅 Timeline</button>
+            <button id="btnTabela" class="px-3 py-2 text-left text-sm rounded-lg transition-colors" style="color: var(--text-primary);">📋 Tabela</button>
+            <button id="btnStats" class="px-3 py-2 text-left text-sm rounded-lg transition-colors" style="color: var(--text-primary);">📈 Indicadores</button>
+            <button id="btnAdvancedFilters" class="px-3 py-2 text-left text-sm rounded-lg transition-colors" style="color: var(--text-primary);" title="Filtros avançados">🎯 Avançados</button>
+            <button id="btnCharts" class="px-3 py-2 text-left text-sm rounded-lg transition-colors" style="color: var(--text-primary);" onclick="window._showCharts()">📈 Gráficos</button>
           </div>
         </div>
       </div>
@@ -1567,14 +1216,15 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
       <!-- Right: Action Buttons (Responsive) -->
       <div class="flex items-center gap-2 w-full sm:w-auto">
         <button id="btnArea"
-          class="px-3 py-2 rounded-lg text-sm font-medium transition-all flex-1 sm:flex-none btn-info-border"
+          class="px-3 py-2 rounded-lg text-sm font-medium transition-all flex-1 sm:flex-none"
+          style="background: var(--bg-tertiary); border: 1px solid var(--color-info); color: var(--color-info); min-height: 44px;"
           title="Selecionar uma área">✏️ <span class="hidden sm:inline">Área</span></button>
         <button id="btnNovo"
-          class="px-3 py-2 rounded-lg text-sm font-medium transition-all btn-success-solid"
-          style="display: none;">+ Ponto</button>
+          class="hidden px-3 py-2 rounded-lg text-sm font-medium text-white transition-all"
+          style="background: var(--color-success); min-height: 44px;">+ Ponto</button>
         <button id="btnAdminConsole"
-          class="px-3 py-2 rounded-lg text-sm font-medium transition-all btn-error-border"
-          style="display: none;">⚙️ <span class="hidden sm:inline">Admin</span></button>
+          class="hidden px-3 py-2 rounded-lg text-sm font-medium transition-all"
+          style="background: var(--bg-tertiary); border: 1px solid var(--color-error); color: var(--color-error); min-height: 44px;">⚙️ <span class="hidden sm:inline">Admin</span></button>
       </div>
     </div>
   </div>
@@ -1661,7 +1311,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
   <div class="rounded-xl w-[min(1050px,95vw)] h-[min(80vh,760px)] flex flex-col overflow-hidden" style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
     <!-- Header -->
     <div class="flex gap-3 items-center px-5 py-4 border-b flex-wrap" style="background: var(--bg-tertiary); border-color: var(--border-color);">
-      <h3 class="font-semibold text-sm text-primary">📋 Registro de luminárias</h3>
+      <h3 class="font-semibold text-sm" style="color: var(--text-primary);">📋 Registro de luminárias</h3>
       <input id="tSearch" placeholder="Código, endereço ou patrimônio…" class="flex-1 min-w-[200px] px-3 py-2 rounded-lg text-xs transition-all form-input" />
       <select id="tBairro" class="w-40 px-3 py-2 rounded-lg text-xs transition-all form-input"><option value="">Bairro: todos</option></select>
       <select id="tStatus" class="w-40 px-3 py-2 rounded-lg text-xs transition-all form-input">
@@ -1670,7 +1320,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
         <option value="pendente">Pendente</option>
         <option value="sem_lampada">Sem lâmpada</option>
       </select>
-      <span id="tCount" class="text-xs ml-auto text-muted"></span>
+      <span id="tCount" class="text-xs ml-auto" style="color: var(--text-tertiary);"></span>
       <button class="px-3 py-2 rounded-lg text-xs font-medium transition-all" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);" id="tClose">✕ Fechar</button>
     </div>
 
@@ -1680,15 +1330,15 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
         <caption class="sr-only">Registro de luminárias de iluminação pública de Niterói, com endereço, bairro, tipo, potência, estado e origem da modernização.</caption>
         <thead style="background: var(--bg-tertiary); border-bottom-color: var(--border-color);">
           <tr>
-            <th class="text-left text-muted">Código</th>
-            <th class="text-left text-muted">Endereço</th>
-            <th class="text-left text-muted">Bairro</th>
-            <th class="text-left text-muted">Tipo</th>
-            <th class="text-right text-muted">Pot.</th>
-            <th class="text-left text-muted">Estado</th>
-            <th class="text-left text-muted">🏥 Saúde</th>
-            <th class="text-left text-muted">Origem mod.</th>
-            <th class="text-right text-muted">Ações</th>
+            <th class="text-left" style="color: var(--text-tertiary);">Código</th>
+            <th class="text-left" style="color: var(--text-tertiary);">Endereço</th>
+            <th class="text-left" style="color: var(--text-tertiary);">Bairro</th>
+            <th class="text-left" style="color: var(--text-tertiary);">Tipo</th>
+            <th class="text-right" style="color: var(--text-tertiary);">Pot.</th>
+            <th class="text-left" style="color: var(--text-tertiary);">Estado</th>
+            <th class="text-left" style="color: var(--text-tertiary);">🏥 Saúde</th>
+            <th class="text-left" style="color: var(--text-tertiary);">Origem mod.</th>
+            <th class="text-right" style="color: var(--text-tertiary);">Ações</th>
           </tr>
         </thead>
         <tbody id="tBody" style="border-color: var(--border-color);"></tbody>
@@ -1698,7 +1348,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
     <!-- Footer Pagination -->
     <div class="flex gap-3 items-center justify-center px-5 py-3 border-t" style="background: var(--bg-tertiary); border-color: var(--border-color);">
       <button class="px-3 py-2 rounded-lg text-xs font-medium transition-all" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);" id="tPrev">‹ Anterior</button>
-      <span id="tPage" class="text-xs text-muted"></span>
+      <span id="tPage" class="text-xs" style="color: var(--text-tertiary);"></span>
       <button class="px-3 py-2 rounded-lg text-xs font-medium transition-all" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);" id="tNext">Próxima ›</button>
     </div>
   </div>
@@ -1709,38 +1359,38 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
   <div class="rounded-xl w-[min(500px,95vw)] flex flex-col overflow-hidden" style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
     <!-- Header -->
     <div class="flex gap-3 items-center px-5 py-4 border-b" style="background: var(--bg-tertiary); border-color: var(--border-color);">
-      <h3 class="font-semibold text-base text-primary">📥 Personalizar exportação CSV</h3>
+      <h3 class="font-semibold text-base" style="color: var(--text-primary);">📥 Personalizar exportação CSV</h3>
       <div class="flex-1"></div>
       <button class="px-2 py-1 rounded-lg text-base transition-all" style="background: transparent; color: var(--text-secondary);" onclick="document.getElementById('exportCustomModal').style.display='none'">✕</button>
     </div>
 
     <!-- Checkboxes List -->
     <div class="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-2 max-h-[60vh]">
-      <div class="text-xs mb-3 text-muted">Selecione as colunas que deseja exportar:</div>
+      <div class="text-xs mb-3" style="color: var(--text-tertiary);">Selecione as colunas que deseja exportar:</div>
 
       <label class="flex items-center gap-3 p-2 cursor-pointer rounded-lg transition-colors" style="hover: var(--bg-tertiary);">
         <input type="checkbox" id="expCol-codigo" class="exp-col-checkbox" value="codigo" checked/>
-        <span class="text-sm text-primary">Código</span>
+        <span class="text-sm" style="color: var(--text-primary);">Código</span>
       </label>
 
       <label class="flex items-center gap-3 p-2 cursor-pointer rounded-lg transition-colors" style="hover: var(--bg-tertiary);">
         <input type="checkbox" id="expCol-endereco" class="exp-col-checkbox" value="endereco" checked/>
-        <span class="text-sm text-primary">Endereço</span>
+        <span class="text-sm" style="color: var(--text-primary);">Endereço</span>
       </label>
 
       <label class="flex items-center gap-3 p-2 cursor-pointer rounded-lg transition-colors" style="hover: var(--bg-tertiary);">
         <input type="checkbox" id="expCol-bairro" class="exp-col-checkbox" value="bairro" checked/>
-        <span class="text-sm text-primary">Bairro</span>
+        <span class="text-sm" style="color: var(--text-primary);">Bairro</span>
       </label>
 
       <label class="flex items-center gap-3 p-2 cursor-pointer rounded-lg transition-colors" style="hover: var(--bg-tertiary);">
         <input type="checkbox" id="expCol-tipo" class="exp-col-checkbox" value="tipo" checked/>
-        <span class="text-sm text-primary">Tipo de Luminária</span>
+        <span class="text-sm" style="color: var(--text-primary);">Tipo de Luminária</span>
       </label>
 
       <label class="flex items-center gap-3 p-2 cursor-pointer rounded-lg transition-colors" style="hover: var(--bg-tertiary);">
         <input type="checkbox" id="expCol-potencia" class="exp-col-checkbox" value="potencia" checked/>
-        <span class="text-sm text-primary">Potência (W)</span>
+        <span class="text-sm" style="color: var(--text-primary);">Potência (W)</span>
       </label>
 
       <label class="flex items-center gap-3 p-2 cursor-pointer hover:bg-slate-700/50 rounded-lg transition-colors">
@@ -1774,7 +1424,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
       <button class="btn px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-100 text-sm rounded-lg border border-slate-600 transition-colors" onclick="document.getElementById('exportCustomModal').style.display='none'">Cancelar</button>
       <button class="btn px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-100 text-sm rounded-lg border border-slate-600 transition-colors" onclick="document.querySelectorAll('.exp-col-checkbox').forEach(cb=>cb.checked=true)">Todas</button>
       <button class="btn px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-100 text-sm rounded-lg border border-slate-600 transition-colors" onclick="document.querySelectorAll('.exp-col-checkbox').forEach(cb=>cb.checked=false)">Nenhuma</button>
-      <div class="flex-1"></div>
+      <div style="flex:1"></div>
       <button class="btn btn-accent" id="btnExportWithSettings">Exportar CSV</button>
     </div>
   </div>
@@ -1782,10 +1432,10 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
 
 <div id="adminConsole" x-data="{ activeTab: 'visao' }" class="fixed inset-0 z-[1400] flex flex-col hidden" style="background: var(--bg-primary);">
   <!-- Header -->
-  <header class="flex items-center justify-between gap-4 px-6 py-4 border-b panel-secondary">
+  <header class="flex items-center justify-between gap-4 px-6 py-4 border-b" style="background: var(--bg-secondary); border-color: var(--border-color);">
     <div class="flex-1">
-      <h2 class="text-lg font-bold leading-tight text-primary">Administração</h2>
-      <p class="text-xs mt-1 text-muted">OpenLux — Public Lighting Management</p>
+      <h2 class="text-lg font-bold leading-tight" style="color: var(--text-primary);">Administração</h2>
+      <p class="text-xs mt-1" style="color: var(--text-tertiary);">OpenLux — Public Lighting Management</p>
     </div>
     <button class="px-4 py-2 rounded-lg text-sm font-medium transition-all" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary);" id="acVoltar">← Voltar</button>
   </header>
@@ -1793,7 +1443,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
   <!-- Main Content -->
   <div class="flex-1 flex min-h-0 overflow-hidden">
     <!-- Sidebar Navigation - Improved -->
-    <nav role="navigation" aria-label="Seções da administração" class="w-52 border-r p-4 flex flex-col gap-2 overflow-y-auto panel-secondary">
+    <nav role="navigation" aria-label="Seções da administração" class="w-52 border-r p-4 flex flex-col gap-2 overflow-y-auto" style="background: var(--bg-secondary); border-color: var(--border-color);">
       <button @click="activeTab = 'visao'"
         :class="{ 'font-semibold': activeTab === 'visao' }"
         :style="{ background: activeTab === 'visao' ? 'var(--color-primary-600)' : 'transparent', color: activeTab === 'visao' ? 'white' : 'var(--text-secondary)' }"
@@ -1830,15 +1480,15 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
     <div class="flex-1 overflow-auto px-6 py-6 lg:px-8" style="background: var(--bg-primary);">
       <!-- Visão Geral: KPI Dashboard -->
       <section id="sec-visao" :style="{ display: activeTab === 'visao' ? 'block' : 'none' }" class="acsec">
-        <h2 class="text-2xl font-bold mb-6 text-primary">Visão Geral do Sistema</h2>
+        <h2 class="text-2xl font-bold mb-6" style="color: var(--text-primary);">Visão Geral do Sistema</h2>
 
         <!-- KPI Cards Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <!-- Total Luminárias Card -->
-          <div class="p-6 rounded-lg border panel-secondary">
+          <div class="p-6 rounded-lg border" style="background: var(--bg-secondary); border-color: var(--border-color);">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm font-medium mb-2 text-muted">Total de Luminárias</p>
+                <p class="text-sm font-medium mb-2" style="color: var(--text-tertiary);">Total de Luminárias</p>
                 <p class="text-3xl font-bold" id="kpiTotal" style="color: var(--color-primary-600);">—</p>
               </div>
               <div class="text-4xl opacity-30">💡</div>
@@ -1846,21 +1496,21 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
           </div>
 
           <!-- LED Instalado Card -->
-          <div class="p-6 rounded-lg border panel-secondary">
+          <div class="p-6 rounded-lg border" style="background: var(--bg-secondary); border-color: var(--border-color);">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm font-medium mb-2 text-muted">LED Instalado (%)</p>
-                <p class="text-3xl font-bold text-success" id="kpiLedPct">—</p>
+                <p class="text-sm font-medium mb-2" style="color: var(--text-tertiary);">LED Instalado (%)</p>
+                <p class="text-3xl font-bold" id="kpiLedPct" style="color: var(--color-success);">—</p>
               </div>
               <div class="text-4xl opacity-30">⚡</div>
             </div>
           </div>
 
           <!-- Potência Média Card -->
-          <div class="p-6 rounded-lg border panel-secondary">
+          <div class="p-6 rounded-lg border" style="background: var(--bg-secondary); border-color: var(--border-color);">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm font-medium mb-2 text-muted">Potência Média (W)</p>
+                <p class="text-sm font-medium mb-2" style="color: var(--text-tertiary);">Potência Média (W)</p>
                 <p class="text-3xl font-bold" id="kpiPotencia" style="color: var(--color-accent);">—</p>
               </div>
               <div class="text-4xl opacity-30">⚙️</div>
@@ -1868,10 +1518,10 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
           </div>
 
           <!-- Eficácia Média Card -->
-          <div class="p-6 rounded-lg border panel-secondary">
+          <div class="p-6 rounded-lg border" style="background: var(--bg-secondary); border-color: var(--border-color);">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm font-medium mb-2 text-muted">Eficácia Média (lm/W)</p>
+                <p class="text-sm font-medium mb-2" style="color: var(--text-tertiary);">Eficácia Média (lm/W)</p>
                 <p class="text-3xl font-bold" id="kpiEficacia" style="color: var(--color-info);">—</p>
               </div>
               <div class="text-4xl opacity-30">📊</div>
@@ -1881,27 +1531,27 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
 
         <!-- System Status Section -->
         <div class="bg-slate-900/30 border rounded-lg p-6" style="border-color: var(--border-color);">
-          <h3 class="text-lg font-semibold mb-4 text-primary">Status do Sistema</h3>
+          <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">Status do Sistema</h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div class="flex items-center gap-3">
               <span class="text-2xl">✅</span>
               <div>
-                <p class="text-muted">Base de Dados</p>
-                <p class="font-medium text-success">Conectado</p>
+                <p style="color: var(--text-tertiary);">Base de Dados</p>
+                <p class="font-medium" style="color: var(--color-success);">Conectado</p>
               </div>
             </div>
             <div class="flex items-center gap-3">
               <span class="text-2xl">✅</span>
               <div>
-                <p class="text-muted">Autenticação</p>
-                <p class="font-medium text-success">Ativo</p>
+                <p style="color: var(--text-tertiary);">Autenticação</p>
+                <p class="font-medium" style="color: var(--color-success);">Ativo</p>
               </div>
             </div>
             <div class="flex items-center gap-3">
               <span class="text-2xl">✅</span>
               <div>
-                <p class="text-muted">API Supabase</p>
-                <p class="font-medium text-success">Online</p>
+                <p style="color: var(--text-tertiary);">API Supabase</p>
+                <p class="font-medium" style="color: var(--color-success);">Online</p>
               </div>
             </div>
           </div>
@@ -1911,27 +1561,27 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
       <!-- Usuários Section -->
       <section id="sec-usuarios" :style="{ display: activeTab === 'usuarios' ? 'block' : 'none' }" class="acsec">
         <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-bold text-primary">Gestão de Usuários</h2>
+          <h2 class="text-2xl font-bold" style="color: var(--text-primary);">Gestão de Usuários</h2>
           <div class="px-4 py-2 rounded-lg text-sm font-medium" id="userCount" style="background: var(--bg-tertiary); color: var(--text-secondary);">0 usuários</div>
         </div>
 
         <!-- New User Form Card -->
-        <div class="p-6 rounded-lg border mb-6 max-w-3xl panel-secondary">
-          <h3 class="text-lg font-semibold mb-4 flex items-center gap-2 text-primary">
+        <div class="p-6 rounded-lg border mb-6 max-w-3xl" style="background: var(--bg-secondary); border-color: var(--border-color);">
+          <h3 class="text-lg font-semibold mb-4 flex items-center gap-2" style="color: var(--text-primary);">
             <span>➕</span> Novo operador
           </h3>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label class="block text-xs font-medium mb-2 text-muted">E-mail *</label>
+              <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">E-mail *</label>
               <input id="admEmail" type="email" placeholder="usuario@example.com" class="w-full px-3 py-2 rounded-lg text-sm transition-all" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);" />
               <div id="emailError" class="text-xs mt-1" style="color: var(--color-error); display:none;"></div>
             </div>
             <div>
-              <label class="block text-xs font-medium mb-2 text-muted">Senha (opt.)</label>
+              <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">Senha (opt.)</label>
               <input id="admPass" type="password" placeholder="•••••••" class="w-full px-3 py-2 rounded-lg text-sm transition-all" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);" />
             </div>
             <div>
-              <label class="block text-xs font-medium mb-2 text-muted">Papel *</label>
+              <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">Papel *</label>
               <select id="admRole" class="w-full px-3 py-2 rounded-lg text-sm transition-all" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
                 <option value="leitura">👁️ Leitura</option>
                 <option value="editor">✏️ Editor</option>
@@ -1940,7 +1590,7 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
             </div>
             <button class="px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all" style="background: var(--color-primary-600);" id="admCreate">Adicionar</button>
           </div>
-          <div id="formStatus" class="text-xs mt-3 text-success" style="display:none; font-weight:600;"></div>
+          <div id="formStatus" class="text-xs mt-3" style="color: var(--color-success); display:none; font-weight:600;"></div>
         </div>
 
         <!-- Search Bar -->
@@ -1949,14 +1599,14 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
         </div>
 
         <!-- Users Table -->
-        <div class="rounded-lg border overflow-hidden panel-secondary">
+        <div class="rounded-lg border overflow-hidden" style="background: var(--bg-secondary); border-color: var(--border-color);">
           <table class="w-full" style="font-size:13px;">
             <thead style="background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color);">
               <tr>
-                <th class="px-4 py-3 text-left font-semibold text-muted">👤 E-mail</th>
-                <th class="px-4 py-3 text-left font-semibold text-muted">Papel</th>
-                <th class="px-4 py-3 text-center font-semibold text-muted">Criado</th>
-                <th class="px-4 py-3 text-right font-semibold text-muted">Ações</th>
+                <th class="px-4 py-3 text-left font-semibold" style="color: var(--text-tertiary);">👤 E-mail</th>
+                <th class="px-4 py-3 text-left font-semibold" style="color: var(--text-tertiary);">Papel</th>
+                <th class="px-4 py-3 text-center font-semibold" style="color: var(--text-tertiary);">Criado</th>
+                <th class="px-4 py-3 text-right font-semibold" style="color: var(--text-tertiary);">Ações</th>
               </tr>
             </thead>
             <tbody id="admBody" style="border-bottom: 1px solid var(--border-color);"></tbody>
@@ -1966,31 +1616,31 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
 
       <!-- Aparência Section -->
       <section id="sec-aparencia" :style="{ display: activeTab === 'aparencia' ? 'block' : 'none' }" class="acsec">
-        <h2 class="text-2xl font-bold mb-6 text-primary">Aparência do Site</h2>
+        <h2 class="text-2xl font-bold mb-6" style="color: var(--text-primary);">Aparência do Site</h2>
 
         <div class="max-w-3xl space-y-6">
           <!-- Branding Card -->
-          <div class="p-6 rounded-lg border panel-secondary">
-            <h3 class="text-lg font-semibold mb-4 text-primary">Identidade Visual</h3>
+          <div class="p-6 rounded-lg border" style="background: var(--bg-secondary); border-color: var(--border-color);">
+            <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">Identidade Visual</h3>
             <div class="space-y-4">
               <!-- Title Input -->
               <div>
-                <label class="block text-xs font-medium mb-2 text-muted">Título do site</label>
+                <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">Título do site</label>
                 <input id="cfgTit" class="w-full px-3 py-2 rounded-lg text-sm" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);" />
               </div>
 
               <!-- Subtitle Input -->
               <div>
-                <label class="block text-xs font-medium mb-2 text-muted">Subtítulo</label>
+                <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">Subtítulo</label>
                 <input id="cfgSubIn" class="w-full px-3 py-2 rounded-lg text-sm" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);" />
               </div>
 
               <!-- Logo Section -->
               <div>
-                <label class="block text-xs font-medium mb-3 text-muted">Logotipo / Brasão</label>
+                <label class="block text-xs font-medium mb-3" style="color: var(--text-tertiary);">Logotipo / Brasão</label>
                 <div class="flex items-center gap-3">
                   <img id="cfgLogoPrev" class="h-8 rounded-lg border" style="border-color: var(--border-color); display: none;" />
-                  <input id="cfgLogoFile" type="file" accept="image/*" class="flex-1 text-xs text-muted" />
+                  <input id="cfgLogoFile" type="file" accept="image/*" class="flex-1 text-xs" style="color: var(--text-tertiary);" />
                   <button class="px-3 py-2 rounded-lg text-xs font-medium transition-all" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary);" id="cfgLogoRemove">Remover</button>
                 </div>
               </div>
@@ -1998,18 +1648,18 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
           </div>
 
           <!-- Colors & Typography Card -->
-          <div class="p-6 rounded-lg border panel-secondary">
-            <h3 class="text-lg font-semibold mb-4 text-primary">Cores e Tipografia</h3>
+          <div class="p-6 rounded-lg border" style="background: var(--bg-secondary); border-color: var(--border-color);">
+            <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">Cores e Tipografia</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <!-- Accent Color -->
               <div>
-                <label class="block text-xs font-medium mb-2 text-muted">Cor de destaque</label>
+                <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">Cor de destaque</label>
                 <input id="cfgAccent" type="color" class="w-full h-10 rounded-lg cursor-pointer" style="border: 1px solid var(--border-color);" />
               </div>
 
               <!-- Font -->
               <div>
-                <label class="block text-xs font-medium mb-2 text-muted">Fonte</label>
+                <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">Fonte</label>
                 <select id="cfgFonte" class="w-full px-3 py-2 rounded-lg text-sm" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
                   <option value="system">Sistema</option>
                   <option value="inter">Inter</option>
@@ -2021,13 +1671,13 @@ style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
 
               <!-- Panel Color -->
               <div>
-                <label class="block text-xs font-medium mb-2 text-muted">Fundo dos painéis</label>
+                <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">Fundo dos painéis</label>
                 <input id="cfgPanel" type="color" class="w-full h-10 rounded-lg cursor-pointer" style="border: 1px solid var(--border-color);" />
               </div>
 
               <!-- Density -->
               <div>
-                <label class="block text-xs font-medium mb-2 text-muted">Densidade</label>
+                <label class="block text-xs font-medium mb-2" style="color: var(--text-tertiary);">Densidade</label>
                 <select id="cfgDensity" class="w-full px-3 py-2 rounded-lg text-sm" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);">
                   <option value="normal">Normal</option>
                   <option value="compact">Compacta</option>
@@ -2460,9 +2110,9 @@ function fotoIdxHtml(anguloDeg, materialKey){
                              : (v<=0.33?'#4ade80':v<=0.66?'#fbbf24':'#f87171');
   const bar = (v,bom) => `<div style="height:5px;border-radius:3px;background:#1f2a37;overflow:hidden;margin-top:2px"><div style="height:100%;width:${pct(v)};background:${cor(v,bom)}"></div></div>`;
   return `<div style="font-weight:600;color:#cbd5e1;margin-bottom:4px">📐 Índices fotométricos (proxy 1ª ordem)</div>
-    <div class="flex-between"><span>Aproveitamento no piso</span><b style="color:${cor(r.etaPiso,true)}">${pct(r.etaPiso)}</b></div>${bar(r.etaPiso,true)}
-    <div class="flex-between" style="margin-top:5px"><span>Poluição luminosa</span><b style="color:${cor(r.P,false)}">${pct(r.P)}</b></div>${bar(r.P,false)}
-    <div class="flex-between" style="margin-top:5px"><span>Luminância relativa (percepção)</span><b>${pct(r.Lrel)}</b></div>${bar(r.Lrel,true)}
+    <div style="display:flex;justify-content:space-between"><span>Aproveitamento no piso</span><b style="color:${cor(r.etaPiso,true)}">${pct(r.etaPiso)}</b></div>${bar(r.etaPiso,true)}
+    <div style="display:flex;justify-content:space-between;margin-top:5px"><span>Poluição luminosa</span><b style="color:${cor(r.P,false)}">${pct(r.P)}</b></div>${bar(r.P,false)}
+    <div style="display:flex;justify-content:space-between;margin-top:5px"><span>Luminância relativa (percepção)</span><b>${pct(r.Lrel)}</b></div>${bar(r.Lrel,true)}
     <div style="color:#6b7280;margin-top:5px;font-size:9.5px">ρ=${r.rho.toFixed(2)} · modelo geométrico documentado em docs/FIELD_REFERENCE_TIER3_PHOTOMETRY.md</div>`;
 }
 function intervLabel(t){ return (INTERV.find(x=>x[0]===t)||[t,t])[1]; }
@@ -2724,18 +2374,18 @@ map.on('click', function(e){
   const tipoOpts = TIPOS.map(t => '<option>' + t + '</option>').join('');
   const statusOpts = STATUS.map(s => '<option>' + s + '</option>').join('');
   d.innerHTML = `
-    <b class="body">Novo ativo (mapa)</b>
+    <b style="font-size:13px">Novo ativo (mapa)</b>
     <div style="font-size:11px;color:#6b7280;margin-top:2px">O código IPNIT é gerado automaticamente.</div>
     <div style="display:flex;flex-direction:column;gap:7px;margin-top:8px">
       <div style="display:flex;gap:6px">
         <label style="font-size:11px;color:#9ca3af;flex:1">Latitude<input id="nLat" type="number" step="0.000001" value="${lat.toFixed(6)}"/></label>
         <label style="font-size:11px;color:#9ca3af;flex:1">Longitude<input id="nLng" type="number" step="0.000001" value="${lng.toFixed(6)}"/></label>
       </div>
-      <label class="label-micro">Tipo de ativo<select id="nAtivo">${ativoOpts}</select></label>
+      <label style="font-size:11px;color:#9ca3af">Tipo de ativo<select id="nAtivo">${ativoOpts}</select></label>
       <input id="nPatr" placeholder="Referência ENEL (opcional)"/>
-      <div class="flex gap-1" style="align-items:center"><input id="nEnd" placeholder="Endereço" class="flex-1"/><span id="nEndLoading" style="font-size:12px;color:#6b7280;display:none"><span class="spin"></span></span></div>
+      <div style="display:flex;gap:6px;align-items:center"><input id="nEnd" placeholder="Endereço" style="flex:1"/><span id="nEndLoading" style="font-size:12px;color:#6b7280;display:none"><span class="spin"></span></span></div>
       <div id="nLumFields" style="display:flex;flex-direction:column;gap:7px">
-        <label class="label-micro">Tipo de luminária<select id="nTipoLum"><option value="">—</option>${tipoLumOpts}</select></label>
+        <label style="font-size:11px;color:#9ca3af">Tipo de luminária<select id="nTipoLum"><option value="">—</option>${tipoLumOpts}</select></label>
         <input id="nClasse" placeholder="Classe NBR (V3, P2, C4…)"/>
         <select id="nTipo">${tipoOpts}</select>
         <input id="nPot" type="number" placeholder="Potência (W)"/>
@@ -2743,11 +2393,11 @@ map.on('click', function(e){
         <label style="font-size:12px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="nMod" style="width:auto"/> LED</label>
         <div style="margin-top:2px;padding-top:6px;border-top:1px solid #1f2a37;display:flex;flex-direction:column;gap:6px">
           <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.4px">📐 Fotometria da instalação (opcional)</div>
-          <label class="label-micro">Ângulo de apontamento<select id="nAngulo"><option value="">— não classificado</option>${ANGULOS_INCLINACAO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
-          <label class="label-micro">Material do piso<select id="nMaterial"><option value="">— não classificado</option>${MATERIAIS_PISO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
+          <label style="font-size:11px;color:#9ca3af">Ângulo de apontamento<select id="nAngulo"><option value="">— não classificado</option>${ANGULOS_INCLINACAO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
+          <label style="font-size:11px;color:#9ca3af">Material do piso<select id="nMaterial"><option value="">— não classificado</option>${MATERIAIS_PISO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
         </div>
       </div>
-      <div class="flex gap-2"><button class="btn btn-accent flex-1" id="nSave">Cadastrar</button><button class="btn" onclick="document.getElementById('detail').style.display='none'">Cancelar</button></div>
+      <div style="display:flex;gap:8px"><button class="btn btn-accent" style="flex:1" id="nSave">Cadastrar</button><button class="btn" onclick="document.getElementById('detail').style.display='none'">Cancelar</button></div>
     </div>`;
   const nAtivo = document.getElementById('nAtivo');
   const toggleLum = () => { document.getElementById('nLumFields').style.display = nAtivo.value === 'luminaria' ? 'flex' : 'none'; };
@@ -2886,7 +2536,7 @@ function buildDensCtl(breaks,cfg){
     const rot=lo==null?('&lt; '+fmtDens(hi)):hi==null?('≥ '+fmtDens(lo)):(fmtDens(lo)+' – '+fmtDens(hi));
     return `<div style="display:flex;align-items:center;gap:6px;margin-top:2px"><span style="width:14px;height:11px;border-radius:2px;background:${cor};display:inline-block;flex-shrink:0"></span><span>${rot}</span></div>`; }).join('');
   c.innerHTML=`<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">${mBtns}</div>
-    <div class="text-gray" style="margin-bottom:2px">${cfg.unid}${cfg.fixo?'':' · quintis'}</div>${sw}
+    <div style="color:#9ca3af;margin-bottom:2px">${cfg.unid}${cfg.fixo?'':' · quintis'}</div>${sw}
     <div style="color:#6b7280;margin-top:5px;font-size:10.5px">Estimativa de fluxo instalado — não é medição NBR 5101</div>`;
   c.style.display='block';
 }
@@ -3161,12 +2811,12 @@ function renderPoligonoPanel(s){
   const box=document.getElementById('poligonoPanel'); if(!box) return;
   if(!s){ box.style.display='none'; return; }
   const fmt=n=>(n||0).toLocaleString('pt-BR');
-  const tipoRows=Object.entries(s.por_tipo_lampada||{}).map(([k,v])=>`<div class="flex-between"><span class="text-gray">${esc(k)}</span><b>${fmt(v)}</b></div>`).join('');
+  const tipoRows=Object.entries(s.por_tipo_lampada||{}).map(([k,v])=>`<div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">${esc(k)}</span><b>${fmt(v)}</b></div>`).join('');
   const foto = (s.aproveitamento_medio!=null)
     ? `<div style="margin-top:8px;padding-top:8px;border-top:1px solid #1f2a37">
-         <div class="text-gray" style="margin-bottom:3px">📐 Fotometria média (${fmt(s.classificados_foto)} classificados)</div>
-         <div class="flex-between"><span>Aproveitamento no piso</span><b style="color:#4ade80">${Math.round(s.aproveitamento_medio*100)}%</b></div>
-         <div class="flex-between"><span>Poluição luminosa</span><b style="color:#fbbf24">${Math.round((s.poluicao_media||0)*100)}%</b></div>
+         <div style="color:#9ca3af;margin-bottom:3px">📐 Fotometria média (${fmt(s.classificados_foto)} classificados)</div>
+         <div style="display:flex;justify-content:space-between"><span>Aproveitamento no piso</span><b style="color:#4ade80">${Math.round(s.aproveitamento_medio*100)}%</b></div>
+         <div style="display:flex;justify-content:space-between"><span>Poluição luminosa</span><b style="color:#fbbf24">${Math.round((s.poluicao_media||0)*100)}%</b></div>
        </div>`
     : `<div style="margin-top:8px;color:#6b7280;font-size:10.5px">Sem pontos classificados por fotometria nesta área.</div>`;
   const exportar = podeEditar()
@@ -3175,20 +2825,20 @@ function renderPoligonoPanel(s){
          <button class="btn" style="flex:1;font-size:11px" onclick="exportarPoligono('geojson')">⬇️ GeoJSON</button>
        </div>` : '';
   box.innerHTML = `
-    <div class="flex-between" style="align-items:center;margin-bottom:8px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <b style="font-size:13px;color:#38bdf8">🗺️ Área selecionada</b>
       <button class="btn" style="padding:2px 8px;font-size:11px" onclick="limparPoligono()">✕ Limpar</button>
     </div>
     <div style="font-size:12px;display:flex;flex-direction:column;gap:3px">
-      <div class="flex-between"><span class="text-gray">Luminárias</span><b>${fmt(s.total)}</b></div>
-      <div class="flex-between"><span class="text-gray">Área</span><b>${s.area_km2} km²</b></div>
-      <div class="flex-between"><span class="text-gray">Densidade</span><b>${s.densidade_km2} /km²</b></div>
-      <div class="flex-between"><span class="text-gray">LED</span><b style="color:#4ade80">${fmt(s.led)} (${s.pct_led}%)</b></div>
-      <div class="flex-between"><span class="text-gray">Pendentes</span><b style="color:#fbbf24">${fmt(s.pendente)}</b></div>
-      <div class="flex-between"><span class="text-gray">Potência instalada</span><b>${s.potencia_kw} kW</b></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Luminárias</span><b>${fmt(s.total)}</b></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Área</span><b>${s.area_km2} km²</b></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Densidade</span><b>${s.densidade_km2} /km²</b></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">LED</span><b style="color:#4ade80">${fmt(s.led)} (${s.pct_led}%)</b></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Pendentes</span><b style="color:#fbbf24">${fmt(s.pendente)}</b></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:#9ca3af">Potência instalada</span><b>${s.potencia_kw} kW</b></div>
     </div>
     <div style="margin-top:8px;padding-top:8px;border-top:1px solid #1f2a37;font-size:11px">
-      <div class="text-gray" style="margin-bottom:3px">Por tipo de lâmpada</div>${tipoRows||'<span style="color:#6b7280">—</span>'}
+      <div style="color:#9ca3af;margin-bottom:3px">Por tipo de lâmpada</div>${tipoRows||'<span style="color:#6b7280">—</span>'}
     </div>
     ${foto}
     ${exportar}`;
@@ -3294,7 +2944,7 @@ async function renderMunicipioLimites(){
 }
 
 // ---------- Detalhe ----------
-function fld(label,val){ return `<div class="flex-between" style="gap:10px;padding:3px 0;border-bottom:1px solid #161f29"><span class="text-gray">${label}</span><span class="text-right">${esc(val)||'—'}</span></div>`; }
+function fld(label,val){ return `<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid #161f29"><span style="color:#9ca3af">${label}</span><span style="text-align:right">${esc(val)||'—'}</span></div>`; }
 function openDetail(p){
   state.current=p;
   const d=document.getElementById('detail'); d.style.display='block';
@@ -3304,8 +2954,8 @@ function openDetail(p){
   const origem=p.fonte_modernizacao==='censo_enel'?'Censo ENEL':p.fonte_modernizacao==='seconser_pos_censo'?'SECONSER (pós-censo)':p.fonte_modernizacao==='campo'?'Campo':'—';
   const ehLum=(p.tipo_ativo||'luminaria')==='luminaria';
   d.innerHTML = `
-    <div class="flex-between" style="align-items:center;margin-bottom:8px">
-      <b class="body">${esc(p.codigo_seconser)||'—'}</b> ${ehLum?badge+' '+healthSpan:healthSpan}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <b style="font-size:13px">${esc(p.codigo_seconser)||'—'}</b> ${ehLum?badge+' '+healthSpan:healthSpan}</div>
     ${fld('Referência ENEL', p.numero_patrimonio)}
     ${fld('Tipo de ativo', ativoLabel(p.tipo_ativo||'luminaria'))}
     ${ehLum?fld('Tipo de luminária', p.tipo_luminaria):''}
@@ -3321,14 +2971,14 @@ function openDetail(p){
     ${ehLum&&p.material_piso?fld('Material do piso', materialLabel(p.material_piso)):''}
     ${ehLum&&fotometriaIndices(p.angulo_inclinacao_graus, p.material_piso)?`<div style="font-size:10.5px;color:#9ca3af;background:#0f151c;border:1px solid #1f2a37;border-radius:6px;padding:7px;margin-top:6px">${fotoIdxHtml(p.angulo_inclinacao_graus, p.material_piso)}</div>`:''}
     ${p.flag_revisao_censo?`<div style="color:#fbbf24;font-size:11px;margin-top:4px">⚑ marcado para revisão</div>`:''}
-    ${p.observacoes?`<div class="text-gray" style="font-size:11px;margin-top:6px">${esc(p.observacoes)}</div>`:''}
+    ${p.observacoes?`<div style="color:#9ca3af;font-size:11px;margin-top:6px">${esc(p.observacoes)}</div>`:''}
     ${state.user?`<div style="display:flex;gap:6px;margin-top:8px">
-        <button class="btn flex-1" onclick="window._interv('${p.id}')">Intervenções</button>
-        <button class="btn flex-1" onclick="window._hist('${p.id}')">Histórico</button>
+        <button class="btn" style="flex:1" onclick="window._interv('${p.id}')">Intervenções</button>
+        <button class="btn" style="flex:1" onclick="window._hist('${p.id}')">Histórico</button>
       </div><div id="histBox"></div>`:''}
     ${podeEditar()?`<button class="btn" style="width:100%;margin-top:8px;border-color:#14532d;color:#4ade80" onclick="window._confirmarPonto('${p.id}')" title="Recenseamento: confirma que os dados conferem com a realidade em campo, sem alterá-los">✓ Confirmar em campo (dados corretos)</button>`:''}
     <div style="margin-top:10px;display:flex;gap:8px">
-      ${podeEditar()?`<button class="btn btn-accent flex-1" onclick="window._edit()">Editar</button>`:''}
+      ${podeEditar()?`<button class="btn btn-accent" style="flex:1" onclick="window._edit()">Editar</button>`:''}
       <button class="btn" onclick="document.getElementById('detail').style.display='none'">Fechar</button></div>`;
 }
 window._confirmarPonto = async (id)=>{
@@ -3353,42 +3003,42 @@ window._edit = function(){
   };
 
   d.innerHTML = `
-    <div class="flex-between" style="align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #1f2a37">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #1f2a37">
       <div>
-        <b class="body">✏️ Editar Ativo</b>
-        <div class="text-gray" style="font-size:11px;margin-top:2px">${esc(p.numero_patrimonio)}</div>
+        <b style="font-size:13px">✏️ Editar Ativo</b>
+        <div style="font-size:11px;color:#9ca3af;margin-top:2px">${esc(p.numero_patrimonio)}</div>
       </div>
-      <div id="editChangedCount" class="text-gray" style="background:#1f2a37;padding:4px 8px;border-radius:8px;font-size:11px;font-weight:600;display:none">0 campos</div>
+      <div id="editChangedCount" style="background:#1f2a37;padding:4px 8px;border-radius:8px;font-size:11px;color:#9ca3af;font-weight:600;display:none">0 campos</div>
     </div>
 
-    <div class="grid-cols-2-gap">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
       <div>
-        <label class="label-small">📍 Latitude</label>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">📍 Latitude</label>
         <input id="eLat" type="number" step="0.000001" value="${initialValues.lat}" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;transition:all 0.2s" placeholder="-22.90"/>
         <div id="latError" style="font-size:9px;color:#ef4444;margin-top:2px;display:none"></div>
       </div>
       <div>
-        <label class="label-small">📍 Longitude</label>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">📍 Longitude</label>
         <input id="eLng" type="number" step="0.000001" value="${initialValues.lng}" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;transition:all 0.2s" placeholder="-43.10"/>
         <div id="lngError" style="font-size:9px;color:#ef4444;margin-top:2px;display:none"></div>
       </div>
     </div>
 
-    <div class="grid-cols-2-gap">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
       <div>
-        <label class="label-small">💡 Tipo</label>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">💡 Tipo</label>
         <select id="eTipo" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;cursor:pointer">${TIPOS.map(t=>'<option '+((t===initialValues.tipo)?'selected':'')+'>'+t+'</option>').join('')}</select>
       </div>
       <div>
-        <label class="label-small">⚡ Potência (W)</label>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">⚡ Potência (W)</label>
         <input id="ePot" type="number" value="${initialValues.pot}" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px" placeholder="0-2000"/>
         <div id="potError" style="font-size:9px;color:#ef4444;margin-top:2px;display:none"></div>
       </div>
     </div>
 
-    <div class="grid-cols-2-gap">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
       <div>
-        <label class="label-small">🔧 Estado</label>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">🔧 Estado</label>
         <select id="eStatus" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;cursor:pointer">${STATUS.map(s=>'<option '+(s===initialValues.status?'selected':'')+'>'+s+'</option>').join('')}</select>
       </div>
       <div style="display:flex;align-items:flex-end">
@@ -3399,31 +3049,31 @@ window._edit = function(){
       </div>
     </div>
 
-    <div class="grid-cols-2-gap">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
       <div>
-        <label class="label-small">🏷️ Tipo Luminária</label>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">🏷️ Tipo Luminária</label>
         <select id="eTipoLum" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;cursor:pointer"><option value="">—</option>${TIPO_LUM.map(t=>'<option '+(t===initialValues.tipoLum?'selected':'')+'>'+t+'</option>').join('')}</select>
       </div>
       <div>
-        <label class="label-small">📋 Classe NBR</label>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">📋 Classe NBR</label>
         <input id="eClasse" value="${initialValues.classe}" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px" placeholder="V3, P2…"/>
       </div>
     </div>
 
-    <div class="grid-cols-2-gap">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
       <div>
-        <label class="label-small">📐 Ângulo (nadir)</label>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">📐 Ângulo (nadir)</label>
         <select id="eAngulo" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;cursor:pointer"><option value="">— não classificado</option>${ANGULOS_INCLINACAO.map(([v,l])=>'<option value="'+v+'"'+(String(v)===initialValues.angulo?' selected':'')+'>'+l+'</option>').join('')}</select>
       </div>
       <div>
-        <label class="label-small">🧱 Material do piso</label>
+        <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">🧱 Material do piso</label>
         <select id="eMaterial" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;cursor:pointer"><option value="">— não classificado</option>${MATERIAIS_PISO.map(([v,l])=>'<option value="'+v+'"'+(v===initialValues.material?' selected':'')+'>'+l+'</option>').join('')}</select>
       </div>
     </div>
     <div id="eFotoIdx" style="font-size:10.5px;color:#9ca3af;background:#0f151c;border:1px solid #1f2a37;border-radius:4px;padding:6px;margin-bottom:8px;display:none"></div>
 
     <div style="margin-bottom:8px">
-      <label class="label-small">📝 Observações</label>
+      <label style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">📝 Observações</label>
       <textarea id="eObs" rows="2" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;font-family:monospace;resize:vertical">${esc(initialValues.obs)}</textarea>
     </div>
 
@@ -3540,7 +3190,7 @@ window._interv = async (id)=>{
     const extra=h.lampada_nova?` → ${esc(h.lampada_nova)}${h.potencia_nova?(' '+h.potencia_nova+' W'):''}`:'';
     return `<div style="border-bottom:1px solid #161f29;padding:4px 0;font-size:11px">
       <div style="color:#cbd5e1">${esc(intervLabel(h.tipo))}${extra}</div>
-      ${h.descricao?`<div class="text-gray">${esc(h.descricao)}</div>`:''}
+      ${h.descricao?`<div style="color:#9ca3af">${esc(h.descricao)}</div>`:''}
       <div style="color:#6b7280">${h.data} · ${esc(h.responsavel||h.registrado_por||'—')}</div></div>`;
   }).join('');
   box.innerHTML=html;
@@ -3557,7 +3207,7 @@ window._formInterv = (id)=>{
       <select id="ivLamp"><option value="">— lâmpada nova —</option>${TIPOS.map(t=>`<option>${t}</option>`).join('')}</select>
       <input id="ivPot" type="number" placeholder="Potência nova (W)"/>
     </div>
-    <div class="flex gap-1"><button class="btn btn-accent flex-1" id="ivSave">Salvar</button><button class="btn" onclick="window._interv('${id}')">Cancelar</button></div>
+    <div style="display:flex;gap:6px"><button class="btn btn-accent" style="flex:1" id="ivSave">Salvar</button><button class="btn" onclick="window._interv('${id}')">Cancelar</button></div>
   </div>`;
   const tipoSel=document.getElementById('ivTipo');
   const toggleSub=()=>{ document.getElementById('ivSub').style.display = tipoSel.value==='substituicao'?'flex':'none'; };
@@ -3604,19 +3254,19 @@ document.getElementById('btnNovo').onclick = ()=>{
   const c=map.getCenter();
   const d=document.getElementById('detail'); d.style.display='block';
   d.innerHTML = `
-    <b class="body">Novo ativo</b>
+    <b style="font-size:13px">Novo ativo</b>
     <div style="font-size:11px;color:#6b7280;margin-top:2px">O código IPNIT é gerado automaticamente.</div>
     <div style="display:flex;flex-direction:column;gap:7px;margin-top:8px">
       <div style="display:flex;gap:6px">
         <label style="font-size:11px;color:#9ca3af;flex:1">Latitude<input id="nLat" type="number" step="0.000001" value="${c.lat.toFixed(6)}"/></label>
         <label style="font-size:11px;color:#9ca3af;flex:1">Longitude<input id="nLng" type="number" step="0.000001" value="${c.lng.toFixed(6)}"/></label>
       </div>
-      <label class="label-micro">Tipo de ativo<select id="nAtivo">${TIPO_ATIVO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
+      <label style="font-size:11px;color:#9ca3af">Tipo de ativo<select id="nAtivo">${TIPO_ATIVO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
       <input id="nPatr" placeholder="Referência ENEL (opcional)"/>
       <input id="nEnd" placeholder="Endereço"/>
       <div id="nLumFields" style="display:flex;flex-direction:column;gap:7px">
         <button class="btn" style="width:100%;margin-bottom:8px;border-color:var(--accent);color:var(--accent)" id="nBtnModelo">📋 Inserir com modelo</button>
-        <label class="label-micro">Tipo de luminária<select id="nTipoLum"><option value="">—</option>${TIPO_LUM.map(t=>`<option>${t}</option>`).join('')}</select></label>
+        <label style="font-size:11px;color:#9ca3af">Tipo de luminária<select id="nTipoLum"><option value="">—</option>${TIPO_LUM.map(t=>`<option>${t}</option>`).join('')}</select></label>
         <input id="nClasse" placeholder="Classe NBR (V3, P2, C4…)"/>
         <select id="nTipo">${TIPOS.map(t=>`<option>${t}</option>`).join('')}</select>
         <input id="nPot" type="number" placeholder="Potência (W)"/>
@@ -3624,11 +3274,11 @@ document.getElementById('btnNovo').onclick = ()=>{
         <label style="font-size:12px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="nMod" style="width:auto"/> LED</label>
         <div style="margin-top:2px;padding-top:6px;border-top:1px solid #1f2a37;display:flex;flex-direction:column;gap:6px">
           <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.4px">📐 Fotometria da instalação (opcional)</div>
-          <label class="label-micro">Ângulo de apontamento<select id="nAngulo"><option value="">— não classificado</option>${ANGULOS_INCLINACAO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
-          <label class="label-micro">Material do piso<select id="nMaterial"><option value="">— não classificado</option>${MATERIAIS_PISO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
+          <label style="font-size:11px;color:#9ca3af">Ângulo de apontamento<select id="nAngulo"><option value="">— não classificado</option>${ANGULOS_INCLINACAO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
+          <label style="font-size:11px;color:#9ca3af">Material do piso<select id="nMaterial"><option value="">— não classificado</option>${MATERIAIS_PISO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
         </div>
       </div>
-      <div class="flex gap-2"><button class="btn btn-accent flex-1" id="nSave">Cadastrar</button><button class="btn" onclick="document.getElementById('detail').style.display='none'">Cancelar</button></div>
+      <div style="display:flex;gap:8px"><button class="btn btn-accent" style="flex:1" id="nSave">Cadastrar</button><button class="btn" onclick="document.getElementById('detail').style.display='none'">Cancelar</button></div>
     </div>`;
   const nAtivo=document.getElementById('nAtivo');
   const toggleLum=()=>{ document.getElementById('nLumFields').style.display = nAtivo.value==='luminaria'?'flex':'none'; };
@@ -3678,7 +3328,7 @@ window._selecionarModelo = async ()=>{
       ${m.foto_url?`<img src="${esc(m.foto_url)}" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:6px;flex-shrink:0"/>`:''}
       <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
         <div style="font-weight:600;font-size:12px">${esc(m.fabricante)} · ${esc(m.modelo)}</div>
-        <div class="text-gray" style="font-size:11px">${m.potencia_w} W${m.temperatura_cor_k?' · '+m.temperatura_cor_k+' K':''}${m.tensao?' · '+esc(m.tensao)+' V':''}${m.ip?' · '+esc(m.ip):''}${m.classe_nbr?' · '+esc(m.classe_nbr):''}</div>
+        <div style="color:#9ca3af;font-size:11px">${m.potencia_w} W${m.temperatura_cor_k?' · '+m.temperatura_cor_k+' K':''}${m.tensao?' · '+esc(m.tensao)+' V':''}${m.ip?' · '+esc(m.ip):''}${m.classe_nbr?' · '+esc(m.classe_nbr):''}</div>
         <div style="color:#6b7280;font-size:10.5px">${esc(m.tipo_luminaria||'')}${m.tipo_luminaria&&m.tipo_lampada?' · ':''}${esc(m.tipo_lampada||'')}${m.descricao?' — '+esc(m.descricao):''}</div>
       </div>
     </div>
@@ -3709,7 +3359,7 @@ async function loadStatsChips(){
   if(!data) return;
   state.stats=data;
   const scope = state.bairro? esc(state.bairro) : 'Niterói';
-  document.getElementById('kpi').innerHTML = `<b>${data.total.toLocaleString('pt-BR')}</b> lum · <b style="color:#4ade80">${data.pct_led}%</b> LED · <b style="color:#fbbf24">${data.pendente.toLocaleString('pt-BR')}</b> pend · <span class="text-gray">${scope}</span>`;
+  document.getElementById('kpi').innerHTML = `<b>${data.total.toLocaleString('pt-BR')}</b> lum · <b style="color:#4ade80">${data.pct_led}%</b> LED · <b style="color:#fbbf24">${data.pendente.toLocaleString('pt-BR')}</b> pend · <span style="color:#9ca3af">${scope}</span>`;
   document.getElementById('pctBar').style.width = (data.pct_led||0)+'%';
 }
 function sparkline(serie){
@@ -3722,7 +3372,7 @@ function sparkline(serie){
   const last=serie[serie.length-1];
   return `<div style="margin-top:4px"><svg width="${w}" height="${h}" style="max-width:100%">
     <polyline points="${pts}" fill="none" stroke="#22c55e" stroke-width="2"/>${dots}</svg>
-    <div class="label-micro">Evolução do % LED — ${serie.length} ponto(s), atual ${last.pct_led}%</div></div>`;
+    <div style="font-size:11px;color:#9ca3af">Evolução do % LED — ${serie.length} ponto(s), atual ${last.pct_led}%</div></div>`;
 }
 async function loadStatsPanel(){
   try {
@@ -3740,7 +3390,7 @@ async function loadStatsPanel(){
     const colorClass = color === 'text-green-400' ? 'border-green-900/50' : color === 'text-amber-400' ? 'border-amber-900/50' : 'border-slate-700';
     return `<div class="relative overflow-hidden rounded-lg border ${colorClass} ${bgColor} p-4 hover:shadow-lg hover:${bgColor.replace('800', '700')} transition-all duration-300">
       <div style="font-size:28px;opacity:0.3;position:absolute;right:-8px;top:-8px">${icon}</div>
-      <div class="text-gray" style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">${label}</div>
+      <div style="color:#9ca3af;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">${label}</div>
       <div style="font-size:24px;font-weight:700;margin-bottom:2px" class="${color}">${value}</div>
       ${subtext ? `<div style="font-size:10px;color:#6b7280">${subtext}</div>` : ''}
     </div>`;
@@ -3770,10 +3420,10 @@ async function loadStatsPanel(){
     <td style="text-align:right;padding:8px;font-size:13px;font-weight:600">${b.pct_led}%</td></tr>`).join('');
 
   document.getElementById('stats').innerHTML = `
-    <div class="flex-between" style="align-items:center;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #1f2a37">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #1f2a37">
       <div>
         <div style="font-weight:700;font-size:15px;color:#e5e7eb">Indicadores</div>
-        ${state.bairro ? `<div class="text-gray" style="font-size:12px;margin-top:2px">📍 ${esc(state.bairro)}</div>` : ''}
+        ${state.bairro ? `<div style="font-size:12px;color:#9ca3af;margin-top:2px">📍 ${esc(state.bairro)}</div>` : ''}
       </div>
       <button class="btn" style="padding:6px 10px;font-size:16px" onclick="document.getElementById('stats').style.display='none'">✕</button>
     </div>
@@ -3854,7 +3504,7 @@ async function loadTable(){
     const origem=p.fonte_modernizacao==='censo_enel'?'censo':p.fonte_modernizacao==='seconser_pos_censo'?'SECONSER':p.fonte_modernizacao==='campo'?'campo':'—';
     const est=p.modernizado_led?`<span class="badge" style="background:#0d3d24;color:#4ade80">LED</span>`:`<span class="badge" style="background:#3d2f0d;color:#fbbf24">Pend.</span>`;
     const healthBadge = healthStatusBadge(p.health_status);
-    return `<tr><td>${esc(p.codigo_seconser)||'—'}</td><td>${esc(p.endereco)||'—'}</td><td>${esc(p.bairro_nome)||'—'}</td><td>${p.tipo_lampada}</td><td>${p.potencia_w||'—'}</td><td>${est}</td><td style="color:${healthBadge.color}">${healthBadge.emoji} ${healthBadge.label}</td><td class="text-gray">${origem}</td>
+    return `<tr><td>${esc(p.codigo_seconser)||'—'}</td><td>${esc(p.endereco)||'—'}</td><td>${esc(p.bairro_nome)||'—'}</td><td>${p.tipo_lampada}</td><td>${p.potencia_w||'—'}</td><td>${est}</td><td style="color:${healthBadge.color}">${healthBadge.emoji} ${healthBadge.label}</td><td style="color:#9ca3af">${origem}</td>
       <td>${podeEditar()?`<button class="btn" style="padding:2px 8px" onclick="window._editId('${p.id}')" aria-label="Editar luminária">editar</button>`:''}</td></tr>`;
   }).join('');
   document.getElementById('tBody').innerHTML = linhas || '<tr><td colspan="8" style="text-align:center;color:#6b7280;padding:18px">Nenhum registro encontrado</td></tr>';
@@ -3870,8 +3520,7 @@ document.getElementById('tNext').onclick=()=>{ state.tPage++; loadTable(); };
 function podeEditar(){ return ['admin','editor'].includes(state.userRole); }
 async function setUser(u){
   state.user=u; state.userRole=null;
-  const labelSpan = document.getElementById('btnLogin').querySelector('span.hidden.sm\\:inline');
-  if(labelSpan) labelSpan.textContent = u?'Sair':'Entrar';
+  document.getElementById('btnLogin').textContent = u?'Sair':'Entrar';
   if(u){ try{ const {data}=await sb.from('profiles').select('role').eq('id',u.id).single(); state.userRole=data?.role||'leitura'; }
          catch(e){ state.userRole='leitura'; } }
   document.getElementById('btnNovo').style.display = podeEditar()?'inline-block':'none';
@@ -3962,12 +3611,12 @@ async function loadCampanhas(){
     const pct = c.total_parque>0 ? Math.round(100*c.verificados/c.total_parque) : 0;
     const badge = c.status==='ativa' ? '<span class="badge" style="background:#0d3d24;color:#4ade80">ATIVA</span>' : '<span class="badge" style="background:#1f2a37;color:#9ca3af">encerrada</span>';
     return `<div class="bg-slate-800/50 border ${c.status==='ativa'?'border-emerald-700':'border-slate-700'} rounded-lg p-4 mb-3">
-      <div class="flex-between" style="align-items:center;gap:8px;flex-wrap:wrap">
-        <div><b class="body">${esc(c.nome)}</b> ${badge}
-          <div class="text-gray" style="font-size:11px;margin-top:2px">${esc(c.descricao)||''} · início ${new Date(c.criado_em).toLocaleDateString('pt-BR')}${c.encerrada_em?(' · fim '+new Date(c.encerrada_em).toLocaleDateString('pt-BR')):''}</div></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <div><b style="font-size:13px">${esc(c.nome)}</b> ${badge}
+          <div style="font-size:11px;color:#9ca3af;margin-top:2px">${esc(c.descricao)||''} · início ${new Date(c.criado_em).toLocaleDateString('pt-BR')}${c.encerrada_em?(' · fim '+new Date(c.encerrada_em).toLocaleDateString('pt-BR')):''}</div></div>
         ${c.status==='ativa'&&isAdmin?`<button class="btn" style="border-color:#7f1d1d;color:#f87171;padding:4px 10px;font-size:11px" onclick="window._encerrarCampanha('${c.id}')">Encerrar</button>`:''}
       </div>
-      <div class="flex-between text-gray" style="font-size:11px;margin-top:10px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#9ca3af;margin-top:10px">
         <span>${(+c.verificados).toLocaleString('pt-BR')} de ${(+c.total_parque).toLocaleString('pt-BR')} pontos verificados</span><b style="color:#4ade80">${pct}%</b></div>
       <div style="height:6px;border-radius:3px;background:#1f2a37;overflow:hidden;margin-top:4px"><div style="height:100%;width:${pct}%;background:linear-gradient(to right,#059669,#4ade80)"></div></div>
     </div>`;
@@ -3996,7 +3645,7 @@ window._encerrarCampanha = async (id)=>{
 
 function qcard(label,n,fila,nota){
   return `<div class="chip" style="border-radius:10px;padding:12px;min-width:160px">
-    <div class="text-gray" style="font-size:11px">${label}</div>
+    <div style="color:#9ca3af;font-size:11px">${label}</div>
     <div style="font-weight:700;font-size:20px">${(n||0).toLocaleString('pt-BR')}</div>
     ${fila?`<button class="btn" style="margin-top:6px;padding:3px 8px;font-size:11px" onclick="window._filaMapa('${fila}')">abrir no mapa</button>`:`<div style="color:#6b7280;font-size:11px;margin-top:6px">${nota||''}</div>`}</div>`;
 }
@@ -4005,7 +3654,7 @@ async function loadVisaoGeral(){
   box.innerHTML='<div style="color:#6b7280"><span class="spin"></span> Carregando…</div>';
   const [s,serie,q]=await Promise.all([ rpc('ip_estatisticas',{p_bairro:null}), rpc('ip_serie_metricas'), rpc('ip_qualidade_dado') ]);
   const S=s||{}, Q=q||{};
-  const kv=(k,v,c)=>`<div class="chip" style="border-radius:10px;padding:12px;min-width:120px"><div class="text-gray" style="font-size:11px">${k}</div><div style="font-weight:700;font-size:20px;color:${c||'#e5e7eb'}">${v}</div></div>`;
+  const kv=(k,v,c)=>`<div class="chip" style="border-radius:10px;padding:12px;min-width:120px"><div style="color:#9ca3af;font-size:11px">${k}</div><div style="font-weight:700;font-size:20px;color:${c||'#e5e7eb'}">${v}</div></div>`;
   box.innerHTML = `<h3 style="margin:0 0 12px;font-size:15px">Visão geral</h3>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
       ${kv('Luminárias',(S.total||0).toLocaleString('pt-BR'))}
@@ -4233,7 +3882,7 @@ async function loadAdminModelos(){
     <tr>
       <td>${esc(m.fabricante)}</td>
       <td>${esc(m.modelo)}${m.descricao?`<div style="color:#6b7280;font-size:10.5px">${esc(m.descricao)}</div>`:''}</td>
-      <td class="text-right">${m.potencia_w} W</td>
+      <td style="text-align:right">${m.potencia_w} W</td>
       <td>${esc(m.tipo_luminaria||'—')}</td>
       <td>${esc(m.tipo_lampada||'—')}</td>
       <td>${esc(m.classe_nbr||'—')}</td>
