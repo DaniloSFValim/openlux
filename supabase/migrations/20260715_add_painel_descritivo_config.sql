@@ -124,7 +124,7 @@ GRANT SELECT ON public.site_config TO authenticated;
 GRANT EXECUTE ON FUNCTION public.ip_obter_painel_config TO authenticated;
 
 -- Admin pode atualizar configuração
-CREATE POLICY "admin_update_painel_config" ON public.site_config
+CREATE POLICY IF NOT EXISTS "admin_update_painel_config" ON public.site_config
   FOR UPDATE
   USING (
     EXISTS (
