@@ -2038,6 +2038,11 @@
         :style="{ background: activeTab === 'aparencia' ? 'var(--color-primary-600)' : 'transparent', color: activeTab === 'aparencia' ? 'white' : 'var(--text-secondary)' }"
         class="text-left px-4 py-2.5 rounded-lg transition-all text-sm acnav"
         data-sec="aparencia">🎨 Aparência</button>
+      <button @click="activeTab = 'painel-descritivo'"
+        :class="{ 'font-semibold': activeTab === 'painel-descritivo' }"
+        :style="{ background: activeTab === 'painel-descritivo' ? 'var(--color-primary-600)' : 'transparent', color: activeTab === 'painel-descritivo' ? 'white' : 'var(--text-secondary)' }"
+        class="text-left px-4 py-2.5 rounded-lg transition-all text-sm acnav"
+        data-sec="painel-descritivo">📋 Painel Descritivo</button>
       <button @click="activeTab = 'campanhas'"
         :class="{ 'font-semibold': activeTab === 'campanhas' }"
         :style="{ background: activeTab === 'campanhas' ? 'var(--color-primary-600)' : 'transparent', color: activeTab === 'campanhas' ? 'white' : 'var(--text-secondary)' }"
@@ -2263,6 +2268,82 @@
 
           <!-- Save Button -->
           <button class="px-6 py-2 rounded-lg text-sm font-semibold text-white transition-all" style="background: var(--color-primary-600);" id="cfgSave">Salvar alterações</button>
+        </div>
+      </section>
+
+      <!-- Painel Descritivo Configuration Section -->
+      <section id="sec-painel-descritivo" :style="{ display: activeTab === 'painel-descritivo' ? 'block' : 'none' }" class="acsec">
+        <h2 class="text-2xl font-bold mb-6 text-primary">Configuração do Painel Descritivo</h2>
+        <p class="text-sm text-muted mb-6">Personalize como as informações dos pontos são exibidas quando clicados no mapa.</p>
+
+        <div class="max-w-4xl space-y-6">
+          <!-- Design Selection Card -->
+          <div class="p-6 rounded-lg border panel-secondary">
+            <h3 class="text-lg font-semibold mb-4 text-primary">Escolher Modelo de Design</h3>
+            <div class="space-y-3">
+              <label class="flex items-center gap-3 p-3 rounded-lg cursor-pointer" style="background: var(--bg-tertiary); border: 2px solid transparent;" onclick="document.getElementById('pdDesign').value='minimalist';this.parentElement.querySelectorAll('label').forEach(l=>l.style.borderColor='transparent');this.style.borderColor='var(--color-primary-600)'">
+                <input type="radio" id="pdDesign" name="design" value="minimalist" class="accent-blue-500" />
+                <div>
+                  <div class="font-medium">📝 Minimalist Linear</div>
+                  <div class="text-xs text-muted">Lista vertical com ícones e labels, muito limpo</div>
+                </div>
+              </label>
+
+              <label class="flex items-center gap-3 p-3 rounded-lg cursor-pointer" style="background: var(--bg-tertiary); border: 2px solid transparent;" onclick="document.getElementById('pdDesign').value='card-grid';this.parentElement.querySelectorAll('label').forEach(l=>l.style.borderColor='transparent');this.style.borderColor='var(--color-primary-600)'">
+                <input type="radio" name="design" value="card-grid" class="accent-blue-500" />
+                <div>
+                  <div class="font-medium">🎨 Card Grid</div>
+                  <div class="text-xs text-muted">2 colunas de cards por seção (visual moderno)</div>
+                </div>
+              </label>
+
+              <label class="flex items-center gap-3 p-3 rounded-lg cursor-pointer" style="background: var(--bg-tertiary); border: 2px solid transparent;" onclick="document.getElementById('pdDesign').value='tabbed';this.parentElement.querySelectorAll('label').forEach(l=>l.style.borderColor='transparent');this.style.borderColor='var(--color-primary-600)'">
+                <input type="radio" name="design" value="tabbed" class="accent-blue-500" checked />
+                <div>
+                  <div class="font-medium">📑 Tabbed Sections</div>
+                  <div class="text-xs text-muted">Abas para organizar conteúdo (padrão)</div>
+                </div>
+              </label>
+
+              <label class="flex items-center gap-3 p-3 rounded-lg cursor-pointer" style="background: var(--bg-tertiary); border: 2px solid transparent;" onclick="document.getElementById('pdDesign').value='status-highlighted';this.parentElement.querySelectorAll('label').forEach(l=>l.style.borderColor='transparent');this.style.borderColor='var(--color-primary-600)'">
+                <input type="radio" name="design" value="status-highlighted" class="accent-blue-500" />
+                <div>
+                  <div class="font-medium">⚠️ Status Highlighted</div>
+                  <div class="text-xs text-muted">Barra colorida no topo mostrando saúde/status</div>
+                </div>
+              </label>
+
+              <label class="flex items-center gap-3 p-3 rounded-lg cursor-pointer" style="background: var(--bg-tertiary); border: 2px solid transparent;" onclick="document.getElementById('pdDesign').value='compact-dense';this.parentElement.querySelectorAll('label').forEach(l=>l.style.borderColor='transparent');this.style.borderColor='var(--color-primary-600)'">
+                <input type="radio" name="design" value="compact-dense" class="accent-blue-500" />
+                <div>
+                  <div class="font-medium">⚡ Compact Dense</div>
+                  <div class="text-xs text-muted">Máxima informação em mínimo espaço</div>
+                </div>
+              </label>
+            </div>
+            <input type="hidden" id="pdDesign" value="tabbed" />
+          </div>
+
+          <!-- Fields Selection Card -->
+          <div class="p-6 rounded-lg border panel-secondary">
+            <h3 class="text-lg font-semibold mb-4 text-primary">Selecionar Campos a Exibir</h3>
+            <p class="text-xs text-muted mb-4">Escolha quais informações aparecem no painel. A ordem segue: Localização → Equipamento → Status</p>
+
+            <div id="pdFieldsContainer" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-height: 400px; overflow-y: auto;">
+              <!-- Campos serão inseridos por JavaScript -->
+            </div>
+          </div>
+
+          <!-- Preview Card -->
+          <div class="p-6 rounded-lg border panel-secondary">
+            <h3 class="text-lg font-semibold mb-4 text-primary">Preview</h3>
+            <div id="pdPreview" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; max-height: 300px; overflow-y: auto; font-size: 12px;">
+              <!-- Preview renderizado aqui -->
+            </div>
+          </div>
+
+          <!-- Save Button -->
+          <button class="px-6 py-2 rounded-lg text-sm font-semibold text-white transition-all" style="background: var(--color-primary-600);" id="pdSave">💾 Salvar Configuração</button>
         </div>
       </section>
 
@@ -3519,40 +3600,375 @@ async function renderMunicipioLimites(){
 }
 
 // ---------- Detalhe ----------
+// Configuração padrão do painel descritivo
+const DEFAULT_PAINEL_CONFIG = {
+  design: 'tabbed',
+  campos: ['codigo_seconser', 'endereco', 'bairro_nome', 'tipo_luminaria', 'potencia_w', 'led_instalado', 'status', 'health_status', 'data_ultima_intervencao']
+};
+
+// Cache de configuração de painel
+let painel_config = { ...DEFAULT_PAINEL_CONFIG };
+
+// Carregar configuração do painel do servidor
+async function carregarPainelConfig() {
+  try {
+    const data = await rpc('ip_obter_painel_config', {});
+    if (data && data[0]) {
+      painel_config.design = data[0].design || DEFAULT_PAINEL_CONFIG.design;
+      painel_config.campos = data[0].campos || DEFAULT_PAINEL_CONFIG.campos;
+    }
+  } catch (e) {
+    console.warn('Erro ao carregar config painel:', e);
+  }
+}
+
 function fld(label,val){ return `<div class="flex-between" style="gap:10px;padding:3px 0;border-bottom:1px solid #161f29"><span class="text-gray">${label}</span><span class="text-right">${esc(val)||'—'}</span></div>`; }
-function openDetail(p){
-  state.current=p;
-  const d=document.getElementById('detail'); d.style.display='block';
+
+// Funções de renderização dinâmica por design
+function renderPainelMinimalist(p, camposSelecionados) {
   const badge=p.modernizado_led?`<span class="badge" style="background:#0d3d24;color:#4ade80">LED</span>`:`<span class="badge" style="background:#3d2f0d;color:#fbbf24">Pendente</span>`;
   const healthBadge = healthStatusBadge(p.health_status);
   const healthSpan=`<span class="badge" style="background:${healthBadge.color}33;color:${healthBadge.color};border:1px solid ${healthBadge.color}">${healthBadge.emoji} ${healthBadge.label}</span>`;
-  const origem=p.fonte_modernizacao==='censo_enel'?'Censo ENEL':p.fonte_modernizacao==='seconser_pos_censo'?'SECONSER (pós-censo)':p.fonte_modernizacao==='campo'?'Campo':'—';
-  const ehLum=(p.tipo_ativo||'luminaria')==='luminaria';
+
+  let html = `<div style="margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #1f2a37">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+      <b class="body" style="font-size:15px">${esc(p.codigo_seconser)||'—'}</b> ${badge}
+    </div>
+    <div>${healthSpan}</div>
+  </div>`;
+
+  const campoMap = {
+    'numero_patrimonio': { icon: '🏷️', label: 'Patrimônio', valor: p.numero_patrimonio },
+    'tipo_ativo': { icon: '📍', label: 'Tipo de Ativo', valor: ativoLabel(p.tipo_ativo||'luminaria') },
+    'tipo_luminaria': { icon: '💡', label: 'Tipo Luminária', valor: p.tipo_luminaria },
+    'classe_nbr': { icon: '📋', label: 'Classe NBR', valor: p.classe_nbr },
+    'endereco': { icon: '📍', label: 'Endereço', valor: p.endereco },
+    'bairro_nome': { icon: '🏘️', label: 'Bairro', valor: p.bairro_nome },
+    'tipo_lampada': { icon: '💡', label: 'Lâmpada', valor: p.tipo_lampada },
+    'potencia_w': { icon: '⚡', label: 'Potência', valor: p.potencia_w ? p.potencia_w + ' W' : null },
+    'status': { icon: '🔧', label: 'Estado', valor: p.status },
+    'health_status': { icon: '❤️', label: 'Saúde', valor: healthBadge.emoji + ' ' + healthBadge.label },
+    'led_instalado': { icon: '⚡', label: 'LED', valor: p.led_instalado ? 'Instalado' : 'Não instalado' },
+    'data_ultima_intervencao': { icon: '🔧', label: 'Última Intervenção', valor: p.data_ultima_intervencao ? new Date(p.data_ultima_intervencao).toLocaleDateString('pt-BR') : null },
+    'verificado_em': { icon: '✓', label: 'Verificado', valor: p.verificado_em ? '✅ ' + new Date(p.verificado_em).toLocaleDateString('pt-BR') : '🕓 Não verificado' },
+    'observacoes': { icon: '📝', label: 'Observações', valor: p.observacoes }
+  };
+
+  for (const campo of camposSelecionados) {
+    const info = campoMap[campo];
+    if (info && info.valor) {
+      html += `<div style="margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #161f29">
+        <div style="font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">${info.icon} ${info.label}</div>
+        <div style="font-size:13px;color:#e5e7eb;font-weight:500">${esc(info.valor)}</div>
+      </div>`;
+    }
+  }
+
+  return html;
+}
+
+function renderPainelCardGrid(p, camposSelecionados) {
+  const badge=p.modernizado_led?`<span class="badge" style="background:#0d3d24;color:#4ade80">LED</span>`:`<span class="badge" style="background:#3d2f0d;color:#fbbf24">Pendente</span>`;
+  const healthBadge = healthStatusBadge(p.health_status);
+
+  let html = `<div style="margin-bottom:16px;padding:12px;background:#0f151c;border:1px solid #1f2a37;border-radius:6px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <b class="body" style="font-size:14px">${esc(p.codigo_seconser)||'—'}</b>
+      <div>${badge}</div>
+    </div>
+    <div style="font-size:11px;color:#9ca3af">${healthBadge.emoji} ${healthBadge.label}</div>
+  </div>`;
+
+  const secoes = {
+    'Localização': ['numero_patrimonio', 'endereco', 'bairro_nome'],
+    'Equipamento': ['tipo_ativo', 'tipo_luminaria', 'classe_nbr', 'tipo_lampada', 'potencia_w'],
+    'Status': ['status', 'health_status', 'led_instalado', 'data_ultima_intervencao', 'verificado_em']
+  };
+
+  for (const [secao, campos] of Object.entries(secoes)) {
+    const camposDisponiveis = campos.filter(c => camposSelecionados.includes(c));
+    if (camposDisponiveis.length === 0) continue;
+
+    html += `<div style="margin-bottom:12px;padding:12px;background:#1a202c;border:1px solid #1f2a37;border-radius:6px">
+      <div style="font-size:12px;font-weight:600;color:#3b82f6;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">${secao}</div>`;
+
+    for (const campo of camposDisponiveis) {
+      let valor = null;
+      let label = campo;
+
+      const campoMap = {
+        'numero_patrimonio': { label: 'Patrimônio', valor: p.numero_patrimonio },
+        'endereco': { label: 'Endereço', valor: p.endereco },
+        'bairro_nome': { label: 'Bairro', valor: p.bairro_nome },
+        'tipo_ativo': { label: 'Tipo de Ativo', valor: ativoLabel(p.tipo_ativo||'luminaria') },
+        'tipo_luminaria': { label: 'Tipo Luminária', valor: p.tipo_luminaria },
+        'classe_nbr': { label: 'Classe NBR', valor: p.classe_nbr },
+        'tipo_lampada': { label: 'Lâmpada', valor: p.tipo_lampada },
+        'potencia_w': { label: 'Potência', valor: p.potencia_w ? p.potencia_w + ' W' : null },
+        'status': { label: 'Estado', valor: p.status },
+        'health_status': { label: 'Saúde', valor: healthBadge.emoji + ' ' + healthBadge.label },
+        'led_instalado': { label: 'LED', valor: p.led_instalado ? 'Instalado' : 'Não' },
+        'data_ultima_intervencao': { label: 'Última Intervenção', valor: p.data_ultima_intervencao ? new Date(p.data_ultima_intervencao).toLocaleDateString('pt-BR') : null },
+        'verificado_em': { label: 'Verificado', valor: p.verificado_em ? '✓ ' + new Date(p.verificado_em).toLocaleDateString('pt-BR') : null }
+      };
+
+      if (campoMap[campo]) {
+        label = campoMap[campo].label;
+        valor = campoMap[campo].valor;
+      }
+
+      if (valor) {
+        html += `<div style="font-size:11px;color:#9ca3af;margin-bottom:2px">${label}</div>
+                 <div style="font-size:12px;color:#e5e7eb;margin-bottom:6px;font-weight:500">${esc(valor)}</div>`;
+      }
+    }
+
+    html += `</div>`;
+  }
+
+  return html;
+}
+
+function renderPainelTabbed(p, camposSelecionados) {
+  const badge=p.modernizado_led?`<span class="badge" style="background:#0d3d24;color:#4ade80">LED</span>`:`<span class="badge" style="background:#3d2f0d;color:#fbbf24">Pendente</span>`;
+  const healthBadge = healthStatusBadge(p.health_status);
+
+  const tabs = [
+    {
+      id: 'loc',
+      label: '📍 Local',
+      campos: ['numero_patrimonio', 'endereco', 'bairro_nome']
+    },
+    {
+      id: 'equip',
+      label: '💡 Equipamento',
+      campos: ['tipo_ativo', 'tipo_luminaria', 'classe_nbr', 'tipo_lampada', 'potencia_w']
+    },
+    {
+      id: 'status',
+      label: '🔧 Status',
+      campos: ['status', 'health_status', 'led_instalado', 'data_ultima_intervencao', 'verificado_em']
+    }
+  ];
+
+  let html = `<div style="margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #1f2a37">
+    <b class="body">${esc(p.codigo_seconser)||'—'}</b> ${badge}
+    <div style="margin-top:4px">${healthBadge.emoji} ${healthBadge.label}</div>
+  </div>
+
+  <div style="display:flex;gap:4px;margin-bottom:12px;border-bottom:1px solid #1f2a37">`;
+
+  for (const tab of tabs) {
+    html += `<button class="tab-btn" data-tab="${tab.id}" style="padding:8px 12px;background:transparent;border:none;border-bottom:2px solid transparent;color:#9ca3af;cursor:pointer;font-size:11px;font-weight:600;transition:all 0.2s" onclick="document.querySelectorAll('[data-tab-content]').forEach(el=>el.style.display='none');document.getElementById('${tab.id}-content').style.display='block';this.parentElement.querySelectorAll('[data-tab]').forEach(b=>b.style.borderBottomColor='transparent');this.style.borderBottomColor='#3b82f6';this.style.color='#3b82f6'">${tab.label}</button>`;
+  }
+
+  html += `</div>`;
+
+  const campoMap = {
+    'numero_patrimonio': { label: 'Patrimônio' },
+    'endereco': { label: 'Endereço' },
+    'bairro_nome': { label: 'Bairro' },
+    'tipo_ativo': { label: 'Tipo de Ativo' },
+    'tipo_luminaria': { label: 'Tipo Luminária' },
+    'classe_nbr': { label: 'Classe NBR' },
+    'tipo_lampada': { label: 'Lâmpada' },
+    'potencia_w': { label: 'Potência' },
+    'status': { label: 'Estado' },
+    'health_status': { label: 'Saúde' },
+    'led_instalado': { label: 'LED' },
+    'data_ultima_intervencao': { label: 'Última Intervenção' },
+    'verificado_em': { label: 'Verificado' }
+  };
+
+  for (const tab of tabs) {
+    html += `<div id="${tab.id}-content" data-tab-content style="display:${tab.id==='loc'?'block':'none'}">`;
+
+    for (const campo of tab.campos) {
+      if (!camposSelecionados.includes(campo)) continue;
+
+      let valor = null;
+      let label = campoMap[campo]?.label || campo;
+
+      if (campo === 'numero_patrimonio') valor = p.numero_patrimonio;
+      else if (campo === 'endereco') valor = p.endereco;
+      else if (campo === 'bairro_nome') valor = p.bairro_nome;
+      else if (campo === 'tipo_ativo') valor = ativoLabel(p.tipo_ativo||'luminaria');
+      else if (campo === 'tipo_luminaria') valor = p.tipo_luminaria;
+      else if (campo === 'classe_nbr') valor = p.classe_nbr;
+      else if (campo === 'tipo_lampada') valor = p.tipo_lampada;
+      else if (campo === 'potencia_w') valor = p.potencia_w ? p.potencia_w + ' W' : null;
+      else if (campo === 'status') valor = p.status;
+      else if (campo === 'health_status') valor = healthBadge.emoji + ' ' + healthBadge.label;
+      else if (campo === 'led_instalado') valor = p.led_instalado ? 'Instalado' : 'Não';
+      else if (campo === 'data_ultima_intervencao') valor = p.data_ultima_intervencao ? new Date(p.data_ultima_intervencao).toLocaleDateString('pt-BR') : null;
+      else if (campo === 'verificado_em') valor = p.verificado_em ? '✓ ' + new Date(p.verificado_em).toLocaleDateString('pt-BR') : null;
+
+      if (valor) {
+        html += `<div style="padding:6px 0;border-bottom:1px solid #161f29">
+          <div style="font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">${label}</div>
+          <div style="font-size:12px;color:#e5e7eb;font-weight:500">${esc(valor)}</div>
+        </div>`;
+      }
+    }
+
+    html += `</div>`;
+  }
+
+  // Highlight primeira tab
+  setTimeout(() => {
+    const firstBtn = document.querySelector('[data-tab]');
+    if (firstBtn) { firstBtn.style.borderBottomColor = '#3b82f6'; firstBtn.style.color = '#3b82f6'; }
+  }, 100);
+
+  return html;
+}
+
+function renderPainelStatusHighlighted(p, camposSelecionados) {
+  const healthBadge = healthStatusBadge(p.health_status);
+  const badge=p.modernizado_led?`<span class="badge" style="background:#0d3d24;color:#4ade80">LED</span>`:`<span class="badge" style="background:#3d2f0d;color:#fbbf24">Pendente</span>`;
+
+  let html = `<div style="padding:10px;background:${healthBadge.color}33;border:1px solid ${healthBadge.color};border-radius:6px;margin-bottom:12px">
+    <div style="font-size:12px;font-weight:600;color:${healthBadge.color}">${healthBadge.emoji} ${healthBadge.label}</div>
+    <div style="font-size:11px;color:#9ca3af;margin-top:2px">${esc(p.codigo_seconser)||'—'}</div>
+  </div>
+
+  <div style="margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #1f2a37">
+    <b class="body" style="font-size:13px">${esc(p.endereco)||'—'}</b>
+    ${badge}
+  </div>`;
+
+  const campoMap = {
+    'numero_patrimonio': { label: 'Patrimônio' },
+    'endereco': { label: 'Endereço' },
+    'bairro_nome': { label: 'Bairro' },
+    'tipo_ativo': { label: 'Tipo' },
+    'tipo_luminaria': { label: 'Luminária' },
+    'classe_nbr': { label: 'Classe' },
+    'tipo_lampada': { label: 'Lâmpada' },
+    'potencia_w': { label: 'Potência' },
+    'status': { label: 'Estado' },
+    'led_instalado': { label: 'LED' },
+    'data_ultima_intervencao': { label: 'Última Manutenção' },
+    'verificado_em': { label: 'Verificado em' }
+  };
+
+  for (const campo of camposSelecionados) {
+    let valor = null;
+    let label = campoMap[campo]?.label || campo;
+
+    if (campo === 'numero_patrimonio') valor = p.numero_patrimonio;
+    else if (campo === 'endereco') valor = p.endereco;
+    else if (campo === 'bairro_nome') valor = p.bairro_nome;
+    else if (campo === 'tipo_ativo') valor = ativoLabel(p.tipo_ativo||'luminaria');
+    else if (campo === 'tipo_luminaria') valor = p.tipo_luminaria;
+    else if (campo === 'classe_nbr') valor = p.classe_nbr;
+    else if (campo === 'tipo_lampada') valor = p.tipo_lampada;
+    else if (campo === 'potencia_w') valor = p.potencia_w ? p.potencia_w + ' W' : null;
+    else if (campo === 'status') valor = p.status;
+    else if (campo === 'led_instalado') valor = p.led_instalado ? 'Instalado' : 'Não';
+    else if (campo === 'data_ultima_intervencao') valor = p.data_ultima_intervencao ? new Date(p.data_ultima_intervencao).toLocaleDateString('pt-BR') : null;
+    else if (campo === 'verificado_em') valor = p.verificado_em ? '✓ ' + new Date(p.verificado_em).toLocaleDateString('pt-BR') : null;
+
+    if (valor) {
+      html += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #161f29">
+        <span style="font-size:11px;color:#9ca3af">${label}</span>
+        <span style="font-size:12px;color:#e5e7eb;font-weight:500">${esc(valor)}</span>
+      </div>`;
+    }
+  }
+
+  return html;
+}
+
+function renderPainelCompactDense(p, camposSelecionados) {
+  const badge=p.modernizado_led?`<span class="badge" style="background:#0d3d24;color:#4ade80">LED</span>`:`<span class="badge" style="background:#3d2f0d;color:#fbbf24">Pendente</span>`;
+  const healthBadge = healthStatusBadge(p.health_status);
+
+  let html = `<div style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px solid #1f2a37">
+    <b style="font-size:13px">${esc(p.codigo_seconser)||'—'}</b>
+    <div>${badge} ${healthBadge.emoji}</div>
+  </div>`;
+
+  html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;font-size:11px">`;
+
+  const campoMap = {
+    'numero_patrimonio': { label: 'Patrimônio' },
+    'endereco': { label: 'Endereço' },
+    'bairro_nome': { label: 'Bairro' },
+    'tipo_ativo': { label: 'Tipo' },
+    'tipo_luminaria': { label: 'Luminária' },
+    'classe_nbr': { label: 'Classe' },
+    'tipo_lampada': { label: 'Lâmpada' },
+    'potencia_w': { label: 'Potência' },
+    'status': { label: 'Estado' },
+    'led_instalado': { label: 'LED' },
+    'data_ultima_intervencao': { label: 'Últimas Intervenção' },
+    'verificado_em': { label: 'Verificado' }
+  };
+
+  for (const campo of camposSelecionados) {
+    let valor = null;
+    let label = campoMap[campo]?.label || campo;
+
+    if (campo === 'numero_patrimonio') valor = p.numero_patrimonio;
+    else if (campo === 'endereco') valor = p.endereco;
+    else if (campo === 'bairro_nome') valor = p.bairro_nome;
+    else if (campo === 'tipo_ativo') valor = ativoLabel(p.tipo_ativo||'luminaria');
+    else if (campo === 'tipo_luminaria') valor = p.tipo_luminaria;
+    else if (campo === 'classe_nbr') valor = p.classe_nbr;
+    else if (campo === 'tipo_lampada') valor = p.tipo_lampada;
+    else if (campo === 'potencia_w') valor = p.potencia_w ? p.potencia_w + ' W' : null;
+    else if (campo === 'status') valor = p.status;
+    else if (campo === 'led_instalado') valor = p.led_instalado ? 'Sim' : 'Não';
+    else if (campo === 'data_ultima_intervencao') valor = p.data_ultima_intervencao ? new Date(p.data_ultima_intervencao).toLocaleDateString('pt-BR') : null;
+    else if (campo === 'verificado_em') valor = p.verificado_em ? '✓' : '—';
+
+    if (valor) {
+      html += `<div style="color:#9ca3af">${label}:</div><div style="color:#e5e7eb;font-weight:500">${esc(valor)}</div>`;
+    }
+  }
+
+  html += `</div>`;
+
+  return html;
+}
+
+function openDetail(p){
+  state.current=p;
+  const d=document.getElementById('detail'); d.style.display='block';
+
+  // Renderizar painel com design configurado
+  let painelHtml = '';
+  const campos = painel_config.campos || DEFAULT_PAINEL_CONFIG.campos;
+
+  switch(painel_config.design) {
+    case 'minimalist':
+      painelHtml = renderPainelMinimalist(p, campos);
+      break;
+    case 'card-grid':
+      painelHtml = renderPainelCardGrid(p, campos);
+      break;
+    case 'status-highlighted':
+      painelHtml = renderPainelStatusHighlighted(p, campos);
+      break;
+    case 'compact-dense':
+      painelHtml = renderPainelCompactDense(p, campos);
+      break;
+    case 'tabbed':
+    default:
+      painelHtml = renderPainelTabbed(p, campos);
+  }
+
   d.innerHTML = `
-    <div class="flex-between" style="align-items:center;margin-bottom:8px">
-      <b class="body">${esc(p.codigo_seconser)||'—'}</b> ${ehLum?badge+' '+healthSpan:healthSpan}</div>
-    ${fld('Referência ENEL', p.numero_patrimonio)}
-    ${fld('Tipo de ativo', ativoLabel(p.tipo_ativo||'luminaria'))}
-    ${ehLum?fld('Tipo de luminária', p.tipo_luminaria):''}
-    ${ehLum?fld('Classe NBR', p.classe_nbr):''}
-    ${fld('Endereço', p.endereco)}${fld('Bairro', p.bairro_nome)}
-    ${ehLum?fld('Lâmpada', p.tipo_lampada):''}
-    ${ehLum?fld('Potência', p.potencia_w? p.potencia_w+' W':null):''}
-    ${ehLum?fld('Estado', p.status):''}
-    ${ehLum?fld('Status de Saúde', healthBadge.emoji + ' ' + healthBadge.label):''}
-    ${ehLum?fld('Origem modernização', origem):''}
-    ${fld('Dado de campo', p.verificado_em ? ('✅ verificado em '+new Date(p.verificado_em).toLocaleDateString('pt-BR')) : '🕓 herdado — não verificado')}
-    ${ehLum&&p.angulo_inclinacao_graus!=null?fld('Ângulo (nadir)', p.angulo_inclinacao_graus+'°'):''}
-    ${ehLum&&p.material_piso?fld('Material do piso', materialLabel(p.material_piso)):''}
-    ${ehLum&&fotometriaIndices(p.angulo_inclinacao_graus, p.material_piso)?`<div style="font-size:10.5px;color:#9ca3af;background:#0f151c;border:1px solid #1f2a37;border-radius:6px;padding:7px;margin-top:6px">${fotoIdxHtml(p.angulo_inclinacao_graus, p.material_piso)}</div>`:''}
-    ${p.flag_revisao_censo?`<div style="color:#fbbf24;font-size:11px;margin-top:4px">⚑ marcado para revisão</div>`:''}
-    ${p.observacoes?`<div class="text-gray" style="font-size:11px;margin-top:6px">${esc(p.observacoes)}</div>`:''}
-    ${state.user?`<div style="display:flex;gap:6px;margin-top:8px">
+    <div style="margin-bottom:16px">
+      ${painelHtml}
+    </div>
+    ${state.user?`<div style="display:flex;gap:6px;margin-bottom:8px">
         <button class="btn flex-1" onclick="window._interv('${p.id}')">Intervenções</button>
         <button class="btn flex-1" onclick="window._hist('${p.id}')">Histórico</button>
       </div><div id="histBox"></div>`:''}
-    ${podeEditar()?`<button class="btn" style="width:100%;margin-top:8px;border-color:#14532d;color:#4ade80" onclick="window._confirmarPonto('${p.id}')" title="Recenseamento: confirma que os dados conferem com a realidade em campo, sem alterá-los">✓ Confirmar em campo (dados corretos)</button>`:''}
-    <div style="margin-top:10px;display:flex;gap:8px">
+    ${podeEditar()?`<button class="btn" style="width:100%;margin-bottom:8px;border-color:#14532d;color:#4ade80" onclick="window._confirmarPonto('${p.id}')" title="Recenseamento: confirma que os dados conferem com a realidade em campo, sem alterá-los">✓ Confirmar em campo (dados corretos)</button>`:''}
+    <div style="display:flex;gap:8px">
       ${podeEditar()?`<button class="btn btn-accent flex-1" onclick="window._edit()">Editar</button>`:''}
       <button class="btn" onclick="document.getElementById('detail').style.display='none'">Fechar</button></div>`;
 }
@@ -4931,6 +5347,177 @@ document.getElementById('cfgSave').onclick=async()=>{
   if(error){ toast('Erro ao salvar aparência: '+error.message,true); return; }
   applyConfig(dados); toast('Aparência atualizada — vale para todos os visitantes'); };
 
+// ---------- Painel Descritivo Configuration ----------
+async function setupPainelDescritivo() {
+  // Carregar campos disponíveis
+  const campos = await rpc('ip_listar_campos_disponveis', {});
+  if (!campos) return;
+
+  const container = document.getElementById('pdFieldsContainer');
+  container.innerHTML = '';
+
+  // Agrupar por seção
+  const porSecao = {};
+  for (const c of campos) {
+    if (!porSecao[c.secao]) porSecao[c.secao] = [];
+    porSecao[c.secao].push(c);
+  }
+
+  // Renderizar checkboxes agrupados
+  for (const [secao, camposList] of Object.entries(porSecao)) {
+    const sectionDiv = document.createElement('div');
+    sectionDiv.style.gridColumn = '1 / -1';
+    sectionDiv.innerHTML = `<div style="font-size:11px;font-weight:600;color:var(--color-primary-600);margin:8px 0 4px;text-transform:uppercase;letter-spacing:0.5px">${secao}</div>`;
+
+    const fieldsDiv = document.createElement('div');
+    fieldsDiv.style.display = 'grid';
+    fieldsDiv.style.gridTemplateColumns = '1fr 1fr';
+    fieldsDiv.style.gap = '8px';
+    fieldsDiv.style.gridColumn = '1 / -1';
+
+    for (const campo of camposList) {
+      const label = document.createElement('label');
+      label.style.display = 'flex';
+      label.style.alignItems = 'center';
+      label.style.gap = '6px';
+      label.style.cursor = 'pointer';
+      label.style.fontSize = '12px';
+      label.style.padding = '4px';
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.value = campo.nome;
+      checkbox.className = 'pd-field-checkbox';
+      checkbox.style.cursor = 'pointer';
+      checkbox.style.accentColor = '#3b82f6';
+
+      // Marcar campos padrão como checked
+      if (DEFAULT_PAINEL_CONFIG.campos.includes(campo.nome)) {
+        checkbox.checked = true;
+      }
+
+      // Atualizar preview ao mudar
+      checkbox.onchange = () => renderPainelPreview();
+
+      label.appendChild(checkbox);
+      label.appendChild(document.createTextNode(campo.label));
+      fieldsDiv.appendChild(label);
+    }
+
+    sectionDiv.appendChild(fieldsDiv);
+    container.appendChild(sectionDiv);
+  }
+
+  // Atualizar preview inicial
+  renderPainelPreview();
+}
+
+function renderPainelPreview() {
+  const design = document.getElementById('pdDesign')?.value || 'tabbed';
+  const checkboxes = document.querySelectorAll('.pd-field-checkbox:checked');
+  const campos = Array.from(checkboxes).map(cb => cb.value);
+
+  // Usar um ponto de exemplo para preview
+  const exemploPoint = {
+    codigo_seconser: 'NIT-0001',
+    numero_patrimonio: 'P-777',
+    endereco: 'Rua Coronel Moreira César 100',
+    bairro_nome: 'Icaraí',
+    tipo_ativo: 'luminaria',
+    tipo_luminaria: 'viaria',
+    classe_nbr: 'V3',
+    tipo_lampada: 'led',
+    potencia_w: 150,
+    status: 'ativo',
+    health_status: 'verde',
+    led_instalado: true,
+    modernizado_led: true,
+    data_ultima_intervencao: new Date().toISOString(),
+    verificado_em: new Date().toISOString(),
+    lat: -22.9035,
+    lon: -43.1071
+  };
+
+  let previewHtml = '';
+  switch(design) {
+    case 'minimalist':
+      previewHtml = renderPainelMinimalist(exemploPoint, campos);
+      break;
+    case 'card-grid':
+      previewHtml = renderPainelCardGrid(exemploPoint, campos);
+      break;
+    case 'status-highlighted':
+      previewHtml = renderPainelStatusHighlighted(exemploPoint, campos);
+      break;
+    case 'compact-dense':
+      previewHtml = renderPainelCompactDense(exemploPoint, campos);
+      break;
+    case 'tabbed':
+    default:
+      previewHtml = renderPainelTabbed(exemploPoint, campos);
+  }
+
+  const preview = document.getElementById('pdPreview');
+  if (preview) {
+    preview.innerHTML = previewHtml;
+  }
+}
+
+// Actualizar design selection
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    const designInputs = document.querySelectorAll('input[name="design"]');
+    designInputs.forEach(input => {
+      input.onchange = () => {
+        document.getElementById('pdDesign').value = input.value;
+        renderPainelPreview();
+      };
+    });
+  }, 200);
+});
+
+// Salvar configuração do painel descritivo
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    const pdSaveBtn = document.getElementById('pdSave');
+    if (pdSaveBtn) {
+      pdSaveBtn.onclick = async () => {
+        const design = document.getElementById('pdDesign')?.value || 'tabbed';
+        const checkboxes = document.querySelectorAll('.pd-field-checkbox:checked');
+        const campos = Array.from(checkboxes).map(cb => cb.value);
+
+        if (campos.length === 0) {
+          toast('Selecione pelo menos um campo para exibir', true);
+          return;
+        }
+
+        setBusy(true);
+        const { data, error } = await sb.rpc('ip_atualizar_painel_config', {
+          p_design: design,
+          p_campos: campos
+        });
+        setBusy(false);
+
+        if (error) {
+          toast('Erro ao salvar: ' + error.message, true);
+          return;
+        }
+
+        // Recarregar configuração em memória
+        painel_config.design = design;
+        painel_config.campos = campos;
+
+        toast('✓ Configuração do painel atualizada com sucesso');
+      };
+    }
+  }, 200);
+});
+
+// Inicializar UI do painel descritivo quando admin abre
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(setupPainelDescritivo, 300);
+});
+
 // ---------- Theme Management (Dark/Light) ----------
 let currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 function setTheme(theme) {
@@ -5106,7 +5693,7 @@ document.getElementById('splash').addEventListener('click',e=>{ if(e.target.id==
 setTimeout(dismissSplash, 2200);
 
 // ---------- init ----------
-loadConfig(); loadBairroOptions(); renderMunicipioLimites(); loadStatsChips(); refresh();
+loadConfig(); carregarPainelConfig(); loadBairroOptions(); renderMunicipioLimites(); loadStatsChips(); refresh();
 </script>
 </body>
 </html>
