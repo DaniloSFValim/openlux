@@ -4043,8 +4043,11 @@ window._edit = function(){
     </div>
 
     <div>
-      <label class="label-small">📚 Modelo Pré-cadastrado</label>
-      <select id="eModelo" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;cursor:pointer;margin-bottom:8px"><option value="">— selecionar modelo</option></select>
+      <label class="label-small">📚 Substituir por Modelo Pré-cadastrado</label>
+      <div style="display:flex;gap:6px;margin-bottom:8px">
+        <select id="eModelo" style="flex:1;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;cursor:pointer"><option value="">— selecionar modelo</option></select>
+        <button class="btn" style="padding:6px 12px;background:var(--accent);color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap" id="eBtnAplicarModelo">Aplicar</button>
+      </div>
     </div>
 
     <div class="grid-cols-2-gap">
@@ -4143,11 +4146,13 @@ window._edit = function(){
   renderFotoIdx();
 
   // Carregar modelos de equipamentos
+  let modelosCache = []; // Cache para uso no handler do botão Aplicar
   (async ()=>{
     try {
       const {data: modelos, error} = await sb.from('equipamentos_modelo').select('id, fabricante, modelo, potencia_w, tipo_luminaria, classe_nbr').order('fabricante, modelo');
       if (error) { console.error('Erro ao carregar modelos:', error); return; }
 
+      modelosCache = modelos || [];
       const dropdown = document.getElementById('eModelo');
       if (dropdown && modelos) {
         modelos.forEach(m => {
@@ -4172,6 +4177,26 @@ window._edit = function(){
       }
     } catch (err) { console.error('Erro:', err); }
   })();
+
+  // Handler para botão "Aplicar" modelo
+  document.getElementById('eBtnAplicarModelo').onclick = () => {
+    const dropdown = document.getElementById('eModelo');
+    if (!dropdown || !dropdown.value) {
+      toast('Selecione um modelo primeiro', true);
+      return;
+    }
+    const modelo = modelosCache.find(m => m.id === dropdown.value);
+    if (!modelo) {
+      toast('Modelo não encontrado', true);
+      return;
+    }
+    // Aplicar campos do modelo
+    if (modelo.potencia_w) document.getElementById('ePot').value = modelo.potencia_w;
+    if (modelo.tipo_luminaria) document.getElementById('eTipoLum').value = modelo.tipo_luminaria;
+    if (modelo.classe_nbr) document.getElementById('eClasse').value = modelo.classe_nbr;
+    trackChanges();
+    toast('Modelo aplicado com sucesso');
+  };
 
   document.getElementById('eDelete').onclick = ()=>window._excluirPonto(p);
   document.getElementById('eSave').onclick = async ()=>{
