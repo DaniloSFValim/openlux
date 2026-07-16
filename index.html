@@ -4015,6 +4015,11 @@ window._edit = function(){
       </div>
     </div>
 
+    <div>
+      <label class="label-small">📚 Modelo Pré-cadastrado</label>
+      <select id="eModelo" style="width:100%;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;cursor:pointer;margin-bottom:8px"><option value="">— selecionar modelo</option></select>
+    </div>
+
     <div class="grid-cols-2-gap">
       <div>
         <label class="label-small">💡 Tipo</label>
@@ -4109,6 +4114,37 @@ window._edit = function(){
   });
   ['eAngulo','eMaterial'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('change', renderFotoIdx); });
   renderFotoIdx();
+
+  // Carregar modelos de equipamentos
+  (async ()=>{
+    try {
+      const {data: modelos, error} = await sb.from('equipamentos_modelo').select('id, fabricante, modelo, potencia_w, tipo_luminaria, classe_nbr').order('fabricante, modelo');
+      if (error) { console.error('Erro ao carregar modelos:', error); return; }
+
+      const dropdown = document.getElementById('eModelo');
+      if (dropdown && modelos) {
+        modelos.forEach(m => {
+          const opt = document.createElement('option');
+          opt.value = m.id;
+          opt.textContent = `${m.fabricante || ''} ${m.modelo || ''} (${m.potencia_w || 0}W)`;
+          dropdown.appendChild(opt);
+        });
+
+        // Ao selecionar modelo, pré-preencher campos
+        dropdown.addEventListener('change', (e) => {
+          if (e.target.value) {
+            const modelo = modelos.find(m => m.id === e.target.value);
+            if (modelo) {
+              if (modelo.potencia_w) document.getElementById('ePot').value = modelo.potencia_w;
+              if (modelo.tipo_luminaria) document.getElementById('eTipoLum').value = modelo.tipo_luminaria;
+              if (modelo.classe_nbr) document.getElementById('eClasse').value = modelo.classe_nbr;
+              trackChanges();
+            }
+          }
+        });
+      }
+    } catch (err) { console.error('Erro:', err); }
+  })();
 
   document.getElementById('eDelete').onclick = ()=>window._excluirPonto(p);
   document.getElementById('eSave').onclick = async ()=>{
