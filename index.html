@@ -4145,17 +4145,20 @@ window._edit = function(){
   ['eAngulo','eMaterial'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('change', renderFotoIdx); });
   renderFotoIdx();
 
-  // Carregar modelos de equipamentos
+  // Carregar modelos de equipamentos via RPC (consistente com _selecionarModelo)
   let modelosCache = []; // Cache para uso no handler do botão Aplicar
   (async ()=>{
     try {
-      const {data: modelos, error} = await sb.from('equipamentos_modelo').select('id, fabricante, modelo, potencia_w, tipo_luminaria, classe_nbr').order('fabricante, modelo');
-      if (error) { console.error('Erro ao carregar modelos:', error); return; }
+      const modelos = await rpc('ip_listar_modelos');
+      if (!Array.isArray(modelos)) {
+        console.error('ip_listar_modelos não retornou array:', modelos);
+        return;
+      }
 
       modelosCache = modelos || [];
       const dropdown = document.getElementById('eModelo');
-      if (dropdown && modelos) {
-        modelos.forEach(m => {
+      if (dropdown && modelosCache.length > 0) {
+        modelosCache.forEach(m => {
           const opt = document.createElement('option');
           opt.value = m.id;
           opt.textContent = `${m.fabricante || ''} ${m.modelo || ''} (${m.potencia_w || 0}W)`;
@@ -4165,7 +4168,7 @@ window._edit = function(){
         // Ao selecionar modelo, pré-preencher campos
         dropdown.addEventListener('change', (e) => {
           if (e.target.value) {
-            const modelo = modelos.find(m => m.id === e.target.value);
+            const modelo = modelosCache.find(m => m.id === e.target.value);
             if (modelo) {
               if (modelo.potencia_w) document.getElementById('ePot').value = modelo.potencia_w;
               if (modelo.tipo_luminaria) document.getElementById('eTipoLum').value = modelo.tipo_luminaria;
@@ -4175,7 +4178,7 @@ window._edit = function(){
           }
         });
       }
-    } catch (err) { console.error('Erro:', err); }
+    } catch (err) { console.error('Erro ao carregar modelos:', err); }
   })();
 
   // Handler para botão "Aplicar" modelo
