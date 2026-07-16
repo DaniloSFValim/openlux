@@ -3017,6 +3017,9 @@ map.on('mouseup', () => {
 map.on('click', function(e){
   if(state.drawing){ _addVertice(e.latlng); return; } // modo desenho de área
   if(!state.user || !podeEditar()) return;
+  // Não abrir novo painel se já existe um aberto
+  const d = document.getElementById('detail');
+  if(d && d.style.display === 'block' && d.innerHTML.includes('nSave')) return;
   if(map.getZoom() < 18){ toast('Zoom mínimo necessário: 18', true); return; }
   const lat = e.latlng.lat, lng = e.latlng.lng;
   if(!dentroDaCidade(lat, lng)){
@@ -3040,6 +3043,7 @@ map.on('click', function(e){
       <input id="nPatr" placeholder="Referência ENEL (opcional)"/>
       <div class="flex gap-1" style="align-items:center"><input id="nEnd" placeholder="Endereço" class="flex-1"/><span id="nEndLoading" style="font-size:12px;color:#6b7280;display:none"><span class="spin"></span></span></div>
       <div id="nLumFields" style="display:flex;flex-direction:column;gap:7px">
+        <button class="btn" style="width:100%;margin-bottom:8px;border-color:var(--accent);color:var(--accent)" id="nBtnModelo">📋 Inserir com modelo</button>
         <label class="label-micro">Tipo de luminária<select id="nTipoLum"><option value="">—</option>${tipoLumOpts}</select></label>
         <input id="nClasse" placeholder="Classe NBR (V3, P2, C4…)"/>
         <select id="nTipo">${tipoOpts}</select>
@@ -3057,6 +3061,9 @@ map.on('click', function(e){
   const nAtivo = document.getElementById('nAtivo');
   const toggleLum = () => { document.getElementById('nLumFields').style.display = nAtivo.value === 'luminaria' ? 'flex' : 'none'; };
   nAtivo.onchange = toggleLum; toggleLum();
+
+  // Modelo selection
+  document.getElementById('nBtnModelo').onclick = () => { window._selecionarModelo(); };
 
   // Buscar endereço via reverse geocoding (OSM Nominatim) - only if zoom >= 18
   const nEndInput = document.getElementById('nEnd');
