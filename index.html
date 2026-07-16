@@ -5164,10 +5164,67 @@ async function loadAdminModelos(){
       <td>${esc(m.tipo_lampada||'—')}</td>
       <td>${esc(m.classe_nbr||'—')}</td>
       <td>${esc(m.ip||'—')}</td>
-      <td style="text-align:right"><button class="btn" style="padding:2px 8px;color:#f87171;font-size:11px" onclick="window._delModelo('${m.id}')">remover</button></td>
+      <td style="text-align:right;display:flex;gap:4px;justify-content:flex-end">
+        <button class="btn" style="padding:2px 8px;color:#60a5fa;font-size:11px" onclick="window._editarModelo('${m.id}')">✏️ editar</button>
+        <button class="btn" style="padding:2px 8px;color:#f87171;font-size:11px" onclick="window._delModelo('${m.id}')">🗑️ remover</button>
+      </td>
     </tr>
   `).join('') || '<tr><td colspan="8" style="text-align:center;color:#6b7280;padding:14px">Nenhum modelo cadastrado ainda</td></tr>';
 }
+window._editarModelo = (id)=>{
+  const modelo = (state.modelosCache || []).find(m => m.id === id);
+  if (!modelo) {
+    toast('Modelo não encontrado', true);
+    return;
+  }
+
+  // Preencher formulário com dados existentes
+  const fieldMap = {
+    modFabricante: 'fabricante',
+    modModelo: 'modelo',
+    modPotencia: 'potencia_w',
+    modTemperatura: 'temperatura_cor_k',
+    modTensao: 'tensao',
+    modIp: 'ip',
+    modClasse: 'classe_nbr',
+    modTecnologia: 'tecnologia',
+    modTipoLum: 'tipo_luminaria',
+    modTipoLamp: 'tipo_lampada',
+    modFotoUrl: 'foto_url',
+    modDescricao: 'descricao',
+    // Tier 2
+    modFluxo: 'fluxo_luminoso_lm',
+    modEficacia: 'eficacia_luminosa_lm_w',
+    modFP: 'fator_potencia_fp',
+    modTHD: 'thd_percentual',
+    modGrauIK: 'grau_ik',
+    modDPS: 'dps_especificacao',
+    modConectividade: 'tipo_conectividade',
+    modIES: 'arquivo_ies_url',
+    // Tier 1
+    modINMETRO: 'inmetro_registro',
+    modVidaUtil: 'vida_util_anos',
+    modGarantia: 'garantia_anos',
+    modManutencao: 'dias_manutencao_preventiva',
+  };
+
+  Object.entries(fieldMap).forEach(([elId, fieldName]) => {
+    const el = document.getElementById(elId);
+    const valor = modelo[fieldName];
+    if (el && valor != null) el.value = valor;
+  });
+
+  // Marcar que está em modo EDIT
+  const btnCreate = document.getElementById('modCreate');
+  btnCreate.textContent = '✏️ Atualizar Modelo';
+  btnCreate._editandoId = id;
+  btnCreate._editandoOriginal = JSON.parse(JSON.stringify(modelo)); // Deep copy
+
+  // Scroll para formulário
+  document.getElementById('modFabricante').scrollIntoView({behavior:'smooth'});
+  toast('Editando: ' + modelo.fabricante + ' ' + modelo.modelo);
+};
+
 window._delModelo = async (id)=>{
   if(!confirm('Remover este modelo do catálogo? Os pontos já cadastrados com ele não serão afetados.')) return;
   setBusy(true);
@@ -5177,7 +5234,8 @@ window._delModelo = async (id)=>{
   toast('Modelo removido');
   loadAdminModelos();
 };
-document.getElementById('modCreate').onclick = async ()=>{
+// Função auxiliar: salvar modelo (CREATE ou UPDATE)
+async function _salvarModelo(modoEdicao=false, idModelo=null) {
   const fab=document.getElementById('modFabricante').value.trim();
   const mod=document.getElementById('modModelo').value.trim();
   const pot=parseInt(document.getElementById('modPotencia').value);
@@ -5185,7 +5243,7 @@ document.getElementById('modCreate').onclick = async ()=>{
 
   if(!fab || !mod || isNaN(pot) || pot<=0 || pot>2000){
     toast('Preencha: Fabricante, Modelo e Potência (1–2000 W)',true);
-    return;
+    return false;
   }
 
   // Validate Tier 2 fields
@@ -5194,10 +5252,10 @@ document.getElementById('modCreate').onclick = async ()=>{
   const fp=document.getElementById('modFP').value.trim()?parseFloat(document.getElementById('modFP').value):null;
   const thd=document.getElementById('modTHD').value.trim()?parseFloat(document.getElementById('modTHD').value):null;
 
-  if(fluxo!==null && fluxo<=0){ toast('Fluxo luminoso deve ser > 0',true); return; }
-  if(eficacia!==null && eficacia<=0){ toast('Eficácia deve ser > 0',true); return; }
-  if(fp!==null && (fp<0.90 || fp>1.0)){ toast('Fator de potência deve estar entre 0.90 e 1.0',true); return; }
-  if(thd!==null && (thd<0 || thd>100)){ toast('THD deve estar entre 0 e 100%',true); return; }
+  if(fluxo!==null && fluxo<=0){ toast('Fluxo luminoso deve ser > 0',true); return false; }
+  if(eficacia!==null && eficacia<=0){ toast('Eficácia deve ser > 0',true); return false; }
+  if(fp!==null && (fp<0.90 || fp>1.0)){ toast('Fator de potência deve estar entre 0.90 e 1.0',true); return false; }
+  if(thd!==null && (thd<0 || thd>100)){ toast('THD deve estar entre 0 e 100%',true); return false; }
 
   // Validate Tier 1 fields
   const inmetro=document.getElementById('modINMETRO').value.trim()||null;
@@ -5205,30 +5263,32 @@ document.getElementById('modCreate').onclick = async ()=>{
   const garantia=document.getElementById('modGarantia').value.trim()?parseInt(document.getElementById('modGarantia').value):null;
   const manutencao=document.getElementById('modManutencao').value.trim()?parseInt(document.getElementById('modManutencao').value):null;
 
-  if(vidaUtil!==null && vidaUtil<=0){ toast('Vida útil deve ser > 0',true); return; }
-  if(garantia!==null && garantia<0){ toast('Garantia não pode ser negativa',true); return; }
-  if(manutencao!==null && manutencao<=0){ toast('Manutenção preventiva deve ser > 0',true); return; }
+  if(vidaUtil!==null && vidaUtil<=0){ toast('Vida útil deve ser > 0',true); return false; }
+  if(garantia!==null && garantia<0){ toast('Garantia não pode ser negativa',true); return false; }
+  if(manutencao!==null && manutencao<=0){ toast('Manutenção preventiva deve ser > 0',true); return false; }
 
   // Handle photo upload with compression if provided
-  let fotoUrl=document.getElementById('modFoto').value.trim()||null;
+  let fotoUrl=document.getElementById('modFotoUrl').value.trim()||null;
   const fotoFile=document.getElementById('modFotoUpload').files[0];
   if(fotoFile){
     fotoUrl=await uploadFoto(fotoFile);
-    if(!fotoUrl) return;
+    if(!fotoUrl) return false;
   }
 
   // Handle .IES file upload if provided
-  let iesUrl=null;
+  let iesUrl=document.getElementById('modIES').value.trim()||null;
   const iesFile=document.getElementById('modArquivoIES').files[0];
   if(iesFile){
     setBusy(true);
     iesUrl=await uploadArquivoIES(iesFile);
-    if(!iesUrl){ setBusy(false); return; }
+    if(!iesUrl){ setBusy(false); return false; }
     setBusy(false);
   }
 
   setBusy(true);
-  const {error}=await sb.rpc('ip_criar_modelo',{
+
+  // Preparar parâmetros comuns
+  const params = {
     p_fabricante:fab, p_modelo:mod, p_potencia_w:pot,
     p_temperatura_cor_k:temp,
     p_tensao:document.getElementById('modTensao').value||null,
@@ -5239,7 +5299,6 @@ document.getElementById('modCreate').onclick = async ()=>{
     p_tipo_lampada:document.getElementById('modTipoLamp').value||'led',
     p_foto_url:fotoUrl,
     p_descricao:document.getElementById('modDescricao').value.trim()||null,
-    // Tier 2 fields
     p_fluxo_luminoso_lm:fluxo,
     p_eficacia_luminosa_lm_w:eficacia,
     p_fator_potencia_fp:fp,
@@ -5248,17 +5307,31 @@ document.getElementById('modCreate').onclick = async ()=>{
     p_dps_especificacao:document.getElementById('modDPS').value.trim()||null,
     p_tipo_conectividade:document.getElementById('modConectividade').value||null,
     p_arquivo_ies_url:iesUrl,
-    // Tier 1 fields
     p_inmetro_registro:inmetro,
     p_vida_util_anos:vidaUtil,
     p_garantia_anos:garantia,
     p_dias_manutencao_preventiva:manutencao
-  });
+  };
+
+  // Chamar RPC apropriado
+  let result;
+  if(modoEdicao){
+    params.p_id = idModelo;
+    result = await sb.rpc('ip_atualizar_modelo', params);
+  }else{
+    result = await sb.rpc('ip_criar_modelo', params);
+  }
+
+  const {error} = result;
   setBusy(false);
-  if(error){ toast('Erro ao criar: '+error.message,true); return; }
+
+  if(error){
+    toast('Erro ao '+(modoEdicao?'atualizar':'criar')+': '+error.message,true);
+    return false;
+  }
 
   // Clear form
-  ['modFabricante','modModelo','modPotencia','modTemperatura','modTensao','modIp','modClasse','modFoto','modDescricao','modFluxo','modEficacia','modFP','modTHD','modDPS','modINMETRO','modVidaUtil','modGarantia','modManutencao'].forEach(id=>document.getElementById(id).value='');
+  ['modFabricante','modModelo','modPotencia','modTemperatura','modTensao','modIp','modClasse','modFotoUrl','modDescricao','modFluxo','modEficacia','modFP','modTHD','modDPS','modINMETRO','modVidaUtil','modGarantia','modManutencao','modIES'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
   document.getElementById('modTecnologia').value='LED';
   document.getElementById('modTipoLum').value='';
   document.getElementById('modTipoLamp').value='led';
@@ -5267,10 +5340,22 @@ document.getElementById('modCreate').onclick = async ()=>{
   document.getElementById('modFotoStatus').textContent='';
   document.getElementById('modConectividade').value='';
   document.getElementById('modArquivoIES').value='';
+  const btn = document.getElementById('modCreate');
+  btn.textContent = '➕ Adicionar Modelo';
+  delete btn._editandoId;
+  delete btn._editandoOriginal;
   setupTecnologiaCondicional();
 
-  toast('Modelo adicionado ao catálogo');
+  toast('Modelo '+(modoEdicao?'atualizado':'adicionado')+' ao catálogo');
   loadAdminModelos();
+  return true;
+}
+
+document.getElementById('modCreate').onclick = async ()=>{
+  const btn = document.getElementById('modCreate');
+  const modoEdicao = !!btn._editandoId;
+  const idModelo = btn._editandoId;
+  await _salvarModelo(modoEdicao, idModelo);
 };
 
 // ---------- Exportação ----------
