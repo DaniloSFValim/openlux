@@ -5177,6 +5177,8 @@ async function loadAdminModelos(){
   state.modelosCache = data||[];
   body.innerHTML=state.modelosCache.map(m=>`
     <tr>
+      <td style="display:flex;align-items:center;gap:8px">
+        ${m.foto_url?`<img src="${esc(m.foto_url)}" style="width:40px;height:40px;border-radius:4px;object-fit:cover;border:1px solid #374151" alt="${esc(m.modelo)}" title="Foto do modelo"/>`:''}</td>
       <td>${esc(m.fabricante)}</td>
       <td>${esc(m.modelo)}${m.descricao?`<div style="color:#6b7280;font-size:10.5px">${esc(m.descricao)}</div>`:''}</td>
       <td class="text-right">${m.potencia_w} W</td>
@@ -5189,7 +5191,7 @@ async function loadAdminModelos(){
         <button class="btn" style="padding:2px 8px;color:#f87171;font-size:11px" onclick="window._delModelo('${m.id}')">🗑️ remover</button>
       </td>
     </tr>
-  `).join('') || '<tr><td colspan="8" style="text-align:center;color:#6b7280;padding:14px">Nenhum modelo cadastrado ainda</td></tr>';
+  `).join('') || '<tr><td colspan="9" style="text-align:center;color:#6b7280;padding:14px">Nenhum modelo cadastrado ainda</td></tr>';
 }
 window._editarModelo = (id)=>{
   const modelo = (state.modelosCache || []).find(m => m.id === id);
