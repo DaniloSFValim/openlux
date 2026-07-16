@@ -3088,13 +3088,16 @@ map.on('mouseup', () => {
 map.on('click', function(e){
   if(state.drawing){ _addVertice(e.latlng); return; } // modo desenho de área
   if(!state.user || !podeEditar()) return;
-  // Não abrir novo painel se já existe um aberto
-  if(state.painelNovoPontoAberto) return;
   if(map.getZoom() < 18){ toast('Zoom mínimo necessário: 18', true); return; }
   const lat = e.latlng.lat, lng = e.latlng.lng;
   if(!dentroDaCidade(lat, lng)){
     toast('Clique dentro dos limites de ' + CITY.nome, true);
     return;
+  }
+  // Se painel já está aberto, fechar primeiro para resetar cache de geocoding
+  if(state.painelNovoPontoAberto){
+    state.painelNovoPontoAberto = false;
+    _lastGeocodeCoord = null;
   }
   state.painelNovoPontoAberto = true;
   const d = document.getElementById('detail'); d.style.display = 'block';
