@@ -2432,13 +2432,14 @@
               <label class="text-xs font-medium text-slate-400 block mb-1">Foto (Upload ou URL)</label>
               <div class="flex gap-2 flex-wrap">
                 <div class="flex-1 min-w-[200px]">
-                  <input id="modFotoUpload" type="file" accept="image/*" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Upload foto (será compactada automaticamente)"/>
+                  <input id="modFotoUpload" type="file" accept="image/jpeg,image/png,image/webp" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Upload foto (será compactada automaticamente)"/>
                   <div id="modFotoStatus" class="text-xs text-slate-500 mt-1"></div>
                 </div>
                 <div class="flex-1 min-w-[200px]">
-                  <input id="modFoto" type="url" placeholder="ou URL: https://…/foto.jpg" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                  <input id="modFotoUrl" type="url" placeholder="ou URL: https://…/foto.jpg" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
                 </div>
               </div>
+              <img id="modFotoPreview" style="max-width:200px;max-height:200px;border-radius:6px;margin-top:8px;display:none;object-fit:cover;border:1px solid #4b5563" alt="Preview"/>
             </div>
 
             <!-- Description -->
@@ -2995,6 +2996,9 @@ async function _refresh(){
 const refresh = debounce(_refresh, 120);
 map.on('moveend', refresh);
 
+// Cache para evitar múltiplas requisições de geocoding para mesmas coords
+let _lastGeocodeCoord = null;
+
 // Função para atualizar coordenadas do painel de novo ponto
 function _updatePainelCoordenadas() {
   const d = document.getElementById('detail');
@@ -3005,8 +3009,55 @@ function _updatePainelCoordenadas() {
   if (!nLat || !nLng) return; // Não é painel de novo ponto
 
   const center = map.getCenter();
-  nLat.value = center.lat.toFixed(6);
-  nLng.value = center.lng.toFixed(6);
+  const lat = center.lat.toFixed(6);
+  const lng = center.lng.toFixed(6);
+  nLat.value = lat;
+  nLng.value = lng;
+
+  // Atualizar endereço via reverse geocoding (sempre, independente de zoom)
+  _updatePainelEndereco(lat, lng);
+}
+
+// Função auxiliar: fazer reverse geocoding e atualizar campo de endereço
+async function _updatePainelEndereco(lat, lng) {
+  const nEnd = document.getElementById('nEnd');
+  const nEndLoading = document.getElementById('nEndLoading');
+  if (!nEnd) return;
+
+  const coordKey = `${lat},${lng}`;
+  if (_lastGeocodeCoord === coordKey) return; // Cache: mesmas coords, não refazer
+  _lastGeocodeCoord = coordKey;
+
+  if (nEndLoading) nEndLoading.style.display = 'inline-block';
+  try {
+    const resp = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=${Math.min(map.getZoom(), 20)}&addressdetails=1`,
+      {
+        signal: AbortSignal.timeout(3000),
+        headers: {'Accept-Language': 'pt-BR'}
+      }
+    );
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+    const data = await resp.json();
+    if (data && data.address) {
+      const addr = data.address;
+      // Preferir road + house_number, senão usar neighbourhood ou city
+      const endereco = addr.road
+        ? `${addr.road}${addr.house_number ? ', ' + addr.house_number : ''}`
+        : (addr.neighbourhood || addr.city || data.display_name);
+      nEnd.value = endereco.substring(0, 200);
+    } else if (data && data.display_name) {
+      nEnd.value = data.display_name.substring(0, 200);
+    } else {
+      nEnd.value = `${lat}, ${lng}`; // Fallback
+    }
+  } catch (err) {
+    console.warn('Reverse geocoding falhou:', err.message);
+    nEnd.value = `${lat}, ${lng}`; // Fallback com coordenadas
+  } finally {
+    if (nEndLoading) nEndLoading.style.display = 'none';
+  }
 }
 
 // Mudar cursor quando zoom permite criar ponto
@@ -3085,23 +3136,9 @@ map.on('click', function(e){
   // Modelo selection
   document.getElementById('nBtnModelo').onclick = () => { window._selecionarModelo(); };
 
-  // Buscar endereço via reverse geocoding (OSM Nominatim) - only if zoom >= 18
+  // Buscar endereço via reverse geocoding (handler centralizado em _updatePainelEndereco)
   const nEndInput = document.getElementById('nEnd');
-  const nEndLoading = document.getElementById('nEndLoading');
-  (async () => {
-    try {
-      nEndLoading.style.display = 'inline-block';
-      const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=18&addressdetails=1`, {signal: AbortSignal.timeout(3000)});
-      if(!resp.ok) throw new Error('HTTP ' + resp.status);
-      const data = await resp.json();
-      if(data && data.address) {
-        const addr = data.address;
-        const endereco = addr.road ? `${addr.road}, ${addr.house_number || 'S/N'}` : data.display_name;
-        nEndInput.value = endereco.substring(0, 200);
-      }
-    } catch(e) { console.log('Nominatim lookup skipped:', e.message); }
-    finally { nEndLoading.style.display = 'none'; }
-  })();
+  _updatePainelEndereco(lat.toFixed(6), lng.toFixed(6));
   document.getElementById('nSave').onclick = async () => {
     const lat2 = parseFloat(document.getElementById('nLat').value), lng2 = parseFloat(document.getElementById('nLng').value);
     if(!dentroDaCidade(lat2, lng2)){ toast('Coordenadas fora de ' + CITY.nome, true); return; }
@@ -4145,17 +4182,20 @@ window._edit = function(){
   ['eAngulo','eMaterial'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('change', renderFotoIdx); });
   renderFotoIdx();
 
-  // Carregar modelos de equipamentos
+  // Carregar modelos de equipamentos via RPC (consistente com _selecionarModelo)
   let modelosCache = []; // Cache para uso no handler do botão Aplicar
   (async ()=>{
     try {
-      const {data: modelos, error} = await sb.from('equipamentos_modelo').select('id, fabricante, modelo, potencia_w, tipo_luminaria, classe_nbr').order('fabricante, modelo');
-      if (error) { console.error('Erro ao carregar modelos:', error); return; }
+      const modelos = await rpc('ip_listar_modelos');
+      if (!Array.isArray(modelos)) {
+        console.error('ip_listar_modelos não retornou array:', modelos);
+        return;
+      }
 
       modelosCache = modelos || [];
       const dropdown = document.getElementById('eModelo');
-      if (dropdown && modelos) {
-        modelos.forEach(m => {
+      if (dropdown && modelosCache.length > 0) {
+        modelosCache.forEach(m => {
           const opt = document.createElement('option');
           opt.value = m.id;
           opt.textContent = `${m.fabricante || ''} ${m.modelo || ''} (${m.potencia_w || 0}W)`;
@@ -4165,7 +4205,7 @@ window._edit = function(){
         // Ao selecionar modelo, pré-preencher campos
         dropdown.addEventListener('change', (e) => {
           if (e.target.value) {
-            const modelo = modelos.find(m => m.id === e.target.value);
+            const modelo = modelosCache.find(m => m.id === e.target.value);
             if (modelo) {
               if (modelo.potencia_w) document.getElementById('ePot').value = modelo.potencia_w;
               if (modelo.tipo_luminaria) document.getElementById('eTipoLum').value = modelo.tipo_luminaria;
@@ -4175,7 +4215,7 @@ window._edit = function(){
           }
         });
       }
-    } catch (err) { console.error('Erro:', err); }
+    } catch (err) { console.error('Erro ao carregar modelos:', err); }
   })();
 
   // Handler para botão "Aplicar" modelo
@@ -5007,6 +5047,22 @@ function initModelosForm(){
     selLamp.value='led';
   }
   setupTecnologiaCondicional();
+
+  // Preview listener para upload de foto
+  const fotoUpload=document.getElementById('modFotoUpload');
+  const fotoPreview=document.getElementById('modFotoPreview');
+  if(fotoUpload && fotoPreview){
+    fotoUpload.addEventListener('change',(e)=>{
+      const file=e.target.files[0];
+      if(file && file.type.startsWith('image/')){
+        const reader=new FileReader();
+        reader.onload=(evt)=>{ fotoPreview.src=evt.target.result; };
+        reader.readAsDataURL(file);
+      }else{
+        fotoPreview.src='';
+      }
+    });
+  }
 }
 
 function setupTecnologiaCondicional(){
@@ -5125,10 +5181,67 @@ async function loadAdminModelos(){
       <td>${esc(m.tipo_lampada||'—')}</td>
       <td>${esc(m.classe_nbr||'—')}</td>
       <td>${esc(m.ip||'—')}</td>
-      <td style="text-align:right"><button class="btn" style="padding:2px 8px;color:#f87171;font-size:11px" onclick="window._delModelo('${m.id}')">remover</button></td>
+      <td style="text-align:right;display:flex;gap:4px;justify-content:flex-end">
+        <button class="btn" style="padding:2px 8px;color:#60a5fa;font-size:11px" onclick="window._editarModelo('${m.id}')">✏️ editar</button>
+        <button class="btn" style="padding:2px 8px;color:#f87171;font-size:11px" onclick="window._delModelo('${m.id}')">🗑️ remover</button>
+      </td>
     </tr>
   `).join('') || '<tr><td colspan="8" style="text-align:center;color:#6b7280;padding:14px">Nenhum modelo cadastrado ainda</td></tr>';
 }
+window._editarModelo = (id)=>{
+  const modelo = (state.modelosCache || []).find(m => m.id === id);
+  if (!modelo) {
+    toast('Modelo não encontrado', true);
+    return;
+  }
+
+  // Preencher formulário com dados existentes
+  const fieldMap = {
+    modFabricante: 'fabricante',
+    modModelo: 'modelo',
+    modPotencia: 'potencia_w',
+    modTemperatura: 'temperatura_cor_k',
+    modTensao: 'tensao',
+    modIp: 'ip',
+    modClasse: 'classe_nbr',
+    modTecnologia: 'tecnologia',
+    modTipoLum: 'tipo_luminaria',
+    modTipoLamp: 'tipo_lampada',
+    modFotoUrl: 'foto_url',
+    modDescricao: 'descricao',
+    // Tier 2
+    modFluxo: 'fluxo_luminoso_lm',
+    modEficacia: 'eficacia_luminosa_lm_w',
+    modFP: 'fator_potencia_fp',
+    modTHD: 'thd_percentual',
+    modGrauIK: 'grau_ik',
+    modDPS: 'dps_especificacao',
+    modConectividade: 'tipo_conectividade',
+    modIES: 'arquivo_ies_url',
+    // Tier 1
+    modINMETRO: 'inmetro_registro',
+    modVidaUtil: 'vida_util_anos',
+    modGarantia: 'garantia_anos',
+    modManutencao: 'dias_manutencao_preventiva',
+  };
+
+  Object.entries(fieldMap).forEach(([elId, fieldName]) => {
+    const el = document.getElementById(elId);
+    const valor = modelo[fieldName];
+    if (el && valor != null) el.value = valor;
+  });
+
+  // Marcar que está em modo EDIT
+  const btnCreate = document.getElementById('modCreate');
+  btnCreate.textContent = '✏️ Atualizar Modelo';
+  btnCreate._editandoId = id;
+  btnCreate._editandoOriginal = JSON.parse(JSON.stringify(modelo)); // Deep copy
+
+  // Scroll para formulário
+  document.getElementById('modFabricante').scrollIntoView({behavior:'smooth'});
+  toast('Editando: ' + modelo.fabricante + ' ' + modelo.modelo);
+};
+
 window._delModelo = async (id)=>{
   if(!confirm('Remover este modelo do catálogo? Os pontos já cadastrados com ele não serão afetados.')) return;
   setBusy(true);
@@ -5138,7 +5251,8 @@ window._delModelo = async (id)=>{
   toast('Modelo removido');
   loadAdminModelos();
 };
-document.getElementById('modCreate').onclick = async ()=>{
+// Função auxiliar: salvar modelo (CREATE ou UPDATE)
+async function _salvarModelo(modoEdicao=false, idModelo=null) {
   const fab=document.getElementById('modFabricante').value.trim();
   const mod=document.getElementById('modModelo').value.trim();
   const pot=parseInt(document.getElementById('modPotencia').value);
@@ -5146,7 +5260,7 @@ document.getElementById('modCreate').onclick = async ()=>{
 
   if(!fab || !mod || isNaN(pot) || pot<=0 || pot>2000){
     toast('Preencha: Fabricante, Modelo e Potência (1–2000 W)',true);
-    return;
+    return false;
   }
 
   // Validate Tier 2 fields
@@ -5155,10 +5269,10 @@ document.getElementById('modCreate').onclick = async ()=>{
   const fp=document.getElementById('modFP').value.trim()?parseFloat(document.getElementById('modFP').value):null;
   const thd=document.getElementById('modTHD').value.trim()?parseFloat(document.getElementById('modTHD').value):null;
 
-  if(fluxo!==null && fluxo<=0){ toast('Fluxo luminoso deve ser > 0',true); return; }
-  if(eficacia!==null && eficacia<=0){ toast('Eficácia deve ser > 0',true); return; }
-  if(fp!==null && (fp<0.90 || fp>1.0)){ toast('Fator de potência deve estar entre 0.90 e 1.0',true); return; }
-  if(thd!==null && (thd<0 || thd>100)){ toast('THD deve estar entre 0 e 100%',true); return; }
+  if(fluxo!==null && fluxo<=0){ toast('Fluxo luminoso deve ser > 0',true); return false; }
+  if(eficacia!==null && eficacia<=0){ toast('Eficácia deve ser > 0',true); return false; }
+  if(fp!==null && (fp<0.90 || fp>1.0)){ toast('Fator de potência deve estar entre 0.90 e 1.0',true); return false; }
+  if(thd!==null && (thd<0 || thd>100)){ toast('THD deve estar entre 0 e 100%',true); return false; }
 
   // Validate Tier 1 fields
   const inmetro=document.getElementById('modINMETRO').value.trim()||null;
@@ -5166,30 +5280,32 @@ document.getElementById('modCreate').onclick = async ()=>{
   const garantia=document.getElementById('modGarantia').value.trim()?parseInt(document.getElementById('modGarantia').value):null;
   const manutencao=document.getElementById('modManutencao').value.trim()?parseInt(document.getElementById('modManutencao').value):null;
 
-  if(vidaUtil!==null && vidaUtil<=0){ toast('Vida útil deve ser > 0',true); return; }
-  if(garantia!==null && garantia<0){ toast('Garantia não pode ser negativa',true); return; }
-  if(manutencao!==null && manutencao<=0){ toast('Manutenção preventiva deve ser > 0',true); return; }
+  if(vidaUtil!==null && vidaUtil<=0){ toast('Vida útil deve ser > 0',true); return false; }
+  if(garantia!==null && garantia<0){ toast('Garantia não pode ser negativa',true); return false; }
+  if(manutencao!==null && manutencao<=0){ toast('Manutenção preventiva deve ser > 0',true); return false; }
 
   // Handle photo upload with compression if provided
-  let fotoUrl=document.getElementById('modFoto').value.trim()||null;
+  let fotoUrl=document.getElementById('modFotoUrl').value.trim()||null;
   const fotoFile=document.getElementById('modFotoUpload').files[0];
   if(fotoFile){
     fotoUrl=await uploadFoto(fotoFile);
-    if(!fotoUrl) return;
+    if(!fotoUrl) return false;
   }
 
   // Handle .IES file upload if provided
-  let iesUrl=null;
+  let iesUrl=document.getElementById('modIES').value.trim()||null;
   const iesFile=document.getElementById('modArquivoIES').files[0];
   if(iesFile){
     setBusy(true);
     iesUrl=await uploadArquivoIES(iesFile);
-    if(!iesUrl){ setBusy(false); return; }
+    if(!iesUrl){ setBusy(false); return false; }
     setBusy(false);
   }
 
   setBusy(true);
-  const {error}=await sb.rpc('ip_criar_modelo',{
+
+  // Preparar parâmetros comuns
+  const params = {
     p_fabricante:fab, p_modelo:mod, p_potencia_w:pot,
     p_temperatura_cor_k:temp,
     p_tensao:document.getElementById('modTensao').value||null,
@@ -5200,7 +5316,6 @@ document.getElementById('modCreate').onclick = async ()=>{
     p_tipo_lampada:document.getElementById('modTipoLamp').value||'led',
     p_foto_url:fotoUrl,
     p_descricao:document.getElementById('modDescricao').value.trim()||null,
-    // Tier 2 fields
     p_fluxo_luminoso_lm:fluxo,
     p_eficacia_luminosa_lm_w:eficacia,
     p_fator_potencia_fp:fp,
@@ -5209,17 +5324,31 @@ document.getElementById('modCreate').onclick = async ()=>{
     p_dps_especificacao:document.getElementById('modDPS').value.trim()||null,
     p_tipo_conectividade:document.getElementById('modConectividade').value||null,
     p_arquivo_ies_url:iesUrl,
-    // Tier 1 fields
     p_inmetro_registro:inmetro,
     p_vida_util_anos:vidaUtil,
     p_garantia_anos:garantia,
     p_dias_manutencao_preventiva:manutencao
-  });
+  };
+
+  // Chamar RPC apropriado
+  let result;
+  if(modoEdicao){
+    params.p_id = idModelo;
+    result = await sb.rpc('ip_atualizar_modelo', params);
+  }else{
+    result = await sb.rpc('ip_criar_modelo', params);
+  }
+
+  const {error} = result;
   setBusy(false);
-  if(error){ toast('Erro ao criar: '+error.message,true); return; }
+
+  if(error){
+    toast('Erro ao '+(modoEdicao?'atualizar':'criar')+': '+error.message,true);
+    return false;
+  }
 
   // Clear form
-  ['modFabricante','modModelo','modPotencia','modTemperatura','modTensao','modIp','modClasse','modFoto','modDescricao','modFluxo','modEficacia','modFP','modTHD','modDPS','modINMETRO','modVidaUtil','modGarantia','modManutencao'].forEach(id=>document.getElementById(id).value='');
+  ['modFabricante','modModelo','modPotencia','modTemperatura','modTensao','modIp','modClasse','modFotoUrl','modDescricao','modFluxo','modEficacia','modFP','modTHD','modDPS','modINMETRO','modVidaUtil','modGarantia','modManutencao','modIES'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
   document.getElementById('modTecnologia').value='LED';
   document.getElementById('modTipoLum').value='';
   document.getElementById('modTipoLamp').value='led';
@@ -5228,10 +5357,22 @@ document.getElementById('modCreate').onclick = async ()=>{
   document.getElementById('modFotoStatus').textContent='';
   document.getElementById('modConectividade').value='';
   document.getElementById('modArquivoIES').value='';
+  const btn = document.getElementById('modCreate');
+  btn.textContent = '➕ Adicionar Modelo';
+  delete btn._editandoId;
+  delete btn._editandoOriginal;
   setupTecnologiaCondicional();
 
-  toast('Modelo adicionado ao catálogo');
+  toast('Modelo '+(modoEdicao?'atualizado':'adicionado')+' ao catálogo');
   loadAdminModelos();
+  return true;
+}
+
+document.getElementById('modCreate').onclick = async ()=>{
+  const btn = document.getElementById('modCreate');
+  const modoEdicao = !!btn._editandoId;
+  const idModelo = btn._editandoId;
+  await _salvarModelo(modoEdicao, idModelo);
 };
 
 // ---------- Exportação ----------
