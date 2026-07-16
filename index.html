@@ -2995,6 +2995,20 @@ async function _refresh(){
 const refresh = debounce(_refresh, 120);
 map.on('moveend', refresh);
 
+// Função para atualizar coordenadas do painel de novo ponto
+function _updatePainelCoordenadas() {
+  const d = document.getElementById('detail');
+  if (!d || d.style.display !== 'block') return;
+
+  const nLat = document.getElementById('nLat');
+  const nLng = document.getElementById('nLng');
+  if (!nLat || !nLng) return; // Não é painel de novo ponto
+
+  const center = map.getCenter();
+  nLat.value = center.lat.toFixed(6);
+  nLng.value = center.lng.toFixed(6);
+}
+
 // Mudar cursor quando zoom permite criar ponto
 map.on('zoomend', () => {
   const container = map.getContainer();
@@ -3003,6 +3017,12 @@ map.on('zoomend', () => {
   } else {
     container.style.cursor = 'grab';
   }
+  // Atualizar coordenadas do painel de novo ponto se ele está aberto
+  _updatePainelCoordenadas();
+});
+map.on('moveend', () => {
+  // Atualizar coordenadas do painel de novo ponto se ele está aberto
+  _updatePainelCoordenadas();
 });
 map.on('mousedown', () => { if(map.getContainer().style.cursor !== 'pointer') map.getContainer().style.cursor = 'grabbing'; });
 map.on('mouseup', () => {
