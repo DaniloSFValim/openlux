@@ -2703,7 +2703,7 @@ if(!window.__CONFIG__) {
 const sb = window.supabase.createClient(URL_SB, ANON);
 
 const state = { user:null, userRole:null, bairro:"", tipo:"", estado:"", pot:"", fila:"", layer:null, mode:"", tPage:0, tSize:50,
-  bairroLayer:null, choropleth:false, choroLayer:null, choroData:null, current:null, tCache:{}, config:null,
+  bairroLayer:null, choropleth:false, choroLayer:null, choroData:null, current:null, tCache:{}, config:null, painelNovoPontoAberto:false,
   densidade:false, densLayer:null, densMunLayer:null, densData:null, densMetric:'klm',
   markerCluster:null, charts: {} }; // FASE 3: clustering; Fase 2: charts (Chart.js instances)
 const TIPOS = ["led","vapor_sodio","metalico","vapor_mercurio","fluorescente","sem_lampada","desconhecido"];
@@ -2995,6 +2995,20 @@ async function _refresh(){
 const refresh = debounce(_refresh, 120);
 map.on('moveend', refresh);
 
+// Função para atualizar coordenadas do painel de novo ponto
+function _updatePainelCoordenadas() {
+  const d = document.getElementById('detail');
+  if (!d || d.style.display !== 'block') return;
+
+  const nLat = document.getElementById('nLat');
+  const nLng = document.getElementById('nLng');
+  if (!nLat || !nLng) return; // Não é painel de novo ponto
+
+  const center = map.getCenter();
+  nLat.value = center.lat.toFixed(6);
+  nLng.value = center.lng.toFixed(6);
+}
+
 // Mudar cursor quando zoom permite criar ponto
 map.on('zoomend', () => {
   const container = map.getContainer();
@@ -3003,6 +3017,12 @@ map.on('zoomend', () => {
   } else {
     container.style.cursor = 'grab';
   }
+  // Atualizar coordenadas do painel de novo ponto se ele está aberto
+  _updatePainelCoordenadas();
+});
+map.on('moveend', () => {
+  // Atualizar coordenadas do painel de novo ponto se ele está aberto
+  _updatePainelCoordenadas();
 });
 map.on('mousedown', () => { if(map.getContainer().style.cursor !== 'pointer') map.getContainer().style.cursor = 'grabbing'; });
 map.on('mouseup', () => {
@@ -3017,12 +3037,15 @@ map.on('mouseup', () => {
 map.on('click', function(e){
   if(state.drawing){ _addVertice(e.latlng); return; } // modo desenho de área
   if(!state.user || !podeEditar()) return;
+  // Não abrir novo painel se já existe um aberto
+  if(state.painelNovoPontoAberto) return;
   if(map.getZoom() < 18){ toast('Zoom mínimo necessário: 18', true); return; }
   const lat = e.latlng.lat, lng = e.latlng.lng;
   if(!dentroDaCidade(lat, lng)){
     toast('Clique dentro dos limites de ' + CITY.nome, true);
     return;
   }
+  state.painelNovoPontoAberto = true;
   const d = document.getElementById('detail'); d.style.display = 'block';
   const ativoOpts = TIPO_ATIVO.map(([v,l]) => '<option value="' + v + '">' + l + '</option>').join('');
   const tipoLumOpts = TIPO_LUM.map(t => '<option>' + t + '</option>').join('');
@@ -3040,6 +3063,7 @@ map.on('click', function(e){
       <input id="nPatr" placeholder="Referência ENEL (opcional)"/>
       <div class="flex gap-1" style="align-items:center"><input id="nEnd" placeholder="Endereço" class="flex-1"/><span id="nEndLoading" style="font-size:12px;color:#6b7280;display:none"><span class="spin"></span></span></div>
       <div id="nLumFields" style="display:flex;flex-direction:column;gap:7px">
+        <button class="btn" style="width:100%;margin-bottom:8px;border-color:var(--accent);color:var(--accent)" id="nBtnModelo">📋 Inserir com modelo</button>
         <label class="label-micro">Tipo de luminária<select id="nTipoLum"><option value="">—</option>${tipoLumOpts}</select></label>
         <input id="nClasse" placeholder="Classe NBR (V3, P2, C4…)"/>
         <select id="nTipo">${tipoOpts}</select>
@@ -3052,11 +3076,14 @@ map.on('click', function(e){
           <label class="label-micro">Material do piso<select id="nMaterial"><option value="">— não classificado</option>${MATERIAIS_PISO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
         </div>
       </div>
-      <div class="flex gap-2"><button class="btn btn-accent flex-1" id="nSave">Cadastrar</button><button class="btn" onclick="document.getElementById('detail').style.display='none'">Cancelar</button></div>
+      <div class="flex gap-2"><button class="btn btn-accent flex-1" id="nSave">Cadastrar</button><button class="btn" onclick="state.painelNovoPontoAberto=false; document.getElementById('detail').style.display='none'">Cancelar</button></div>
     </div>`;
   const nAtivo = document.getElementById('nAtivo');
   const toggleLum = () => { document.getElementById('nLumFields').style.display = nAtivo.value === 'luminaria' ? 'flex' : 'none'; };
   nAtivo.onchange = toggleLum; toggleLum();
+
+  // Modelo selection
+  document.getElementById('nBtnModelo').onclick = () => { window._selecionarModelo(); };
 
   // Buscar endereço via reverse geocoding (OSM Nominatim) - only if zoom >= 18
   const nEndInput = document.getElementById('nEnd');
@@ -3092,7 +3119,7 @@ map.on('click', function(e){
       p_material: ehLum ? (document.getElementById('nMaterial').value || null) : null });
     setBusy(false);
     if(error){ toast('Falha ao cadastrar: ' + error.message, true); return; }
-    toast('Cadastrado: ' + (data || 'ok')); d.style.display = 'none'; state.choroData = null; state.densData = null; refresh(); loadStatsChips();
+    toast('Cadastrado: ' + (data || 'ok')); state.painelNovoPontoAberto=false; d.style.display = 'none'; state.choroData = null; state.densData = null; refresh(); loadStatsChips();
     map.setView([lat2, lng2], Math.max(map.getZoom(), 17));
   };
 });
@@ -4015,6 +4042,14 @@ window._edit = function(){
       </div>
     </div>
 
+    <div>
+      <label class="label-small">📚 Substituir por Modelo Pré-cadastrado</label>
+      <div style="display:flex;gap:6px;margin-bottom:8px">
+        <select id="eModelo" style="flex:1;padding:6px;background:#0f151c;border:1px solid #1f2a37;color:#e5e7eb;border-radius:4px;font-size:12px;cursor:pointer"><option value="">— selecionar modelo</option></select>
+        <button class="btn" style="padding:6px 12px;background:var(--accent);color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap" id="eBtnAplicarModelo">Aplicar</button>
+      </div>
+    </div>
+
     <div class="grid-cols-2-gap">
       <div>
         <label class="label-small">💡 Tipo</label>
@@ -4109,6 +4144,59 @@ window._edit = function(){
   });
   ['eAngulo','eMaterial'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('change', renderFotoIdx); });
   renderFotoIdx();
+
+  // Carregar modelos de equipamentos
+  let modelosCache = []; // Cache para uso no handler do botão Aplicar
+  (async ()=>{
+    try {
+      const {data: modelos, error} = await sb.from('equipamentos_modelo').select('id, fabricante, modelo, potencia_w, tipo_luminaria, classe_nbr').order('fabricante, modelo');
+      if (error) { console.error('Erro ao carregar modelos:', error); return; }
+
+      modelosCache = modelos || [];
+      const dropdown = document.getElementById('eModelo');
+      if (dropdown && modelos) {
+        modelos.forEach(m => {
+          const opt = document.createElement('option');
+          opt.value = m.id;
+          opt.textContent = `${m.fabricante || ''} ${m.modelo || ''} (${m.potencia_w || 0}W)`;
+          dropdown.appendChild(opt);
+        });
+
+        // Ao selecionar modelo, pré-preencher campos
+        dropdown.addEventListener('change', (e) => {
+          if (e.target.value) {
+            const modelo = modelos.find(m => m.id === e.target.value);
+            if (modelo) {
+              if (modelo.potencia_w) document.getElementById('ePot').value = modelo.potencia_w;
+              if (modelo.tipo_luminaria) document.getElementById('eTipoLum').value = modelo.tipo_luminaria;
+              if (modelo.classe_nbr) document.getElementById('eClasse').value = modelo.classe_nbr;
+              trackChanges();
+            }
+          }
+        });
+      }
+    } catch (err) { console.error('Erro:', err); }
+  })();
+
+  // Handler para botão "Aplicar" modelo
+  document.getElementById('eBtnAplicarModelo').onclick = () => {
+    const dropdown = document.getElementById('eModelo');
+    if (!dropdown || !dropdown.value) {
+      toast('Selecione um modelo primeiro', true);
+      return;
+    }
+    const modelo = modelosCache.find(m => m.id === dropdown.value);
+    if (!modelo) {
+      toast('Modelo não encontrado', true);
+      return;
+    }
+    // Aplicar campos do modelo
+    if (modelo.potencia_w) document.getElementById('ePot').value = modelo.potencia_w;
+    if (modelo.tipo_luminaria) document.getElementById('eTipoLum').value = modelo.tipo_luminaria;
+    if (modelo.classe_nbr) document.getElementById('eClasse').value = modelo.classe_nbr;
+    trackChanges();
+    toast('Modelo aplicado com sucesso');
+  };
 
   document.getElementById('eDelete').onclick = ()=>window._excluirPonto(p);
   document.getElementById('eSave').onclick = async ()=>{
@@ -4242,6 +4330,7 @@ window._hist = async (id)=>{
 // ---------- Novo ponto ----------
 document.getElementById('btnNovo').onclick = ()=>{
   if(!podeEditar()) return;
+  state.painelNovoPontoAberto = true;
   const c=map.getCenter();
   const d=document.getElementById('detail'); d.style.display='block';
   d.innerHTML = `
@@ -4269,7 +4358,7 @@ document.getElementById('btnNovo').onclick = ()=>{
           <label class="label-micro">Material do piso<select id="nMaterial"><option value="">— não classificado</option>${MATERIAIS_PISO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
         </div>
       </div>
-      <div class="flex gap-2"><button class="btn btn-accent flex-1" id="nSave">Cadastrar</button><button class="btn" onclick="document.getElementById('detail').style.display='none'">Cancelar</button></div>
+      <div class="flex gap-2"><button class="btn btn-accent flex-1" id="nSave">Cadastrar</button><button class="btn" onclick="state.painelNovoPontoAberto=false; document.getElementById('detail').style.display='none'">Cancelar</button></div>
     </div>`;
   const nAtivo=document.getElementById('nAtivo');
   const toggleLum=()=>{ document.getElementById('nLumFields').style.display = nAtivo.value==='luminaria'?'flex':'none'; };
@@ -4295,7 +4384,7 @@ document.getElementById('btnNovo').onclick = ()=>{
       p_material: ehLum ? (document.getElementById('nMaterial').value||null) : null });
     setBusy(false);
     if(error){ toast('Falha ao cadastrar: '+error.message,true); return; }
-    toast('Cadastrado: '+(data||'ok')); d.style.display='none'; state.choroData=null; state.densData=null; refresh(); loadStatsChips();
+    toast('Cadastrado: '+(data||'ok')); state.painelNovoPontoAberto=false; d.style.display='none'; state.choroData=null; state.densData=null; refresh(); loadStatsChips();
     map.setView([lat,lng], Math.max(map.getZoom(),17));
   };
 };
