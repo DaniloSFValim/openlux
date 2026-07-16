@@ -2432,13 +2432,14 @@
               <label class="text-xs font-medium text-slate-400 block mb-1">Foto (Upload ou URL)</label>
               <div class="flex gap-2 flex-wrap">
                 <div class="flex-1 min-w-[200px]">
-                  <input id="modFotoUpload" type="file" accept="image/*" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Upload foto (será compactada automaticamente)"/>
+                  <input id="modFotoUpload" type="file" accept="image/jpeg,image/png,image/webp" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Upload foto (será compactada automaticamente)"/>
                   <div id="modFotoStatus" class="text-xs text-slate-500 mt-1"></div>
                 </div>
                 <div class="flex-1 min-w-[200px]">
-                  <input id="modFoto" type="url" placeholder="ou URL: https://…/foto.jpg" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                  <input id="modFotoUrl" type="url" placeholder="ou URL: https://…/foto.jpg" class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
                 </div>
               </div>
+              <img id="modFotoPreview" style="max-width:200px;max-height:200px;border-radius:6px;margin-top:8px;display:none;object-fit:cover;border:1px solid #4b5563" alt="Preview"/>
             </div>
 
             <!-- Description -->
@@ -5046,6 +5047,22 @@ function initModelosForm(){
     selLamp.value='led';
   }
   setupTecnologiaCondicional();
+
+  // Preview listener para upload de foto
+  const fotoUpload=document.getElementById('modFotoUpload');
+  const fotoPreview=document.getElementById('modFotoPreview');
+  if(fotoUpload && fotoPreview){
+    fotoUpload.addEventListener('change',(e)=>{
+      const file=e.target.files[0];
+      if(file && file.type.startsWith('image/')){
+        const reader=new FileReader();
+        reader.onload=(evt)=>{ fotoPreview.src=evt.target.result; };
+        reader.readAsDataURL(file);
+      }else{
+        fotoPreview.src='';
+      }
+    });
+  }
 }
 
 function setupTecnologiaCondicional(){
