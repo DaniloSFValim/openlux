@@ -2703,7 +2703,7 @@ if(!window.__CONFIG__) {
 const sb = window.supabase.createClient(URL_SB, ANON);
 
 const state = { user:null, userRole:null, bairro:"", tipo:"", estado:"", pot:"", fila:"", layer:null, mode:"", tPage:0, tSize:50,
-  bairroLayer:null, choropleth:false, choroLayer:null, choroData:null, current:null, tCache:{}, config:null,
+  bairroLayer:null, choropleth:false, choroLayer:null, choroData:null, current:null, tCache:{}, config:null, painelNovoPontoAberto:false,
   densidade:false, densLayer:null, densMunLayer:null, densData:null, densMetric:'klm',
   markerCluster:null, charts: {} }; // FASE 3: clustering; Fase 2: charts (Chart.js instances)
 const TIPOS = ["led","vapor_sodio","metalico","vapor_mercurio","fluorescente","sem_lampada","desconhecido"];
@@ -3038,14 +3038,14 @@ map.on('click', function(e){
   if(state.drawing){ _addVertice(e.latlng); return; } // modo desenho de área
   if(!state.user || !podeEditar()) return;
   // Não abrir novo painel se já existe um aberto
-  const d = document.getElementById('detail');
-  if(d && d.style.display === 'block' && d.innerHTML.includes('nSave')) return;
+  if(state.painelNovoPontoAberto) return;
   if(map.getZoom() < 18){ toast('Zoom mínimo necessário: 18', true); return; }
   const lat = e.latlng.lat, lng = e.latlng.lng;
   if(!dentroDaCidade(lat, lng)){
     toast('Clique dentro dos limites de ' + CITY.nome, true);
     return;
   }
+  state.painelNovoPontoAberto = true;
   const d = document.getElementById('detail'); d.style.display = 'block';
   const ativoOpts = TIPO_ATIVO.map(([v,l]) => '<option value="' + v + '">' + l + '</option>').join('');
   const tipoLumOpts = TIPO_LUM.map(t => '<option>' + t + '</option>').join('');
@@ -3076,7 +3076,7 @@ map.on('click', function(e){
           <label class="label-micro">Material do piso<select id="nMaterial"><option value="">— não classificado</option>${MATERIAIS_PISO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
         </div>
       </div>
-      <div class="flex gap-2"><button class="btn btn-accent flex-1" id="nSave">Cadastrar</button><button class="btn" onclick="document.getElementById('detail').style.display='none'">Cancelar</button></div>
+      <div class="flex gap-2"><button class="btn btn-accent flex-1" id="nSave">Cadastrar</button><button class="btn" onclick="state.painelNovoPontoAberto=false; document.getElementById('detail').style.display='none'">Cancelar</button></div>
     </div>`;
   const nAtivo = document.getElementById('nAtivo');
   const toggleLum = () => { document.getElementById('nLumFields').style.display = nAtivo.value === 'luminaria' ? 'flex' : 'none'; };
@@ -3119,7 +3119,7 @@ map.on('click', function(e){
       p_material: ehLum ? (document.getElementById('nMaterial').value || null) : null });
     setBusy(false);
     if(error){ toast('Falha ao cadastrar: ' + error.message, true); return; }
-    toast('Cadastrado: ' + (data || 'ok')); d.style.display = 'none'; state.choroData = null; state.densData = null; refresh(); loadStatsChips();
+    toast('Cadastrado: ' + (data || 'ok')); state.painelNovoPontoAberto=false; d.style.display = 'none'; state.choroData = null; state.densData = null; refresh(); loadStatsChips();
     map.setView([lat2, lng2], Math.max(map.getZoom(), 17));
   };
 });
@@ -4305,6 +4305,7 @@ window._hist = async (id)=>{
 // ---------- Novo ponto ----------
 document.getElementById('btnNovo').onclick = ()=>{
   if(!podeEditar()) return;
+  state.painelNovoPontoAberto = true;
   const c=map.getCenter();
   const d=document.getElementById('detail'); d.style.display='block';
   d.innerHTML = `
@@ -4332,7 +4333,7 @@ document.getElementById('btnNovo').onclick = ()=>{
           <label class="label-micro">Material do piso<select id="nMaterial"><option value="">— não classificado</option>${MATERIAIS_PISO.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
         </div>
       </div>
-      <div class="flex gap-2"><button class="btn btn-accent flex-1" id="nSave">Cadastrar</button><button class="btn" onclick="document.getElementById('detail').style.display='none'">Cancelar</button></div>
+      <div class="flex gap-2"><button class="btn btn-accent flex-1" id="nSave">Cadastrar</button><button class="btn" onclick="state.painelNovoPontoAberto=false; document.getElementById('detail').style.display='none'">Cancelar</button></div>
     </div>`;
   const nAtivo=document.getElementById('nAtivo');
   const toggleLum=()=>{ document.getElementById('nLumFields').style.display = nAtivo.value==='luminaria'?'flex':'none'; };
@@ -4358,7 +4359,7 @@ document.getElementById('btnNovo').onclick = ()=>{
       p_material: ehLum ? (document.getElementById('nMaterial').value||null) : null });
     setBusy(false);
     if(error){ toast('Falha ao cadastrar: '+error.message,true); return; }
-    toast('Cadastrado: '+(data||'ok')); d.style.display='none'; state.choroData=null; state.densData=null; refresh(); loadStatsChips();
+    toast('Cadastrado: '+(data||'ok')); state.painelNovoPontoAberto=false; d.style.display='none'; state.choroData=null; state.densData=null; refresh(); loadStatsChips();
     map.setView([lat,lng], Math.max(map.getZoom(),17));
   };
 };
