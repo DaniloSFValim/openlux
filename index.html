@@ -3101,29 +3101,8 @@ map.on('click', async function(e){
   const ativosProximos = await rpc('ip_pontos_bbox', { p_bbox_south: bbox_s, p_bbox_west: bbox_w, p_bbox_north: bbox_n, p_bbox_east: bbox_e, p_zoom: 20 });
 
   if(ativosProximos && ativosProximos.length > 0) {
-    // Já existe ativo próximo, mostrar modal com opções
-    const d = document.getElementById('detail');
-    d.style.display = 'block';
-    d.innerHTML = `
-      <div style="text-align:center;padding:16px">
-        <div style="font-size:20px;margin-bottom:12px">⚠️</div>
-        <b class="body" style="display:block;margin-bottom:8px">Ativo(s) existente(s) próximo</b>
-        <div style="color:#9ca3af;font-size:12px;margin-bottom:16px">
-          Há <strong>${ativosProximos.length}</strong> ativo(s) a menos de 50 metros deste ponto.
-        </div>
-        <div style="display:flex;flex-direction:column;gap:8px;font-size:12px;margin-bottom:16px;max-height:200px;overflow-y:auto;text-align:left;background:#0f151c;border:1px solid #1f2a37;border-radius:6px;padding:8px">
-          ${ativosProximos.map(p=>`
-            <div style="padding:6px;border-bottom:1px solid #1f2a37;cursor:pointer;hover:background:#1a1f2e" onclick="openDetail({id:'${p.id}',numero_patrimonio:'${esc(p.numero_patrimonio)}',endereco:'${esc(p.endereco||'—')}',tipo_lampada:'${p.tipo_lampada}',potencia_w:${p.potencia_w},lat:${p.lat},lon:${p.lon},tipo_ativo:'${p.tipo_ativo}',tipo_luminaria:'${p.tipo_luminaria||'—'}',classe_nbr:'${p.classe_nbr||'—'}',status:'${p.status}',modernizado_led:${p.modernizado_led},observacoes:'${esc(p.observacoes||'')}',verificado_em:'${p.verificado_em}',health_status:'${p.health_status||'—'}',data_ultima_intervencao:'${p.data_ultima_intervencao||'—'}',angulo_inclinacao_graus:${p.angulo_inclinacao_graus},material_piso:'${p.material_piso||'—'}'})">
-              <div style="color:#e5e7eb;font-weight:500">${esc(p.numero_patrimonio)} · ${p.tipo_lampada}</div>
-              <div style="color:#6b7280;font-size:10px">${esc(p.endereco||'—')} · ${p.potencia_w||'—'} W</div>
-            </div>
-          `).join('')}
-        </div>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-accent flex-1" onclick="(() => { _abrirNovoAtivoFormulario(${lat}, ${lng}); })()">Inserir novo ativo</button>
-          <button class="btn" onclick="document.getElementById('detail').style.display='none'">Cancelar</button>
-        </div>
-      </div>`;
+    // Já existe ativo próximo, apenas aviso
+    toast(`⚠️ Há ${ativosProximos.length} ativo(s) próximo(s) neste ponto`, false);
     return;
   }
 
