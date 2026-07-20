@@ -1737,6 +1737,7 @@
       <button id="btnTimeline" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Filtrar por período">📅 Timeline</button>
       <button id="btnTabela" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body">📋 Tabela</button>
       <button id="btnStats" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body">📈 Indicadores</button>
+      <button id="btnKPIDash" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Dashboard KPI em tempo real">📊 Dashboard KPI</button>
       <button id="btnAdvancedFilters" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Filtros avançados">🎯 Avançados</button>
       <button id="btnCharts" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" onclick="window._showCharts()">📈 Gráficos</button>
     </div>
@@ -3784,6 +3785,198 @@ function routingMapClick(e){
     window._addRoutingPoint(closest._latlng.lat,closest._latlng.lng,info);
   }
 }
+
+// #5: Dashboard KPI em Tempo Real
+async function loadKPIData(){
+  try{
+    // Buscar dados globais do Supabase
+    const {data,error}=await sb.from('v_parque_export').select('*');
+    if(error) throw error;
+
+    if(!data||data.length===0) return null;
+
+    // Calcular KPIs
+    const totalLum=data.length;
+    const ledLum=data.filter(d=>d.modernizado_led).length;
+    const pctLed=Math.round((ledLum/totalLum)*100);
+    const potTotal=data.reduce((sum,d)=>sum+(d.potencia_w||0),0);
+    const potMedia=Math.round(potTotal/totalLum);
+
+    // Por tipo
+    const byTipo={};
+    data.forEach(d=>{
+      const t=d.tipo_lampada||'desconhecido';
+      if(!byTipo[t]) byTipo[t]={total:0,led:0};
+      byTipo[t].total++;
+      if(d.modernizado_led) byTipo[t].led++;
+    });
+
+    // Por bairro (top 5)
+    const byBairro={};
+    data.forEach(d=>{
+      const b=d.bairro_nome||'desconhecido';
+      if(!byBairro[b]) byBairro[b]={total:0,led:0};
+      byBairro[b].total++;
+      if(d.modernizado_led) byBairro[b].led++;
+    });
+    const topBairros=Object.entries(byBairro).sort((a,b)=>b[1].total-a[1].total).slice(0,5);
+
+    return {
+      totalLum:totalLum,
+      ledLum:ledLum,
+      pctLed:pctLed,
+      pendente:totalLum-ledLum,
+      potTotal:potTotal,
+      potMedia:potMedia,
+      byTipo:byTipo,
+      byBairro:byBairro,
+      topBairros:topBairros
+    };
+  }catch(e){
+    console.error('Erro ao carregar KPIs:',e);
+    return null;
+  }
+}
+
+function renderKPIDashboard(){
+  const dashboardModal=document.getElementById('kpiDashboardModal');
+  if(!dashboardModal){
+    const m=document.createElement('div');
+    m.id='kpiDashboardModal';
+    m.style.cssText='position:fixed;top:12px;left:calc(var(--sb-w)+12px);right:12px;height:auto;max-height:85vh;z-index:1050;background:var(--bg-panel);border:1px solid var(--border-color);border-radius:12px;padding:16px;box-shadow:var(--shadow-lg);overflow-y:auto;';
+    m.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px solid var(--border-color);padding-bottom:12px">
+      <b style="color:var(--text-primary);font-size:16px">📊 Dashboard KPI</b>
+      <button style="background:none;border:none;color:var(--text-tertiary);cursor:pointer;font-size:18px" onclick="window._closeKPIDashboard()">✕</button>
+    </div>
+    <div id="kpiContent" style="font-size:13px;color:var(--text-secondary)">Carregando...</div>`;
+    document.body.appendChild(m);
+  }else{
+    dashboardModal.style.display='block';
+  }
+
+  window._closeKPIDashboard=()=>{
+    document.getElementById('kpiDashboardModal').style.display='none';
+    document.getElementById('btnKPIDash').classList.remove('on');
+  };
+
+  // Carregar e renderizar dados
+  loadKPIData().then(kpi=>{
+    if(!kpi){
+      document.getElementById('kpiContent').innerHTML='<span style="color:var(--color-error)">Erro ao carregar dados</span>';
+      return;
+    }
+
+    const kpiHTML=`
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px">
+        <!-- Card: Total de Luminárias -->
+        <div style="background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;padding:12px;text-align:center">
+          <div style="font-size:28px;font-weight:700;color:#3b82f6">${kpi.totalLum.toLocaleString('pt-BR')}</div>
+          <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">Total de Luminárias</div>
+        </div>
+
+        <!-- Card: % LED -->
+        <div style="background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;padding:12px;text-align:center">
+          <div style="font-size:28px;font-weight:700;color:#22c55e">${kpi.pctLed}%</div>
+          <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">LED (${kpi.ledLum})</div>
+        </div>
+
+        <!-- Card: Pendentes -->
+        <div style="background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;padding:12px;text-align:center">
+          <div style="font-size:28px;font-weight:700;color:#f59e0b">${kpi.pendente.toLocaleString('pt-BR')}</div>
+          <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">Pendentes</div>
+        </div>
+
+        <!-- Card: Potência Total -->
+        <div style="background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;padding:12px;text-align:center">
+          <div style="font-size:28px;font-weight:700;color:#06b6d4">${(kpi.potTotal/1000).toFixed(1)} MW</div>
+          <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">Potência</div>
+        </div>
+      </div>
+
+      <!-- Gráfico: Distribuição por Tipo -->
+      <div style="background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;padding:12px;margin-bottom:16px">
+        <div style="font-weight:600;margin-bottom:10px;color:var(--text-primary)">Distribuição por Tipo</div>
+        <canvas id="kpiChartTipo" style="max-height:200px"></canvas>
+      </div>
+
+      <!-- Gráfico: Top 5 Bairros -->
+      <div style="background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;padding:12px;margin-bottom:16px">
+        <div style="font-weight:600;margin-bottom:10px;color:var(--text-primary)">Top 5 Bairros (Luminárias)</div>
+        <canvas id="kpiChartBairros" style="max-height:200px"></canvas>
+      </div>
+
+      <!-- Tabela: Resumo por Tipo -->
+      <div style="background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;padding:12px;overflow-x:auto">
+        <div style="font-weight:600;margin-bottom:10px;color:var(--text-primary)">Resumo por Tipo</div>
+        <table style="width:100%;font-size:11px;border-collapse:collapse">
+          <thead><tr style="border-bottom:1px solid var(--border-color)"><th style="text-align:left;padding:6px">Tipo</th><th style="text-align:right;padding:6px">Total</th><th style="text-align:right;padding:6px">LED</th><th style="text-align:right;padding:6px">%LED</th></tr></thead>
+          <tbody>
+            ${Object.entries(kpi.byTipo).map(([tipo,d])=>`<tr style="border-bottom:1px solid #1a232e"><td style="padding:6px">${tipo}</td><td style="text-align:right;padding:6px">${d.total}</td><td style="text-align:right;padding:6px;color:#22c55e">${d.led}</td><td style="text-align:right;padding:6px">${Math.round((d.led/d.total)*100)}%</td></tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    document.getElementById('kpiContent').innerHTML=kpiHTML;
+
+    // Renderizar gráficos com Chart.js
+    setTimeout(()=>{
+      // Gráfico Tipo
+      const ctxTipo=document.getElementById('kpiChartTipo');
+      if(ctxTipo && typeof Chart!=='undefined'){
+        new Chart(ctxTipo,{
+          type:'doughnut',
+          data:{
+            labels:Object.keys(kpi.byTipo),
+            datasets:[{
+              data:Object.values(kpi.byTipo).map(d=>d.total),
+              backgroundColor:['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'],
+              borderColor:'var(--border-color)',
+              borderWidth:1
+            }]
+          },
+          options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'bottom',labels:{font:{size:11},color:'var(--text-secondary)'}}}}
+        });
+      }
+
+      // Gráfico Bairros
+      const ctxBairros=document.getElementById('kpiChartBairros');
+      if(ctxBairros && typeof Chart!=='undefined'){
+        new Chart(ctxBairros,{
+          type:'bar',
+          data:{
+            labels:kpi.topBairros.map(b=>b[0].substring(0,12)),
+            datasets:[{
+              label:'LED',
+              data:kpi.topBairros.map(b=>b[1].led),
+              backgroundColor:'#22c55e',
+              borderColor:'var(--border-color)',
+              borderWidth:1
+            },{
+              label:'Pendente',
+              data:kpi.topBairros.map(b=>b[1].total-b[1].led),
+              backgroundColor:'#f59e0b',
+              borderColor:'var(--border-color)',
+              borderWidth:1
+            }]
+          },
+          options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{labels:{font:{size:11},color:'var(--text-secondary)'}}},scales:{x:{ticks:{font:{size:10},color:'var(--text-tertiary)'}},y:{ticks:{font:{size:10},color:'var(--text-tertiary)'}}}}
+        });
+      }
+    },100);
+  });
+}
+
+document.getElementById('btnKPIDash').onclick=()=>{
+  state.kpiDashboard=!state.kpiDashboard;
+  document.getElementById('btnKPIDash').classList.toggle('on',state.kpiDashboard);
+  if(state.kpiDashboard){
+    renderKPIDashboard();
+  }else{
+    const modal=document.getElementById('kpiDashboardModal');
+    if(modal) modal.style.display='none';
+  }
+};
 
 // ---------- Fase 2: Gráficos & Dashboards (Chart.js) ----------
 async function loadTimeSeriesData(){
