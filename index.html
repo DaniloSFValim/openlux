@@ -1733,6 +1733,7 @@
       <button id="btnDens" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Grade 250 m">📊 Densidade</button>
       <button id="btnHeatmapEnergy" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Mapa de calor: consumo energético (kWh)">🔥 Heatmap Energético</button>
       <button id="btnCoverage" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Análise de cobertura luminosa e gaps">💡 Cobertura Luminosa</button>
+      <button id="btnLuxmap" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Visualizar iluminância virtual (NBR 5101)">✨ Mapa de Luxe</button>
       <button id="btnTimeline" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Filtrar por período">📅 Timeline</button>
       <button id="btnTabela" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body">📋 Tabela</button>
       <button id="btnStats" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body">📈 Indicadores</button>
@@ -1748,6 +1749,9 @@
       <button id="btnArea"
         class="px-3 py-2 rounded-lg text-sm font-medium transition-all btn-info-border"
         title="Selecionar uma área">✏️ Área</button>
+      <button id="btnRouting"
+        class="px-3 py-2 rounded-lg text-sm font-medium transition-all btn-info-border"
+        title="Otimizar rota de manutenção">🛣️ Rotas</button>
       <button id="btnNovo"
         class="px-3 py-2 rounded-lg text-sm font-medium transition-all btn-success-solid"
         style="display: none;">+ Ponto</button>
@@ -3449,22 +3453,25 @@ document.getElementById('btnCoverage').onclick=()=>{
   if(state.poligono) limparPoligono(true);
   state.coverage=!state.coverage;
   document.getElementById('detail').style.display='none';
-  if(state.coverage && (state.densidade||state.choropleth||state.heatmapEnergy)){
+  if(state.coverage && (state.densidade||state.choropleth||state.heatmapEnergy||state.luxmap)){
     state.densidade=false;
     state.choropleth=false;
     state.heatmapEnergy=false;
+    state.luxmap=false;
     document.getElementById('btnChoro').classList.remove('on');
     document.getElementById('btnDens').classList.remove('on');
     document.getElementById('btnHeatmapEnergy').classList.remove('on');
+    document.getElementById('btnLuxmap').classList.remove('on');
     if(state.choroLayer){ map.removeLayer(state.choroLayer); state.choroLayer=null; }
     if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; }
     if(state.densMunLayer){ map.removeLayer(state.densMunLayer); state.densMunLayer=null; }
     if(state.heatmapEnergyLayer){ map.removeLayer(state.heatmapEnergyLayer); state.heatmapEnergyLayer=null; }
+    if(state.luxmapLayer){ map.removeLayer(state.luxmapLayer); state.luxmapLayer=null; }
     document.getElementById('densCtl').style.display='none';
   }
   document.getElementById('btnCoverage').classList.toggle('on',state.coverage);
-  document.getElementById('btnVis').classList.toggle('on',state.coverage||state.densidade||state.choropleth||state.heatmapEnergy);
-  document.getElementById('legend').style.display=(state.coverage||state.densidade||state.choropleth||state.heatmapEnergy)?'none':'block';
+  document.getElementById('btnVis').classList.toggle('on',state.coverage||state.densidade||state.choropleth||state.heatmapEnergy||state.luxmap);
+  document.getElementById('legend').style.display=(state.coverage||state.densidade||state.choropleth||state.heatmapEnergy||state.luxmap)?'none':'block';
   if(!state.coverage){
     if(state.coverageLayer){ map.removeLayer(state.coverageLayer); state.coverageLayer=null; }
     renderMunicipioLimites();
@@ -3472,6 +3479,311 @@ document.getElementById('btnCoverage').onclick=()=>{
     renderCoverageAnalysis();
   }
 };
+
+// #3: Mapa de Luxe/Iluminância Virtual (simplificado)
+async function renderLuxMap(){
+  if(state.luxmapLayer){ map.removeLayer(state.luxmapLayer); state.luxmapLayer=null; }
+  state.layer.clearLayers();
+  if(state.choroLayer){ map.removeLayer(state.choroLayer); state.choroLayer=null; }
+  if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; }
+
+  setBusy(true);
+  try{
+    const {data,error}=await sb.rpc('ip_pontos_bbox',{p_bbox_south:-23.05,p_bbox_west:-43.25,p_bbox_north:-22.8,p_bbox_east:-42.85,p_zoom:12});
+    if(error) throw error;
+
+    if(!data||data.length===0){ toast('Sem dados de iluminação',true); return; }
+
+    // Fórmula simplificada de iluminância: E = (I × cos(θ)) / d²
+    // Onde: I=intensidade luminosa (proporcional a potência)
+    //       θ=ângulo de incidência, d=distância do alvo
+    // Para simplificar: E ≈ (P / d²) × fator_tipo
+
+    const features=data
+      .filter(d=>d.latitude&&d.longitude&&d.potencia_w)
+      .map(d=>{
+        // Fator baseado no tipo de luminária (viária=1.2, globo=0.8, etc)
+        const tipoLum=d.tipo_luminaria||'viaria';
+        const fatorTipo=tipoLum==='viaria'?1.2:(tipoLum==='globo'?0.8:1.0);
+
+        // Estimativa simplificada de iluminância (unidade relativa)
+        // Em prática: potência × fator_tipo / altura² ≈ iluminância relativa
+        const alturaEstimada=8; // metros (poste típico)
+        const luxRelativo=(d.potencia_w*fatorTipo)/(alturaEstimada*alturaEstimada);
+
+        return {
+          type:'Feature',
+          geometry:{type:'Point',coordinates:[d.longitude,d.latitude]},
+          properties:{
+            potencia:d.potencia_w,
+            tipo:tipoLum,
+            lux:Math.round(luxRelativo),
+            endereco:d.endereco||'desconhecido',
+            modernizado:d.modernizado_led?'LED':'Pendente'
+          }
+        };
+      });
+
+    const fc={type:'FeatureCollection',features};
+
+    // Normalizar para cores
+    const luxVals=features.map(f=>f.properties.lux).filter(l=>!isNaN(l));
+    const maxLux=Math.max(...luxVals);
+    const minLux=Math.min(...luxVals);
+
+    // Função para mapear lux → cor (vermelho=baixo, verde=alto)
+    const getLuxColor=(lux)=>{
+      const norm=(lux-minLux)/(maxLux-minLux);
+      if(norm<0.33) return '#ef4444'; // vermelho (baixa iluminância)
+      if(norm<0.66) return '#fbbf24'; // amarelo
+      return '#22c55e'; // verde (alta iluminância)
+    };
+
+    state.luxmapLayer=L.geoJSON(fc,{
+      pointToLayer:(f,latlng)=>{
+        const lux=f.properties.lux;
+        const cor=getLuxColor(lux);
+        const radius=Math.min(25,Math.max(5,lux/50)); // Tamanho proporcional a luxe
+
+        const c=L.circleMarker(latlng,{
+          radius:radius,
+          color:cor,weight:2,opacity:0.8,fillColor:cor,fillOpacity:0.5
+        });
+
+        c.bindPopup(`<div style="font-size:12px;min-width:200px">
+          <b>✨ Iluminância Virtual</b><br/>
+          Potência: <b>${f.properties.potencia} W</b><br/>
+          Tipo: <b>${f.properties.tipo}</b><br/>
+          Lux (relativo): <b>${lux} lux</b><br/>
+          Status: <b>${f.properties.modernizado}</b><br/>
+          Endereço: ${f.properties.endereco}<br/>
+          <span style="color:#6b7280;font-size:10.5px">
+            Cálculo simplificado (não validado por NBR 5101).
+            Usar para análise comparativa apenas.
+          </span>
+        </div>`);
+
+        return c;
+      }
+    }).addTo(map);
+
+    const hint=`✨ Mapa de Luxe · ${features.length} luminárias · Lux: ${minLux}-${maxLux} (relativo)`;
+    document.getElementById('modeHint').textContent=hint;
+    toast(`Mapa de iluminância: ${features.length} pontos analisados`);
+  }catch(e){
+    toast('Erro ao carregar mapa de luxe: '+(e.message||e),true);
+  }finally{
+    setBusy(false);
+  }
+}
+
+document.getElementById('btnLuxmap').onclick=()=>{
+  if(state.poligono) limparPoligono(true);
+  state.luxmap=!state.luxmap;
+  document.getElementById('detail').style.display='none';
+  if(state.luxmap && (state.densidade||state.choropleth||state.heatmapEnergy||state.coverage)){
+    state.densidade=false;
+    state.choropleth=false;
+    state.heatmapEnergy=false;
+    state.coverage=false;
+    document.getElementById('btnChoro').classList.remove('on');
+    document.getElementById('btnDens').classList.remove('on');
+    document.getElementById('btnHeatmapEnergy').classList.remove('on');
+    document.getElementById('btnCoverage').classList.remove('on');
+    if(state.choroLayer){ map.removeLayer(state.choroLayer); state.choroLayer=null; }
+    if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; }
+    if(state.densMunLayer){ map.removeLayer(state.densMunLayer); state.densMunLayer=null; }
+    if(state.heatmapEnergyLayer){ map.removeLayer(state.heatmapEnergyLayer); state.heatmapEnergyLayer=null; }
+    if(state.coverageLayer){ map.removeLayer(state.coverageLayer); state.coverageLayer=null; }
+    document.getElementById('densCtl').style.display='none';
+  }
+  document.getElementById('btnLuxmap').classList.toggle('on',state.luxmap);
+  document.getElementById('btnVis').classList.toggle('on',state.luxmap||state.densidade||state.choropleth||state.heatmapEnergy||state.coverage);
+  document.getElementById('legend').style.display=(state.luxmap||state.densidade||state.choropleth||state.heatmapEnergy||state.coverage)?'none':'block';
+  if(!state.luxmap){
+    if(state.luxmapLayer){ map.removeLayer(state.luxmapLayer); state.luxmapLayer=null; }
+    renderMunicipioLimites();
+  }else{
+    renderLuxMap();
+  }
+};
+
+// #4: Roteamento Otimizado para Manutenção (usando OSRM)
+async function optimizeMaintenanceRoute(waypoints){
+  if(waypoints.length<2){
+    toast('Selecione pelo menos 2 pontos para rotear',true);
+    return null;
+  }
+
+  setBusy(true);
+  try{
+    // Usar OSRM API pública (demo.project-osrm.org)
+    // Formato: /route/v1/driving/lon1,lat1;lon2,lat2;...?overview=full
+    const coords=waypoints.map(w=>`${w[1]},${w[0]}`).join(';');
+    const url=`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&steps=true&geometries=geojson`;
+
+    const resp=await fetch(url,{signal:AbortSignal.timeout(5000)});
+    if(!resp.ok) throw new Error(`OSRM ${resp.status}`);
+
+    const result=await resp.json();
+    if(!result.routes||result.routes.length===0) throw new Error('Sem rota disponível');
+
+    const route=result.routes[0];
+    const distKm=(route.distance/1000).toFixed(1);
+    const minutos=Math.round(route.duration/60);
+
+    return {
+      coordinates:route.geometry.coordinates,
+      distance:distKm,
+      duration:minutos,
+      route:route
+    };
+  }catch(e){
+    console.error('Erro OSRM:',e);
+    toast('Erro ao calcular rota (OSRM indisponível)',true);
+    return null;
+  }finally{
+    setBusy(false);
+  }
+}
+
+function renderRoutingUI(){
+  // UI modal para selecionar pontos e ver rota
+  const modal=document.getElementById('routingModal');
+  if(!modal){
+    // Criar modal se não existe
+    const m=document.createElement('div');
+    m.id='routingModal';
+    m.style.cssText='position:fixed;top:12px;right:12px;width:320px;z-index:1050;background:var(--bg-panel);border:1px solid var(--border-color);border-radius:12px;padding:16px;box-shadow:var(--shadow-lg);';
+    m.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <b style="color:var(--text-primary)">🛣️ Otimizar Rota</b>
+      <button style="background:none;border:none;color:var(--text-tertiary);cursor:pointer;font-size:18px" onclick="window._clearRouting()">✕</button>
+    </div>
+    <div id="routingInfo" style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.4">
+      Clique nos pontos que precisam manutenção no mapa (máx 25 pontos)
+    </div>
+    <div id="routingStats" style="font-size:12px;color:var(--text-primary);margin-bottom:12px;padding:8px;background:var(--bg-tertiary);border-radius:6px;display:none">
+      <div>📍 Pontos: <b id="routingCount">0</b></div>
+      <div>🛣️ Distância: <b id="routingDist">0 km</b></div>
+      <div>⏱️ Tempo: <b id="routingTime">0 min</b></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn" style="flex:1;font-size:12px" onclick="window._calculateRoute()">Calcular Rota</button>
+      <button class="btn" style="flex:1;font-size:12px" onclick="window._exportRoute()">📥 Exportar</button>
+    </div>`;
+    document.body.appendChild(m);
+  }else{
+    modal.style.display='block';
+  }
+
+  // Configurar mapa para selecionar pontos
+  const points=[];
+  const markers=[];
+
+  window._addRoutingPoint=(lat,lng,info)=>{
+    if(points.length>=25){
+      toast('Máximo 25 pontos por rota',true);
+      return;
+    }
+    points.push([lat,lng]);
+    const m=L.marker([lat,lng],{icon:L.ExtraMarkers.icon({prefix:'fa',icon:'fa-wrench',markerColor:'red'})}).addTo(map);
+    m.bindPopup(`<div style="font-size:12px"><b>${points.length}º ponto</b><br/>${info}</div>`);
+    markers.push(m);
+    document.getElementById('routingInfo').textContent=`${points.length} ponto(s) selecionado(s)`;
+  };
+
+  window._calculateRoute=async()=>{
+    if(points.length<2){
+      toast('Selecione pelo menos 2 pontos',true);
+      return;
+    }
+
+    const routeData=await optimizeMaintenanceRoute(points);
+    if(!routeData) return;
+
+    // Renderizar rota no mapa
+    if(state.routingLineLayer) map.removeLayer(state.routingLineLayer);
+    state.routingLineLayer=L.polyline(routeData.coordinates.map(c=>[c[1],c[0]]),{
+      color:'#06b6d4',weight:4,opacity:0.8,dashArray:'5,5'
+    }).addTo(map);
+
+    // Atualizar stats
+    document.getElementById('routingStats').style.display='block';
+    document.getElementById('routingCount').textContent=points.length;
+    document.getElementById('routingDist').textContent=routeData.distance+' km';
+    document.getElementById('routingTime').textContent=routeData.duration+' min';
+
+    toast(`✅ Rota otimizada: ${routeData.distance}km em ${routeData.duration}min`);
+
+    // Salvar rota em state
+    state.currentRoute={
+      points:points,
+      data:routeData,
+      markers:markers
+    };
+  };
+
+  window._exportRoute=()=>{
+    if(!state.currentRoute){
+      toast('Calcule a rota primeiro',true);
+      return;
+    }
+    const route=state.currentRoute;
+    const csv=`Ordem,Latitude,Longitude,Distância_acumulada_km,Duração_acumulada_min\n${route.points.map((p,i)=>`${i+1},${p[0]},${p[1]}`).join('\n')}`;
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=`rota-manutencao-${Date.now()}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+    toast('Rota exportada em CSV');
+  };
+
+  window._clearRouting=()=>{
+    state.routingMode=false;
+    if(state.routingLineLayer) map.removeLayer(state.routingLineLayer);
+    markers.forEach(m=>map.removeLayer(m));
+    document.getElementById('routingModal').style.display='none';
+    document.getElementById('btnRouting').classList.remove('on');
+    toast('Modo de roteamento desativado');
+  };
+}
+
+document.getElementById('btnRouting').onclick=()=>{
+  state.routingMode=!state.routingMode;
+  document.getElementById('btnRouting').classList.toggle('on',state.routingMode);
+  if(state.routingMode){
+    renderRoutingUI();
+    // Ativar seleção por clique no mapa
+    map.on('click',routingMapClick);
+    toast('🗺️ Modo de roteamento ativo — clique nos pontos que precisam manutenção');
+  }else{
+    map.off('click',routingMapClick);
+    window._clearRouting();
+  }
+};
+
+function routingMapClick(e){
+  if(!state.routingMode) return;
+  const lat=e.latlng.lat, lng=e.latlng.lng;
+  // Encontrar ponto mais próximo
+  const allData=state.layer.getLayers();
+  let closest=null, minDist=Infinity;
+  allData.forEach(layer=>{
+    if(layer._latlng){
+      const d=Math.pow(layer._latlng.lat-lat,2)+Math.pow(layer._latlng.lng-lng,2);
+      if(d<minDist){ minDist=d; closest=layer; }
+    }
+  });
+
+  if(closest && minDist<0.0001){
+    // Ponto encontrado, adicionar à rota
+    const info=closest.options.title||'Ponto de iluminação';
+    window._addRoutingPoint(closest._latlng.lat,closest._latlng.lng,info);
+  }
+}
 
 // ---------- Fase 2: Gráficos & Dashboards (Chart.js) ----------
 async function loadTimeSeriesData(){
