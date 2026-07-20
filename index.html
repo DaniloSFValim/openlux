@@ -29,10 +29,6 @@
 <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 
 <link rel="stylesheet" href="design-tokens.css"/>
-<link rel="stylesheet" href="phase2-header-redesign.css"/>
-<link rel="stylesheet" href="phase3-admin-console-redesign.css"/>
-<link rel="stylesheet" href="phase4-forms-tables-redesign.css"/>
-<link rel="stylesheet" href="phase5-polish-mobile.css"/>
 
 <style>
   html, body, #map {
@@ -2709,8 +2705,8 @@
 // Get Supabase credentials from environment or build-time injection
 // In production (Netlify): injected as window.__CONFIG__ by build process
 // In development: configure in netlify.toml or local .env
-const URL_SB = window.__CONFIG__?.supabaseUrl || 'https://qkxhwriitrqybzbkojdm.supabase.co';
-const ANON = window.__CONFIG__?.supabaseAnonKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFreGh3cmlpdHJxeWJ6YmtvamRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ0ODI5MDksImV4cCI6MjEwMDA1ODkwOX0.TFHcdPnZiO9dbIsGjuo1SIjDl8yHBbV555AcMlMzQvg';
+const URL_SB = window.__CONFIG__?.supabaseUrl || 'https://lrnmydrwzxxajylsmoih.supabase.co';
+const ANON = window.__CONFIG__?.supabaseAnonKey || 'sb_publishable_w3UmLsmcDtT81S3MDdDJjw_rEWckoVl';
 
 // Validate credentials exist (log warning if using defaults)
 if(!window.__CONFIG__) {
@@ -6608,6 +6604,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Log para debug
+  console.log('✅ HTMX dynamic filters initialized');
 });
 
 // ---------- acessibilidade ----------
