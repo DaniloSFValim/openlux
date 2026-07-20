@@ -1,0 +1,891 @@
+/* ============================================================
+   PHASE 5: POLISH & MOBILE RESPONSIVENESS - Final Refinements
+   Animations, mobile optimization, breakpoint refinement, accessibility
+   ============================================================ */
+
+/* ========== ANIMATION DEFINITIONS ========== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutLeft {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* ========== LOADING SPINNER ========== */
+
+.spinner {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--border-color-lighter);
+  border-top-color: var(--color-primary-700);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.spinner.sm {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+
+.spinner.lg {
+  width: 32px;
+  height: 32px;
+  border-width: 4px;
+}
+
+/* ========== SKELETON LOADING ========== */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-tertiary) 0%,
+    var(--bg-secondary) 50%,
+    var(--bg-tertiary) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+  border-radius: var(--radius-lg);
+}
+
+.skeleton.text {
+  height: var(--font-size-base);
+  margin-bottom: var(--space-sm);
+}
+
+.skeleton.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.skeleton.card {
+  height: 120px;
+  border-radius: var(--radius-xl);
+}
+
+/* ========== BUTTON RIPPLE EFFECT ========== */
+
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-ripple::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.btn-ripple:active::after {
+  animation: ripple 0.6s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-ripple:active::after {
+    animation: none;
+  }
+}
+
+/* ========== PAGE TRANSITION ANIMATIONS ========== */
+
+.page-enter {
+  animation: fadeIn var(--transition-base) ease-out;
+}
+
+.page-exit {
+  animation: fadeOut var(--transition-base) ease-out forwards;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.page-content {
+  animation: slideUp var(--transition-base) ease-out;
+}
+
+/* ========== MODAL ANIMATIONS - ENHANCED ========== */
+
+.modal {
+  animation: fadeIn var(--transition-base) ease-out;
+}
+
+.modal.closing {
+  animation: fadeOut var(--transition-fast) ease-in forwards;
+}
+
+.modal-content {
+  animation: slideUp var(--transition-base) ease-out;
+}
+
+.modal.closing .modal-content {
+  animation: slideDown var(--transition-fast) ease-in forwards;
+}
+
+/* ========== DROPDOWN MENU ANIMATIONS ========== */
+
+.dropdown-menu {
+  animation: slideDown var(--transition-fast) ease-out;
+  transform-origin: top center;
+}
+
+.dropdown-menu.closing {
+  animation: slideUp var(--transition-fast) ease-in forwards;
+}
+
+/* ========== SIDEBAR MOBILE ANIMATION ========== */
+
+#sidebar {
+  animation: slideInLeft var(--transition-base) ease-out;
+}
+
+#sidebar.closing {
+  animation: slideOutLeft var(--transition-fast) ease-in forwards;
+}
+
+/* ========== HOVER & FOCUS EFFECTS ========== */
+
+.btn {
+  position: relative;
+  transition: all var(--transition-fast);
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.card {
+  transition: all var(--transition-fast);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ========== ACCESSIBILITY - FOCUS MANAGEMENT ========== */
+
+:focus-visible {
+  outline: 2px solid var(--color-primary-700);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--color-primary-700);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+  :focus-visible {
+    outline: 3px solid var(--color-primary-700);
+    outline-offset: 3px;
+  }
+
+  input,
+  select,
+  textarea {
+    border-width: 2px;
+  }
+
+  .btn {
+    border-width: 2px;
+  }
+}
+
+/* ========== REDUCED MOTION SUPPORT ========== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ========== MOBILE OPTIMIZATION: 375px (Smallest phones) ========== */
+
+@media (max-width: 375px) {
+  :root {
+    --space-lg: 12px;
+    --space-xl: 16px;
+    --font-size-base: 12px;
+  }
+
+  body {
+    font-size: var(--font-size-base);
+  }
+
+  .btn {
+    min-height: 44px;
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-sm);
+  }
+
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .modal-content {
+    padding: var(--space-lg);
+    margin: var(--space-lg);
+    max-width: calc(100vw - var(--space-xl) * 2);
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  table {
+    font-size: var(--font-size-sm);
+  }
+
+  table thead th,
+  table tbody td {
+    padding: var(--space-sm);
+  }
+
+  .pagination {
+    font-size: var(--font-size-sm);
+    gap: var(--space-sm);
+  }
+
+  .pagination button {
+    min-width: 36px;
+    padding: var(--space-xs) var(--space-sm);
+  }
+}
+
+/* ========== MOBILE OPTIMIZATION: 640px (Mobile & Tablets) ========== */
+
+@media (max-width: 640px) {
+  :root {
+    --space-xl: 16px;
+    --font-size-lg: 13px;
+  }
+
+  body {
+    font-size: var(--font-size-base);
+  }
+
+  /* Ensure touch targets are 48px minimum */
+  button,
+  input[type="checkbox"],
+  input[type="radio"],
+  a.btn {
+    min-height: 48px;
+    min-width: 48px;
+  }
+
+  /* Input fields at least 48px height for touch */
+  input,
+  select,
+  textarea {
+    min-height: 48px;
+  }
+
+  /* Typography adjustments for small screens */
+  h1 {
+    font-size: var(--font-size-2xl);
+  }
+
+  h2 {
+    font-size: var(--font-size-xl);
+  }
+
+  h3 {
+    font-size: var(--font-size-lg);
+  }
+
+  /* Form layout single column */
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
+
+  .form-row.two-col,
+  .form-row.three-col {
+    grid-template-columns: 1fr;
+  }
+
+  /* Form actions stack vertically */
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
+
+  /* Table becomes scrollable container */
+  table {
+    font-size: var(--font-size-sm);
+  }
+
+  table thead th {
+    padding: var(--space-sm);
+    font-size: var(--font-size-xs);
+  }
+
+  table tbody td {
+    padding: var(--space-sm);
+  }
+
+  /* Hide verbose columns on mobile */
+  table .mobile-hide {
+    display: none;
+  }
+
+  /* Pagination mobile layout */
+  .pagination {
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .pagination-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .pagination button {
+    flex: 1;
+  }
+
+  /* Modal full-width on mobile */
+  .modal {
+    padding: var(--space-lg);
+  }
+
+  .modal-content {
+    max-width: 100%;
+    width: 100%;
+    max-height: 90vh;
+    border-radius: var(--radius-lg);
+  }
+
+  .modal-header {
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .modal-close {
+    align-self: flex-end;
+  }
+
+  .modal-footer {
+    flex-direction: column-reverse;
+  }
+
+  .modal-footer button {
+    width: 100%;
+  }
+
+  /* Sidebar mobile layout */
+  #sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 80%;
+    max-width: 320px;
+    z-index: var(--z-modal);
+    transform: translateX(-100%);
+    transition: transform var(--transition-base);
+  }
+
+  #sidebar.open {
+    transform: translateX(0);
+  }
+
+  #sidebar::after {
+    content: "";
+    position: absolute;
+    right: -100vw;
+    top: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    pointer-events: auto;
+  }
+
+  /* Collapsible sections on mobile */
+  .collapsible-section {
+    border-bottom: 1px solid var(--border-color-lighter);
+  }
+
+  .collapsible-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-md);
+    cursor: pointer;
+    user-select: none;
+    background: var(--bg-secondary);
+    transition: background var(--transition-fast);
+  }
+
+  .collapsible-header:hover {
+    background: var(--bg-tertiary);
+  }
+
+  .collapsible-header::after {
+    content: "▼";
+    display: inline-block;
+    transition: transform var(--transition-fast);
+    color: var(--text-secondary);
+  }
+
+  .collapsible-header.open::after {
+    transform: rotate(-180deg);
+  }
+
+  .collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height var(--transition-base);
+  }
+
+  .collapsible-content.open {
+    max-height: 1000px;
+  }
+
+  /* Card grid single column */
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Sticky header on mobile tables */
+  table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  /* Reduce spacing on small screens */
+  .panel {
+    margin: var(--space-lg) 0;
+    padding: var(--space-lg);
+  }
+
+  .modal-content {
+    padding: var(--space-lg);
+  }
+
+  #novoPontoForm {
+    padding: var(--space-lg);
+  }
+}
+
+/* ========== TABLET OPTIMIZATION: 768px ========== */
+
+@media (min-width: 641px) and (max-width: 1023px) {
+  .form-row.two-col {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .form-row.three-col {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Table scrollable on tablet if needed */
+  table {
+    overflow-x: auto;
+  }
+
+  /* Sidebar optional collapse on tablet */
+  #sidebar {
+    width: 250px;
+  }
+}
+
+/* ========== DESKTOP OPTIMIZATION: 1024px+ ========== */
+
+@media (min-width: 1024px) {
+  .form-row.two-col {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .form-row.three-col {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .card-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+
+  /* Hover effects only on desktop (not mobile) */
+  .btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+  }
+
+  /* Sidebar sticky on desktop */
+  #sidebar {
+    position: sticky;
+    transform: translateX(0);
+    max-width: none;
+  }
+
+  /* Table full-width on desktop */
+  table {
+    width: 100%;
+  }
+}
+
+/* ========== WIDE SCREENS: 1400px+ ========== */
+
+@media (min-width: 1400px) {
+  .form-row.three-col {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .card-grid {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  }
+
+  /* Increase spacing on wide screens */
+  :root {
+    --space-xl: 24px;
+    --space-2xl: 32px;
+  }
+
+  .panel {
+    padding: var(--space-2xl);
+  }
+
+  .modal-content {
+    padding: var(--space-2xl);
+    max-width: 800px;
+  }
+}
+
+/* ========== TOUCH DEVICE OPTIMIZATION ========== */
+
+@media (hover: none) and (pointer: coarse) {
+  /* Disable hover effects on touch devices */
+  .btn:hover {
+    transform: none;
+  }
+
+  .card:hover {
+    transform: none;
+  }
+
+  /* Larger touch targets */
+  button,
+  a.btn,
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Increase padding for touch friendliness */
+  .btn {
+    padding: var(--space-md) var(--space-lg);
+  }
+
+  /* Disable active state transform on touch */
+  .btn:active {
+    transform: none;
+  }
+}
+
+/* ========== LANDSCAPE ORIENTATION ========== */
+
+@media (max-width: 920px) and (orientation: landscape) {
+  /* Reduce vertical spacing in landscape mode */
+  :root {
+    --space-xl: 12px;
+    --space-lg: 10px;
+  }
+
+  .panel {
+    padding: var(--space-lg);
+  }
+
+  input,
+  select,
+  textarea {
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  button {
+    padding: var(--space-xs) var(--space-md);
+  }
+
+  /* Stack navigation sidebar horizontally in landscape */
+  #sidebar {
+    width: 100%;
+    max-height: 60px;
+    transform: none;
+    flex-direction: row;
+    overflow-x: auto;
+  }
+}
+
+/* ========== DARK MODE POLISH ========== */
+
+@media (prefers-color-scheme: dark) {
+  .modal {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+  }
+
+  .dropdown-menu {
+    box-shadow: var(--shadow-xl);
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    background: var(--bg-secondary);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+  }
+}
+
+/* ========== LIGHT MODE POLISH ========== */
+
+@media (prefers-color-scheme: light) {
+  .modal {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(6px);
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    background: #ffffff;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+  }
+
+  .btn-primary {
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+  }
+}
+
+/* ========== PRINT OPTIMIZATION ========== */
+
+@media print {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .modal,
+  .modal-backdrop,
+  .dropdown-menu,
+  .navigation {
+    display: none;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+
+  a {
+    color: blue;
+    text-decoration: underline;
+  }
+
+  table {
+    page-break-inside: avoid;
+    border-collapse: collapse;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+}
+
+/* ========== PERFORMANCE: GPU ACCELERATION ========== */
+
+.modal,
+.modal-content,
+#sidebar,
+.dropdown-menu {
+  will-change: transform;
+}
+
+.spinner,
+.btn:hover,
+.card:hover {
+  transform: translateZ(0);
+}
+
+/* ========== UTILITY CLASSES ========== */
+
+.no-scroll {
+  overflow: hidden;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.opacity-50 {
+  opacity: 0.5;
+}
+
+.opacity-75 {
+  opacity: 0.75;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.cursor-not-allowed {
+  cursor: not-allowed;
+}
+
+.user-select-none {
+  user-select: none;
+}
+
+.bg-gradient {
+  background: linear-gradient(135deg, var(--color-primary-700), var(--color-primary-600));
+}
