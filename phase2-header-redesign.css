@@ -1,0 +1,522 @@
+/* ============================================================
+   PHASE 2: HEADER REDESIGN - Modern Responsive Navbar
+   Modernizar top bar com responsividade, badges, melhor spacing
+   ============================================================ */
+
+/* ========== SIDEBAR HEADER (Mobile-first) ========== */
+
+/* Logo area - responsive layout */
+.sb-brand {
+  padding: var(--space-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  border-bottom: 1px solid var(--border-color-lighter);
+  flex-wrap: wrap;
+  min-height: auto;
+}
+
+#cfgLogo {
+  height: 32px;
+  width: auto;
+  max-width: 100%;
+  border-radius: var(--radius-lg);
+}
+
+.sb-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  line-height: var(--line-height-tight);
+}
+
+.sb-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+  line-height: var(--line-height-normal);
+}
+
+/* Loading spinner */
+.sb-loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ========== KPI BAR - Modern style ========== */
+
+.sb-kpi {
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  border-bottom: 1px solid var(--border-color-lighter);
+}
+
+.sb-kpi-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.sb-kpi-bar > div {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-success) 0%, var(--color-warning) 50%, var(--color-error) 100%);
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease-out;
+}
+
+.sb-kpi {
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+}
+
+/* ========== SEARCH - Enhanced styles ========== */
+
+.sb-search {
+  padding: var(--space-md);
+  position: relative;
+}
+
+#sbSearch {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-base);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-lg);
+  color: var(--input-text);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+#sbSearch:focus {
+  outline: none;
+  border-color: var(--input-border-focus);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+#sbSearch::placeholder {
+  color: var(--input-placeholder);
+}
+
+#sbSearchResults {
+  position: absolute;
+  top: 100%;
+  left: var(--space-md);
+  right: var(--space-md);
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  margin-top: var(--space-sm);
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: var(--z-dropdown);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ========== SECTION HEADERS - Expandable sections ========== */
+
+.sb-section {
+  border-bottom: 1px solid var(--border-color-lighter);
+}
+
+.sb-section-header {
+  width: 100%;
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  text-align: left;
+}
+
+.sb-section-header:hover {
+  background: var(--bg-hover);
+}
+
+.sb-section-header:focus-visible {
+  outline: 2px solid var(--color-primary-600);
+  outline-offset: -2px;
+}
+
+.sb-chevron {
+  display: inline-block;
+  transition: transform var(--transition-normal);
+  font-size: var(--font-size-lg);
+}
+
+.sb-section-header.sb-open .sb-chevron {
+  transform: rotate(180deg);
+}
+
+/* ========== SECTION BODY ========== */
+
+.sb-section-body {
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  background: var(--bg-tertiary);
+}
+
+/* Checkbox rows in filters */
+.sb-section-body > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.form-label-inline {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: var(--space-xs);
+}
+
+.input-default {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-base);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-lg);
+  color: var(--input-text);
+  transition: border-color var(--transition-fast);
+}
+
+.input-default:focus {
+  outline: none;
+  border-color: var(--input-border-focus);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+/* ========== BUTTONS - Unified styling ========== */
+
+.sb-section-body .btn {
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-base);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color-light);
+  background: var(--bg-chip);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+  font-weight: var(--font-weight-medium);
+}
+
+.sb-section-body .btn:hover {
+  background: var(--bg-secondary);
+  border-color: var(--color-primary-700);
+}
+
+.sb-section-body .btn:focus-visible {
+  outline: 2px solid var(--color-primary-600);
+  outline-offset: -2px;
+}
+
+/* Action buttons - specific styles */
+#btnArea, #btnRouting {
+  background: rgba(6, 182, 212, 0.1);
+  border-color: var(--color-info);
+  color: var(--color-info);
+}
+
+#btnArea:hover, #btnRouting:hover {
+  background: rgba(6, 182, 212, 0.2);
+}
+
+#btnNovo {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: var(--color-success);
+  color: var(--color-success);
+  font-weight: var(--font-weight-semibold);
+}
+
+#btnNovo:hover {
+  background: rgba(16, 185, 129, 0.3);
+}
+
+#btnAdminConsole {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+#btnAdminConsole:hover {
+  background: rgba(239, 68, 68, 0.25);
+}
+
+/* ========== BADGE - Filter active count ========== */
+
+.btn-badge {
+  display: inline-block;
+  margin-left: var(--space-xs);
+  padding: 2px 6px;
+  background: var(--color-primary-600);
+  color: #fff;
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+  min-width: 18px;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* ========== PRESETS ROW - Horizontal buttons ========== */
+
+.sb-presets-row {
+  display: grid;
+  grid-template-columns: 1fr 40px 100px;
+  gap: var(--space-sm);
+}
+
+/* ========== ACTIONS SECTION ========== */
+
+.sb-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* ========== FOOTER - Theme + Login ========== */
+
+.sb-footer {
+  padding: var(--space-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  border-top: 1px solid var(--border-color-lighter);
+  background: var(--bg-secondary);
+}
+
+.sb-footer button {
+  flex: 1;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: 1px solid var(--border-color-light);
+}
+
+#themeToggle {
+  background: var(--bg-chip);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color-light);
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#themeToggle:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--color-primary-700);
+}
+
+#themeToggle:focus-visible {
+  outline: 2px solid var(--color-primary-600);
+  outline-offset: 2px;
+}
+
+#btnLogin {
+  background: var(--color-primary-700);
+  border-color: var(--color-primary-700);
+  color: #fff;
+  flex: 2;
+}
+
+#btnLogin:hover {
+  background: var(--color-primary-600);
+  border-color: var(--color-primary-600);
+}
+
+#btnLogin:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+#btnLogin:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ========== SIDEBAR TOGGLE - Mobile hamburger ========== */
+
+#sidebarToggle {
+  position: absolute;
+  top: var(--space-lg);
+  left: var(--space-lg);
+  z-index: 999;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-chip);
+  border: 1px solid var(--border-color-light);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  font-size: var(--font-size-2xl);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+#sidebarToggle:hover {
+  border-color: var(--color-primary-700);
+  background: var(--bg-secondary);
+}
+
+#sidebarToggle:focus-visible {
+  outline: 2px solid var(--color-primary-600);
+  outline-offset: 2px;
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+
+/* Tablet: improve spacing */
+@media (min-width: 768px) {
+  .sb-brand {
+    padding: var(--space-xl);
+  }
+
+  .sb-section-header {
+    padding: var(--space-md) var(--space-xl);
+  }
+
+  .sb-section-body {
+    padding: var(--space-md) var(--space-xl);
+  }
+
+  .sb-footer {
+    padding: var(--space-xl);
+  }
+
+  .sb-search {
+    padding: var(--space-md) var(--space-xl);
+  }
+
+  #sidebarToggle {
+    display: none;
+  }
+}
+
+/* Mobile: hamburger menu + responsive layout */
+@media (max-width: 640px) {
+  #sidebarToggle {
+    display: flex;
+  }
+
+  aside#sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: min(100vw, 320px);
+    z-index: 998;
+    transform: translateX(-100%);
+    transition: transform var(--transition-normal);
+    overflow-y: auto;
+  }
+
+  aside#sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sb-brand {
+    padding: var(--space-lg);
+  }
+
+  .sb-section-header {
+    padding: var(--space-md) var(--space-lg);
+    font-size: var(--font-size-base);
+  }
+
+  .sb-section-body {
+    padding: var(--space-md) var(--space-lg);
+    gap: var(--space-xs);
+  }
+
+  .sb-footer {
+    padding: var(--space-lg);
+    flex-direction: column;
+  }
+
+  #btnLogin {
+    width: 100%;
+  }
+
+  /* Responsive typography */
+  :root {
+    --font-size-2xl: 16px;
+    --font-size-xl: 14px;
+  }
+
+  .sb-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .sb-subtitle {
+    font-size: 11px;
+  }
+}
+
+/* Ultra-wide: optimize for large screens */
+@media (min-width: 1400px) {
+  .sb-brand {
+    padding: var(--space-2xl);
+  }
+
+  .sb-section-header {
+    padding: var(--space-lg) var(--space-2xl);
+  }
+
+  .sb-section-body {
+    padding: var(--space-lg) var(--space-2xl);
+  }
+}
+
+/* ========== ACCESSIBILITY ========== */
+
+/* Keyboard focus visible (WCAG AAA) */
+button:focus-visible {
+  outline: 2px solid var(--color-primary-600);
+  outline-offset: 2px;
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .sb-chevron,
+  .sb-section-header,
+  button,
+  input,
+  select {
+    transition: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+  .sb-section-header {
+    font-weight: var(--font-weight-bold);
+  }
+
+  button:focus-visible {
+    outline-width: 3px;
+  }
+}

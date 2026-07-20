@@ -5,7 +5,7 @@
 # superfície de ataque. Ver auditoria de 2026-07-09, item C4.
 [build]
   publish = "dist"
-  command = "mkdir -p dist && cp index.html design-tokens.css _headers dist/ 2>/dev/null || cp index.html design-tokens.css dist/"
+  command = "mkdir -p dist && cp index.html design-tokens.css phase2-header-redesign.css phase3-admin-console-redesign.css phase4-forms-tables-redesign.css phase5-polish-mobile.css _headers dist/ 2>/dev/null || cp index.html design-tokens.css phase2-header-redesign.css phase3-admin-console-redesign.css phase4-forms-tables-redesign.css phase5-polish-mobile.css dist/"
 
 [[headers]]
   for = "/*"
