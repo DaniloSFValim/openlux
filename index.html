@@ -3085,18 +3085,32 @@ map.on('mouseup', () => {
 });
 
 // ---------- Novo ponto via mapa (click) ----------
-map.on('click', function(e){
+map.on('click', async function(e){
   if(state.drawing){ _addVertice(e.latlng); return; } // modo desenho de área
   if(!state.user || !podeEditar()) return;
-  // Não abrir novo painel se já existe um aberto
-  if(state.painelNovoPontoAberto) return;
   if(map.getZoom() < 18){ toast('Zoom mínimo necessário: 18', true); return; }
   const lat = e.latlng.lat, lng = e.latlng.lng;
   if(!dentroDaCidade(lat, lng)){
     toast('Clique dentro dos limites de ' + CITY.nome, true);
     return;
   }
-  state.painelNovoPontoAberto = true;
+
+  // Verificar se já existe ativo próximo (raio ~50m)
+  const raio = 0.0005; // ~50 metros em graus
+  const bbox_s = lat - raio, bbox_n = lat + raio, bbox_w = lng - raio, bbox_e = lng + raio;
+  const ativosProximos = await rpc('ip_pontos_bbox', { p_bbox_south: bbox_s, p_bbox_west: bbox_w, p_bbox_north: bbox_n, p_bbox_east: bbox_e, p_zoom: 20 });
+
+  if(ativosProximos && ativosProximos.length > 0) {
+    // Já existe ativo próximo, apenas aviso
+    toast(`⚠️ Há ${ativosProximos.length} ativo(s) próximo(s) neste ponto`, false);
+    return;
+  }
+
+  // Se não há ativo próximo, abrir formulário diretamente
+  _abrirNovoAtivoFormulario(lat, lng);
+});
+
+async function _abrirNovoAtivoFormulario(lat, lng){
   const d = document.getElementById('detail'); d.style.display = 'block';
   const ativoOpts = TIPO_ATIVO.map(([v,l]) => '<option value="' + v + '">' + l + '</option>').join('');
   const tipoLumOpts = TIPO_LUM.map(t => '<option>' + t + '</option>').join('');
@@ -3159,7 +3173,7 @@ map.on('click', function(e){
     toast('Cadastrado: ' + (data || 'ok')); state.painelNovoPontoAberto=false; d.style.display = 'none'; state.choroData = null; state.densData = null; refresh(); loadStatsChips();
     map.setView([lat2, lng2], Math.max(map.getZoom(), 17));
   };
-});
+}
 
 // ---------- Coroplético ----------
 async function renderChoropleth(){
@@ -5174,6 +5188,8 @@ async function loadAdminModelos(){
   state.modelosCache = data||[];
   body.innerHTML=state.modelosCache.map(m=>`
     <tr>
+      <td style="display:flex;align-items:center;gap:8px">
+        ${m.foto_url?`<img src="${esc(m.foto_url)}" style="width:40px;height:40px;border-radius:4px;object-fit:cover;border:1px solid #374151" alt="${esc(m.modelo)}" title="Foto do modelo"/>`:''}</td>
       <td>${esc(m.fabricante)}</td>
       <td>${esc(m.modelo)}${m.descricao?`<div style="color:#6b7280;font-size:10.5px">${esc(m.descricao)}</div>`:''}</td>
       <td class="text-right">${m.potencia_w} W</td>
@@ -5186,7 +5202,7 @@ async function loadAdminModelos(){
         <button class="btn" style="padding:2px 8px;color:#f87171;font-size:11px" onclick="window._delModelo('${m.id}')">🗑️ remover</button>
       </td>
     </tr>
-  `).join('') || '<tr><td colspan="8" style="text-align:center;color:#6b7280;padding:14px">Nenhum modelo cadastrado ainda</td></tr>';
+  `).join('') || '<tr><td colspan="9" style="text-align:center;color:#6b7280;padding:14px">Nenhum modelo cadastrado ainda</td></tr>';
 }
 window._editarModelo = (id)=>{
   const modelo = (state.modelosCache || []).find(m => m.id === id);
