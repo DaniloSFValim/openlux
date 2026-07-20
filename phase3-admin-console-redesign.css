@@ -1,0 +1,577 @@
+/* ============================================================
+   PHASE 3: ADMIN CONSOLE REDESIGN - Dashboard Profissional
+   Transformar interface textual em dashboard moderno com cards
+   ============================================================ */
+
+/* ========== ADMIN CONSOLE CONTAINER ========== */
+
+#adminConsole {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+#adminConsole header {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  padding: var(--space-xl) var(--space-lg);
+}
+
+#adminConsole header h2 {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+#adminConsole header p {
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+  margin: var(--space-sm) 0 0 0;
+}
+
+#acVoltar {
+  background: var(--bg-chip);
+  border: 1px solid var(--border-color-light);
+  color: var(--text-primary);
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+#acVoltar:hover {
+  border-color: var(--color-primary-700);
+  background: var(--bg-secondary);
+}
+
+#acVoltar:focus-visible {
+  outline: 2px solid var(--color-primary-600);
+  outline-offset: 2px;
+}
+
+/* ========== SIDEBAR NAVIGATION ========== */
+
+nav[aria-label="Seções da administração"] {
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  min-width: 200px;
+  max-width: 250px;
+  overflow-y: auto;
+}
+
+.acnav {
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-lg);
+  border: none;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+  color: var(--text-secondary);
+  background: transparent;
+}
+
+.acnav:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.acnav:focus-visible {
+  outline: 2px solid var(--color-primary-600);
+  outline-offset: -2px;
+}
+
+/* Active state handled by Alpine.js */
+.acnav[style*="background: var(--color-primary-600)"] {
+  color: #fff;
+  font-weight: var(--font-weight-bold);
+}
+
+/* ========== CONTENT AREA ========== */
+
+#adminConsole > div.flex-1 {
+  background: var(--bg-primary);
+  overflow-y: auto;
+}
+
+.acsec {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========== KPI CARDS GRID ========== */
+
+.grid.grid-cols-1 {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+@media (min-width: 768px) {
+  .md\:grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .lg\:grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.panel-secondary {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+}
+
+/* KPI Card Styles */
+#sec-visao > div:first-of-type > div {
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+#sec-visao > div:first-of-type > div:hover {
+  border-color: var(--border-color-light);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+#sec-visao > div:first-of-type div p:first-child {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#sec-visao > div:first-of-type div p:last-child {
+  font-size: 32px;
+  font-weight: var(--font-weight-bold);
+  margin: 0;
+}
+
+/* ========== FORM FIELDS ========== */
+
+label[class*="form-label"] {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-tertiary);
+  display: block;
+  margin-bottom: var(--space-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="color"],
+select,
+textarea {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-base);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-lg);
+  color: var(--input-text);
+  font-family: var(--font-family-base);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="color"]:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--input-border-focus);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder,
+textarea::placeholder {
+  color: var(--input-placeholder);
+}
+
+/* ========== ACCORDIONS ========== */
+
+.accordion {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: var(--space-lg);
+}
+
+.accordion-header {
+  width: 100%;
+  padding: var(--space-lg);
+  background: var(--bg-panel);
+  border: none;
+  border-bottom: 1px solid var(--border-color-lighter);
+  cursor: pointer;
+  text-align: left;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all var(--transition-fast);
+}
+
+.accordion-header:hover {
+  background: var(--bg-hover);
+}
+
+.accordion-header:focus-visible {
+  outline: 2px solid var(--color-primary-600);
+  outline-offset: -2px;
+}
+
+.accordion-header::after {
+  content: '▾';
+  display: inline-block;
+  transition: transform var(--transition-normal);
+  font-size: var(--font-size-lg);
+}
+
+.accordion-header.open::after {
+  transform: rotate(180deg);
+}
+
+.accordion-content {
+  padding: var(--space-lg);
+  background: var(--bg-tertiary);
+  display: none;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height var(--transition-normal);
+}
+
+.accordion-header.open + .accordion-content {
+  display: block;
+  max-height: 2000px;
+}
+
+/* ========== TABLES ========== */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-base);
+  background: var(--bg-panel);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+table thead {
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+table thead th {
+  padding: var(--space-md) var(--space-lg);
+  text-align: left;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+table tbody tr {
+  border-bottom: 1px solid var(--border-color-lighter);
+  transition: background-color var(--transition-fast);
+}
+
+table tbody tr:hover {
+  background: var(--bg-hover);
+}
+
+table tbody tr:last-child {
+  border-bottom: none;
+}
+
+table tbody td {
+  padding: var(--space-md) var(--space-lg);
+  color: var(--text-secondary);
+}
+
+table tbody tr:nth-child(even) {
+  background: rgba(59, 130, 246, 0.02);
+}
+
+/* ========== USER CARDS (Card-based layout) ========== */
+
+#sec-usuarios .user-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-lg);
+  transition: all var(--transition-fast);
+}
+
+#sec-usuarios .user-card:hover {
+  border-color: var(--border-color-light);
+  box-shadow: var(--shadow-md);
+}
+
+#sec-usuarios .user-card-info {
+  flex: 1;
+}
+
+#sec-usuarios .user-card-email {
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+  margin-top: var(--space-xs);
+}
+
+#sec-usuarios .user-card-role {
+  display: inline-block;
+  margin-top: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
+  background: rgba(37, 99, 235, 0.2);
+  color: var(--color-primary-300);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ========== MODEL CARDS (Card grid) ========== */
+
+#sec-modelos .model-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-lg);
+  margin-top: var(--space-lg);
+}
+
+#sec-modelos .model-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  transition: all var(--transition-fast);
+}
+
+#sec-modelos .model-card:hover {
+  border-color: var(--border-color-light);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+}
+
+#sec-modelos .model-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: var(--space-md);
+}
+
+#sec-modelos .model-card-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+#sec-modelos .model-card-brand {
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+  margin: var(--space-xs) 0 0 0;
+}
+
+#sec-modelos .model-card-specs {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
+#sec-modelos .model-card-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: auto;
+}
+
+#sec-modelos .model-card-actions button {
+  flex: 1;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color-light);
+  background: var(--bg-chip);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+#sec-modelos .model-card-actions button:hover {
+  border-color: var(--color-primary-700);
+  background: var(--bg-secondary);
+}
+
+/* ========== APPEARANCE SECTION - Live Preview ========== */
+
+#sec-aparencia .preview-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: var(--space-xl);
+  margin-top: var(--space-lg);
+}
+
+#sec-aparencia .preview-box {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+#sec-aparencia .preview-logo {
+  width: 100%;
+  max-width: 200px;
+  margin-bottom: var(--space-lg);
+}
+
+#sec-aparencia .preview-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  text-align: center;
+  margin: 0 0 var(--space-md) 0;
+}
+
+#sec-aparencia .preview-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+  text-align: center;
+  margin: 0;
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+
+@media (max-width: 1024px) {
+  #adminConsole > div.flex-1 {
+    flex-direction: column;
+  }
+
+  nav[aria-label="Seções da administração"] {
+    flex-direction: row;
+    max-width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    overflow-x: auto;
+  }
+
+  .acnav {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  #sec-aparencia .preview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #sec-modelos .model-card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  #adminConsole header {
+    padding: var(--space-lg) var(--space-md);
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  #adminConsole header h2 {
+    font-size: var(--font-size-2xl);
+  }
+
+  nav[aria-label="Seções da administração"] {
+    gap: var(--space-xs);
+  }
+
+  .acnav {
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-sm);
+  }
+
+  #sec-visao > div:first-of-type {
+    grid-template-columns: 1fr;
+  }
+
+  #sec-usuarios .user-card {
+    flex-direction: column;
+    align-items: start;
+  }
+
+  #sec-modelos .model-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ========== ACCESSIBILITY ========== */
+
+@media (prefers-reduced-motion: reduce) {
+  .acsec,
+  button,
+  .accordion-header::after,
+  table tbody tr {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .acnav {
+    font-weight: var(--font-weight-bold);
+  }
+
+  button:focus-visible {
+    outline-width: 3px;
+  }
+}
