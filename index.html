@@ -16,6 +16,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<!-- Leaflet.heat para heatmaps de densidade energética -->
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<!-- Leaflet.ExtraMarkers para ícones customizados -->
+<script src="https://unpkg.com/leaflet-extra-markers@1.2.1/dist/js/leaflet.extra-markers.min.js"></script>
+<link href="https://unpkg.com/leaflet-extra-markers@1.2.1/dist/css/leaflet.extra-markers.min.css" rel="stylesheet"/>
 <script defer data-domain="iluminacao-niteroi.netlify.app" src="https://plausible.io/js/script.js"></script>
 
 <!-- POC: Tailwind CSS + Alpine.js + HTMX -->
@@ -1726,9 +1731,13 @@
     <div class="sb-section-body" id="visPop" style="display: none;">
       <button id="btnChoro" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Colorir bairros por % LED">🎨 Coroplético</button>
       <button id="btnDens" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Grade 250 m">📊 Densidade</button>
+      <button id="btnHeatmapEnergy" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Mapa de calor: consumo energético (kWh)">🔥 Heatmap Energético</button>
+      <button id="btnCoverage" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Análise de cobertura luminosa e gaps">💡 Cobertura Luminosa</button>
+      <button id="btnLuxmap" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Visualizar iluminância virtual (NBR 5101)">✨ Mapa de Luxe</button>
       <button id="btnTimeline" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Filtrar por período">📅 Timeline</button>
       <button id="btnTabela" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body">📋 Tabela</button>
       <button id="btnStats" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body">📈 Indicadores</button>
+      <button id="btnKPIDash" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Dashboard KPI em tempo real">📊 Dashboard KPI</button>
       <button id="btnAdvancedFilters" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" title="Filtros avançados">🎯 Avançados</button>
       <button id="btnCharts" class="px-3 py-2 text-left text-sm rounded-lg transition-colors body" onclick="window._showCharts()">📈 Gráficos</button>
     </div>
@@ -1741,6 +1750,9 @@
       <button id="btnArea"
         class="px-3 py-2 rounded-lg text-sm font-medium transition-all btn-info-border"
         title="Selecionar uma área">✏️ Área</button>
+      <button id="btnRouting"
+        class="px-3 py-2 rounded-lg text-sm font-medium transition-all btn-info-border"
+        title="Otimizar rota de manutenção">🛣️ Rotas</button>
       <button id="btnNovo"
         class="px-3 py-2 rounded-lg text-sm font-medium transition-all btn-success-solid"
         style="display: none;">+ Ponto</button>
@@ -3291,6 +3303,679 @@ document.getElementById('btnDens').onclick = ()=>{
     renderMunicipioLimites();
   }
   refresh();
+};
+
+// ---------- MELHORIAS GEOESPACIAIS ----------
+// #1: Heatmap de Consumo Energético
+async function renderHeatmapEnergy(){
+  if(state.heatmapEnergyLayer){ map.removeLayer(state.heatmapEnergyLayer); state.heatmapEnergyLayer=null; }
+  state.layer.clearLayers();
+  if(state.choroLayer){ map.removeLayer(state.choroLayer); state.choroLayer=null; }
+  if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; }
+
+  setBusy(true);
+  try{
+    const {data,error}=await sb.rpc('ip_pontos_bbox',{p_bbox_south:-23.05,p_bbox_west:-43.25,p_bbox_north:-22.8,p_bbox_east:-42.85,p_zoom:12});
+    if(error) throw error;
+
+    if(!data||data.length===0){ toast('Sem dados de iluminação para análise',true); return; }
+
+    // Preparar dados para heatmap: array de [lat, lng, intensidade]
+    // Intensidade = potência normalizada (0-1)
+    const maxPot=Math.max(...data.map(d=>d.potencia_w||0).filter(p=>p>0));
+    const heatData=data
+      .filter(d=>d.latitude&&d.longitude&&d.potencia_w)
+      .map(d=>[d.latitude,d.longitude,(d.potencia_w||0)/maxPot]);
+
+    if(heatData.length===0){ toast('Sem dados de potência para análise',true); return; }
+
+    // Criar heatmap com Leaflet.heat
+    state.heatmapEnergyLayer=L.heatLayer(heatData,{
+      radius:30,
+      blur:20,
+      max:1.0,
+      gradient:{0.0:'#0b0f14',0.25:'#1e40af',0.5:'#06b6d4',0.75:'#fbbf24',1.0:'#dc2626'}
+    }).addTo(map);
+
+    document.getElementById('modeHint').textContent='🔥 Heatmap de consumo energético · Intensidade = Potência(W)';
+  }catch(e){
+    toast('Erro ao carregar heatmap energético: '+(e.message||e),true);
+  }finally{
+    setBusy(false);
+  }
+}
+
+// #2: Análise de Cobertura Luminosa (detectar gaps)
+async function renderCoverageAnalysis(){
+  if(state.coverageLayer){ map.removeLayer(state.coverageLayer); state.coverageLayer=null; }
+  state.layer.clearLayers();
+  if(state.choroLayer){ map.removeLayer(state.choroLayer); state.choroLayer=null; }
+  if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; }
+
+  setBusy(true);
+  try{
+    const {data,error}=await sb.rpc('ip_pontos_bbox',{p_bbox_south:-23.05,p_bbox_west:-43.25,p_bbox_north:-22.8,p_bbox_east:-42.85,p_zoom:12});
+    if(error) throw error;
+
+    if(!data||data.length===0){ toast('Sem dados de iluminação',true); return; }
+
+    // Ordenar por rua/endereço para detectar gaps
+    const ativos=data
+      .filter(d=>d.latitude&&d.longitude&&d.endereco)
+      .sort((a,b)=>a.endereco.localeCompare(b.endereco));
+
+    if(ativos.length===0){ toast('Sem dados de endereço para análise',true); return; }
+
+    let gaps=[], gapCount=0;
+    const MIN_DIST=30; // meters - distância mínima entre luminárias (norma ABNT ~30m)
+
+    // Agrupar por endereço e detectar gaps
+    const byAddr={};
+    ativos.forEach(a=>{
+      if(!byAddr[a.endereco]) byAddr[a.endereco]=[];
+      byAddr[a.endereco].push(a);
+    });
+
+    Object.entries(byAddr).forEach(([addr,pts])=>{
+      pts.sort((a,b)=>(a.latitude+a.longitude)-(b.latitude+b.longitude));
+      for(let i=0;i<pts.length-1;i++){
+        const dist=Math.sqrt(Math.pow(pts[i+1].latitude-pts[i].latitude,2)+Math.pow(pts[i+1].longitude-pts[i].longitude,2))*111000; // to meters
+        if(dist>MIN_DIST){
+          gapCount++;
+          // Ponto médio entre dois ativos = possível gap
+          const midLat=(pts[i].latitude+pts[i+1].latitude)/2;
+          const midLng=(pts[i].longitude+pts[i+1].longitude)/2;
+          gaps.push({lat:midLat,lng:midLng,dist:Math.round(dist),addr:addr});
+        }
+      }
+    });
+
+    // Renderizar círculos nos gaps
+    const featureCollection={type:'FeatureCollection',features:gaps.map(g=>({
+      type:'Feature',
+      geometry:{type:'Point',coordinates:[g.lng,g.lat]},
+      properties:g
+    }))};
+
+    state.coverageLayer=L.geoJSON(featureCollection,{
+      pointToLayer:(f,latlng)=>{
+        const c=L.circleMarker(latlng,{
+          radius:12,radius:12,
+          color:'#ef4444',weight:2,opacity:0.9,fillColor:'#fca5a5',fillOpacity:0.3
+        });
+        c.bindPopup(`<div style="font-size:12px">
+          <b>⚠️ Gap de iluminação</b><br/>
+          Distância: <b>${f.properties.dist}m</b> (limite: 30m)<br/>
+          Rua: ${f.properties.addr}
+        </div>`);
+        return c;
+      }
+    }).addTo(map);
+
+    document.getElementById('modeHint').textContent=`💡 Cobertura Luminosa · ${gapCount} gap(s) detectados (>30m)`;
+    toast(`Análise: ${gapCount} gap(s) de iluminação detectados`);
+  }catch(e){
+    toast('Erro ao carregar análise de cobertura: '+(e.message||e),true);
+  }finally{
+    setBusy(false);
+  }
+}
+
+// Event listeners para os botões
+document.getElementById('btnHeatmapEnergy').onclick=()=>{
+  if(state.poligono) limparPoligono(true);
+  state.heatmapEnergy=!state.heatmapEnergy;
+  document.getElementById('detail').style.display='none';
+  if(state.heatmapEnergy && (state.densidade||state.choropleth||state.coverage)){
+    state.densidade=false;
+    state.choropleth=false;
+    state.coverage=false;
+    document.getElementById('btnChoro').classList.remove('on');
+    document.getElementById('btnDens').classList.remove('on');
+    document.getElementById('btnCoverage').classList.remove('on');
+    if(state.choroLayer){ map.removeLayer(state.choroLayer); state.choroLayer=null; }
+    if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; }
+    if(state.densMunLayer){ map.removeLayer(state.densMunLayer); state.densMunLayer=null; }
+    if(state.coverageLayer){ map.removeLayer(state.coverageLayer); state.coverageLayer=null; }
+    document.getElementById('densCtl').style.display='none';
+  }
+  document.getElementById('btnHeatmapEnergy').classList.toggle('on',state.heatmapEnergy);
+  document.getElementById('btnVis').classList.toggle('on',state.heatmapEnergy||state.densidade||state.choropleth||state.coverage);
+  document.getElementById('legend').style.display=(state.heatmapEnergy||state.densidade||state.choropleth||state.coverage)?'none':'block';
+  if(!state.heatmapEnergy){
+    if(state.heatmapEnergyLayer){ map.removeLayer(state.heatmapEnergyLayer); state.heatmapEnergyLayer=null; }
+    renderMunicipioLimites();
+  }else{
+    renderHeatmapEnergy();
+  }
+};
+
+document.getElementById('btnCoverage').onclick=()=>{
+  if(state.poligono) limparPoligono(true);
+  state.coverage=!state.coverage;
+  document.getElementById('detail').style.display='none';
+  if(state.coverage && (state.densidade||state.choropleth||state.heatmapEnergy||state.luxmap)){
+    state.densidade=false;
+    state.choropleth=false;
+    state.heatmapEnergy=false;
+    state.luxmap=false;
+    document.getElementById('btnChoro').classList.remove('on');
+    document.getElementById('btnDens').classList.remove('on');
+    document.getElementById('btnHeatmapEnergy').classList.remove('on');
+    document.getElementById('btnLuxmap').classList.remove('on');
+    if(state.choroLayer){ map.removeLayer(state.choroLayer); state.choroLayer=null; }
+    if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; }
+    if(state.densMunLayer){ map.removeLayer(state.densMunLayer); state.densMunLayer=null; }
+    if(state.heatmapEnergyLayer){ map.removeLayer(state.heatmapEnergyLayer); state.heatmapEnergyLayer=null; }
+    if(state.luxmapLayer){ map.removeLayer(state.luxmapLayer); state.luxmapLayer=null; }
+    document.getElementById('densCtl').style.display='none';
+  }
+  document.getElementById('btnCoverage').classList.toggle('on',state.coverage);
+  document.getElementById('btnVis').classList.toggle('on',state.coverage||state.densidade||state.choropleth||state.heatmapEnergy||state.luxmap);
+  document.getElementById('legend').style.display=(state.coverage||state.densidade||state.choropleth||state.heatmapEnergy||state.luxmap)?'none':'block';
+  if(!state.coverage){
+    if(state.coverageLayer){ map.removeLayer(state.coverageLayer); state.coverageLayer=null; }
+    renderMunicipioLimites();
+  }else{
+    renderCoverageAnalysis();
+  }
+};
+
+// #3: Mapa de Luxe/Iluminância Virtual (simplificado)
+async function renderLuxMap(){
+  if(state.luxmapLayer){ map.removeLayer(state.luxmapLayer); state.luxmapLayer=null; }
+  state.layer.clearLayers();
+  if(state.choroLayer){ map.removeLayer(state.choroLayer); state.choroLayer=null; }
+  if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; }
+
+  setBusy(true);
+  try{
+    const {data,error}=await sb.rpc('ip_pontos_bbox',{p_bbox_south:-23.05,p_bbox_west:-43.25,p_bbox_north:-22.8,p_bbox_east:-42.85,p_zoom:12});
+    if(error) throw error;
+
+    if(!data||data.length===0){ toast('Sem dados de iluminação',true); return; }
+
+    // Fórmula simplificada de iluminância: E = (I × cos(θ)) / d²
+    // Onde: I=intensidade luminosa (proporcional a potência)
+    //       θ=ângulo de incidência, d=distância do alvo
+    // Para simplificar: E ≈ (P / d²) × fator_tipo
+
+    const features=data
+      .filter(d=>d.latitude&&d.longitude&&d.potencia_w)
+      .map(d=>{
+        // Fator baseado no tipo de luminária (viária=1.2, globo=0.8, etc)
+        const tipoLum=d.tipo_luminaria||'viaria';
+        const fatorTipo=tipoLum==='viaria'?1.2:(tipoLum==='globo'?0.8:1.0);
+
+        // Estimativa simplificada de iluminância (unidade relativa)
+        // Em prática: potência × fator_tipo / altura² ≈ iluminância relativa
+        const alturaEstimada=8; // metros (poste típico)
+        const luxRelativo=(d.potencia_w*fatorTipo)/(alturaEstimada*alturaEstimada);
+
+        return {
+          type:'Feature',
+          geometry:{type:'Point',coordinates:[d.longitude,d.latitude]},
+          properties:{
+            potencia:d.potencia_w,
+            tipo:tipoLum,
+            lux:Math.round(luxRelativo),
+            endereco:d.endereco||'desconhecido',
+            modernizado:d.modernizado_led?'LED':'Pendente'
+          }
+        };
+      });
+
+    const fc={type:'FeatureCollection',features};
+
+    // Normalizar para cores
+    const luxVals=features.map(f=>f.properties.lux).filter(l=>!isNaN(l));
+    const maxLux=Math.max(...luxVals);
+    const minLux=Math.min(...luxVals);
+
+    // Função para mapear lux → cor (vermelho=baixo, verde=alto)
+    const getLuxColor=(lux)=>{
+      const norm=(lux-minLux)/(maxLux-minLux);
+      if(norm<0.33) return '#ef4444'; // vermelho (baixa iluminância)
+      if(norm<0.66) return '#fbbf24'; // amarelo
+      return '#22c55e'; // verde (alta iluminância)
+    };
+
+    state.luxmapLayer=L.geoJSON(fc,{
+      pointToLayer:(f,latlng)=>{
+        const lux=f.properties.lux;
+        const cor=getLuxColor(lux);
+        const radius=Math.min(25,Math.max(5,lux/50)); // Tamanho proporcional a luxe
+
+        const c=L.circleMarker(latlng,{
+          radius:radius,
+          color:cor,weight:2,opacity:0.8,fillColor:cor,fillOpacity:0.5
+        });
+
+        c.bindPopup(`<div style="font-size:12px;min-width:200px">
+          <b>✨ Iluminância Virtual</b><br/>
+          Potência: <b>${f.properties.potencia} W</b><br/>
+          Tipo: <b>${f.properties.tipo}</b><br/>
+          Lux (relativo): <b>${lux} lux</b><br/>
+          Status: <b>${f.properties.modernizado}</b><br/>
+          Endereço: ${f.properties.endereco}<br/>
+          <span style="color:#6b7280;font-size:10.5px">
+            Cálculo simplificado (não validado por NBR 5101).
+            Usar para análise comparativa apenas.
+          </span>
+        </div>`);
+
+        return c;
+      }
+    }).addTo(map);
+
+    const hint=`✨ Mapa de Luxe · ${features.length} luminárias · Lux: ${minLux}-${maxLux} (relativo)`;
+    document.getElementById('modeHint').textContent=hint;
+    toast(`Mapa de iluminância: ${features.length} pontos analisados`);
+  }catch(e){
+    toast('Erro ao carregar mapa de luxe: '+(e.message||e),true);
+  }finally{
+    setBusy(false);
+  }
+}
+
+document.getElementById('btnLuxmap').onclick=()=>{
+  if(state.poligono) limparPoligono(true);
+  state.luxmap=!state.luxmap;
+  document.getElementById('detail').style.display='none';
+  if(state.luxmap && (state.densidade||state.choropleth||state.heatmapEnergy||state.coverage)){
+    state.densidade=false;
+    state.choropleth=false;
+    state.heatmapEnergy=false;
+    state.coverage=false;
+    document.getElementById('btnChoro').classList.remove('on');
+    document.getElementById('btnDens').classList.remove('on');
+    document.getElementById('btnHeatmapEnergy').classList.remove('on');
+    document.getElementById('btnCoverage').classList.remove('on');
+    if(state.choroLayer){ map.removeLayer(state.choroLayer); state.choroLayer=null; }
+    if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; }
+    if(state.densMunLayer){ map.removeLayer(state.densMunLayer); state.densMunLayer=null; }
+    if(state.heatmapEnergyLayer){ map.removeLayer(state.heatmapEnergyLayer); state.heatmapEnergyLayer=null; }
+    if(state.coverageLayer){ map.removeLayer(state.coverageLayer); state.coverageLayer=null; }
+    document.getElementById('densCtl').style.display='none';
+  }
+  document.getElementById('btnLuxmap').classList.toggle('on',state.luxmap);
+  document.getElementById('btnVis').classList.toggle('on',state.luxmap||state.densidade||state.choropleth||state.heatmapEnergy||state.coverage);
+  document.getElementById('legend').style.display=(state.luxmap||state.densidade||state.choropleth||state.heatmapEnergy||state.coverage)?'none':'block';
+  if(!state.luxmap){
+    if(state.luxmapLayer){ map.removeLayer(state.luxmapLayer); state.luxmapLayer=null; }
+    renderMunicipioLimites();
+  }else{
+    renderLuxMap();
+  }
+};
+
+// #4: Roteamento Otimizado para Manutenção (usando OSRM)
+async function optimizeMaintenanceRoute(waypoints){
+  if(waypoints.length<2){
+    toast('Selecione pelo menos 2 pontos para rotear',true);
+    return null;
+  }
+
+  setBusy(true);
+  try{
+    // Usar OSRM API pública (demo.project-osrm.org)
+    // Formato: /route/v1/driving/lon1,lat1;lon2,lat2;...?overview=full
+    const coords=waypoints.map(w=>`${w[1]},${w[0]}`).join(';');
+    const url=`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&steps=true&geometries=geojson`;
+
+    const resp=await fetch(url,{signal:AbortSignal.timeout(5000)});
+    if(!resp.ok) throw new Error(`OSRM ${resp.status}`);
+
+    const result=await resp.json();
+    if(!result.routes||result.routes.length===0) throw new Error('Sem rota disponível');
+
+    const route=result.routes[0];
+    const distKm=(route.distance/1000).toFixed(1);
+    const minutos=Math.round(route.duration/60);
+
+    return {
+      coordinates:route.geometry.coordinates,
+      distance:distKm,
+      duration:minutos,
+      route:route
+    };
+  }catch(e){
+    console.error('Erro OSRM:',e);
+    toast('Erro ao calcular rota (OSRM indisponível)',true);
+    return null;
+  }finally{
+    setBusy(false);
+  }
+}
+
+function renderRoutingUI(){
+  // UI modal para selecionar pontos e ver rota
+  const modal=document.getElementById('routingModal');
+  if(!modal){
+    // Criar modal se não existe
+    const m=document.createElement('div');
+    m.id='routingModal';
+    m.style.cssText='position:fixed;top:12px;right:12px;width:320px;z-index:1050;background:var(--bg-panel);border:1px solid var(--border-color);border-radius:12px;padding:16px;box-shadow:var(--shadow-lg);';
+    m.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <b style="color:var(--text-primary)">🛣️ Otimizar Rota</b>
+      <button style="background:none;border:none;color:var(--text-tertiary);cursor:pointer;font-size:18px" onclick="window._clearRouting()">✕</button>
+    </div>
+    <div id="routingInfo" style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.4">
+      Clique nos pontos que precisam manutenção no mapa (máx 25 pontos)
+    </div>
+    <div id="routingStats" style="font-size:12px;color:var(--text-primary);margin-bottom:12px;padding:8px;background:var(--bg-tertiary);border-radius:6px;display:none">
+      <div>📍 Pontos: <b id="routingCount">0</b></div>
+      <div>🛣️ Distância: <b id="routingDist">0 km</b></div>
+      <div>⏱️ Tempo: <b id="routingTime">0 min</b></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn" style="flex:1;font-size:12px" onclick="window._calculateRoute()">Calcular Rota</button>
+      <button class="btn" style="flex:1;font-size:12px" onclick="window._exportRoute()">📥 Exportar</button>
+    </div>`;
+    document.body.appendChild(m);
+  }else{
+    modal.style.display='block';
+  }
+
+  // Configurar mapa para selecionar pontos
+  const points=[];
+  const markers=[];
+
+  window._addRoutingPoint=(lat,lng,info)=>{
+    if(points.length>=25){
+      toast('Máximo 25 pontos por rota',true);
+      return;
+    }
+    points.push([lat,lng]);
+    const m=L.marker([lat,lng],{icon:L.ExtraMarkers.icon({prefix:'fa',icon:'fa-wrench',markerColor:'red'})}).addTo(map);
+    m.bindPopup(`<div style="font-size:12px"><b>${points.length}º ponto</b><br/>${info}</div>`);
+    markers.push(m);
+    document.getElementById('routingInfo').textContent=`${points.length} ponto(s) selecionado(s)`;
+  };
+
+  window._calculateRoute=async()=>{
+    if(points.length<2){
+      toast('Selecione pelo menos 2 pontos',true);
+      return;
+    }
+
+    const routeData=await optimizeMaintenanceRoute(points);
+    if(!routeData) return;
+
+    // Renderizar rota no mapa
+    if(state.routingLineLayer) map.removeLayer(state.routingLineLayer);
+    state.routingLineLayer=L.polyline(routeData.coordinates.map(c=>[c[1],c[0]]),{
+      color:'#06b6d4',weight:4,opacity:0.8,dashArray:'5,5'
+    }).addTo(map);
+
+    // Atualizar stats
+    document.getElementById('routingStats').style.display='block';
+    document.getElementById('routingCount').textContent=points.length;
+    document.getElementById('routingDist').textContent=routeData.distance+' km';
+    document.getElementById('routingTime').textContent=routeData.duration+' min';
+
+    toast(`✅ Rota otimizada: ${routeData.distance}km em ${routeData.duration}min`);
+
+    // Salvar rota em state
+    state.currentRoute={
+      points:points,
+      data:routeData,
+      markers:markers
+    };
+  };
+
+  window._exportRoute=()=>{
+    if(!state.currentRoute){
+      toast('Calcule a rota primeiro',true);
+      return;
+    }
+    const route=state.currentRoute;
+    const csv=`Ordem,Latitude,Longitude,Distância_acumulada_km,Duração_acumulada_min\n${route.points.map((p,i)=>`${i+1},${p[0]},${p[1]}`).join('\n')}`;
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=`rota-manutencao-${Date.now()}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+    toast('Rota exportada em CSV');
+  };
+
+  window._clearRouting=()=>{
+    state.routingMode=false;
+    if(state.routingLineLayer) map.removeLayer(state.routingLineLayer);
+    markers.forEach(m=>map.removeLayer(m));
+    document.getElementById('routingModal').style.display='none';
+    document.getElementById('btnRouting').classList.remove('on');
+    toast('Modo de roteamento desativado');
+  };
+}
+
+document.getElementById('btnRouting').onclick=()=>{
+  state.routingMode=!state.routingMode;
+  document.getElementById('btnRouting').classList.toggle('on',state.routingMode);
+  if(state.routingMode){
+    renderRoutingUI();
+    // Ativar seleção por clique no mapa
+    map.on('click',routingMapClick);
+    toast('🗺️ Modo de roteamento ativo — clique nos pontos que precisam manutenção');
+  }else{
+    map.off('click',routingMapClick);
+    window._clearRouting();
+  }
+};
+
+function routingMapClick(e){
+  if(!state.routingMode) return;
+  const lat=e.latlng.lat, lng=e.latlng.lng;
+  // Encontrar ponto mais próximo
+  const allData=state.layer.getLayers();
+  let closest=null, minDist=Infinity;
+  allData.forEach(layer=>{
+    if(layer._latlng){
+      const d=Math.pow(layer._latlng.lat-lat,2)+Math.pow(layer._latlng.lng-lng,2);
+      if(d<minDist){ minDist=d; closest=layer; }
+    }
+  });
+
+  if(closest && minDist<0.0001){
+    // Ponto encontrado, adicionar à rota
+    const info=closest.options.title||'Ponto de iluminação';
+    window._addRoutingPoint(closest._latlng.lat,closest._latlng.lng,info);
+  }
+}
+
+// #5: Dashboard KPI em Tempo Real
+async function loadKPIData(){
+  try{
+    // Buscar dados globais do Supabase
+    const {data,error}=await sb.from('v_parque_export').select('*');
+    if(error) throw error;
+
+    if(!data||data.length===0) return null;
+
+    // Calcular KPIs
+    const totalLum=data.length;
+    const ledLum=data.filter(d=>d.modernizado_led).length;
+    const pctLed=Math.round((ledLum/totalLum)*100);
+    const potTotal=data.reduce((sum,d)=>sum+(d.potencia_w||0),0);
+    const potMedia=Math.round(potTotal/totalLum);
+
+    // Por tipo
+    const byTipo={};
+    data.forEach(d=>{
+      const t=d.tipo_lampada||'desconhecido';
+      if(!byTipo[t]) byTipo[t]={total:0,led:0};
+      byTipo[t].total++;
+      if(d.modernizado_led) byTipo[t].led++;
+    });
+
+    // Por bairro (top 5)
+    const byBairro={};
+    data.forEach(d=>{
+      const b=d.bairro_nome||'desconhecido';
+      if(!byBairro[b]) byBairro[b]={total:0,led:0};
+      byBairro[b].total++;
+      if(d.modernizado_led) byBairro[b].led++;
+    });
+    const topBairros=Object.entries(byBairro).sort((a,b)=>b[1].total-a[1].total).slice(0,5);
+
+    return {
+      totalLum:totalLum,
+      ledLum:ledLum,
+      pctLed:pctLed,
+      pendente:totalLum-ledLum,
+      potTotal:potTotal,
+      potMedia:potMedia,
+      byTipo:byTipo,
+      byBairro:byBairro,
+      topBairros:topBairros
+    };
+  }catch(e){
+    console.error('Erro ao carregar KPIs:',e);
+    return null;
+  }
+}
+
+function renderKPIDashboard(){
+  const dashboardModal=document.getElementById('kpiDashboardModal');
+  if(!dashboardModal){
+    const m=document.createElement('div');
+    m.id='kpiDashboardModal';
+    m.style.cssText='position:fixed;top:12px;left:calc(var(--sb-w)+12px);right:12px;height:auto;max-height:85vh;z-index:1050;background:var(--bg-panel);border:1px solid var(--border-color);border-radius:12px;padding:16px;box-shadow:var(--shadow-lg);overflow-y:auto;';
+    m.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px solid var(--border-color);padding-bottom:12px">
+      <b style="color:var(--text-primary);font-size:16px">📊 Dashboard KPI</b>
+      <button style="background:none;border:none;color:var(--text-tertiary);cursor:pointer;font-size:18px" onclick="window._closeKPIDashboard()">✕</button>
+    </div>
+    <div id="kpiContent" style="font-size:13px;color:var(--text-secondary)">Carregando...</div>`;
+    document.body.appendChild(m);
+  }else{
+    dashboardModal.style.display='block';
+  }
+
+  window._closeKPIDashboard=()=>{
+    document.getElementById('kpiDashboardModal').style.display='none';
+    document.getElementById('btnKPIDash').classList.remove('on');
+  };
+
+  // Carregar e renderizar dados
+  loadKPIData().then(kpi=>{
+    if(!kpi){
+      document.getElementById('kpiContent').innerHTML='<span style="color:var(--color-error)">Erro ao carregar dados</span>';
+      return;
+    }
+
+    const kpiHTML=`
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px">
+        <!-- Card: Total de Luminárias -->
+        <div style="background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;padding:12px;text-align:center">
+          <div style="font-size:28px;font-weight:700;color:#3b82f6">${kpi.totalLum.toLocaleString('pt-BR')}</div>
+          <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">Total de Luminárias</div>
+        </div>
+
+        <!-- Card: % LED -->
+        <div style="background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;padding:12px;text-align:center">
+          <div style="font-size:28px;font-weight:700;color:#22c55e">${kpi.pctLed}%</div>
+          <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">LED (${kpi.ledLum})</div>
+        </div>
+
+        <!-- Card: Pendentes -->
+        <div style="background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;padding:12px;text-align:center">
+          <div style="font-size:28px;font-weight:700;color:#f59e0b">${kpi.pendente.toLocaleString('pt-BR')}</div>
+          <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">Pendentes</div>
+        </div>
+
+        <!-- Card: Potência Total -->
+        <div style="background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;padding:12px;text-align:center">
+          <div style="font-size:28px;font-weight:700;color:#06b6d4">${(kpi.potTotal/1000).toFixed(1)} MW</div>
+          <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">Potência</div>
+        </div>
+      </div>
+
+      <!-- Gráfico: Distribuição por Tipo -->
+      <div style="background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;padding:12px;margin-bottom:16px">
+        <div style="font-weight:600;margin-bottom:10px;color:var(--text-primary)">Distribuição por Tipo</div>
+        <canvas id="kpiChartTipo" style="max-height:200px"></canvas>
+      </div>
+
+      <!-- Gráfico: Top 5 Bairros -->
+      <div style="background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;padding:12px;margin-bottom:16px">
+        <div style="font-weight:600;margin-bottom:10px;color:var(--text-primary)">Top 5 Bairros (Luminárias)</div>
+        <canvas id="kpiChartBairros" style="max-height:200px"></canvas>
+      </div>
+
+      <!-- Tabela: Resumo por Tipo -->
+      <div style="background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;padding:12px;overflow-x:auto">
+        <div style="font-weight:600;margin-bottom:10px;color:var(--text-primary)">Resumo por Tipo</div>
+        <table style="width:100%;font-size:11px;border-collapse:collapse">
+          <thead><tr style="border-bottom:1px solid var(--border-color)"><th style="text-align:left;padding:6px">Tipo</th><th style="text-align:right;padding:6px">Total</th><th style="text-align:right;padding:6px">LED</th><th style="text-align:right;padding:6px">%LED</th></tr></thead>
+          <tbody>
+            ${Object.entries(kpi.byTipo).map(([tipo,d])=>`<tr style="border-bottom:1px solid #1a232e"><td style="padding:6px">${tipo}</td><td style="text-align:right;padding:6px">${d.total}</td><td style="text-align:right;padding:6px;color:#22c55e">${d.led}</td><td style="text-align:right;padding:6px">${Math.round((d.led/d.total)*100)}%</td></tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    document.getElementById('kpiContent').innerHTML=kpiHTML;
+
+    // Renderizar gráficos com Chart.js
+    setTimeout(()=>{
+      // Gráfico Tipo
+      const ctxTipo=document.getElementById('kpiChartTipo');
+      if(ctxTipo && typeof Chart!=='undefined'){
+        new Chart(ctxTipo,{
+          type:'doughnut',
+          data:{
+            labels:Object.keys(kpi.byTipo),
+            datasets:[{
+              data:Object.values(kpi.byTipo).map(d=>d.total),
+              backgroundColor:['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'],
+              borderColor:'var(--border-color)',
+              borderWidth:1
+            }]
+          },
+          options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'bottom',labels:{font:{size:11},color:'var(--text-secondary)'}}}}
+        });
+      }
+
+      // Gráfico Bairros
+      const ctxBairros=document.getElementById('kpiChartBairros');
+      if(ctxBairros && typeof Chart!=='undefined'){
+        new Chart(ctxBairros,{
+          type:'bar',
+          data:{
+            labels:kpi.topBairros.map(b=>b[0].substring(0,12)),
+            datasets:[{
+              label:'LED',
+              data:kpi.topBairros.map(b=>b[1].led),
+              backgroundColor:'#22c55e',
+              borderColor:'var(--border-color)',
+              borderWidth:1
+            },{
+              label:'Pendente',
+              data:kpi.topBairros.map(b=>b[1].total-b[1].led),
+              backgroundColor:'#f59e0b',
+              borderColor:'var(--border-color)',
+              borderWidth:1
+            }]
+          },
+          options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{labels:{font:{size:11},color:'var(--text-secondary)'}}},scales:{x:{ticks:{font:{size:10},color:'var(--text-tertiary)'}},y:{ticks:{font:{size:10},color:'var(--text-tertiary)'}}}}
+        });
+      }
+    },100);
+  });
+}
+
+document.getElementById('btnKPIDash').onclick=()=>{
+  state.kpiDashboard=!state.kpiDashboard;
+  document.getElementById('btnKPIDash').classList.toggle('on',state.kpiDashboard);
+  if(state.kpiDashboard){
+    renderKPIDashboard();
+  }else{
+    const modal=document.getElementById('kpiDashboardModal');
+    if(modal) modal.style.display='none';
+  }
 };
 
 // ---------- Fase 2: Gráficos & Dashboards (Chart.js) ----------
