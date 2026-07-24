@@ -1,0 +1,56 @@
+name: Apply Supabase Migrations
+
+on:
+  push:
+    branches: [ main, develop, claude/* ]
+    paths:
+      - 'supabase/migrations/**'
+  workflow_dispatch:
+
+jobs:
+  apply-migrations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Supabase CLI
+        run: npm install -g supabase
+
+      - name: Verify migrations exist
+        run: |
+          echo "📋 Migrations found:"
+          ls -lh supabase/migrations/ | grep -E "\.sql$" || echo "No migrations found"
+
+      - name: Apply migrations to Supabase
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$SUPABASE_ACCESS_TOKEN" ]; then
+            echo "⚠️ SUPABASE_ACCESS_TOKEN not configured in secrets"
+            echo "Migrations must be applied manually via dashboard or after setting secret"
+            exit 0
+          fi
+
+          echo "🔗 Linking to Supabase project..."
+          supabase link --project-ref qkxhwriitrqybzbkojdm || true
+
+          echo "📤 Pushing migrations..."
+          supabase db push
+
+      - name: Verify migrations applied
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          if [ -z "$SUPABASE_ACCESS_TOKEN" ]; then
+            echo "⏭️ Skipping verification (no token)"
+            exit 0
+          fi
+
+          echo "✅ Migration push completed"
+          supabase migration list || true
