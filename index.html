@@ -1646,6 +1646,19 @@
                 class="input-default">
                 <option value="">Todos</option>
               </select>
+            <!-- Comunidades Select -->
+            <div>
+              <label class="form-label-inline">🌍 Comunidades</label>
+              <select id="fComunidade"
+                hx-get="/api/v1/comunidades"
+                hx-trigger="load"
+                hx-swap="innerHTML"
+                hx-indicator="#loading"
+                class="input-default"
+                aria-label="Filtrar por comunidade">
+                <option value="">Todos</option>
+              </select>
+            </div>
             </div>
             <!-- Tipo Select -->
             <div>
@@ -2703,8 +2716,8 @@ if(!window.__CONFIG__) {
 
 const sb = window.supabase.createClient(URL_SB, ANON);
 
-const state = { user:null, userRole:null, bairro:"", tipo:"", estado:"", pot:"", fila:"", layer:null, mode:"", tPage:0, tSize:50,
-  bairroLayer:null, choropleth:false, choroLayer:null, choroData:null, current:null, tCache:{}, config:null, painelNovoPontoAberto:false,
+const state = { user:null, userRole:null, bairro:"", comunidade:"", tipo:"", estado:"", pot:"", fila:"", layer:null, mode:"", tPage:0, tSize:50,
+  bairroLayer:null, comunidadeLayer:null, choropleth:false, choroLayer:null, choroData:null, current:null, tCache:{}, config:null, painelNovoPontoAberto:false,
   densidade:false, densLayer:null, densMunLayer:null, densData:null, densMetric:'klm',
   markerCluster:null, charts: {} }; // FASE 3: clustering; Fase 2: charts (Chart.js instances)
 const TIPOS = ["led","vapor_sodio","metalico","vapor_mercurio","fluorescente","sem_lampada","desconhecido"];
@@ -2883,6 +2896,7 @@ function filtros(){
 
   return {
     p_bairro:state.bairro||null,
+    p_comunidade:state.comunidade||null,
     p_tipo,
     p_modernizado,
     p_pot_min: state.pot?parseInt(state.pot):null,
@@ -3667,6 +3681,17 @@ async function highlightBairro(name){
   refresh();
 }
 
+
+async function highlightComunidade(name){
+  if(state.comunidadeLayer){ map.removeLayer(state.comunidadeLayer); state.comunidadeLayer=null; }
+  if(!name){ refresh(); return; }
+  const data = await rpc('ip_comunidade_geojson', { p_comunidade:name });
+  if(data){
+    state.comunidadeLayer = L.geoJSON(data,{style:{color:'#f97316',weight:2,fillColor:'#ef4444',fillOpacity:.14,interactive:false}}).addTo(map);
+    try{ map.fitBounds(state.comunidadeLayer.getBounds(),{padding:[30,30]}); }catch(e){ console.warn('Aviso ao centralizar comunidade:', e); }
+  }
+  refresh();
+}
 // ---------- Limites do município ----------
 async function renderMunicipioLimites(){
   state.munLayer.clearLayers();
@@ -4572,8 +4597,29 @@ async function loadStatsPanel(){
         <tbody>${rows}</tbody>
       </table>
     </div>`;
+    <div style="margin:12px 0 8px;color:#9ca3af;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px">Passivo por Comunidade</div>
+    <div style="border-radius:8px;border:1px solid #1f2a37;overflow:hidden">
+      <table style="width:100%;border-collapse:collapse;font-size:12px" id="tableComunidades">
+        <thead style="background:#0f151c/50;border-bottom:1px solid #1f2a37">
+          <tr><th style="text-align:left;padding:8px;color:#9ca3af">Comunidade</th><th style="text-align:right;padding:8px;color:#9ca3af">Total</th><th style="text-align:right;padding:8px;color:#9ca3af">LED</th><th style="text-align:right;padding:8px;color:#9ca3af">Pend.</th><th style="text-align:right;padding:8px;color:#9ca3af">%</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>`;
+    
+  // Load and populate communities table
+  const porComunidade = await rpc('ip_por_comunidade');
+  if(porComunidade && porComunidade.length > 0) {
+    const comRows = porComunidade.map(c => `<tr style="cursor:pointer;border-bottom:1px solid #1f2a37;transition:background-color 0.2s" class="hover:bg-slate-700/30" onclick="window._zoomComunidade('${esc(c.comunidade_nome).replace(/'/g,"\\'")}')">
+      <td style="padding:8px;font-size:13px">${esc(c.comunidade_nome)}</td><td style="text-align:right;padding:8px;font-size:13px">${c.total}</td>
+      <td style="text-align:right;padding:8px;font-size:13px;color:#4ade80;font-weight:600">${c.led_instalado}</td><td style="text-align:right;padding:8px;font-size:13px;color:#fbbf24">${c.pendente_troca}</td>
+      <td style="text-align:right;padding:8px;font-size:13px;font-weight:600">${c.percentual_led}%</td></tr>`).join('');
+    document.querySelector('#tableComunidades tbody').innerHTML = comRows;
+  }
+}
 }
 window._zoomBairro = (b)=>{ document.getElementById('fBairro').value=b; state.bairro=b; loadStatsChips(); highlightBairro(b); };
+window._zoomComunidade = (c)=>{ document.getElementById('fComunidade').value=c; state.comunidade=c; loadStatsChips(); highlightComunidade(c); };
 
 async function loadBairroOptions(){
   const data = await rpc('ip_por_bairro');
@@ -4603,12 +4649,13 @@ document.getElementById('sidebarToggle').onclick = ()=>document.getElementById('
 document.querySelectorAll('#visPop button, .sb-actions button').forEach(b=>
   b.addEventListener('click', ()=>{ if(window.innerWidth<1024) document.getElementById('sidebar').classList.remove('open'); }));
 document.getElementById('fLimpar').onclick = ()=>{
-  state.bairro=state.tipo=state.estado=state.pot=state.fila=state.saude='';
-  ['fBairro','fTipo','fEstado','fPot','fFila','fSaude'].forEach(id=>document.getElementById(id).value='');
-  updateFCount(); loadStatsChips(); if(state.bairroLayer){map.removeLayer(state.bairroLayer);state.bairroLayer=null;}
+  state.bairro=state.comunidade=state.tipo=state.estado=state.pot=state.fila=state.saude='';
+  ['fBairro','fComunidade','fTipo','fEstado','fPot','fFila','fSaude'].forEach(id=>document.getElementById(id).value='');
+  updateFCount(); loadStatsChips(); if(state.bairroLayer){map.removeLayer(state.bairroLayer);state.bairroLayer=null;}if(state.comunidadeLayer){map.removeLayer(state.comunidadeLayer);state.comunidadeLayer=null;}
   state.choroData=null; refresh();
 };
 document.getElementById('fBairro').onchange = e=>{ state.bairro=e.target.value; updateFCount(); loadStatsChips(); highlightBairro(e.target.value); };
+document.getElementById('fComunidade').onchange = e=>{ state.comunidade=e.target.value; updateFCount(); loadStatsChips(); highlightComunidade(e.target.value); };
 document.getElementById('fTipo').onchange = e=>{ state.tipo=e.target.value; updateFCount(); state.choroData=null; refresh(); };
 document.getElementById('fEstado').onchange = e=>{ state.estado=e.target.value; updateFCount(); refresh(); };
 document.getElementById('fPot').onchange = e=>{ state.pot=e.target.value; updateFCount(); refresh(); };
@@ -5858,6 +5905,29 @@ window.fetch = async function(...args) {
     }
   }
 
+
+  // Handler para /api/v1/comunidades - retorna lista de comunidades
+  if (url.includes('/api/v1/comunidades')) {
+    try {
+      const {data,error} = await sb.from('v_parque_export')
+        .select('comunidade_nome')
+        .not('comunidade_nome', 'is', null)
+        .order('comunidade_nome');
+
+      if (error) throw error;
+
+      const comunidades = [...new Set(data.map(d => d.comunidade_nome).filter(Boolean))];
+      const html = `<option value="">Todos</option>\n${comunidades.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('\n')}`;
+
+      return new Response(html, {
+        status: 200,
+        headers: {'Content-Type': 'text/html; charset=utf-8'}
+      });
+    } catch (e) {
+      console.error('Erro ao carregar comunidades:', e);
+      return new Response('<option value="">Erro ao carregar</option>', {status: 500});
+    }
+  }
   // Handler para /api/v1/tipos-por-bairro - retorna tipos baseado no bairro
   if (url.includes('/api/v1/tipos-por-bairro')) {
     try {
