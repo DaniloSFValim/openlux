@@ -77,6 +77,14 @@
      preferir este nome em codigo novo. */
   --metric-destaque: var(--color-accent);
 
+  /* Numeros nos chips de indicador. Tons proprios, mais claros que os de --saude-*,
+     porque aparecem como texto sobre fundo escuro (contraste, nao preenchimento). */
+  --metric-led: #4ade80;
+  --metric-pendente: #fbbf24;
+  --metric-alta: #4ade80;        /* variacao positiva (mais LED) */
+  --metric-baixa: #f87171;       /* variacao negativa */
+  --metric-estavel: #9ca3af;     /* sem variacao no periodo */
+
   /* Neutral Colors */
   --color-gray-50: #f9fafb;
   --color-gray-100: #f3f4f6;

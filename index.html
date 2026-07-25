@@ -2598,6 +2598,7 @@
                   <p class="text-xs text-slate-400 mb-1.5">Formato</p>
                   <select id="exportFormat" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="csv">📊 CSV (Tabular)</option>
+                    <option value="xlsx">📗 XLSX (Excel)</option>
                     <option value="geojson">🗺️ GeoJSON (SIG)</option>
                     <option value="pdf">📄 PDF (Relatório)</option>
                   </select>
@@ -2733,7 +2734,12 @@ const TOK = (()=>{
     zonaComunidade:    ler('--zona-comunidade',      '#f97316'),
     zonaAreaDesenhada: ler('--zona-area-desenhada',  '#38bdf8'),
     gradientePendente: ler('--gradiente-pendente',   '#f59e0b'),
-    gradienteLed:      ler('--gradiente-led',        '#22c55e')
+    gradienteLed:      ler('--gradiente-led',        '#22c55e'),
+    metricLed:         ler('--metric-led',           '#4ade80'),
+    metricPendente:    ler('--metric-pendente',      '#fbbf24'),
+    metricAlta:        ler('--metric-alta',          '#4ade80'),
+    metricBaixa:       ler('--metric-baixa',         '#f87171'),
+    metricEstavel:     ler('--metric-estavel',       '#9ca3af')
   };
 })();
 // Converte '#rrggbb' em [r,g,b] para interpolação de gradiente.
@@ -3590,7 +3596,8 @@ function renderPoligonoPanel(s){
   const exportar = podeEditar()
     ? `<button class="btn" style="width:100%;margin-top:10px;font-size:11px;border-color:#1d4ed8;color:#93c5fd" onclick="window._bulkFromPolygon()">✏️ Editar em massa (${fmt(s.total)} pontos)</button>
        <div style="display:flex;gap:6px;margin-top:6px">
-         <button class="btn" style="flex:1;font-size:11px" onclick="exportarPoligono('csv')">⬇️ CSV da área</button>
+         <button class="btn" style="flex:1;font-size:11px" onclick="exportarPoligono('csv')">⬇️ CSV</button>
+         <button class="btn" style="flex:1;font-size:11px" onclick="exportarPoligono('xlsx')">⬇️ XLSX</button>
          <button class="btn" style="flex:1;font-size:11px" onclick="exportarPoligono('geojson')">⬇️ GeoJSON</button>
        </div>` : '';
   box.innerHTML = `
@@ -3629,6 +3636,7 @@ async function exportarPoligono(fmt){
   setBusy(false);
   if(!rows || !rows.length){ toast('Nenhum ponto na área',true); return; }
   if(fmt==='csv') baixar(`area_${stamp()}.csv`, '﻿'+toCSV(rows), 'text/csv;charset=utf-8');
+  else if(fmt==='xlsx'){ await baixarXLSX(`area_${stamp()}.xlsx`, rows, 'Área'); return; }
   else { const fc={type:'FeatureCollection',features:rows.filter(r=>r.lat!=null).map(r=>{ const {lat,lon,...p}=r; return {type:'Feature',geometry:{type:'Point',coordinates:[lon,lat]},properties:p}; })};
     baixar(`area_${stamp()}.geojson`, JSON.stringify(fc), 'application/geo+json'); }
   toast(`Área exportada: ${rows.length.toLocaleString('pt-BR')} pontos`);
@@ -4530,7 +4538,26 @@ async function loadStatsChips(){
   if(!data || data.total==null) return;
   state.stats=data;
   const scope = state.bairro? esc(state.bairro) : 'Niterói';
-  document.getElementById('kpi').innerHTML = `<b>${data.total.toLocaleString('pt-BR')}</b> lum · <b style="color:#4ade80">${data.pct_led}%</b> LED · <b style="color:#fbbf24">${(data.pendente??0).toLocaleString('pt-BR')}</b> pend · <span class="text-gray">${scope}</span>`;
+
+  // Série do parque inteiro, buscada uma única vez e reaproveitada.
+  if(!state.serie && !state.bairro){
+    state.serie = await rpc('ip_serie_metricas') || [];
+  }
+  // Variação apenas no escopo municipal — a série não é filtrada por bairro.
+  let extra = '';
+  if(!state.bairro && Array.isArray(state.serie) && state.serie.length > 1){
+    const v = variacaoSerie(state.serie);
+    if(v){
+      const cor = v.dLed > 0 ? TOK.metricAlta : (v.dLed < 0 ? TOK.metricBaixa : TOK.metricEstavel);
+      const seta = v.dLed > 0 ? '▲' : (v.dLed < 0 ? '▼' : '•');
+      const sinal = v.dLed > 0 ? '+' : '';
+      const mudanca = ultimaMudancaSerie(state.serie);
+      const dica = `${sinal}${v.dLed.toLocaleString('pt-BR')} LED e ${sinal}${v.dPct} p.p. nos últimos ${v.dias} dias`
+                 + (mudanca ? ` · última mudança no parque em ${fmtDataBR(mudanca)}` : '');
+      extra = ` · <span style="color:${cor}" title="${esc(dica)}">${seta} ${sinal}${v.dLed.toLocaleString('pt-BR')} LED/${v.dias}d</span>`;
+    }
+  }
+  document.getElementById('kpi').innerHTML = `<b>${data.total.toLocaleString('pt-BR')}</b> lum · <b style="color:${TOK.metricLed}">${data.pct_led}%</b> LED · <b style="color:${TOK.metricPendente}">${(data.pendente??0).toLocaleString('pt-BR')}</b> pend${extra} · <span class="text-gray">${scope}</span>`;
   document.getElementById('pctBar').style.width = (data.pct_led||0)+'%';
 }
 function sparkline(serie){
@@ -4928,7 +4955,9 @@ function applyExportFilters(){
 
   // Export based on type
   if(type === 'luminárias'){
-    exportData(fmt === 'pdf' ? 'pdf' : fmt);
+    // 'pdf' precisa ir para exportPDF: exportData nao trata esse formato e cairia
+    // no ramo GeoJSON, entregando o arquivo errado a quem pediu o relatorio.
+    if(fmt === 'pdf') exportPDF(); else exportData(fmt);
   } else if(type === 'bairros'){
     exportBairros();
   } else if(type === 'série'){
@@ -5468,6 +5497,68 @@ function toCSV(rows){
   return cols.join(';')+'\n'+rows.map(r=>cols.map(c=>cell(r[c])).join(';')).join('\n');
 }
 function stamp(){ return new Date().toISOString().slice(0,10).replace(/-/g,''); }
+
+// ---------- Série de métricas: variação e última mudança real ----------
+// ip_serie_metricas devolve um ponto por dia com {data, total, led, pendente, pct_led}.
+// A série é do parque INTEIRO — nunca exibir a variação junto de um escopo filtrado,
+// senão o número sugere algo que ele não mede.
+function variacaoSerie(serie){
+  if(!Array.isArray(serie) || serie.length < 2) return null;
+  const pri = serie[0], ult = serie[serie.length-1];
+  const dias = Math.max(1, Math.round((new Date(ult.data) - new Date(pri.data)) / 86400000));
+  const dLed = (Number(ult.led)||0) - (Number(pri.led)||0);
+  const dPct = Math.round((((Number(ult.pct_led)||0) - (Number(pri.pct_led)||0)) * 10)) / 10;
+  return { dias, dLed, dPct };
+}
+// Data em que o parque de fato mudou por último. Deliberadamente NÃO usa
+// max(atualizado_em): aquela coluna é marcada por UPDATEs em massa (ex.: joins
+// espaciais), o que faria o carimbo apontar para uma alteração que não houve.
+function ultimaMudancaSerie(serie){
+  if(!Array.isArray(serie) || serie.length < 2) return null;
+  for(let i = serie.length-1; i > 0; i--){
+    const a = serie[i], b = serie[i-1];
+    if(Number(a.led) !== Number(b.led) || Number(a.total) !== Number(b.total)) return a.data;
+  }
+  return null;
+}
+function fmtDataBR(iso){
+  if(!iso) return '';
+  const [a,m,d] = String(iso).slice(0,10).split('-');
+  return (d && m && a) ? `${d}/${m}/${a}` : String(iso);
+}
+
+// ---------- Export XLSX (SheetJS carregado sob demanda) ----------
+// O bundle só é buscado no primeiro clique, para não pesar no carregamento inicial.
+let _sheetJSPromise = null;
+function garantirSheetJS(){
+  if(window.XLSX) return Promise.resolve(window.XLSX);
+  if(!_sheetJSPromise){
+    _sheetJSPromise = new Promise((resolver, rejeitar)=>{
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+      s.onload = ()=> window.XLSX ? resolver(window.XLSX) : rejeitar(new Error('XLSX não inicializou'));
+      s.onerror = ()=>{ _sheetJSPromise = null; rejeitar(new Error('não foi possível carregar o gerador de XLSX')); };
+      document.head.appendChild(s);
+    });
+  }
+  return _sheetJSPromise;
+}
+async function baixarXLSX(nome, rows, aba){
+  if(!rows || !rows.length){ toast('Nada para exportar', true); return; }
+  setBusy(true);
+  try{
+    const XLSX = await garantirSheetJS();
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, String(aba || 'Dados').slice(0,31));
+    const buf = XLSX.write(wb, { bookType:'xlsx', type:'array' });
+    baixar(nome, new Blob([buf], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+    toast(`Exportado: ${rows.length.toLocaleString('pt-BR')} linha(s)`);
+  }catch(e){
+    console.error('Erro ao gerar XLSX:', e);
+    toast('Erro ao gerar XLSX: ' + (e.message||e), true);
+  }finally{ setBusy(false); }
+}
 async function fetchFiltrado(){
   setBusy(true); let rows=[], from=0; const page=1000;
   try{
@@ -5490,15 +5581,18 @@ async function exportData(fmt){
   if(!rows.length){ toast('Nenhum ponto no filtro atual',true); return; }
   const suf=state.bairro?('_'+state.bairro.replace(/\s+/g,'')):'';
   if(fmt==='csv') baixar(`parque${suf}_${stamp()}.csv`, '\uFEFF'+toCSV(rows),'text/csv;charset=utf-8');
+  else if(fmt==='xlsx'){ await baixarXLSX(`parque${suf}_${stamp()}.xlsx`, rows, 'Parque'); return; }
   else { const fc={type:'FeatureCollection',features:rows.filter(r=>r.lat!=null).map(r=>{
       const {lat,lon,...p}=r; return {type:'Feature',geometry:{type:'Point',coordinates:[lon,lat]},properties:p}; })};
     baixar(`parque${suf}_${stamp()}.geojson`, JSON.stringify(fc),'application/geo+json'); }
   toast(`Exportado: ${rows.length.toLocaleString('pt-BR')} pontos`);
 }
 async function exportBairros(){ const d=await rpc('ip_por_bairro'); if(!d)return;
+  if((document.getElementById('exportFormat')?.value)==='xlsx'){ await baixarXLSX(`passivo_por_bairro_${stamp()}.xlsx`, d, 'Por bairro'); return; }
   baixar(`passivo_por_bairro_${stamp()}.csv`,'\uFEFF'+toCSV(d),'text/csv;charset=utf-8'); toast('Passivo por bairro exportado'); }
 async function exportSerie(){ const d=await rpc('ip_serie_metricas'); if(!d)return;
   if(!d.length){ toast('Sem série ainda (o cron grava diariamente)',true); return; }
+  if((document.getElementById('exportFormat')?.value)==='xlsx'){ await baixarXLSX(`serie_metricas_${stamp()}.xlsx`, d, 'Série'); return; }
   baixar(`serie_metricas_${stamp()}.csv`,'\uFEFF'+toCSV(d),'text/csv;charset=utf-8'); toast('Série exportada'); }
 async function exportGrade(){
   const d=state.densData || await rpc('ip_grid_densidade',{p_cell_m:250});
