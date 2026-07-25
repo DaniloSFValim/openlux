@@ -21,7 +21,12 @@
   --color-primary-800: #1e40af;
   --color-primary-900: #1e3a8a;
 
-  /* Accent/Warning Colors */
+  /* Accent/Warning Colors
+     ATENCAO: --color-accent (ambar) e --accent (azul) sao papeis DIFERENTES:
+       --color-accent  -> destaque de valor numerico (KPI de potencia, .text-accent)
+                          use preferencialmente o alias semantico --metric-destaque
+       --accent        -> cor da marca, definida pelo admin em site_config.dados.accent
+                          (padrao #1d4ed8); nao e definida aqui, vem do JS em runtime */
   --color-accent: #fbbf24;
   --color-accent-dark: #f59e0b;
   --color-accent-light: #fcd34d;
@@ -35,6 +40,50 @@
   --color-error-light: #fca5a5;
   --color-info: #06b6d4;
   --color-info-light: #22d3ee;
+
+  /* =====================================================
+     TOKENS SEMANTICOS DE DOMINIO
+     Nomeados pelo SIGNIFICADO no parque luminotecnico, nao pela matiz —
+     padrao adotado dos dashboards DIP/Rotativo (--chart-consumo, --chart-pago).
+     Fonte de verdade unica: o JS le estes valores em TOK (index.html) via
+     getComputedStyle, porque Leaflet e Chart.js precisam de cor literal
+     (var() nao resolve em atributo de apresentacao SVG nem em canvas).
+     Ao mudar uma cor de status, mude AQUI — nao nos literais do JS.
+     ===================================================== */
+
+  /* Saude do ativo (health_status) — usado em colorForHealth e healthStatusBadge */
+  --saude-bom: #10b981;          /* verde   — operando normalmente */
+  --saude-manutencao: #f59e0b;   /* amarelo — requer manutencao */
+  --saude-critico: #ef4444;      /* vermelho— critico */
+  --saude-nao-mapeado: #6b7280;  /* cinza   — sem classificacao */
+
+  /* Tipo de ativo */
+  --ativo-nao-luminaria: #38bdf8; /* caixas e demais ativos no mapa */
+
+  /* Recortes territoriais — cada camada tem cor propria para nao se confundirem */
+  --zona-bairro: #60a5fa;        /* limites de bairro e do municipio */
+  --zona-bairro-fill: #3b82f6;
+  --zona-comunidade: #f97316;    /* ZEIS (Mapa 8 do Plano Diretor) */
+  --zona-area-desenhada: #38bdf8; /* poligono desenhado a mao pelo usuario.
+                                     NOTA: mesma matiz de --ativo-nao-luminaria por
+                                     heranca do codigo; sao papeis distintos e podem
+                                     divergir sem quebrar nada. */
+
+  /* Gradiente do coropletico: interpola pendente -> totalmente modernizado */
+  --gradiente-pendente: #f59e0b;
+  --gradiente-led: #22c55e;
+
+  /* Destaque de valor numerico (KPIs). Alias semantico de --color-accent;
+     preferir este nome em codigo novo. */
+  --metric-destaque: var(--color-accent);
+
+  /* Numeros nos chips de indicador. Tons proprios, mais claros que os de --saude-*,
+     porque aparecem como texto sobre fundo escuro (contraste, nao preenchimento). */
+  --metric-led: #4ade80;
+  --metric-pendente: #fbbf24;
+  --metric-alta: #4ade80;        /* variacao positiva (mais LED) */
+  --metric-baixa: #f87171;       /* variacao negativa */
+  --metric-estavel: #9ca3af;     /* sem variacao no periodo */
 
   /* Neutral Colors */
   --color-gray-50: #f9fafb;
