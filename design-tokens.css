@@ -190,11 +190,34 @@
   --z-sticky: 1000;
   --z-fixed: 1001;
   --z-dropdown: 1001;
-  --z-modal: 1100;
-  --z-modal-lg: 1150;
-  --z-modal-xl: 1400;
+
+  /* Camadas da interface, do fundo para a frente. Cada faixa tem UM papel;
+     empate de z-index deixa a ordem do DOM decidir quem cobre quem, e era
+     dai que vinha a sobreposicao de paineis.
+       overlay     paineis sobre o mapa (detail, stats, poligonoPanel, legend,
+                   densCtl, timelineCtl, advancedFiltersCtl) — exclusividade
+                   dentro do grupo e responsabilidade de abrirPainel(), nao do z-index
+       map-ctl     controles ancorados no mapa (drawCtl), acima dos paineis
+       sidebar     painel lateral e seu botao hamburguer
+       modal       janelas modais (tableModal, loginModal, bulkModal)
+       fullscreen  telas cheias (adminConsole)
+       modal-over  modais abertos DE DENTRO de uma tela cheia — precisam ficar
+                   acima dela, senao abrem invisiveis por tras
+       toast       avisos, sempre visiveis
+       splash      abertura */
+  --z-overlay: 1000;
+  --z-map-ctl: 1050;
+  --z-sidebar: 1100;
+  --z-sidebar-toggle: 1101;
+  --z-modal: 1200;
+  --z-fullscreen: 1400;
+  --z-modal-over: 1500;
   --z-toast: 2000;
   --z-splash: 3000;
+
+  /* Mantidos por compatibilidade com regras antigas; prefira os nomes acima. */
+  --z-modal-lg: 1500;
+  --z-modal-xl: 1400;
 
   /* =====================================================
      TRANSITIONS

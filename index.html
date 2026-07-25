@@ -181,33 +181,61 @@
   }
 
   /* Adjust panel positioning for small screens */
+  /* ===== Celular: paineis do mapa viram bottom sheet =====
+     Antes, esta media query empurrava TODOS os paineis para left:2.5px — inclusive
+     o #detail, que no desktop fica a direita. Resultado: detail, stats e
+     poligonoPanel caiam na mesma coordenada e se sobrepunham.
+     Agora sobem da base ocupando a largura toda, um por vez (a exclusividade e
+     garantida por abrirPainel() no JS), liberando o mapa acima. */
   @media (max-width: 768px) {
-    #legend, #densCtl, #poligonoPanel, #detail, #stats, #timelineCtl, #advancedFiltersCtl, #drawCtl {
-      left: 2.5px !important;
-      right: auto !important;
-      max-width: calc(100vw - 20px) !important;
+    #detail, #stats, #poligonoPanel {
+      position: fixed !important;
+      left: 0 !important;
+      right: 0 !important;
+      top: auto !important;
+      bottom: 0 !important;
+      width: 100% !important;
+      max-width: none !important;
+      max-height: 70vh !important;
+      overflow-y: auto !important;
+      border-radius: 16px 16px 0 0 !important;
+      border-left: none !important;
+      border-right: none !important;
+      border-bottom: none !important;
+      padding-top: 20px !important;
+      /* respeita a area segura do iPhone */
+      padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+      box-shadow: 0 -8px 24px -6px rgba(0,0,0,.55) !important;
     }
 
-    /* On mobile, ensure left panels don't get cut off */
-    #poligonoPanel {
-      width: calc(100vw - 20px) !important;
-      max-width: 340px !important;
+    /* alca de arraste, como referencia visual de folha inferior */
+    #detail::before, #stats::before, #poligonoPanel::before {
+      content: '';
+      position: absolute;
+      top: 8px; left: 50%;
+      transform: translateX(-50%);
+      width: 38px; height: 4px;
+      border-radius: 999px;
+      background: var(--border-color-light, #4b5563);
     }
 
-    #detail, #stats {
-      width: calc(100vw - 20px) !important;
-      max-width: 340px !important;
+    /* legenda e grade de densidade dividem o canto inferior; sincronizarRodapeMapa()
+       garante que so um esteja visivel por vez */
+    #legend, #densCtl {
+      left: 8px !important;
+      right: 8px !important;
+      bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+      max-width: none !important;
+      width: auto !important;
     }
 
-    #legend {
-      left: 2.5px !important;
-      bottom: 3.5px !important;
-      max-width: calc(100vw - 20px) !important;
-    }
-
-    #densCtl {
-      left: 2.5px !important;
-      max-width: calc(100vw - 20px) !important;
+    /* controles ancorados no topo: nao competem com a folha inferior */
+    #timelineCtl, #advancedFiltersCtl, #drawCtl {
+      left: 8px !important;
+      right: 8px !important;
+      transform: none !important;
+      max-width: none !important;
+      width: auto !important;
     }
   }
 
@@ -559,23 +587,44 @@
      MOBILE RESPONSIVENESS (Phase 5)
      ===================================================== */
 
-  /* Extra Small (Mobile) - Base: 375px */
+  /* Extra Small (Mobile) - Base: 375px
+     NOTA: este bloco mirava `header` e `.hide-sm`, da topbar que existia antes do
+     redesign em sidebar. Eram regras mortas — daí a impressao de que o layout
+     "nao muda no celular". Agora atinge a estrutura real (.sb-*, modais, tabela). */
   @media (max-width: 640px) {
-    /* Header Responsiveness */
-    header {
-      flex-direction: column;
-      gap: var(--space-md) !important;
-    }
-
-    /* Button sizing for touch */
-    button {
+    /* Alvos de toque confortaveis (WCAG 2.5.5) */
+    button, .btn, select, input[type="checkbox"] {
       min-height: 44px;
+    }
+    button, .btn {
       min-width: 44px;
     }
 
-    /* Hide labels on small screens */
-    .hide-sm {
-      display: none;
+    /* Sidebar ocupa quase a tela e ganha respiro interno */
+    #sidebar {
+      width: min(340px, 92vw) !important;
+    }
+    .sb-section-body {
+      gap: 10px !important;
+    }
+    /* Selects de filtro empilham e usam a largura toda */
+    .sb-section-body > div {
+      width: 100% !important;
+    }
+    .input-default {
+      width: 100% !important;
+      font-size: 16px !important; /* < 16px faz o iOS dar zoom ao focar */
+    }
+
+    /* Modais em tela cheia: em 390px nao sobra margem para caixa centralizada */
+    #tableModal > div, #loginModal > div, #modeloModal > div,
+    #exportCustomModal > div, #chartsModal > div, #bulkModal > div {
+      width: 100% !important;
+      max-width: 100% !important;
+      height: 100% !important;
+      max-height: 100% !important;
+      border-radius: 0 !important;
+      margin: 0 !important;
     }
 
     /* Stack form fields */
@@ -1177,7 +1226,7 @@
     left: 50%;
     bottom: 12px;
     transform: translateX(-50%);
-    z-index: 800;
+    z-index: var(--z-toast);
     max-width: 92vw;
     background: rgba(15, 21, 28, 0.86);
     border: 1px solid var(--border-color-lighter);
@@ -1340,7 +1389,7 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-    z-index: 1001;
+    z-index: var(--z-dropdown);
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
   }
@@ -1407,7 +1456,7 @@
     position: fixed;
     top: 0; left: 0; bottom: 0;
     width: var(--sb-w);
-    z-index: 1100;
+    z-index: var(--z-sidebar);
     display: flex;
     flex-direction: column;
     background: var(--bg-secondary);
@@ -1554,7 +1603,7 @@
   #sidebarToggle {
     position: fixed;
     top: 12px; left: 12px;
-    z-index: 1101;
+    z-index: var(--z-sidebar-toggle);
     display: none;
     width: 42px; height: 42px;
     border-radius: 10px;
@@ -1589,7 +1638,7 @@
 </head>
 <body>
 <div id="map" role="main" aria-label="Mapa de iluminação pública de Niterói"></div>
-<div id="splash" class="fixed inset-0 z-[3000] flex flex-col items-center justify-center gap-2 transition-opacity duration-500" style="background: var(--bg-primary);">
+<div id="splash" class="fixed inset-0 flex flex-col items-center justify-center gap-2 transition-opacity duration-500" style="z-index: var(--z-splash); background: var(--bg-primary);">
   <img id="splashLogo" alt="" class="h-14 hidden mb-2"/>
   <div id="splashTitle" class="splash-title">OpenLux</div>
   <div class="splash-subtitle">Public Lighting Asset Management</div>
@@ -1768,7 +1817,7 @@
   </div>
 </aside>
 
-<div id="legend" role="complementary" aria-label="Legenda" class="absolute bottom-3.5 left-2.5 z-[1000] bg-slate-800/95 border border-slate-700 rounded-xl p-2.5 text-xs backdrop-blur">
+<div id="legend" role="complementary" aria-label="Legenda" class="absolute bottom-3.5 left-2.5 bg-slate-800/95 border border-slate-700 rounded-xl p-2.5 text-xs backdrop-blur" style="z-index: var(--z-overlay);">
   <div class="flex items-center gap-1.5 mb-0.5"><svg width="13" height="16" viewBox="0 0 20 24"><path d="M10 1.5a6.5 6.5 0 0 0-3.7 11.8V16h7.4v-2.7A6.5 6.5 0 0 0 10 1.5z" fill="#22c55e" stroke="#0b0f14" stroke-width="1.4"/><rect x="6.8" y="16.3" width="6.4" height="2.6" rx="1" fill="#9ca3af"/></svg> <span class="text-slate-300">LED</span></div>
   <div class="flex items-center gap-1.5 mb-0.5"><svg width="13" height="16" viewBox="0 0 20 24"><path d="M10 1.5a6.5 6.5 0 0 0-3.7 11.8V16h7.4v-2.7A6.5 6.5 0 0 0 10 1.5z" fill="#f59e0b" stroke="#0b0f14" stroke-width="1.4"/><rect x="6.8" y="16.3" width="6.4" height="2.6" rx="1" fill="#9ca3af"/></svg> <span class="text-slate-300">Pendente de troca</span></div>
   <div class="flex items-center gap-1.5"><svg width="13" height="16" viewBox="0 0 20 24"><path d="M10 1.5a6.5 6.5 0 0 0-3.7 11.8V16h7.4v-2.7A6.5 6.5 0 0 0 10 1.5z" fill="#141b24" stroke="#6b7280" stroke-width="1.4"/><rect x="6.8" y="16.3" width="6.4" height="2.6" rx="1" fill="#9ca3af"/></svg> <span class="text-slate-300">Sem lâmpada</span></div>
@@ -1776,9 +1825,9 @@
   <div id="modeHint" class="text-slate-400 mt-1 text-xs"></div>
 </div>
 
-<div id="densCtl" role="complementary" aria-label="Controle da grade de densidade" class="absolute bottom-3.5 left-2.5 z-[1000] bg-slate-800/95 border border-slate-700 rounded-xl p-2.5 text-xs max-w-xs hidden backdrop-blur"></div>
+<div id="densCtl" role="complementary" aria-label="Controle da grade de densidade" class="absolute bottom-3.5 left-2.5 bg-slate-800/95 border border-slate-700 rounded-xl p-2.5 text-xs max-w-xs hidden backdrop-blur" style="z-index: var(--z-overlay);"></div>
 
-<div id="drawCtl" class="absolute top-16 left-1/2 -translate-x-1/2 z-[1100] bg-slate-900/95 border border-sky-600 rounded-xl px-4 py-2.5 text-xs backdrop-blur hidden">
+<div id="drawCtl" class="absolute top-16 left-1/2 -translate-x-1/2 bg-slate-900/95 border border-sky-600 rounded-xl px-4 py-2.5 text-xs backdrop-blur hidden" style="z-index: var(--z-map-ctl);">
   <div class="text-sky-300 font-semibold mb-1">✏️ Selecionando área</div>
   <div class="text-slate-300 mb-2">Clique no mapa para adicionar vértices · duplo-clique ou <b>Concluir</b> para fechar (mín. 3).</div>
   <div class="flex gap-2 items-center">
@@ -1787,11 +1836,11 @@
     <span id="drawCount" class="text-slate-400">0 vértices</span>
   </div>
 </div>
-<div id="poligonoPanel" role="complementary" aria-label="Estatísticas da área selecionada" class="absolute top-16 left-2.5 w-80 z-[1000] bg-slate-800/95 border border-sky-700 rounded-xl p-3 hidden max-h-[calc(100%-90px)] overflow-auto backdrop-blur"></div>
-<div id="detail" role="complementary" aria-label="Detalhe do ativo" class="absolute top-16 right-2.5 w-80 z-[1000] bg-slate-800/95 border border-slate-700 rounded-xl p-3 hidden max-h-[calc(100%-90px)] overflow-auto backdrop-blur"></div>
-<div id="stats" role="complementary" aria-label="Indicadores" class="absolute top-16 left-2.5 w-96 z-[1000] bg-slate-800/95 border border-slate-700 rounded-xl p-3 hidden max-h-[calc(100%-90px)] overflow-auto backdrop-blur"></div>
+<div id="poligonoPanel" role="complementary" aria-label="Estatísticas da área selecionada" class="absolute top-16 left-2.5 w-80 bg-slate-800/95 border border-sky-700 rounded-xl p-3 hidden max-h-[calc(100%-90px)] overflow-auto backdrop-blur" style="z-index: var(--z-overlay);"></div>
+<div id="detail" role="complementary" aria-label="Detalhe do ativo" class="absolute top-16 right-2.5 w-80 bg-slate-800/95 border border-slate-700 rounded-xl p-3 hidden max-h-[calc(100%-90px)] overflow-auto backdrop-blur" style="z-index: var(--z-overlay);"></div>
+<div id="stats" role="complementary" aria-label="Indicadores" class="absolute top-16 left-2.5 w-96 bg-slate-800/95 border border-slate-700 rounded-xl p-3 hidden max-h-[calc(100%-90px)] overflow-auto backdrop-blur" style="z-index: var(--z-overlay);"></div>
 
-<div id="timelineCtl" role="complementary" aria-label="Timeline de dados" class="absolute bottom-3.5 left-2.5 z-[1000] bg-slate-800/95 border border-slate-700 rounded-xl p-3 text-xs max-w-xs hidden backdrop-blur">
+<div id="timelineCtl" role="complementary" aria-label="Timeline de dados" class="absolute bottom-3.5 left-2.5 bg-slate-800/95 border border-slate-700 rounded-xl p-3 text-xs max-w-xs hidden backdrop-blur" style="z-index: var(--z-overlay);">
   <div class="font-medium text-slate-200 mb-2">📅 Timeline Interativa</div>
   <div class="mb-2">
     <label class="text-xs text-slate-400 block mb-1">Período:</label>
@@ -1804,7 +1853,7 @@
   </div>
 </div>
 
-<div id="advancedFiltersCtl" role="complementary" aria-label="Filtros avançados" class="absolute bottom-3.5 left-2.5 z-[1000] bg-slate-800/95 border border-slate-700 rounded-xl p-3 text-xs max-w-sm hidden backdrop-blur max-h-[calc(100%-120px)] overflow-auto">
+<div id="advancedFiltersCtl" role="complementary" aria-label="Filtros avançados" class="absolute bottom-3.5 left-2.5 bg-slate-800/95 border border-slate-700 rounded-xl p-3 text-xs max-w-sm hidden backdrop-blur max-h-[calc(100%-120px)] overflow-auto" style="z-index: var(--z-overlay);">
   <div class="font-medium text-slate-200 mb-2">🎯 Filtros Avançados</div>
   <div class="space-y-2">
     <div>
@@ -1834,7 +1883,7 @@
 </div>
 <div id="toast"></div>
 
-<div id="modeloModal" class="fixed inset-0 z-[1150] bg-black/60 flex items-center justify-center hidden">
+<div id="modeloModal" class="fixed inset-0 bg-black/60 flex items-center justify-center hidden" style="z-index: var(--z-modal-over);">
   <div class="bg-slate-800 border border-slate-700 rounded-xl w-[min(600px,95vw)] h-[min(70vh,600px)] flex flex-col overflow-hidden shadow-2xl">
     <div class="flex gap-2 items-center px-4 py-2.5 border-b border-slate-700 bg-slate-700/50">
       <h3 class="font-semibold text-white text-sm">Selecionar modelo de equipamento</h3>
@@ -1845,7 +1894,7 @@
   </div>
 </div>
 
-<div id="tableModal" class="fixed inset-0 z-[1100] flex items-center justify-center hidden" style="background: rgba(0, 0, 0, 0.7);">
+<div id="tableModal" class="fixed inset-0 flex items-center justify-center hidden" style="z-index: var(--z-modal); background: rgba(0, 0, 0, 0.7);">
   <div class="rounded-xl w-[min(1050px,95vw)] h-[min(80vh,760px)] flex flex-col overflow-hidden" style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
     <!-- Header -->
     <div class="flex gap-3 items-center px-5 py-4 border-b flex-wrap" style="background: var(--bg-tertiary); border-color: var(--border-color);">
@@ -1898,7 +1947,7 @@
 </div>
 
 <!-- BULK EDIT MODAL (Tier 1) -->
-<div id="bulkModal" class="fixed inset-0 z-[1250] bg-black/60 items-center justify-center" style="display: none;">
+<div id="bulkModal" class="fixed inset-0 bg-black/60 items-center justify-center" style="z-index: var(--z-modal); display: none;">
   <div class="rounded-xl w-[min(420px,95vw)] p-5" style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
     <h3 class="font-semibold text-sm text-primary" style="margin-bottom: 8px;">✏️ Edição em massa</h3>
     <p class="text-xs text-muted" style="margin-bottom: 12px;">As alterações serão aplicadas a <b id="bkTotal">—</b> ponto(s) selecionado(s). Campos em "— manter —" não são alterados.</p>
@@ -1936,7 +1985,7 @@
 </div>
 
 <!-- EXPORT COLUMNS SELECTOR MODAL -->
-<div id="exportCustomModal" class="fixed inset-0 z-[1150] flex items-center justify-center hidden" style="background: rgba(0, 0, 0, 0.7);">
+<div id="exportCustomModal" class="fixed inset-0 flex items-center justify-center hidden" style="z-index: var(--z-modal-over); background: rgba(0, 0, 0, 0.7);">
   <div class="rounded-xl w-[min(500px,95vw)] flex flex-col overflow-hidden" style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
     <!-- Header -->
     <div class="flex gap-3 items-center px-5 py-4 border-b" style="background: var(--bg-tertiary); border-color: var(--border-color);">
@@ -2011,7 +2060,7 @@
   </div>
 </div>
 
-<div id="adminConsole" x-data="{ activeTab: 'visao' }" class="fixed inset-0 z-[1400] flex flex-col hidden" style="background: var(--bg-primary);">
+<div id="adminConsole" x-data="{ activeTab: 'visao' }" class="fixed inset-0 flex flex-col hidden" style="z-index: var(--z-fullscreen); background: var(--bg-primary);">
   <!-- Header -->
   <header class="flex items-center justify-between gap-4 px-6 py-4 border-b panel-secondary">
     <div class="flex-1">
@@ -2664,7 +2713,7 @@
 </div>
 
 <!-- CHARTS MODAL - Fase 2: Gráficos & Dashboards -->
-<div id="chartsModal" class="fixed inset-0 z-[1150] bg-black/60 flex items-center justify-center hidden" style="opacity:0;transition:opacity 300ms;">
+<div id="chartsModal" class="fixed inset-0 bg-black/60 flex items-center justify-center hidden" style="z-index: var(--z-modal-over); opacity:0;transition:opacity 300ms;">
   <div class="bg-slate-800 border border-slate-700 rounded-xl w-[min(1000px,95vw)] h-[min(80vh,700px)] flex flex-col overflow-hidden shadow-2xl">
     <!-- Header -->
     <div class="flex gap-2 items-center px-4 py-3 border-b border-slate-700 bg-slate-700/50">
@@ -2681,7 +2730,7 @@
   </div>
 </div>
 
-<div id="loginModal" class="fixed inset-0 z-[1200] bg-black/60 flex items-center justify-center hidden">
+<div id="loginModal" class="fixed inset-0 bg-black/60 flex items-center justify-center hidden" style="z-index: var(--z-modal);">
   <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 w-80 shadow-2xl">
     <h3 class="text-base font-semibold text-white">Entrar para editar</h3>
     <div class="mt-4 space-y-3">
@@ -2858,6 +2907,36 @@ state.layer = L.layerGroup().addTo(map);
 const POINT_ZOOM = 16;
 function gridForZoom(z){ return Math.max(0.0015, 0.05/Math.pow(2, z-11)); }
 function colorFor(p){ if((p.tipo_ativo||'luminaria')!=='luminaria') return '#38bdf8'; if(p.modernizado_led) return '#22c55e'; if(p.tipo_lampada==='sem_lampada') return '#6b7280'; return '#f59e0b'; }
+// ---------- Painéis sobre o mapa: exclusividade num só lugar ----------
+// Estes painéis disputam a mesma região da tela (e, no celular, a mesma faixa
+// inferior como bottom sheet). A regra "só um por vez" vivia espalhada em ~17
+// pontos com `style.display='none'` avulso, e as combinações que faltavam eram
+// justamente as que sobrepunham. Agora quem abre um painel do grupo fecha os
+// irmãos automaticamente.
+const PAINEIS_EXCLUSIVOS = ['detail','stats','poligonoPanel'];
+function abrirPainel(id){
+  PAINEIS_EXCLUSIVOS.forEach(outro=>{
+    if(outro === id) return;
+    const el = document.getElementById(outro);
+    if(el) el.style.display = 'none';
+  });
+  const alvo = document.getElementById(id);
+  if(alvo) alvo.style.display = 'block';
+  return alvo;
+}
+function fecharPainel(id){
+  const el = document.getElementById(id);
+  if(el) el.style.display = 'none';
+}
+// legend e densCtl compartilham o canto inferior: nunca os dois juntos.
+function sincronizarRodapeMapa(){
+  const mostrarDens = !!state.densidade;
+  const legend = document.getElementById('legend');
+  const densCtl = document.getElementById('densCtl');
+  if(legend)  legend.style.display  = (state.choropleth || state.densidade) ? 'none' : 'block';
+  if(densCtl) densCtl.style.display = mostrarDens ? 'block' : 'none';
+}
+
 function colorForHealth(p){
   if((p.tipo_ativo||'luminaria')!=='luminaria') return TOK.ativoNaoLuminaria;
   if(p.health_status==='verde') return TOK.saudeBom;
@@ -3235,14 +3314,14 @@ async function renderChoropleth(){
 document.getElementById('btnChoro').onclick = ()=>{
   if(state.poligono) limparPoligono(true);
   state.choropleth=!state.choropleth;
-  document.getElementById('detail').style.display='none'; // Fechar painel de detalhes
+  PAINEIS_EXCLUSIVOS.forEach(fecharPainel); // trocar de visualizacao fecha os paineis do mapa
   if(state.choropleth && state.densidade){ state.densidade=false;
     document.getElementById('btnDens').classList.remove('on');
     if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; }
     document.getElementById('densCtl').style.display='none'; }
   document.getElementById('btnChoro').classList.toggle('on',state.choropleth);
   document.getElementById('btnVis').classList.toggle('on',state.choropleth||state.densidade);
-  document.getElementById('legend').style.display = (state.choropleth||state.densidade)?'none':'block';
+  sincronizarRodapeMapa();
   if(!state.choropleth && !state.densidade) renderMunicipioLimites();
   refresh();
 };
@@ -3318,13 +3397,13 @@ window._densMetric=(m)=>{ state.densMetric=m; renderDensidade(); };
 document.getElementById('btnDens').onclick = ()=>{
   if(state.poligono) limparPoligono(true);
   state.densidade=!state.densidade;
-  document.getElementById('detail').style.display='none'; // Fechar painel de detalhes
+  PAINEIS_EXCLUSIVOS.forEach(fecharPainel); // trocar de visualizacao fecha os paineis do mapa
   if(state.densidade && state.choropleth){ state.choropleth=false;
     document.getElementById('btnChoro').classList.remove('on');
     if(state.choroLayer){ map.removeLayer(state.choroLayer); state.choroLayer=null; } }
   document.getElementById('btnDens').classList.toggle('on',state.densidade);
   document.getElementById('btnVis').classList.toggle('on',state.densidade||state.choropleth);
-  document.getElementById('legend').style.display=(state.densidade||state.choropleth)?'none':'block';
+  sincronizarRodapeMapa();
   if(!state.densidade){
     if(state.densLayer){ map.removeLayer(state.densLayer); state.densLayer=null; }
     if(state.densMunLayer){ map.removeLayer(state.densMunLayer); state.densMunLayer=null; }
@@ -3618,7 +3697,7 @@ function renderPoligonoPanel(s){
     </div>
     ${foto}
     ${exportar}`;
-  box.style.display='block';
+  abrirPainel('poligonoPanel');
 }
 function limparPoligono(silencioso){
   if(state.poligonoLayer){ map.removeLayer(state.poligonoLayer); state.poligonoLayer=null; }
@@ -4431,7 +4510,7 @@ document.getElementById('btnNovo').onclick = ()=>{
   if(!podeEditar()) return;
   state.painelNovoPontoAberto = true;
   const c=map.getCenter();
-  const d=document.getElementById('detail'); d.style.display='block';
+  const d=abrirPainel('detail');
   d.innerHTML = `
     <b class="body">Novo ativo</b>
     <div style="font-size:11px;color:#6b7280;margin-top:2px">O código IPNIT é gerado automaticamente.</div>
@@ -4720,7 +4799,8 @@ document.getElementById('fFila').onchange = async e=>{ state.fila=e.target.value
   if(e.target.value){ let q=sb.from('v_parque_export').select('id',{count:'exact',head:true}); q=aplicaFila(q);
     const {count}=await q; toast('Fila: '+((count||0).toLocaleString('pt-BR'))+' ponto(s)'); } };
 document.getElementById('fSaude').onchange = e=>{ state.saude=e.target.value; updateFCount(); refresh(); };
-document.getElementById('btnStats').onclick = ()=>{ const s=document.getElementById('stats'); if(s.style.display==='block'){s.style.display='none';} else {s.style.display='block'; loadStatsPanel();} };
+document.getElementById('btnStats').onclick = ()=>{ const s=document.getElementById('stats');
+  if(s.style.display==='block'){ fecharPainel('stats'); } else { abrirPainel('stats'); loadStatsPanel(); } };
 
 // ---------- Tabela ----------
 async function loadTable(){
@@ -4753,7 +4833,7 @@ async function loadTable(){
   }).join('');
   document.getElementById('tBody').innerHTML = linhas || '<tr><td colspan="10" style="text-align:center;color:#6b7280;padding:18px">Nenhum registro encontrado</td></tr>';
 }
-window._editId=(id)=>{ const p=state.tCache[id]; if(!p) return; state.current=p; document.getElementById('tableModal').style.display='none'; document.getElementById('detail').style.display='block'; window._edit(); };
+window._editId=(id)=>{ const p=state.tCache[id]; if(!p) return; state.current=p; document.getElementById('tableModal').style.display='none'; abrirPainel('detail'); window._edit(); };
 document.getElementById('btnTabela').onclick=()=>{ state.tPage=0; document.getElementById('tableModal').style.display='flex'; loadTable(); };
 document.getElementById('tClose').onclick=()=>document.getElementById('tableModal').style.display='none';
 document.getElementById('tPrev').onclick=()=>{ if(state.tPage>0){state.tPage--;loadTable();} };
