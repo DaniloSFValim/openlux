@@ -2097,7 +2097,7 @@
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm font-medium mb-2 text-muted">Potência Média (W)</p>
-                <p class="text-3xl font-bold" id="kpiPotencia" style="color: var(--color-accent);">—</p>
+                <p class="text-3xl font-bold" id="kpiPotencia" style="color: var(--metric-destaque);">—</p>
               </div>
               <div class="text-4xl opacity-30">⚙️</div>
             </div>
@@ -2714,6 +2714,34 @@ const state = { user:null, userRole:null, bairro:"", comunidade:"", tipo:"", est
   bairroLayer:null, choropleth:false, choroLayer:null, choroData:null, current:null, tCache:{}, config:null, painelNovoPontoAberto:false,
   densidade:false, densLayer:null, densMunLayer:null, densData:null, densMetric:'klm',
   markerCluster:null, charts: {} }; // FASE 3: clustering; Fase 2: charts (Chart.js instances)
+// ---------- Tokens semânticos de cor (fonte de verdade: design-tokens.css) ----------
+// Leaflet e Chart.js exigem cor literal — var() não resolve em atributo de apresentação
+// SVG nem em canvas. Por isso lemos os tokens do CSS uma vez, aqui, em vez de espalhar
+// literais pelo código. Para mudar uma cor de status, edite design-tokens.css.
+// O fallback mantém o mapa correto mesmo se o CSS não carregar.
+const TOK = (()=>{
+  const css = getComputedStyle(document.documentElement);
+  const ler = (nome, padrao)=>{ const v = css.getPropertyValue(nome).trim(); return v || padrao; };
+  return {
+    saudeBom:          ler('--saude-bom',            '#10b981'),
+    saudeManutencao:   ler('--saude-manutencao',     '#f59e0b'),
+    saudeCritico:      ler('--saude-critico',        '#ef4444'),
+    saudeNaoMapeado:   ler('--saude-nao-mapeado',    '#6b7280'),
+    ativoNaoLuminaria: ler('--ativo-nao-luminaria',  '#38bdf8'),
+    zonaBairro:        ler('--zona-bairro',          '#60a5fa'),
+    zonaBairroFill:    ler('--zona-bairro-fill',     '#3b82f6'),
+    zonaComunidade:    ler('--zona-comunidade',      '#f97316'),
+    zonaAreaDesenhada: ler('--zona-area-desenhada',  '#38bdf8'),
+    gradientePendente: ler('--gradiente-pendente',   '#f59e0b'),
+    gradienteLed:      ler('--gradiente-led',        '#22c55e')
+  };
+})();
+// Converte '#rrggbb' em [r,g,b] para interpolação de gradiente.
+function tokRGB(hex){
+  const h = (hex||'').replace('#','');
+  return h.length===6 ? [0,2,4].map(i=>parseInt(h.slice(i,i+2),16)) : [0,0,0];
+}
+
 const TIPOS = ["led","vapor_sodio","metalico","vapor_mercurio","fluorescente","sem_lampada","desconhecido"];
 const STATUS = ["led_instalado","pendente_troca","a_verificar"];
 const TIPO_ATIVO = [['luminaria','Luminária'],['caixa_comando','Caixa de comando'],['chave_magnetica','Chave magnética'],['rele_fotoeletrico','Relé fotoelétrico'],['poste','Poste'],['braco','Braço'],['outro','Outro']];
@@ -2825,18 +2853,18 @@ const POINT_ZOOM = 16;
 function gridForZoom(z){ return Math.max(0.0015, 0.05/Math.pow(2, z-11)); }
 function colorFor(p){ if((p.tipo_ativo||'luminaria')!=='luminaria') return '#38bdf8'; if(p.modernizado_led) return '#22c55e'; if(p.tipo_lampada==='sem_lampada') return '#6b7280'; return '#f59e0b'; }
 function colorForHealth(p){
-  if((p.tipo_ativo||'luminaria')!=='luminaria') return '#38bdf8';
-  if(p.health_status==='verde') return '#10b981';
-  if(p.health_status==='amarelo') return '#f59e0b';
-  if(p.health_status==='vermelho') return '#ef4444';
-  return '#6b7280';
+  if((p.tipo_ativo||'luminaria')!=='luminaria') return TOK.ativoNaoLuminaria;
+  if(p.health_status==='verde') return TOK.saudeBom;
+  if(p.health_status==='amarelo') return TOK.saudeManutencao;
+  if(p.health_status==='vermelho') return TOK.saudeCritico;
+  return TOK.saudeNaoMapeado;
 }
 function healthStatusBadge(status){
   const badges = {
-    'verde': { emoji: '🟢', label: 'Bom', color: '#10b981' },
-    'amarelo': { emoji: '🟡', label: 'Manutenção', color: '#f59e0b' },
-    'vermelho': { emoji: '🔴', label: 'Crítico', color: '#ef4444' },
-    'cinza': { emoji: '⚫', label: 'Não mapeado', color: '#6b7280' }
+    'verde': { emoji: '🟢', label: 'Bom', color: TOK.saudeBom },
+    'amarelo': { emoji: '🟡', label: 'Manutenção', color: TOK.saudeManutencao },
+    'vermelho': { emoji: '🔴', label: 'Crítico', color: TOK.saudeCritico },
+    'cinza': { emoji: '⚫', label: 'Não mapeado', color: TOK.saudeNaoMapeado }
   };
   return badges[status] || badges['cinza'];
 }
@@ -2869,7 +2897,7 @@ function iconFor(p){
   if(ta!=='luminaria') return ASSET_ICONS[ta]||ASSET_ICONS.outro;
   if(p.modernizado_led) return LAMP_ICONS.led; if(p.tipo_lampada==='sem_lampada') return LAMP_ICONS.sem; return LAMP_ICONS.pend;
 }
-function mix(pct){ const a=[245,158,11], b=[34,197,94]; return `rgb(${a.map((x,i)=>Math.round(x+(b[i]-x)*pct)).join(',')})`; }
+function mix(pct){ const a=tokRGB(TOK.gradientePendente), b=tokRGB(TOK.gradienteLed); return `rgb(${a.map((x,i)=>Math.round(x+(b[i]-x)*pct)).join(',')})`; }
 function filtros(){
   let p_tipo=state.tipo||null, p_modernizado=null;
   if(state.estado==='led') p_modernizado=true;
@@ -3262,7 +3290,7 @@ async function renderDensidade(){
   const munData = await rpc('ip_bairros_choropleth', {});
   if(munData){
     const munGeoJson={type:'FeatureCollection',features:munData.features.map(f=>({type:'Feature',geometry:f.geometry,properties:f.properties}))};
-    state.densMunLayer=L.geoJSON(munGeoJson,{style:{color:'#60a5fa',weight:2,fill:false,opacity:.4},interactive:false}).addTo(map);
+    state.densMunLayer=L.geoJSON(munGeoJson,{style:{color:TOK.zonaBairro,weight:2,fill:false,opacity:.4},interactive:false}).addTo(map);
   }
   buildDensCtl(breaks,cfg);
   document.getElementById('modeHint').textContent='Grade 250 m · '+cfg.rot+' (limites em azul)';
@@ -3482,7 +3510,7 @@ function iniciarDesenhoArea(){
   if(state.choropleth) document.getElementById('btnChoro').click();
   if(state.densidade)  document.getElementById('btnDens').click();
   state.drawing = true; _drawPts = [];
-  _drawLayer = L.polygon([], {color:'#38bdf8',weight:2,dashArray:'6,5',fillColor:'#38bdf8',fillOpacity:0.06}).addTo(map);
+  _drawLayer = L.polygon([], {color:TOK.zonaAreaDesenhada,weight:2,dashArray:'6,5',fillColor:TOK.zonaAreaDesenhada,fillOpacity:0.06}).addTo(map);
   _drawVerts = L.layerGroup().addTo(map);
   map.doubleClickZoom.disable();
   map.getContainer().style.cursor = 'crosshair';
@@ -3493,7 +3521,7 @@ function iniciarDesenhoArea(){
 function _addVertice(latlng){
   _drawPts.push([latlng.lat, latlng.lng]);
   if(_drawLayer) _drawLayer.setLatLngs(_drawPts);
-  if(_drawVerts) L.circleMarker(latlng,{radius:3,weight:1,color:'#0b0f14',fillColor:'#38bdf8',fillOpacity:1,interactive:false}).addTo(_drawVerts);
+  if(_drawVerts) L.circleMarker(latlng,{radius:3,weight:1,color:'#0b0f14',fillColor:TOK.zonaAreaDesenhada,fillOpacity:1,interactive:false}).addTo(_drawVerts);
   _updDrawCount();
 }
 function _encerraDesenho(){
@@ -3516,7 +3544,7 @@ function concluirDesenhoArea(){
   ring.push(ring[0]);                                            // fecha o anel
   state.poligono = JSON.stringify({ type:'Polygon', coordinates:[ring] });
   _encerraDesenho();
-  state.poligonoLayer = L.polygon(pts, {color:'#38bdf8',weight:2,fillColor:'#38bdf8',fillOpacity:0.05}).addTo(map);
+  state.poligonoLayer = L.polygon(pts, {color:TOK.zonaAreaDesenhada,weight:2,fillColor:TOK.zonaAreaDesenhada,fillOpacity:0.05}).addTo(map);
   aplicarPoligono();
 }
 async function aplicarPoligono(){
@@ -3670,7 +3698,7 @@ async function highlightBairro(name){
   if(!name){ refresh(); return; }
   const data = await rpc('ip_bairro_geojson', { p_bairro:name });
   if(data){
-    state.bairroLayer = L.geoJSON(data,{style:{color:'#60a5fa',weight:2,fillColor:'#3b82f6',fillOpacity:.14,interactive:false}}).addTo(map);
+    state.bairroLayer = L.geoJSON(data,{style:{color:TOK.zonaBairro,weight:2,fillColor:TOK.zonaBairroFill,fillOpacity:.14,interactive:false}}).addTo(map);
     try{ map.fitBounds(state.bairroLayer.getBounds(),{padding:[30,30]}); }catch(e){ console.warn('Aviso ao centralizar bairro:', e); }
   }
   refresh();
@@ -3682,7 +3710,7 @@ async function renderMunicipioLimites(){
   const data = await rpc('ip_bairros_choropleth', {});
   if(data && data.features){
     const munGeoJson={type:'FeatureCollection',features:data.features.map(f=>({type:'Feature',geometry:f.geometry,properties:f.properties}))};
-    L.geoJSON(munGeoJson,{style:{color:'#60a5fa',weight:2.5,fill:false,opacity:.5,dashArray:'5,5'},interactive:false}).addTo(state.munLayer);
+    L.geoJSON(munGeoJson,{style:{color:TOK.zonaBairro,weight:2.5,fill:false,opacity:.5,dashArray:'5,5'},interactive:false}).addTo(state.munLayer);
   }
 }
 
@@ -4613,7 +4641,7 @@ async function aplicarComunidade(nome){
   if(!geom){ toast('Comunidade sem geometria cadastrada', true); return; }
   if(state.poligonoLayer){ map.removeLayer(state.poligonoLayer); state.poligonoLayer=null; }
   state.poligono = JSON.stringify(geom);
-  state.poligonoLayer = L.geoJSON(geom,{style:{color:'#f97316',weight:2,fillColor:'#f97316',fillOpacity:0.08},interactive:false}).addTo(map);
+  state.poligonoLayer = L.geoJSON(geom,{style:{color:TOK.zonaComunidade,weight:2,fillColor:TOK.zonaComunidade,fillOpacity:0.08},interactive:false}).addTo(map);
   await aplicarPoligono();
 }
 function updateFCount(){
