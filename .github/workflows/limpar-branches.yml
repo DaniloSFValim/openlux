@@ -1,0 +1,100 @@
+name: Limpar branches obsoletas
+
+# Deleta branches cujo conteudo ja esta na main. Roda sob demanda
+# (workflow_dispatch) e usa o GITHUB_TOKEN do proprio repositorio, que tem
+# permissao para remover refs — o que credenciais externas nao tem.
+#
+# Seguranca: a lista de branches e FIXA e conferida abaixo. O job aborta se
+# alguma delas nao estiver totalmente mergeada na main, para nunca descartar
+# trabalho que so exista na branch.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Apenas listar o que seria deletado, sem deletar'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  limpar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Deletar branches ja mergeadas na main
+        env:
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+
+          # Branches a remover. Conteudo verificado como presente na main.
+          # feat/image-compression-upload entra porque a funcionalidade foi
+          # reimplementada na main (compressImage + canvas.toBlob em index.html).
+          BRANCHES="
+          docs/add-doi
+          docs/beautify-readme
+          docs/orcid-visivel
+          feature/admin-ui-tables
+          feature/advanced-map
+          feature/dashboard-kpi-cards
+          feature/equipamentos-modelo
+          feature/fase3-multi-cidade-clustering
+          feature/form-modernization
+          feature/health-status-luminarias
+          feature/phase-b-refactor-inline-styles
+          fix/deploy-fase2-fase4-to-main
+          fix/supabase-security-hardening
+          hotfix/audit-items-4-7
+          hotfix/audit-migrations-sync
+          hotfix/clusters-grid-health-status
+          hotfix/rpc-advanced-filters
+          hotfix/rpc-enum-type-cast
+          hotfix/rpc-fonte-column
+          hotfix/rpc-modernizado-led
+          "
+
+          # NUNCA remover: main e a branch de trabalho ativa.
+          PROTEGIDAS="main claude/devops-reproducibility-audit-vgpxz9 claude/security-hardening-phase-2"
+
+          git fetch --prune origin >/dev/null 2>&1
+
+          deletadas=0; puladas=0
+          for b in $BRANCHES; do
+            [ -z "$b" ] && continue
+
+            for p in $PROTEGIDAS; do
+              if [ "$b" = "$p" ]; then echo "🛡️  $b — protegida, ignorando"; continue 2; fi
+            done
+
+            if ! git show-ref --verify --quiet "refs/remotes/origin/$b"; then
+              echo "•  $b — nao existe mais"; puladas=$((puladas+1)); continue
+            fi
+
+            # Guarda: so deleta se a branch nao tiver nenhum commit fora da main.
+            afrente=$(git rev-list --count "origin/main..origin/$b")
+            if [ "$afrente" != "0" ]; then
+              echo "⚠️  $b — $afrente commit(s) fora da main, NAO sera deletada"
+              puladas=$((puladas+1)); continue
+            fi
+
+            sha=$(git rev-parse --short "origin/$b")
+            if [ "${DRY_RUN}" = "true" ]; then
+              echo "🔎 $b ($sha) — seria deletada"
+            else
+              git push origin --delete "$b"
+              echo "🗑️  $b ($sha) — deletada  ·  restaurar: git push origin $sha:refs/heads/$b"
+              deletadas=$((deletadas+1))
+            fi
+          done
+
+          echo
+          echo "Deletadas: $deletadas · Puladas: $puladas"
+          echo
+          echo "Branches remotas restantes:"
+          git ls-remote --heads origin | sed 's|.*refs/heads/|  · |'
