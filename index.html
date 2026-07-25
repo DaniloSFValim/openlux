@@ -4539,10 +4539,10 @@ async function loadStatsChips(){
   state.stats=data;
   const scope = state.bairro? esc(state.bairro) : 'Niterói';
 
-  // Série do parque inteiro, buscada uma única vez e reaproveitada.
-  if(!state.serie && !state.bairro){
-    state.serie = await rpc('ip_serie_metricas') || [];
-  }
+  // A série NÃO é buscada aqui de propósito. O carregamento inicial já dispara 8 RPCs
+  // simultâneas e, com o statement_timeout do anon, a concorrência empurrava alguma
+  // delas acima do limite ("canceling statement due to statement timeout"). A série
+  // chega depois, fora do caminho crítico, via agendarSerie(), e o chip é redesenhado.
   // Variação apenas no escopo municipal — a série não é filtrada por bairro.
   let extra = '';
   if(!state.bairro && Array.isArray(state.serie) && state.serie.length > 1){
@@ -4559,6 +4559,19 @@ async function loadStatsChips(){
   }
   document.getElementById('kpi').innerHTML = `<b>${data.total.toLocaleString('pt-BR')}</b> lum · <b style="color:${TOK.metricLed}">${data.pct_led}%</b> LED · <b style="color:${TOK.metricPendente}">${(data.pendente??0).toLocaleString('pt-BR')}</b> pend${extra} · <span class="text-gray">${scope}</span>`;
   document.getElementById('pctBar').style.width = (data.pct_led||0)+'%';
+}
+// Busca a série depois que o carregamento inicial assentou, para não competir com as
+// RPCs do mapa. Usa requestIdleCallback quando disponível; senão, um atraso simples.
+// Uma vez em cache, loadStatsChips passa a exibir a variação.
+function agendarSerie(){
+  const buscar = async ()=>{
+    if(state.serie) return;
+    const d = await rpc('ip_serie_metricas');
+    state.serie = d || [];
+    if(!state.bairro && state.serie.length > 1) loadStatsChips();
+  };
+  if(typeof requestIdleCallback === 'function') requestIdleCallback(buscar, { timeout: 4000 });
+  else setTimeout(buscar, 2500);
 }
 function sparkline(serie){
   if(!serie||serie.length<1) return '';
@@ -6098,6 +6111,7 @@ setTimeout(dismissSplash, 2200);
 
 // ---------- init ----------
 loadConfig(); carregarPainelConfig(); loadBairroOptions(); loadComunidadeOptions(); renderMunicipioLimites(); loadStatsChips(); refresh();
+agendarSerie(); // fora do caminho crítico: chega quando o carregamento assentar
 </script>
 </body>
 </html>
