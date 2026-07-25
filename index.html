@@ -1647,6 +1647,13 @@
                 <option value="">Todos</option>
               </select>
             </div>
+            <!-- Comunidade (ZEIS) Select — populado por RPC em loadComunidadeOptions(); sem HTMX de propósito -->
+            <div>
+              <label class="form-label-inline">🏘️ Comunidade (ZEIS)</label>
+              <select id="fComunidade" class="input-default">
+                <option value="">Todas</option>
+              </select>
+            </div>
             <!-- Tipo Select -->
             <div>
               <label class="form-label-inline">💡 Tipo</label>
@@ -2703,7 +2710,7 @@ if(!window.__CONFIG__) {
 
 const sb = window.supabase.createClient(URL_SB, ANON);
 
-const state = { user:null, userRole:null, bairro:"", tipo:"", estado:"", pot:"", fila:"", layer:null, mode:"", tPage:0, tSize:50,
+const state = { user:null, userRole:null, bairro:"", comunidade:"", tipo:"", estado:"", pot:"", fila:"", layer:null, mode:"", tPage:0, tSize:50,
   bairroLayer:null, choropleth:false, choroLayer:null, choroData:null, current:null, tCache:{}, config:null, painelNovoPontoAberto:false,
   densidade:false, densLayer:null, densMunLayer:null, densData:null, densMetric:'klm',
   markerCluster:null, charts: {} }; // FASE 3: clustering; Fase 2: charts (Chart.js instances)
@@ -3581,6 +3588,8 @@ function renderPoligonoPanel(s){
 function limparPoligono(silencioso){
   if(state.poligonoLayer){ map.removeLayer(state.poligonoLayer); state.poligonoLayer=null; }
   state.poligono=null; state.poligonoPontos=null;
+  // A seleção de comunidade usa o mesmo mecanismo; manter select e state em sincronia.
+  if(state.comunidade){ state.comunidade=''; const fc=document.getElementById('fComunidade'); if(fc) fc.value=''; updateFCount(); }
   const box=document.getElementById('poligonoPanel'); if(box) box.style.display='none';
   const ba=document.getElementById('btnArea'); if(ba) ba.classList.remove('on');
   if(!silencioso) refresh();
@@ -4582,8 +4591,33 @@ async function loadBairroOptions(){
   names.forEach(n=>{ f.insertAdjacentHTML('beforeend',`<option>${esc(n)}</option>`); t.insertAdjacentHTML('beforeend',`<option>${esc(n)}</option>`); });
   TIPOS.forEach(tp=>document.getElementById('fTipo').insertAdjacentHTML('beforeend',`<option value="${tp}">${tp}</option>`));
 }
+// Comunidades (ZEIS): popula o select por RPC. Se a chamada falhar, o dropdown fica
+// apenas com "Todas" — a página nunca depende desta resposta para carregar.
+async function loadComunidadeOptions(){
+  const data = await rpc('ip_comunidades_lista');
+  const sel = document.getElementById('fComunidade');
+  if(!sel || !Array.isArray(data)) return;
+  const repetidos = new Set();
+  const vistos = new Set();
+  data.forEach(c=>{ if(vistos.has(c.nome)) repetidos.add(c.nome); vistos.add(c.nome); });
+  data.forEach(c=>{
+    const rotulo = (repetidos.has(c.nome) && c.bairro) ? `${c.nome} (${c.bairro})` : c.nome;
+    sel.insertAdjacentHTML('beforeend', `<option value="${esc(c.nome)}">${esc(rotulo)}</option>`);
+  });
+}
+// Selecionar comunidade reusa a seleção por área: usa o polígono da ZEIS como recorte,
+// aproveitando ip_pontos_poligono/ip_stats_poligono. Nenhuma RPC de bbox/clusters é tocada.
+async function aplicarComunidade(nome){
+  if(!nome){ limparPoligono(); return; }
+  const geom = await rpc('ip_comunidade_geom', { p_nome: nome });
+  if(!geom){ toast('Comunidade sem geometria cadastrada', true); return; }
+  if(state.poligonoLayer){ map.removeLayer(state.poligonoLayer); state.poligonoLayer=null; }
+  state.poligono = JSON.stringify(geom);
+  state.poligonoLayer = L.geoJSON(geom,{style:{color:'#f97316',weight:2,fillColor:'#f97316',fillOpacity:0.08},interactive:false}).addTo(map);
+  await aplicarPoligono();
+}
 function updateFCount(){
-  const n=[state.bairro,state.tipo,state.estado,state.pot,state.fila].filter(Boolean).length;
+  const n=[state.bairro,state.tipo,state.estado,state.pot,state.fila,state.comunidade].filter(Boolean).length;
   const b=document.getElementById('fCount');
   if(n){ b.style.display='inline'; b.textContent=n; } else b.style.display='none';
 }
@@ -4603,12 +4637,14 @@ document.getElementById('sidebarToggle').onclick = ()=>document.getElementById('
 document.querySelectorAll('#visPop button, .sb-actions button').forEach(b=>
   b.addEventListener('click', ()=>{ if(window.innerWidth<1024) document.getElementById('sidebar').classList.remove('open'); }));
 document.getElementById('fLimpar').onclick = ()=>{
-  state.bairro=state.tipo=state.estado=state.pot=state.fila=state.saude='';
-  ['fBairro','fTipo','fEstado','fPot','fFila','fSaude'].forEach(id=>document.getElementById(id).value='');
+  state.bairro=state.tipo=state.estado=state.pot=state.fila=state.saude=state.comunidade='';
+  ['fBairro','fComunidade','fTipo','fEstado','fPot','fFila','fSaude'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
   updateFCount(); loadStatsChips(); if(state.bairroLayer){map.removeLayer(state.bairroLayer);state.bairroLayer=null;}
+  if(state.poligono) limparPoligono(true);
   state.choroData=null; refresh();
 };
 document.getElementById('fBairro').onchange = e=>{ state.bairro=e.target.value; updateFCount(); loadStatsChips(); highlightBairro(e.target.value); };
+document.getElementById('fComunidade').onchange = e=>{ state.comunidade=e.target.value; updateFCount(); aplicarComunidade(e.target.value); };
 document.getElementById('fTipo').onchange = e=>{ state.tipo=e.target.value; updateFCount(); state.choroData=null; refresh(); };
 document.getElementById('fEstado').onchange = e=>{ state.estado=e.target.value; updateFCount(); refresh(); };
 document.getElementById('fPot').onchange = e=>{ state.pot=e.target.value; updateFCount(); refresh(); };
@@ -5939,7 +5975,7 @@ document.getElementById('splash').addEventListener('click',e=>{ if(e.target.id==
 setTimeout(dismissSplash, 2200);
 
 // ---------- init ----------
-loadConfig(); carregarPainelConfig(); loadBairroOptions(); renderMunicipioLimites(); loadStatsChips(); refresh();
+loadConfig(); carregarPainelConfig(); loadBairroOptions(); loadComunidadeOptions(); renderMunicipioLimites(); loadStatsChips(); refresh();
 </script>
 </body>
 </html>
