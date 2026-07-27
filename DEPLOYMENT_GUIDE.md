@@ -93,42 +93,65 @@ supabase projects describe
 > visível. O Cloudflare Pages tem bandwidth ilimitado no plano gratuito e lê o
 > **mesmo formato** de `_headers`, então as regras de segurança seguem valendo.
 
-O deploy é feito pelo workflow `.github/workflows/deploy-cloudflare.yml`, que roda no
-GitHub Actions (gratuito em repositório público) e publica com `wrangler`.
+O deploy usa a **Git integration** do Cloudflare Pages: a Cloudflare lê este
+repositório e faz build e deploy a cada push em `main`, sem token, sem secret e sem
+GitHub Actions. Também gera preview deployments para pull requests.
 
-### 3.1 Criar o token de API na Cloudflare
-
-```
-1. https://dash.cloudflare.com → ícone do perfil → API Tokens
-2. "Create Token" → template "Edit Cloudflare Workers"
-   (ou Custom Token com a permissão: Account → Cloudflare Pages → Edit)
-3. Copiar o token gerado (aparece só uma vez)
-4. Anotar o Account ID, visível na barra lateral do dashboard
-```
-
-### 3.2 Cadastrar os dois secrets no GitHub
+### 3.1 Criar o projeto (uma vez)
 
 ```
-Repositório → Settings → Secrets and variables → Actions → New repository secret
-
-CLOUDFLARE_API_TOKEN   = <token da etapa 3.1>
-CLOUDFLARE_ACCOUNT_ID  = <account id da etapa 3.1>
+1. https://dash.cloudflare.com → Workers & Pages
+2. Create application → aba Pages → "Import an existing Git repository"
+3. Selecionar DaniloSFValim/openlux → Begin setup
+4. Preencher a configuração da tabela abaixo → Save and Deploy
 ```
+
+Configuração de build — **estes são os valores exatos**, replicando o que o
+`netlify.toml` fazia:
+
+| Campo                  | Valor                                                              |
+| ---------------------- | ------------------------------------------------------------------ |
+| Project name           | `openlux` (define a URL `openlux.pages.dev`)                       |
+| Production branch      | `main`                                                             |
+| Build command          | `mkdir -p dist && cp index.html design-tokens.css _headers dist/`  |
+| Build output directory | `dist`                                                             |
 
 Não há variáveis de ambiente de Supabase a configurar: as credenciais públicas
 (`URL` e `anon key`) estão no próprio `index.html`, como antes.
 
-### 3.3 Deploy
+> **O `Build output directory` é um controle de segurança, não só uma conveniência.**
+> É ele que garante que apenas `dist/` seja publicado, nunca a raiz do repositório —
+> que contém `supabase/migrations/*.sql`, documentação interna, POCs antigas e a
+> coleção Postman. Ver auditoria de 2026-07-09, item C4. Se algum dia esse campo for
+> alterado para `.`, todo esse material volta a ficar público.
+>
+> Vale registrar o que se perdeu na troca: a versão anterior deste deploy rodava em
+> GitHub Actions e falhava o build se um `.sql` aparecesse em `dist/` ou se algum
+> arquivo viesse vazio. Essas guardas automáticas não existem mais — agora a
+> propriedade depende desse campo do dashboard estar correto.
 
-O workflow dispara sozinho em push para `main` que altere `index.html`,
-`design-tokens.css` ou `_headers`. Para publicar sob demanda:
+### 3.2 Por que a configuração está duplicada aqui
+
+Com a Git integration, a configuração real mora no dashboard da Cloudflare, fora do
+controle de versão. A tabela acima existe para que a decisão de deploy continue
+registrada no repositório — se o projeto for recriado, ou se alguém precisar auditar
+como o site é publicado, a resposta está aqui e não só numa tela.
+
+### 3.3 Contingência: `npm ci` desnecessário no build
+
+O repositório tem `package.json` e `package-lock.json`, então a Cloudflare instala as
+`devDependencies` (`@playwright/test`, `html-validate`, `http-server`) antes de rodar
+o build command. Isso funciona, mas acrescenta cerca de um minuto sem utilidade — o
+build é `cp` puro e não usa nenhuma delas.
+
+Se quiser eliminar esse passo:
 
 ```
-Repositório → Actions → "Deploy (Cloudflare Pages)" → Run workflow
+Pages → projeto openlux → Settings → Variables and Secrets → Add
+SKIP_DEPENDENCY_INSTALL = 1
 ```
 
-No primeiro deploy o `wrangler` cria o projeto `openlux` automaticamente, e o site
-passa a responder em `https://openlux.pages.dev`.
+Opcional. Não é pré-requisito para o deploy funcionar.
 
 ### 3.4 Verificar
 
@@ -158,6 +181,26 @@ consequências já tratadas no código:
   Configuration.
 
 Para usar domínio próprio: Cloudflare Pages → projeto → Custom domains.
+
+### 3.6 Previews de pull request
+
+A Git integration repete build e deploy para cada PR, gerando uma URL de preview —
+a mesma capacidade que existia no Netlify e que se perdeu quando os créditos
+acabaram. Útil para revisar mudança visual antes do merge.
+
+### 3.7 Desativar o Netlify (depois de confirmar)
+
+O `netlify.toml` continua no repositório de propósito, como caminho de volta enquanto
+a Cloudflare não estiver confirmada no ar. Depois que estiver:
+
+```
+1. Remover netlify.toml do repositório
+2. app.netlify.com → site → Site configuration → Build & deploy
+   → Continuous deployment → "Stop builds" (ou remover o site)
+```
+
+O segundo passo importa: enquanto o site seguir conectado, o Netlify tenta um build
+por push e falha por falta de créditos, gerando notificação de erro a cada merge.
 
 ---
 
