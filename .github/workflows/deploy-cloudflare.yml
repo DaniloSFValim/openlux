@@ -1,0 +1,71 @@
+name: Deploy (Cloudflare Pages)
+
+# Publica o site no Cloudflare Pages a cada push em main.
+#
+# Por que saimos do Netlify: o "build" deste projeto e copiar tres arquivos
+# (index.html, design-tokens.css, _headers) para dist/, e isso era cobrado como
+# build a cada merge. Com os creditos esgotados, producao parou de atualizar — o
+# merge do PR #81 e um commit vazio em main nao geraram deploy algum.
+#
+# Cloudflare Pages tem bandwidth ilimitado no plano gratuito e le o MESMO formato
+# de arquivo `_headers` que o projeto ja usa, entao as regras de cabecalho da
+# auditoria de seguranca continuam valendo sem reescrita.
+#
+# O passo de montagem replica exatamente o antigo netlify.toml: publica APENAS
+# dist/, nunca a raiz do repositorio — que contem supabase/migrations/*.sql e
+# documentacao interna (auditoria 2026-07-09, item C4).
+#
+# Secrets necessarios (Settings → Secrets and variables → Actions):
+#   CLOUDFLARE_API_TOKEN   token com permissao "Cloudflare Pages: Edit"
+#   CLOUDFLARE_ACCOUNT_ID  id da conta, visivel na barra lateral do dashboard
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'design-tokens.css'
+      - '_headers'
+      - '.github/workflows/deploy-cloudflare.yml'
+  workflow_dispatch:
+    inputs:
+      motivo:
+        description: 'Motivo do deploy manual (aparece no log)'
+        required: false
+        default: 'deploy manual'
+
+concurrency:
+  group: deploy-cloudflare
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Montar dist/ (mesmo conteudo que o Netlify publicava)
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          cp index.html design-tokens.css _headers dist/
+          echo "Conteudo publicado:"
+          ls -la dist/
+          # Guardas: nao publicar sem os arquivos essenciais, e nunca vazar migrations
+          test -s dist/index.html        || { echo "::error::dist/index.html ausente ou vazio"; exit 1; }
+          test -s dist/design-tokens.css || { echo "::error::dist/design-tokens.css ausente ou vazio"; exit 1; }
+          test -s dist/_headers          || { echo "::error::dist/_headers ausente ou vazio"; exit 1; }
+          if find dist -name '*.sql' | grep -q .; then
+            echo "::error::ha .sql em dist/ — a raiz do repo nao deve ser publicada"; exit 1
+          fi
+
+      - name: Publicar no Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=openlux --commit-dirty=true
