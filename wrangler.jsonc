@@ -27,6 +27,16 @@
     // NUNCA trocar por "." — ver comentario acima.
     "directory": "./dist"
   },
+  // Dominio proprio. Como labdados.org e uma zona Cloudflare, o `custom_domain: true`
+  // faz a Cloudflare criar o registro DNS e emitir o certificado sozinha, sem passo
+  // manual no dashboard. Diferente de uma "route", um Custom Domain aponta TODOS os
+  // caminhos do subdominio para este Worker, que e o que queremos para um site.
+  "routes": [
+    {
+      "pattern": "openlux.labdados.org",
+      "custom_domain": true
+    }
+  ],
   "observability": {
     "enabled": true
   }

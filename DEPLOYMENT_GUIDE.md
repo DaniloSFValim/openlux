@@ -172,36 +172,64 @@ Dá para pular com a variável de build `SKIP_DEPENDENCY_INSTALL = 1`
 > tamanho e publicar o repositório inteiro. Com o `wrangler.jsonc` no lugar, a
 > variável é segura — e apenas uma otimização.
 
-### 3.4 Verificar
+### 3.4 Domínio próprio: `openlux.labdados.org`
+
+O domínio está declarado no `wrangler.jsonc`, não no dashboard:
+
+```jsonc
+"routes": [
+  { "pattern": "openlux.labdados.org", "custom_domain": true }
+]
+```
+
+Como `labdados.org` é uma zona Cloudflare, o `custom_domain: true` faz a Cloudflare
+**criar o registro DNS e emitir o certificado TLS sozinha** — sem passo manual e sem
+gerenciar certificado. O vínculo é criado no primeiro `wrangler deploy` que rodar com
+essa configuração.
+
+A escolha de *Custom Domain* em vez de *Route* é deliberada: um Custom Domain aponta
+**todos** os caminhos do subdomínio para o Worker, que é o comportamento desejado
+para um site. Uma Route casaria apenas padrões específicos.
+
+Equivalente pelo dashboard, se algum dia for necessário: *Worker → Settings →
+Domains & Routes → Add → Custom Domain*. Preferir o arquivo, para a configuração
+seguir versionada.
+
+### 3.5 Verificar
 
 ```bash
 # codigo novo no ar
-curl -s https://openlux.pages.dev | grep -c abrirPainel      # > 0
+curl -s https://openlux.labdados.org | grep -c abrirPainel      # > 0
 
 # headers de seguranca aplicados (prova que o _headers foi lido)
-curl -sI https://openlux.pages.dev | grep -i x-frame-options
+curl -sI https://openlux.labdados.org | grep -i x-frame-options
+
+# cache imutavel do CSS
+curl -sI https://openlux.labdados.org/design-tokens.css | grep -i cache-control
 
 # a raiz do repositorio NAO e publicada (auditoria C4)
 curl -s -o /dev/null -w '%{http_code}\n' \
-  https://openlux.pages.dev/supabase/migrations/20260720000000_initial_schema_recreation.sql
+  https://openlux.labdados.org/supabase/migrations/20260720000000_initial_schema_recreation.sql
 # esperado: 404
 ```
 
-### 3.5 Sobre o domínio e as métricas
+### 3.6 Sobre a troca de domínio
 
-A URL passa de `iluminacao-niteroi.netlify.app` para `openlux.pages.dev`. Duas
+A URL passa de `iluminacao-niteroi.netlify.app` para `openlux.labdados.org`. Duas
 consequências já tratadas no código:
 
-- **Analytics:** o Plausible está configurado com os dois domínios separados por
-  vírgula (`index.html`), então o histórico não se perde na transição.
+- **Analytics:** o Plausible lista os dois domínios separados por vírgula
+  (`index.html`), então o histórico não se perde na transição. Lembre de adicionar
+  `openlux.labdados.org` como site no painel do Plausible.
 - **Autenticação:** o login usa `signInWithPassword`, sem `redirectTo` — a troca de
   domínio **não** afeta o acesso. Se um dia houver login por OAuth ou magic link,
   será preciso incluir o domínio novo em Supabase → Authentication → URL
   Configuration.
 
-Para usar domínio próprio: Cloudflare Pages → projeto → Custom domains.
+O `_headers` é agnóstico de domínio (todas as regras são por caminho: `/*`, `/*.css`),
+então nada muda ali.
 
-### 3.6 Previews de pull request
+### 3.7 Previews de pull request
 
 A Git integration repete build e deploy para cada PR, gerando uma URL de preview —
 a mesma capacidade que existia no Netlify e que se perdeu quando os créditos
