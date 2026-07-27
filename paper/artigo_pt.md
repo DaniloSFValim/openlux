@@ -80,7 +80,7 @@ simulação radiométrica completa.
 ### 3.1 Arquitetura do sistema
 
 A aplicação é uma *single-page application* autocontida (HTML/JS sem framework,
-Leaflet para o mapa), servida estaticamente (Netlify) e apoiada no **Supabase**
+Leaflet para o mapa), servida estaticamente (Cloudflare Workers) e apoiada no **Supabase**
 (PostgreSQL + PostGIS, autenticação por papéis e *storage*). Toda a lógica de
 autorização vive no banco (RLS + funções `SECURITY DEFINER`), e o esquema é
 versionado por *migrations*. Não há etapa de *build*, o que reduz a superfície de

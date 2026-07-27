@@ -14,7 +14,6 @@ and full auditing. MIT-licensed code; the data belongs to each municipality.
 
 <br/>
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/fad767e1-972b-40e7-995d-f0c38b287c8e/deploy-status)](https://app.netlify.com/projects/iluminacao-niteroi)
 [![E2E Tests](https://github.com/DaniloSFValim/openlux/actions/workflows/e2e-tests.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/openlux/actions/workflows/e2e-tests.yml)
 [![API Tests](https://github.com/DaniloSFValim/openlux/actions/workflows/api-testing.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/openlux/actions/workflows/api-testing.yml)
 [![Lighthouse CI](https://github.com/DaniloSFValim/openlux/actions/workflows/lighthouse-ci.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/openlux/actions/workflows/lighthouse-ci.yml)
@@ -23,7 +22,7 @@ and full auditing. MIT-licensed code; the data belongs to each municipality.
 ![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla_ES6+-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 ![Leaflet](https://img.shields.io/badge/Leaflet-1.9.4-199900?style=for-the-badge&logo=leaflet&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL_+_PostGIS-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white)
-![Netlify](https://img.shields.io/badge/Netlify-Continuous_deploy-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)
+![Cloudflare Workers](https://img.shields.io/badge/Cloudflare_Workers-Continuous_deploy-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)
 
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21305310-blue.svg?style=flat-square)](https://doi.org/10.5281/zenodo.21305310)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
@@ -33,14 +32,14 @@ and full auditing. MIT-licensed code; the data belongs to each municipality.
 <br/>
 
 **[🌍 Project vision](VISION.md)** ·
-**[🌐 Live demo (Niterói)](https://iluminacao-niteroi.netlify.app)** ·
+**[🌐 Live demo (Niterói)](https://openlux.labdados.org)** ·
 **[🏙️ Deploy in your city](docs/DEPLOY_YOUR_CITY.md)** ·
 **[🐛 Report a bug](https://github.com/DaniloSFValim/openlux/issues/new?template=bug.md)**
 
 <br/>
 <br/>
 
-[![OpenLux in production — Niterói instance: 42,765 luminaires in clusters colored by LED rate](docs/assets/hero-niteroi.png)](https://iluminacao-niteroi.netlify.app)
+[![OpenLux in production — Niterói instance: 42,765 luminaires in clusters colored by LED rate](docs/assets/hero-niteroi.png)](https://openlux.labdados.org)
 
 *The reference case study, live: park clusters colored by LED modernization rate — click to open.*
 
@@ -153,7 +152,7 @@ flowchart LR
     SPA --> AUTH
     SPA --> STG
 
-    GH["📦 GitHub (main)"] -- "automatic deploy" --> NF["🌐 Netlify<br/>publishes dist/ only"]
+    GH["📦 GitHub (main)"] -- "automatic deploy" --> NF["🌐 Cloudflare Workers<br/>publishes dist/ only"]
     NF --> SPA
 ```
 

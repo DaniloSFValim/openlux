@@ -31,8 +31,8 @@ This project follows these security practices:
 
 - ✅ **XSS Prevention:** All user input escaped via `esc()` function
 - ✅ **No Credentials:** Never hardcoded in frontend code
-- ✅ **Secure Headers:** X-Frame-Options, X-Content-Type-Options via Netlify
-- ✅ **HTTPS Only:** Enforced in production (Netlify)
+- ✅ **Secure Headers:** X-Frame-Options, X-Content-Type-Options via `_headers` (Cloudflare Workers)
+- ✅ **HTTPS Only:** Enforced in production (Cloudflare Workers)
 - ✅ **CSP:** Content Security Policy via headers
 
 ### Backend (Supabase)

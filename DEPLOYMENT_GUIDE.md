@@ -12,7 +12,7 @@ Este guia descreve como fazer deploy do sistema de iluminação LED da cidade de
 
 ```bash
 # Arquivos essenciais que devem estar presentes:
-ls -la index.html netlify.toml .env.example
+ls -la index.html wrangler.jsonc _headers .env.example
 test -d .github && echo "✅ GitHub configuration found"
 test -d supabase && echo "✅ Supabase configuration found"
 ```
@@ -90,8 +90,8 @@ supabase projects describe
 > isso como build a cada merge. Quando os créditos acabaram, produção parou de
 > atualizar silenciosamente — deploys de preview continuavam, mas nenhum deploy de
 > produção era criado, e o site ficou servindo um commit antigo sem qualquer erro
-> visível. O Cloudflare Pages tem bandwidth ilimitado no plano gratuito e lê o
-> **mesmo formato** de `_headers`, então as regras de segurança seguem valendo.
+> visível. A Cloudflare tem bandwidth ilimitado no plano gratuito e lê o **mesmo
+> formato** de `_headers`, então as regras de segurança seguem valendo sem reescrita.
 
 O deploy usa **Workers Builds**: a Cloudflare lê este repositório e faz build e deploy
 a cada push em `main`, sem token, sem secret e sem GitHub Actions.
@@ -104,7 +104,7 @@ a cada push em `main`, sem token, sem secret e sem GitHub Actions.
 
 ### 3.1 A configuração fica em `wrangler.jsonc`
 
-O arquivo [`wrangler.jsonc`](../wrangler.jsonc) na raiz define o essencial:
+O arquivo [`wrangler.jsonc`](wrangler.jsonc) na raiz define o essencial:
 
 ```jsonc
 "assets": { "directory": "./dist" }
@@ -235,19 +235,22 @@ A Git integration repete build e deploy para cada PR, gerando uma URL de preview
 a mesma capacidade que existia no Netlify e que se perdeu quando os créditos
 acabaram. Útil para revisar mudança visual antes do merge.
 
-### 3.7 Desativar o Netlify (depois de confirmar)
+### 3.7 Migração concluída
 
-O `netlify.toml` continua no repositório de propósito, como caminho de volta enquanto
-a Cloudflare não estiver confirmada no ar. Depois que estiver:
+O site está no ar em `openlux.labdados.org`, verificado em 2026-07-27:
 
-```
-1. Remover netlify.toml do repositório
-2. app.netlify.com → site → Site configuration → Build & deploy
-   → Continuous deployment → "Stop builds" (ou remover o site)
-```
+| Verificação | Resultado |
+| ----------- | --------- |
+| Código atual em produção | `abrirPainel` presente, zero classes `z-[N]` |
+| `_headers` aplicado | `X-Frame-Options`, `nosniff`, `X-XSS-Protection`, `Referrer-Policy` |
+| Cache do CSS | `max-age=31536000, immutable` |
+| `/supabase/migrations/*.sql` | **404** — a raiz não é publicada |
+| `/package.json`, `/wrangler.jsonc`, `/docs/*` | 404 |
+| TLS | certificado emitido automaticamente pela Cloudflare |
 
-O segundo passo importa: enquanto o site seguir conectado, o Netlify tenta um build
-por push e falha por falta de créditos, gerando notificação de erro a cada merge.
+O `netlify.toml` foi removido e as referências a Netlify saíram da documentação
+operacional. Registros históricos (`CHANGELOG.md`, notas de release, documentos de
+melhorias) mantêm as menções de propósito — descrevem o que era verdade na época.
 
 ---
 
@@ -256,7 +259,7 @@ por push e falha por falta de créditos, gerando notificação de erro a cada me
 ### 4.1 Teste de Conectividade Frontend
 
 ```
-1. Acessar site: https://seu-site.netlify.app
+1. Acessar site: https://openlux.labdados.org
 2. Abrir DevTools (F12)
 3. Verificar aba Console — não deve haver erros em vermelho
 4. Verificar Network — requisições para Supabase devem retornar 200
@@ -331,8 +334,8 @@ Targets mínimos:
 ### 5.1 Verificar Logs
 
 ```
-Netlify Logs:
-  https://app.netlify.com → seu site → Deploys → último → Deploy logs
+Cloudflare Workers Logs:
+  dash.cloudflare.com → Workers & Pages → openlux → Deployments → último → build log
 
 Supabase Logs:
   https://app.supabase.com → seu projeto → Logs → PostgreSQL
@@ -373,10 +376,10 @@ psql -f backups/db_YYYY-MM-DD_HH-MM-SS.sql
 git log --oneline -5
 git revert <commit-id>
 git push origin main
-# Netlify rebuilda automaticamente (~2 min)
+# Workers Builds reconstroi automaticamente (~2 min)
 
-# Opção B: Via Netlify Dashboard
-# Netlify → Deploys → clique em deploy anterior → "Publish deploy"
+# Opção B: Via dashboard da Cloudflare
+# Workers & Pages → openlux → Deployments → deploy anterior → "Rollback to this deployment"
 ```
 
 ### 6.2 Rollback Backend (Supabase)
@@ -399,7 +402,7 @@ supabase db push --linked
 ```
 PRÉ-DEPLOYMENT:
 [ ] index.html pronto
-[ ] netlify.toml válido
+[ ] wrangler.jsonc válido (assets.directory = ./dist)
 [ ] .env.example preenchido com placeholders (sem credenciais reais)
 [ ] .github/workflows funcionando localmente
 
@@ -410,10 +413,11 @@ SUPABASE:
 [ ] RLS policies habilitadas
 [ ] Backups configurados
 
-NETLIFY:
-[ ] Repositório conectado
-[ ] Build settings corretos
-[ ] Environment variables configuradas
+CLOUDFLARE WORKERS:
+[ ] Repositório conectado (Workers Builds)
+[ ] Root directory = / (nao dist)
+[ ] Build command e Deploy command corretos
+[ ] Custom domain openlux.labdados.org ativo
 [ ] Domain/SSL certificado
 
 TESTES:
@@ -427,7 +431,7 @@ TESTES:
 [ ] Endereço via Nominatim preenchido
 
 MONITORAMENTO:
-[ ] Netlify logs verificados
+[ ] Build log da Cloudflare verificado (3 arquivos em dist/)
 [ ] Supabase logs verificados
 [ ] GitHub Actions status (todas passando)
 [ ] Performance scores adequados (Lighthouse)

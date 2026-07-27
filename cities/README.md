@@ -7,7 +7,7 @@ Registro público das implantações da plataforma. Para aderir, veja o
 
 | Cidade | UF | Papel | Pontos | Modo | Status | Desde |
 |---|:--:|---|---:|---|---|---|
-| **Niterói** | RJ | 🧪 Implantação de referência (laboratório) | 42.765 | Instância própria ([demo](https://iluminacao-niteroi.netlify.app)) | 🟢 Produção | 2026 |
+| **Niterói** | RJ | 🧪 Implantação de referência (laboratório) | 42.765 | Instância própria ([demo](https://openlux.labdados.org)) | 🟢 Produção | 2026 |
 | *— sua cidade aqui —* | | | | | | |
 
 ## Como entrar nesta lista
