@@ -129,14 +129,30 @@ O arquivo [`wrangler.jsonc`](../wrangler.jsonc) na raiz define o essencial:
 
 Em **Workers & Pages → openlux → Settings → Builds**:
 
-| Campo             | Valor                                                              |
-| ----------------- | ------------------------------------------------------------------ |
-| Build command     | `mkdir -p dist && cp index.html design-tokens.css _headers dist/`  |
-| Deploy command    | `npx wrangler deploy`                                              |
-| Production branch | `main`                                                             |
+| Campo              | Valor                                                              |
+| ------------------ | ------------------------------------------------------------------ |
+| **Root directory** | `/`                                                                |
+| Build command      | `mkdir -p dist && cp index.html design-tokens.css _headers dist/`  |
+| Deploy command     | `npx wrangler deploy`                                              |
+| Production branch  | `main`                                                             |
 
 O build monta `dist/` com os três arquivos; o `wrangler.jsonc` garante que só `dist/`
 suba. `dist/` está no `.gitignore` — é gerado a cada build, não versionado.
+
+> **Não coloque `dist` em Root directory.** É a confusão natural para quem vem do
+> Netlify ou do fluxo Pages, onde existe um campo "Build output directory" que recebe
+> `dist`. No Workers Builds esse campo não existe: `Root directory` é a pasta *dentro
+> do repositório* onde o build roda, e apontá-la para `dist` faz o build morrer no
+> clone, antes de qualquer comando:
+>
+> ```
+> Cloning repository...
+> Failed: root directory not found
+> ```
+>
+> O motivo é que `dist/` não existe no repositório — está no `.gitignore` e só é
+> criado durante o build. Quem define o que sobe é o `wrangler.jsonc`, não o
+> dashboard.
 
 Não há variáveis de ambiente de Supabase a configurar: as credenciais públicas
 (`URL` e `anon key`) estão no próprio `index.html`, como antes.
