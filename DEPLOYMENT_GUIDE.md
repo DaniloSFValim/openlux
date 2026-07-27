@@ -83,7 +83,7 @@ supabase projects describe
 
 ---
 
-## Fase 3: Deploy Frontend (Cloudflare Pages)
+## Fase 3: Deploy Frontend (Cloudflare Workers — static assets)
 
 > **Por que não Netlify.** O "build" deste projeto é copiar três arquivos
 > (`index.html`, `design-tokens.css`, `_headers`) para `dist/`, e o Netlify cobrava
@@ -93,65 +93,68 @@ supabase projects describe
 > visível. O Cloudflare Pages tem bandwidth ilimitado no plano gratuito e lê o
 > **mesmo formato** de `_headers`, então as regras de segurança seguem valendo.
 
-O deploy usa a **Git integration** do Cloudflare Pages: a Cloudflare lê este
-repositório e faz build e deploy a cada push em `main`, sem token, sem secret e sem
-GitHub Actions. Também gera preview deployments para pull requests.
+O deploy usa **Workers Builds**: a Cloudflare lê este repositório e faz build e deploy
+a cada push em `main`, sem token, sem secret e sem GitHub Actions.
 
-### 3.1 Criar o projeto (uma vez)
+> **Por que Workers e não Pages.** O fluxo "Import a repository" do dashboard cria um
+> Worker com static assets, não um projeto Pages — foi o que aconteceu na prática. Em
+> vez de refazer como Pages, ficamos no Worker: `_headers` funciona igual, e a
+> configuração passa a viver em `wrangler.jsonc`, **versionado**, em vez de campos do
+> dashboard. Para auditoria isso é melhor do que o plano original.
 
+### 3.1 A configuração fica em `wrangler.jsonc`
+
+O arquivo [`wrangler.jsonc`](../wrangler.jsonc) na raiz define o essencial:
+
+```jsonc
+"assets": { "directory": "./dist" }
 ```
-1. https://dash.cloudflare.com → Workers & Pages
-2. Create application → aba Pages → "Import an existing Git repository"
-3. Selecionar DaniloSFValim/openlux → Begin setup
-4. Preencher a configuração da tabela abaixo → Save and Deploy
-```
 
-Configuração de build — **estes são os valores exatos**, replicando o que o
-`netlify.toml` fazia:
+> **Esse campo é um controle de segurança, não uma conveniência.**
+>
+> Sem o `wrangler.jsonc`, o `wrangler deploy` gera configuração automática com
+> `"directory": "."` e publica a **raiz inteira** do repositório: as 128 entradas
+> versionadas, incluindo `supabase/migrations/*.sql` (schema do banco), docs internos,
+> a coleção Postman e POCs antigas.
+>
+> Foi exatamente o que ocorreu no primeiro build (2026-07-27): o wrangler leu 4560
+> arquivos de `/opt/buildhome/repo` e **só não publicou porque abortou** ao encontrar
+> `node_modules/workerd/bin/workerd` com 122 MiB, acima do limite de 25 MiB por asset.
+> A única coisa que impediu o vazamento foi um acidente de tamanho.
+>
+> Mantém a decisão da auditoria de 2026-07-09, item C4, antes garantida pelo
+> `publish = "dist"` do `netlify.toml`. **Nunca trocar `./dist` por `.`**
 
-| Campo                  | Valor                                                              |
-| ---------------------- | ------------------------------------------------------------------ |
-| Project name           | `openlux` (define a URL `openlux.pages.dev`)                       |
-| Production branch      | `main`                                                             |
-| Build command          | `mkdir -p dist && cp index.html design-tokens.css _headers dist/`  |
-| Build output directory | `dist`                                                             |
+### 3.2 Configurar o build (uma vez, no dashboard)
+
+Em **Workers & Pages → openlux → Settings → Builds**:
+
+| Campo             | Valor                                                              |
+| ----------------- | ------------------------------------------------------------------ |
+| Build command     | `mkdir -p dist && cp index.html design-tokens.css _headers dist/`  |
+| Deploy command    | `npx wrangler deploy`                                              |
+| Production branch | `main`                                                             |
+
+O build monta `dist/` com os três arquivos; o `wrangler.jsonc` garante que só `dist/`
+suba. `dist/` está no `.gitignore` — é gerado a cada build, não versionado.
 
 Não há variáveis de ambiente de Supabase a configurar: as credenciais públicas
 (`URL` e `anon key`) estão no próprio `index.html`, como antes.
 
-> **O `Build output directory` é um controle de segurança, não só uma conveniência.**
-> É ele que garante que apenas `dist/` seja publicado, nunca a raiz do repositório —
-> que contém `supabase/migrations/*.sql`, documentação interna, POCs antigas e a
-> coleção Postman. Ver auditoria de 2026-07-09, item C4. Se algum dia esse campo for
-> alterado para `.`, todo esse material volta a ficar público.
->
-> Vale registrar o que se perdeu na troca: a versão anterior deste deploy rodava em
-> GitHub Actions e falhava o build se um `.sql` aparecesse em `dist/` ou se algum
-> arquivo viesse vazio. Essas guardas automáticas não existem mais — agora a
-> propriedade depende desse campo do dashboard estar correto.
-
-### 3.2 Por que a configuração está duplicada aqui
-
-Com a Git integration, a configuração real mora no dashboard da Cloudflare, fora do
-controle de versão. A tabela acima existe para que a decisão de deploy continue
-registrada no repositório — se o projeto for recriado, ou se alguém precisar auditar
-como o site é publicado, a resposta está aqui e não só numa tela.
-
-### 3.3 Contingência: `npm ci` desnecessário no build
+### 3.3 Sobre o `npm ci` no build
 
 O repositório tem `package.json` e `package-lock.json`, então a Cloudflare instala as
-`devDependencies` (`@playwright/test`, `html-validate`, `http-server`) antes de rodar
-o build command. Isso funciona, mas acrescenta cerca de um minuto sem utilidade — o
-build é `cp` puro e não usa nenhuma delas.
+`devDependencies` (`@playwright/test`, `html-validate`, `http-server`) antes do build.
+Acrescenta cerca de um minuto e o build não usa nenhuma delas.
 
-Se quiser eliminar esse passo:
+Dá para pular com a variável de build `SKIP_DEPENDENCY_INSTALL = 1`
+(*Settings → Variables and Secrets*).
 
-```
-Pages → projeto openlux → Settings → Variables and Secrets → Add
-SKIP_DEPENDENCY_INSTALL = 1
-```
-
-Opcional. Não é pré-requisito para o deploy funcionar.
+> **Não faça isso antes de o `wrangler.jsonc` estar em `main`.** Enquanto a
+> configuração automática com `"directory": "."` estiver em uso, o `node_modules`
+> pesado é o que faz o deploy abortar. Removê-lo faria o upload passar no limite de
+> tamanho e publicar o repositório inteiro. Com o `wrangler.jsonc` no lugar, a
+> variável é segura — e apenas uma otimização.
 
 ### 3.4 Verificar
 

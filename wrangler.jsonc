@@ -1,0 +1,33 @@
+{
+  // Configuracao do deploy no Cloudflare Workers (static assets).
+  //
+  // Este arquivo existe por um motivo de seguranca, nao de conveniencia.
+  //
+  // Sem ele, o `wrangler deploy` do Workers Builds gera uma configuracao
+  // automatica com "assets": { "directory": "." } — ou seja, publica a RAIZ
+  // INTEIRA do repositorio: supabase/migrations/*.sql (schema do banco), docs
+  // internos, a colecao Postman, POCs antigas. Foi exatamente o que aconteceu no
+  // primeiro build (2026-07-27): o wrangler leu 4560 arquivos de /opt/buildhome/repo
+  // e so nao publicou porque abortou ao encontrar node_modules/workerd/bin/workerd
+  // com 122 MiB, acima do limite de 25 MiB por asset.
+  //
+  // Ou seja: a unica coisa que impediu o vazamento foi um acidente de tamanho.
+  // Apontar "directory" para ./dist e o que torna isso deliberado.
+  //
+  // Mantem a decisao da auditoria de 2026-07-09, item C4 (antes garantida pelo
+  // `publish = "dist"` do netlify.toml).
+  //
+  // O conteudo de dist/ e montado pelo build command configurado em
+  // Workers Builds (ver DEPLOYMENT_GUIDE.md, Fase 3):
+  //   mkdir -p dist && cp index.html design-tokens.css _headers dist/
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "openlux",
+  "compatibility_date": "2026-07-27",
+  "assets": {
+    // NUNCA trocar por "." — ver comentario acima.
+    "directory": "./dist"
+  },
+  "observability": {
+    "enabled": true
+  }
+}
