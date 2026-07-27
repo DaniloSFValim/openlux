@@ -83,49 +83,81 @@ supabase projects describe
 
 ---
 
-## Fase 3: Deploy Frontend (Netlify)
+## Fase 3: Deploy Frontend (Cloudflare Pages)
 
-### 3.1 Conectar Repositório
+> **Por que não Netlify.** O "build" deste projeto é copiar três arquivos
+> (`index.html`, `design-tokens.css`, `_headers`) para `dist/`, e o Netlify cobrava
+> isso como build a cada merge. Quando os créditos acabaram, produção parou de
+> atualizar silenciosamente — deploys de preview continuavam, mas nenhum deploy de
+> produção era criado, e o site ficou servindo um commit antigo sem qualquer erro
+> visível. O Cloudflare Pages tem bandwidth ilimitado no plano gratuito e lê o
+> **mesmo formato** de `_headers`, então as regras de segurança seguem valendo.
+
+O deploy é feito pelo workflow `.github/workflows/deploy-cloudflare.yml`, que roda no
+GitHub Actions (gratuito em repositório público) e publica com `wrangler`.
+
+### 3.1 Criar o token de API na Cloudflare
+
+```
+1. https://dash.cloudflare.com → ícone do perfil → API Tokens
+2. "Create Token" → template "Edit Cloudflare Workers"
+   (ou Custom Token com a permissão: Account → Cloudflare Pages → Edit)
+3. Copiar o token gerado (aparece só uma vez)
+4. Anotar o Account ID, visível na barra lateral do dashboard
+```
+
+### 3.2 Cadastrar os dois secrets no GitHub
+
+```
+Repositório → Settings → Secrets and variables → Actions → New repository secret
+
+CLOUDFLARE_API_TOKEN   = <token da etapa 3.1>
+CLOUDFLARE_ACCOUNT_ID  = <account id da etapa 3.1>
+```
+
+Não há variáveis de ambiente de Supabase a configurar: as credenciais públicas
+(`URL` e `anon key`) estão no próprio `index.html`, como antes.
+
+### 3.3 Deploy
+
+O workflow dispara sozinho em push para `main` que altere `index.html`,
+`design-tokens.css` ou `_headers`. Para publicar sob demanda:
+
+```
+Repositório → Actions → "Deploy (Cloudflare Pages)" → Run workflow
+```
+
+No primeiro deploy o `wrangler` cria o projeto `openlux` automaticamente, e o site
+passa a responder em `https://openlux.pages.dev`.
+
+### 3.4 Verificar
 
 ```bash
-# 1. Ir em https://app.netlify.com
-# 2. Clique em "New site from Git"
-# 3. Selecionar GitHub
-# 4. Localizar repositório: DaniloSFValim/openlux
-# 5. Conectar
+# codigo novo no ar
+curl -s https://openlux.pages.dev | grep -c abrirPainel      # > 0
+
+# headers de seguranca aplicados (prova que o _headers foi lido)
+curl -sI https://openlux.pages.dev | grep -i x-frame-options
+
+# a raiz do repositorio NAO e publicada (auditoria C4)
+curl -s -o /dev/null -w '%{http_code}\n' \
+  https://openlux.pages.dev/supabase/migrations/20260720000000_initial_schema_recreation.sql
+# esperado: 404
 ```
 
-### 3.2 Configurar Build Settings
+### 3.5 Sobre o domínio e as métricas
 
-```
-Netlify Dashboard → Settings → Build & deploy
+A URL passa de `iluminacao-niteroi.netlify.app` para `openlux.pages.dev`. Duas
+consequências já tratadas no código:
 
-Build command:         (deixar em branco - arquivos estáticos)
-Publish directory:     .
-Base directory:        (deixar em branco)
-Node version:          18
-```
+- **Analytics:** o Plausible está configurado com os dois domínios separados por
+  vírgula (`index.html`), então o histórico não se perde na transição.
+- **Autenticação:** o login usa `signInWithPassword`, sem `redirectTo` — a troca de
+  domínio **não** afeta o acesso. Se um dia houver login por OAuth ou magic link,
+  será preciso incluir o domínio novo em Supabase → Authentication → URL
+  Configuration.
 
-### 3.3 Configurar Environment Variables
-
-```
-Netlify Dashboard → Site settings → Environment
-
-Adicionar:
-NEXT_PUBLIC_SUPABASE_URL    = https://lrnmydrwzxxajylsmoih.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY = sb_publishable_w3UmLsmcDtT81S3MDdDJjw_rEWckoVl
-```
-
-### 3.4 Deploy Automático
-
-```bash
-# Uma vez conectado, push para main dispara deploy automático
-git push origin main
-
-# Verificar status em:
-# https://app.netlify.com → seu site → Deploys
-# Aguardar status "Published" (verde)
-```
+Para usar domínio próprio: Cloudflare Pages → projeto → Custom domains.
 
 ---
 
