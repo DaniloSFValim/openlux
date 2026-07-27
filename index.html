@@ -16,10 +16,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<!-- Dois dominios durante a migracao Netlify → Cloudflare: o Plausible aceita lista
-     separada por virgula, entao as metricas nao se perdem na troca. O destino final e
-     o dominio proprio openlux.labdados.org. -->
-<script defer data-domain="iluminacao-niteroi.netlify.app,openlux.labdados.org" src="https://plausible.io/js/script.js"></script>
+<script defer data-domain="openlux.labdados.org" src="https://plausible.io/js/script.js"></script>
 
 <!-- POC: Tailwind CSS + Alpine.js + HTMX -->
 <script src="https://cdn.tailwindcss.com"></script>
@@ -2751,8 +2748,8 @@
 
 <script>
 // Get Supabase credentials from environment or build-time injection
-// In production (Netlify): injected as window.__CONFIG__ by build process
-// In development: configure in netlify.toml or local .env
+// In production (Cloudflare Workers): injected as window.__CONFIG__ by build process
+// In development: configure in wrangler.jsonc or local .env
 const URL_SB = window.__CONFIG__?.supabaseUrl || 'https://lrnmydrwzxxajylsmoih.supabase.co';
 const ANON = window.__CONFIG__?.supabaseAnonKey || 'sb_publishable_w3UmLsmcDtT81S3MDdDJjw_rEWckoVl';
 

@@ -77,7 +77,7 @@ simulation.
 ### 3.1 System architecture
 
 The application is a self-contained single-page application (framework-free HTML/JS,
-Leaflet for the map), served statically (Netlify) and backed by **Supabase**
+Leaflet for the map), served statically (Cloudflare Workers) and backed by **Supabase**
 (PostgreSQL + PostGIS, role-based auth and storage). All authorization logic lives in
 the database (RLS + `SECURITY DEFINER` functions), and the schema is versioned via
 migrations. There is no build step, reducing maintenance surface and favoring

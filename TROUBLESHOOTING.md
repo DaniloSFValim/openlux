@@ -252,22 +252,27 @@ psql -f backups/db_*.sql -v ON_ERROR_STOP=1
 2. Verificar console para erros de fetch
 3. Testar seleção manual de Tipo
 
-## 💾 Netlify Deploy
+## 💾 Deploy (Cloudflare Workers)
 
-### Deploy falha no Netlify
+### Deploy falha no build
 
-**Sintoma:** "Build failed" no dashboard
+**Sintoma:** "Failed" no dashboard do Workers Builds
 
-**Causas:**
-- Arquivo corrompido
-- Variáveis de ambiente não configuradas
-- GitHub webhook erro
+**Causas conhecidas — todas já observadas neste projeto:**
 
-**Solução:**
-1. Ir em Netlify Dashboard → Deploys → View logs
-2. Verificar se `index.html` está correto
-3. Verificar Environment variables
-4. Trigger rebuild manual
+| Erro no log | Causa | Correção |
+| ----------- | ----- | -------- |
+| `Failed: root directory not found` | Campo **Root directory** apontado para `dist`, que não existe no repositório (está no `.gitignore` e só nasce durante o build) | Root directory = `/` |
+| `Asset too large ... workerd with a size of 122 MiB` | `wrangler.jsonc` ausente ou ignorado, fazendo o wrangler publicar a raiz com `node_modules` | Garantir `"assets": { "directory": "./dist" }` |
+| `necessary to set a CLOUDFLARE_API_TOKEN` | Deploy rodando por GitHub Actions sem o secret | Usar Workers Builds (não precisa de token) ou cadastrar o secret |
+
+**Solução geral:**
+1. Workers & Pages → openlux → **Deployments** → abrir o build → ver o log
+2. Conferir a linha `✨ Read N files from the assets directory` — deve ser **3**
+   (`index.html`, `design-tokens.css`, `_headers`). Mais que isso significa que o
+   `wrangler.jsonc` não foi lido, e a raiz do repositório está em risco de vazar
+3. Conferir os campos em Settings → Builds (ver `DEPLOYMENT_GUIDE.md`, Fase 3.2)
+4. **Retry deployment**
 
 ### Produção mostra versão antiga
 
@@ -275,14 +280,24 @@ psql -f backups/db_*.sql -v ON_ERROR_STOP=1
 
 **Causas:**
 - Cache do browser
-- CDN cache (Netlify)
-- Deploy ainda em progresso
+- Deploy ainda em progresso, ou build falhou silenciosamente
+- Build não disparou (conferir se o push foi para `main`)
 
 **Solução:**
 1. Hard refresh: Ctrl+Shift+R
-2. Aguardar 2-3 min
-3. Ver status em https://app.netlify.com
-4. Limpar cache Netlify: Settings → Build & Deploy → Clear cache
+2. Conferir o último deployment em Workers & Pages → openlux → Deployments
+3. Confirmar por fora do browser, sem cache:
+   ```bash
+   curl -s https://openlux.labdados.org | grep -c abrirPainel
+   ```
+
+> **Histórico que vale conhecer.** Este projeto já ficou semanas servindo um commit
+> antigo em produção sem nenhum erro visível: o host anterior (Netlify) parou de
+> criar deploys de produção por falta de créditos de build, enquanto os previews
+> continuavam funcionando. A lição é que "o preview está certo" não prova que
+> produção está — confirme sempre no domínio real. O `Cache-Control` da raiz é
+> `max-age=0, must-revalidate` justamente para que HTML velho nunca fique preso em
+> cache.
 
 ## 🆘 Última Opção: Debug Completo
 

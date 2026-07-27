@@ -24,7 +24,7 @@ For a complete step-by-step walkthrough, see [`DEPLOY_YOUR_CITY.md`](DEPLOY_YOUR
 2. Create a Supabase project and apply schema from `supabase/migrations/`
 3. Import point data (geometry as SRID 4326) into `pontos_luminaria` table
 4. Configure city in `config/cities/<cidade>.json` and `index.html` **CITY** block
-5. Connect to Netlify (publishes `index.html` only)
+5. Connect to Cloudflare Workers Builds (publishes `dist/` only)
 6. Create users via Supabase Auth → assign roles in `profiles.role`
 
 **Time estimate:** ~4–8 hours (data import is the long pole)
@@ -40,7 +40,7 @@ For a complete step-by-step walkthrough, see [`DEPLOY_YOUR_CITY.md`](DEPLOY_YOUR
 - [ ] Review `SECURITY DEFINER` RPCs in `supabase/migrations/` (should have `SET search_path = public` to avoid escalation)
 - [ ] Test that `leitura` (viewer) role cannot edit points: `SELECT count(*) FROM pontos_luminaria;` should work, but `UPDATE` should fail
 - [ ] Rotate Supabase service role key (see [Key Rotation](#key-rotation) below)
-- [ ] Verify Netlify environment variables are set (ANON_KEY, URL)
+- [ ] Verify Supabase public credentials in `index.html` (ANON_KEY, URL)
 - [ ] Review GitHub secrets used in CI/CD (should not expose SERVICE_ROLE_KEY in logs)
 
 **Data**
@@ -63,14 +63,14 @@ For a complete step-by-step walkthrough, see [`DEPLOY_YOUR_CITY.md`](DEPLOY_YOUR
 
 **Monitoring**
 - [ ] Database backups configured (see [Backup & Disaster Recovery](#backup--disaster-recovery))
-- [ ] Netlify deploy notifications sent to team Slack/email
+- [ ] Cloudflare deploy notifications sent to team Slack/email
 - [ ] Supabase monitoring enabled: Dashboard → Status → Monitor resources
 
 ### Launch Readiness Sign-Off
 
 | Owner | Component | Status | Notes |
 |-------|-----------|--------|-------|
-| DevOps | Infrastructure | ✅ Ready | Supabase + Netlify + DNS |
+| DevOps | Infrastructure | ✅ Ready | Supabase + Cloudflare Workers + DNS |
 | Data | Data import | ✅ Ready | Point count verified |
 | Security | RLS + Keys | ✅ Ready | Policies tested, keys rotated |
 | Product | Feature parity | ✅ Ready | Map, edit, export, campaigns working |
@@ -514,7 +514,7 @@ SELECT COUNT(*) FROM pontos_luminaria;
 | **Point data corrupted** | 30 min | Restore from backup (steps above) → verify count matches → redeploy |
 | **Schema broken** | 1 hour | Restore backup → run migrations from HEAD → test all RPCs |
 | **Supabase project deleted** | 2 hours | Create new project → restore schema from `supabase/migrations/` → restore data from backup |
-| **Netlify down** | 5 min | Deploy to alternative host (Vercel, GitHub Pages) with same Supabase URL |
+| **Cloudflare down** | 5 min | Deploy to alternative host (Vercel, GitHub Pages) with same Supabase URL |
 | **Full infrastructure loss** | 4 hours | All source in Git + backups in S3/GitHub → re-provision from scratch |
 
 ### Key Rotation
@@ -530,7 +530,7 @@ When to rotate:
 #    Settings → API → Reveal new keys → copy
 
 # 2. Update environment variables
-#    Netlify: Settings → Build & Deploy → Environment
+#    Cloudflare: Workers & Pages → openlux → Settings → Variables and Secrets
 #    GitHub: Settings → Secrets → Actions
 #    index.html: Update hardcoded values (if any)
 

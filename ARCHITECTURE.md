@@ -4,7 +4,7 @@
 
 ```
 ┌─────────────────────────────────────────────┐
-│           FRONTEND (SPA - Netlify)          │
+│           FRONTEND (SPA - Cloudflare Workers)          │
 │  ┌───────────────────────────────────────┐  │
 │  │  index.html (1.125 linhas)            │  │
 │  │  - Leaflet (Mapas)                    │  │
@@ -177,7 +177,7 @@ Mapa re-renderiza com novos filtros
 openlux/
 ├── index.html              (Aplicação principal SPA)
 ├── index-poc-working.html  (POC com modernizações)
-├── netlify.toml            (Configuração deploy Netlify)
+├── wrangler.jsonc          (Configuração deploy Cloudflare Workers)
 ├── .env.example            (Template de env)
 ├── .gitignore              (Git ignorar)
 ├── README.md               (Este arquivo)
@@ -211,7 +211,7 @@ openlux/
 
 | Layer | Tecnologia | Versão |
 |-------|-----------|--------|
-| Hospedagem Frontend | Netlify | Latest |
+| Hospedagem Frontend | Cloudflare Workers (static assets) | Latest |
 | Frontend | HTML5 + Vanilla JS | ES6+ |
 | Mapas | Leaflet | 1.9.4 |
 | Styling | Tailwind CSS | Latest (CDN) |

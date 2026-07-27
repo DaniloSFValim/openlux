@@ -10,7 +10,7 @@
 | Recurso | Custo típico | Observação |
 |---|---|---|
 | Conta [Supabase](https://supabase.com) | Grátis → ~US$ 25/mês | PostgreSQL + PostGIS + Auth + Storage |
-| Conta [Netlify](https://netlify.com) (ou similar) | Grátis | Hospeda 1 arquivo HTML |
+| Conta [Cloudflare](https://cloudflare.com) (ou similar) | Grátis | Hospeda 1 arquivo HTML |
 | Base inicial de pontos | — | Censo da distribuidora, KML/planilha própria, ou cadastro do zero em campo |
 | Uma pessoa técnica | — | Para a implantação inicial (≈ 1 dia hoje; meta da Fase 3: 1 hora) |
 
@@ -28,7 +28,7 @@
    (nome, centro, zoom, limites geográficos) — é o único ponto do código com dados da
    cidade. Credenciais do Supabase ficam logo acima (`URL_SB`/`ANON`); título e
    identidade visual são configuráveis pelo painel Admin → Aparência.
-5. **Deploy**: conecte o repositório ao Netlify (o `netlify.toml` já publica somente
+5. **Deploy**: conecte o repositório ao Cloudflare Workers Builds (o `wrangler.jsonc` já publica somente
    o `dist/index.html`).
 6. **Papéis**: crie os usuários (leitura/editor/admin) — ver
    [DEPLOYMENT_GUIDE.md](../DEPLOYMENT_GUIDE.md) e

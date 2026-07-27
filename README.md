@@ -14,7 +14,6 @@ espacial e auditoria completa. Código MIT; os dados pertencem a cada município
 
 <br/>
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/fad767e1-972b-40e7-995d-f0c38b287c8e/deploy-status)](https://app.netlify.com/projects/iluminacao-niteroi)
 [![E2E Tests](https://github.com/DaniloSFValim/openlux/actions/workflows/e2e-tests.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/openlux/actions/workflows/e2e-tests.yml)
 [![API Tests](https://github.com/DaniloSFValim/openlux/actions/workflows/api-testing.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/openlux/actions/workflows/api-testing.yml)
 [![Lighthouse CI](https://github.com/DaniloSFValim/openlux/actions/workflows/lighthouse-ci.yml/badge.svg?branch=main)](https://github.com/DaniloSFValim/openlux/actions/workflows/lighthouse-ci.yml)
@@ -23,7 +22,7 @@ espacial e auditoria completa. Código MIT; os dados pertencem a cada município
 ![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla_ES6+-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 ![Leaflet](https://img.shields.io/badge/Leaflet-1.9.4-199900?style=for-the-badge&logo=leaflet&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL_+_PostGIS-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white)
-![Netlify](https://img.shields.io/badge/Netlify-Deploy_cont%C3%ADnuo-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)
+![Cloudflare Workers](https://img.shields.io/badge/Cloudflare_Workers-Deploy_cont%C3%ADnuo-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)
 
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21305310-blue.svg?style=flat-square)](https://doi.org/10.5281/zenodo.21305310)
 [![License: MIT](https://img.shields.io/badge/Licen%C3%A7a-MIT-yellow.svg?style=flat-square)](LICENSE)
@@ -33,14 +32,14 @@ espacial e auditoria completa. Código MIT; os dados pertencem a cada município
 <br/>
 
 **[🌍 Visão do projeto](VISION.md)** ·
-**[🌐 Demo (Niterói)](https://iluminacao-niteroi.netlify.app)** ·
+**[🌐 Demo (Niterói)](https://openlux.labdados.org)** ·
 **[🏙️ Implante na sua cidade](docs/DEPLOY_YOUR_CITY.md)** ·
 **[🐛 Reportar Bug](https://github.com/DaniloSFValim/openlux/issues/new?template=bug.md)**
 
 <br/>
 <br/>
 
-[![OpenLux em produção — instância Niterói: 42.765 luminárias em clusters coloridos por taxa de LED](docs/assets/hero-niteroi.png)](https://iluminacao-niteroi.netlify.app)
+[![OpenLux em produção — instância Niterói: 42.765 luminárias em clusters coloridos por taxa de LED](docs/assets/hero-niteroi.png)](https://openlux.labdados.org)
 
 *A instância de referência ao vivo: clusters do parque de Niterói coloridos por taxa de modernização LED — clique para abrir.*
 
@@ -151,7 +150,7 @@ flowchart LR
     SPA --> AUTH
     SPA --> STG
 
-    GH["📦 GitHub (main)"] -- "deploy automático" --> NF["🌐 Netlify<br/>publica somente dist/"]
+    GH["📦 GitHub (main)"] -- "deploy automático" --> NF["🌐 Cloudflare Workers<br/>publica somente dist/"]
     NF --> SPA
 ```
 
@@ -248,7 +247,7 @@ o banco de produção é a fonte de verdade e *merge de PR não aplica migration
 ```
 openlux/
 ├── index.html                  # 🎯 A aplicação inteira (SPA autocontida)
-├── netlify.toml                # Deploy: publica somente dist/index.html
+├── wrangler.jsonc              # Deploy: publica somente dist/ (assets.directory)
 ├── VISION.md                   # 🌍 Visão e roadmap da plataforma
 ├── GOVERNANCE.md               # Como o projeto decide
 ├── cities/                     # Registro público de implantações
@@ -303,7 +302,7 @@ Vulnerabilidades de segurança: siga a [política de segurança](SECURITY.md) �
 | [docs/DEPLOY_YOUR_CITY.md](docs/DEPLOY_YOUR_CITY.md) | 🏙️ Implante o OpenLux na sua cidade |
 | [cities/README.md](cities/README.md) | Registro público de implantações |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Diagramas, fluxos e modelo de dados |
-| [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) | Deploy do zero (Netlify + Supabase) |
+| [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) | Deploy do zero (Cloudflare + Supabase) |
 | [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | FAQ e diagnóstico de problemas |
 | [APPROVAL_WORKFLOW.md](APPROVAL_WORKFLOW.md) | Fila de aprovação de alterações |
 | [docs/FIELD_REFERENCE_TIER2.md](docs/FIELD_REFERENCE_TIER2.md) | Campos de fotometria e conformidade do modelo (Tier 2) |

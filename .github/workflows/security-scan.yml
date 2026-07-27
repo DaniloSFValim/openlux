@@ -78,7 +78,7 @@ jobs:
             --exclude="*.md" \
             --exclude-dir=.github \
             --exclude="package*.json" \
-            --exclude="netlify.toml" \
+            --exclude="wrangler.jsonc" \
             --exclude=".env*"; then
             echo "❌ PRIVATE KEY FOUND"
             exit 1
@@ -89,7 +89,7 @@ jobs:
             --exclude="*.md" \
             --exclude-dir=.github \
             --exclude="package*.json" \
-            --exclude="netlify.toml" \
+            --exclude="wrangler.jsonc" \
             --exclude=".env*"; then
             echo "❌ PRIVATE KEY FOUND"
             exit 1
