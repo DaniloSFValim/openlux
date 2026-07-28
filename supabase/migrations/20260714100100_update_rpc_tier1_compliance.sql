@@ -183,15 +183,31 @@ $$;
 -- ============================================================================
 
 -- Revoke old Tier 2 signatures (without Tier 1 params)
-REVOKE IF EXISTS EXECUTE ON FUNCTION public.ip_criar_modelo(
-  text, text, integer, integer, text, text, text, text, text, text, text, text,
-  integer, numeric, numeric, numeric, text, text, text, text
-) FROM public, anon;
+--
+-- `REVOKE IF EXISTS` nao existe em PostgreSQL — a clausula IF EXISTS nao se
+-- aplica a REVOKE. Com ela, este arquivo abortava ao ser executado, e foi por
+-- isso que as mudancas acabaram aplicadas a mao no banco em vez de pela
+-- migration. O equivalente valido e um bloco DO que ignora o caso de a
+-- assinatura antiga nao existir (num banco recriado do zero ela nunca existiu).
+DO $$
+BEGIN
+  REVOKE EXECUTE ON FUNCTION public.ip_criar_modelo(
+    text, text, integer, integer, text, text, text, text, text, text, text, text,
+    integer, numeric, numeric, numeric, text, text, text, text
+  ) FROM public, anon;
+EXCEPTION WHEN undefined_function THEN
+  NULL;
+END $$;
 
-REVOKE IF EXISTS EXECUTE ON FUNCTION public.ip_atualizar_modelo(
-  uuid, text, text, integer, integer, text, text, text, text, text, text, text, text,
-  integer, numeric, numeric, numeric, text, text, text, text
-) FROM public, anon;
+DO $$
+BEGIN
+  REVOKE EXECUTE ON FUNCTION public.ip_atualizar_modelo(
+    uuid, text, text, integer, integer, text, text, text, text, text, text, text, text,
+    integer, numeric, numeric, numeric, text, text, text, text
+  ) FROM public, anon;
+EXCEPTION WHEN undefined_function THEN
+  NULL;
+END $$;
 
 -- Grant new Tier 1 + Tier 2 combined signatures to authenticated and service_role
 GRANT EXECUTE ON FUNCTION public.ip_criar_modelo(
