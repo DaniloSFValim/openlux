@@ -552,5 +552,5 @@ When to rotate:
 - [DEPLOY_YOUR_CITY.md](DEPLOY_YOUR_CITY.md) — Step-by-step single-city setup
 - [supabase/README.md](../supabase/README.md) — Local development environment
 - [supabase/migrations/README.md](../supabase/migrations/README.md) — Database schema versioning
-- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) — Common issues and solutions
+- [TROUBLESHOOTING.md](../TROUBLESHOOTING.md) — Common issues and solutions
 - [VISION.md](../VISION.md#6-roadmap-por-fases) — Multi-city Fase 3 roadmap

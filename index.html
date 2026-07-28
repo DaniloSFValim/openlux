@@ -4416,7 +4416,7 @@ window._edit = function(){
     status.textContent='⏳ Salvando…'; status.style.color='#9ca3af'; status.style.display='block';
 
     setBusy(true);
-    const {error}=await sb.rpc('ip_atualizar_ponto',{ p_id:p.id, p_tipo:document.getElementById('eTipo').value,
+    const {data,error}=await sb.rpc('ip_atualizar_ponto',{ p_id:p.id, p_tipo:document.getElementById('eTipo').value,
       p_potencia:isNaN(pot)?null:pot, p_status:document.getElementById('eStatus').value,
       p_modernizado:document.getElementById('eMod').checked, p_obs:document.getElementById('eObs').value||null,
       p_lat:pLat, p_lng:pLng,
@@ -4426,8 +4426,18 @@ window._edit = function(){
     setBusy(false);
 
     if(error){ status.textContent='❌ Erro: '+error.message; status.style.color='#ef4444'; status.style.display='block'; return; }
-    status.textContent='✅ Ponto atualizado!'; status.style.color='#4ade80'; status.style.display='block';
-    setTimeout(()=>{ document.getElementById('detail').style.display='none'; }, 1500);
+    // ip_atualizar_ponto sinaliza falha pelo VALOR DE RETORNO, nao lancando excecao:
+    // {error:'Sem permissao para editar'} e afins chegam com error==null do PostgREST.
+    // Sem esta checagem o app exibia "atualizado" mesmo quando nada tinha acontecido.
+    if(data && data.error){ status.textContent='❌ '+data.error; status.style.color='#ef4444'; status.style.display='block'; return; }
+    // Editor cai na fila de aprovacao e o ponto NAO muda agora — a funcao devolve
+    // 'Alteracao registrada - aguardando aprovacao'. Mostrar a mensagem real evita
+    // que o editor pense que salvou e so descubra depois que nada mudou.
+    const emAprovacao = !!(data && data.message && /aprova/i.test(data.message));
+    status.textContent = (emAprovacao?'⏳ ':'✅ ') + ((data && data.message) || 'Ponto atualizado');
+    status.style.color = emAprovacao ? '#fbbf24' : '#4ade80';
+    status.style.display='block';
+    setTimeout(()=>{ document.getElementById('detail').style.display='none'; }, emAprovacao ? 3000 : 1500);
     state.choroData=null; state.densData=null; refresh(); loadStatsChips();
   };
 };
@@ -4486,14 +4496,16 @@ window._formInterv = (id)=>{
   tipoSel.onchange=toggleSub; toggleSub();
   document.getElementById('ivSave').onclick=async()=>{
     setBusy(true);
-    const {error}=await sb.rpc('ip_registrar_intervencao',{ p_ponto:id, p_tipo:tipoSel.value,
+    const {data,error}=await sb.rpc('ip_registrar_intervencao',{ p_ponto:id, p_tipo:tipoSel.value,
       p_data:document.getElementById('ivData').value||null, p_descricao:document.getElementById('ivDesc').value||null,
       p_responsavel:document.getElementById('ivResp').value||null,
       p_lampada_nova:document.getElementById('ivLamp').value||null,
       p_potencia_nova:parseInt(document.getElementById('ivPot').value)||null });
     setBusy(false);
     if(error){ toast('Falha ao registrar: '+error.message,true); return; }
-    toast('Intervenção registrada'); window._interv(id); state.choroData=null; state.densData=null; refresh(); loadStatsChips();
+    // Mesma convencao dos demais RPCs de ponto: a falha vem no valor de retorno.
+    if(data && data.error){ toast(data.error,true); return; }
+    toast((data && data.message) || 'Intervenção registrada'); window._interv(id); state.choroData=null; state.densData=null; refresh(); loadStatsChips();
   };
 };
 window._hist = async (id)=>{
@@ -4967,13 +4979,13 @@ document.getElementById('bkApply').onclick=async ()=>{
   const pot=potStr===''?null:parseInt(potStr);
   if(pot!==null&&(isNaN(pot)||pot<0||pot>2000)){ toast('Potência fora da faixa (0-2000 W)',true); return; }
   if(!est&&!lamp&&potStr===''&&!mod){ toast('Nenhuma alteração selecionada',true); return; }
-  const ids=[...state.bulkSel]; let ok=0,fail=0,done=0;
+  const ids=[...state.bulkSel]; let ok=0,fail=0,done=0,pendentes=0;
   const msg=document.getElementById('bkStatusMsg'); msg.style.display='block';
   setBusy(true);
   const aplicar=async (id)=>{
     const p=state.bulkCache[id]||state.tCache[id];
     if(!p){ fail++; return; }
-    const {error}=await sb.rpc('ip_atualizar_ponto',{ p_id:p.id,
+    const {data,error}=await sb.rpc('ip_atualizar_ponto',{ p_id:p.id,
       p_tipo: lamp||p.tipo_lampada||null,
       p_potencia: potStr!==''?pot:(p.potencia_w??null),
       p_status: est||p.status||null,
@@ -4984,7 +4996,13 @@ document.getElementById('bkApply').onclick=async ()=>{
       p_classe_nbr: p.classe_nbr||null,
       p_angulo: (p.angulo_inclinacao_graus!=null)?p.angulo_inclinacao_graus:null,
       p_material: p.material_piso||null });
-    if(error){ fail++; console.error('Bulk falhou em '+p.id+': '+error.message); } else ok++;
+    // A funcao devolve {error:...} sem lancar excecao. Contar esse retorno como
+    // sucesso inflava o "ok": o usuario via "N pontos atualizados" sem que nenhum
+    // tivesse mudado. Editor cai na fila de aprovacao — contabilizado a parte.
+    if(error){ fail++; console.error('Bulk falhou em '+p.id+': '+error.message); }
+    else if(data && data.error){ fail++; console.error('Bulk recusado em '+p.id+': '+data.error); }
+    else if(data && data.message && /aprova/i.test(data.message)){ pendentes++; }
+    else ok++;
     done++; msg.textContent=`⏳ Aplicando ${done} de ${ids.length}…`;
   };
   // lotes de 5 em paralelo para áreas grandes
@@ -4999,7 +5017,7 @@ document.getElementById('bkApply').onclick=async ()=>{
   const selAll=document.getElementById('bulkAll'); if(selAll) selAll.checked=false;
   ['bkStatus','bkLamp','bkMod'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('bkPot').value='';
-  toast(`Edição em massa: ${ok} atualizado(s)${fail?`, ${fail} falha(s)`:''}`, fail>0);
+  toast(`Edição em massa: ${ok} atualizado(s)${pendentes?`, ${pendentes} aguardando aprovação`:''}${fail?`, ${fail} falha(s)`:''}`, fail>0);
   state.choroData=null; state.densData=null;
   loadStatsChips();
   if(origem==='poligono' && state.poligono) aplicarPoligono();

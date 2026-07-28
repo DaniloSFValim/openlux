@@ -39,3 +39,7 @@ secrets.json
 
 # Netlify build output
 dist/
+
+# Saida do Playwright (gerada a cada run)
+test-results/
+playwright-report/
