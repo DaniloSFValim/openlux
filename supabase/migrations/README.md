@@ -69,3 +69,52 @@ Versões anteriores a essas existem no histórico do banco mas não têm arquivo
 neste diretório (foram aplicadas pelo dashboard/MCP antes desta organização).
 Para reconstruir o schema do zero, use `supabase db pull` a partir da
 produção em vez de reexecutar este diretório.
+
+## ⛔ SQL que o PostgreSQL não aceita
+
+Três ocorrências foram encontradas na auditoria de 2026-07-28 e corrigidas. Vale
+a regra porque o modo de falhar é traiçoeiro: o arquivo **aborta inteiro**, o
+schema acaba aplicado à mão para destravar, e a migration nunca consta como
+aplicada — exatamente a divergência que este README tenta evitar.
+
+| Construção inválida | Forma correta |
+| ------------------- | ------------- |
+| `REVOKE IF EXISTS EXECUTE ON FUNCTION …` | Bloco `DO $$ BEGIN REVOKE …; EXCEPTION WHEN undefined_function THEN NULL; END $$;` |
+| `CREATE POLICY IF NOT EXISTS …` | `DROP POLICY IF EXISTS …;` seguido de `CREATE POLICY …` |
+| `CREATE TRIGGER IF NOT EXISTS …` | `DROP TRIGGER IF EXISTS … ON …;` seguido de `CREATE TRIGGER …` |
+
+`IF EXISTS` / `IF NOT EXISTS` **não** são universais: existem em `DROP`,
+`CREATE TABLE`, `CREATE INDEX` e `ADD COLUMN`, mas não em `REVOKE`, `GRANT`,
+`CREATE POLICY` nem `CREATE TRIGGER`.
+
+## Auditoria de 2026-07-28
+
+Motivo: `20260709183525_drop_dead_rpc_overloads` constava como **aplicada**, mas
+as sobrecargas de `ip_criar_modelo` (20 params) e `ip_atualizar_modelo` (21
+params) continuavam no banco. A versão antiga do update ignora em silêncio os 4
+campos Tier 1, o que quebrava a edição de modelos no painel administrativo
+(PR #88).
+
+Estado encontrado: **43 versões** registradas no banco, **21 arquivos** aqui.
+
+Corrigido nesta auditoria:
+
+- **2 arquivos com prefixo de 8 dígitos** viviam neste diretório apesar da regra
+  acima — `20260714_add_rpc_estatisticas_gerais.sql` e
+  `20260715_add_painel_descritivo_config.sql`. Renomeados para 14 dígitos
+  (`20260714000000`, `20260715000000`), preservando a ordem cronológica real.
+- **3 construções de SQL inválido** (tabela acima), nos dois arquivos que hoje
+  não constam como aplicados — justamente porque abortavam.
+
+Registrado, sem ação:
+
+- **9 arquivos têm nome idêntico a uma versão aplicada, mas timestamp diferente**
+  (ex.: `add_tier1_compliance_fields` — repo `20260714100000`, banco
+  `20260716152154`). Foram aplicados via dashboard/MCP, que gera o próprio
+  timestamp. Renomeá-los não traria ganho e reescreveria histórico.
+- **2 arquivos sem versão correspondente no banco**:
+  `20260716100000_create_rpc_listar_modelos.sql` (substituído por
+  `create_rpc_listar_modelos_fixed`, aplicado) e
+  `20260720000000_initial_schema_recreation.sql` (consolidação parcial — cobre
+  4 tabelas, 7 policies e 8 índices, mas **nenhuma função**, então não substitui
+  o `db pull` para reconstruir o schema).

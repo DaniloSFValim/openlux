@@ -124,7 +124,14 @@ GRANT SELECT ON public.site_config TO authenticated;
 GRANT EXECUTE ON FUNCTION public.ip_obter_painel_config TO authenticated;
 
 -- Admin pode atualizar configuração
-CREATE POLICY IF NOT EXISTS "admin_update_painel_config" ON public.site_config
+-- PostgreSQL nao aceita `CREATE POLICY IF NOT EXISTS` (nao existe em nenhuma
+-- versao). A forma idempotente e dropar antes de criar. Enquanto a linha invalida
+-- esteve aqui, este arquivo abortava ao ser executado — foi por isso que o schema
+-- do painel descritivo acabou aplicado a mao e a migration nunca constou como
+-- aplicada no banco.
+DROP POLICY IF EXISTS "admin_update_painel_config" ON public.site_config;
+
+CREATE POLICY "admin_update_painel_config" ON public.site_config
   FOR UPDATE
   USING (
     EXISTS (
