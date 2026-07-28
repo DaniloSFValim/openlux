@@ -34,21 +34,14 @@ timestamp de 14 dígitos).
 sem registrar a migration correspondente — as duas coisas juntas é que
 mantêm este diretório confiável.
 
-## Sobre `../migrations_archive/`
+## Migrations legadas (removidas)
 
-Contém os arquivos antigos com prefixo de data incompleto (8 dígitos,
-ex.: `20260709_fix_...`). Eles foram movidos para fora deste diretório porque:
+Existiu um `../migrations_archive/` com arquivos de prefixo curto (8 dígitos),
+preservados como registro histórico das intenções de cada PR. Foi removido em
+2026-07-28: nenhum deles era executável (vários **regressivos**, recriando
+funções com colunas inexistentes) e o histórico continua no git.
 
-- O prefixo curto quebra a ordenação do Supabase CLI (arquivos do mesmo dia
-  ordenam alfabeticamente pelo nome, não pela ordem real de aplicação);
-- Vários **nunca foram aplicados** ao banco, ou foram substituídos por
-  hotfixes manuais posteriores;
-- Alguns são **regressivos**: se executados em ordem alfabética, recriam
-  funções quebradas (ex.: `20260709_fix_rpc_enum_type_casting.sql` recria
-  `ip_inserir_ponto` com colunas `latitude`/`longitude` que não existem).
-
-**Não execute os arquivos do archive.** Eles estão preservados apenas como
-registro histórico das intenções de cada PR.
+Para reconstruir o banco, use [`../schema.sql`](../schema.sql).
 
 ## Estado em 2026-07-10
 

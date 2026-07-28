@@ -176,7 +176,6 @@ Mapa re-renderiza com novos filtros
 ```
 openlux/
 ├── index.html              (Aplicação principal SPA)
-├── index-poc-working.html  (POC com modernizações)
 ├── wrangler.jsonc          (Configuração deploy Cloudflare Workers)
 ├── .env.example            (Template de env)
 ├── .gitignore              (Git ignorar)

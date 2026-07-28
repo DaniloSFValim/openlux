@@ -254,19 +254,20 @@ psql "$DATABASE_URL" -f supabase/schema.sql
 ```
 openlux/
 ├── index.html                  # 🎯 A aplicação inteira (SPA autocontida)
+├── design-tokens.css           # Tokens de design (cores, espaçamento, z-index)
+├── _headers                    # Headers HTTP: segurança + cache imutável
 ├── wrangler.jsonc              # Deploy: publica somente dist/ (assets.directory)
 ├── VISION.md                   # 🌍 Visão e roadmap da plataforma
 ├── GOVERNANCE.md               # Como o projeto decide
 ├── cities/                     # Registro público de implantações
 ├── supabase/
 │   ├── schema.sql              # Snapshot completo: reconstrói o banco do zero
-│   ├── migrations/             # Schema versionado (espelho do banco) + README
-│   └── migrations_archive/     # Migrations legadas (NÃO executar)
+│   └── migrations/             # Schema versionado (espelho do banco) + README
 ├── tests/                      # E2E Playwright
 ├── scripts/                    # Backup & restore
 ├── docs/                       # Guias e referências (deploy, Tier 2/3, PI)
 ├── paper/                      # 📄 Artigo científico (PT/EN), dados e figuras
-├── .github/workflows/          # 7 pipelines de CI/CD
+├── .github/workflows/          # 8 pipelines de CI/CD
 ├── ARCHITECTURE.md             # Arquitetura detalhada
 ├── DEPLOYMENT_GUIDE.md         # Guia de deploy passo a passo
 ├── TROUBLESHOOTING.md          # Soluções para problemas comuns

@@ -85,13 +85,9 @@ supabase projects describe
 
 ## Fase 3: Deploy Frontend (Cloudflare Workers — static assets)
 
-> **Por que não Netlify.** O "build" deste projeto é copiar três arquivos
-> (`index.html`, `design-tokens.css`, `_headers`) para `dist/`, e o Netlify cobrava
-> isso como build a cada merge. Quando os créditos acabaram, produção parou de
-> atualizar silenciosamente — deploys de preview continuavam, mas nenhum deploy de
-> produção era criado, e o site ficou servindo um commit antigo sem qualquer erro
-> visível. A Cloudflare tem bandwidth ilimitado no plano gratuito e lê o **mesmo
-> formato** de `_headers`, então as regras de segurança seguem valendo sem reescrita.
+> O host anterior cobrava como build o que aqui é copiar três arquivos, e quando os
+> créditos acabaram produção parou de atualizar **em silêncio**. A lição está em
+> [TROUBLESHOOTING.md](TROUBLESHOOTING.md#-deploy-cloudflare-workers).
 
 O deploy usa **Workers Builds**: a Cloudflare lê este repositório e faz build e deploy
 a cada push em `main`, sem token, sem secret e sem GitHub Actions.
@@ -123,7 +119,7 @@ O arquivo [`wrangler.jsonc`](wrangler.jsonc) na raiz define o essencial:
 > A única coisa que impediu o vazamento foi um acidente de tamanho.
 >
 > Mantém a decisão da auditoria de 2026-07-09, item C4, antes garantida pelo
-> `publish = "dist"` do `netlify.toml`. **Nunca trocar `./dist` por `.`**
+> `publish = "dist"` da configuração anterior. **Nunca trocar `./dist` por `.`**
 
 ### 3.2 Configurar o build (uma vez, no dashboard)
 
@@ -139,8 +135,8 @@ Em **Workers & Pages → openlux → Settings → Builds**:
 O build monta `dist/` com os três arquivos; o `wrangler.jsonc` garante que só `dist/`
 suba. `dist/` está no `.gitignore` — é gerado a cada build, não versionado.
 
-> **Não coloque `dist` em Root directory.** É a confusão natural para quem vem do
-> Netlify ou do fluxo Pages, onde existe um campo "Build output directory" que recebe
+> **Não coloque `dist` em Root directory.** É a confusão natural para quem vem de
+> outros hosts ou do fluxo Pages, onde existe um campo "Build output directory" que recebe
 > `dist`. No Workers Builds esse campo não existe: `Root directory` é a pasta *dentro
 > do repositório* onde o build roda, e apontá-la para `dist` faz o build morrer no
 > clone, antes de qualquer comando:
@@ -215,8 +211,8 @@ curl -s -o /dev/null -w '%{http_code}\n' \
 
 ### 3.6 Sobre a troca de domínio
 
-A URL passa de `iluminacao-niteroi.netlify.app` para `openlux.labdados.org`. Duas
-consequências já tratadas no código:
+O site responde em `openlux.labdados.org`. Duas consequências da troca de domínio,
+já tratadas no código:
 
 - **Analytics:** o Plausible lista os dois domínios separados por vírgula
   (`index.html`), então o histórico não se perde na transição. Lembre de adicionar
@@ -232,7 +228,7 @@ então nada muda ali.
 ### 3.7 Previews de pull request
 
 A Git integration repete build e deploy para cada PR, gerando uma URL de preview —
-a mesma capacidade que existia no Netlify e que se perdeu quando os créditos
+a mesma capacidade que se perdeu quando os créditos do host anterior
 acabaram. Útil para revisar mudança visual antes do merge.
 
 ### 3.7 Migração concluída
@@ -247,10 +243,6 @@ O site está no ar em `openlux.labdados.org`, verificado em 2026-07-27:
 | `/supabase/migrations/*.sql` | **404** — a raiz não é publicada |
 | `/package.json`, `/wrangler.jsonc`, `/docs/*` | 404 |
 | TLS | certificado emitido automaticamente pela Cloudflare |
-
-O `netlify.toml` foi removido e as referências a Netlify saíram da documentação
-operacional. Registros históricos (`CHANGELOG.md`, notas de release, documentos de
-melhorias) mantêm as menções de propósito — descrevem o que era verdade na época.
 
 ---
 
