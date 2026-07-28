@@ -241,6 +241,13 @@ O schema é versionado em [`supabase/migrations/`](supabase/migrations/) — **l
 [README de migrations](supabase/migrations/README.md)** antes de qualquer mudança:
 o banco de produção é a fonte de verdade e *merge de PR não aplica migration*.
 
+Para **subir o banco do zero**, use o snapshot completo em
+[`supabase/schema.sql`](supabase/schema.sql) (não o diretório de migrations):
+
+```bash
+psql "$DATABASE_URL" -f supabase/schema.sql
+```
+
 <details>
 <summary><b>📂 Estrutura do projeto</b></summary>
 
@@ -252,6 +259,7 @@ openlux/
 ├── GOVERNANCE.md               # Como o projeto decide
 ├── cities/                     # Registro público de implantações
 ├── supabase/
+│   ├── schema.sql              # Snapshot completo: reconstrói o banco do zero
 │   ├── migrations/             # Schema versionado (espelho do banco) + README
 │   └── migrations_archive/     # Migrations legadas (NÃO executar)
 ├── tests/                      # E2E Playwright

@@ -67,8 +67,28 @@ registro histórico das intenções de cada PR.
 
 Versões anteriores a essas existem no histórico do banco mas não têm arquivo
 neste diretório (foram aplicadas pelo dashboard/MCP antes desta organização).
-Para reconstruir o schema do zero, use `supabase db pull` a partir da
-produção em vez de reexecutar este diretório.
+
+## Para reconstruir o schema do zero: `../schema.sql`
+
+**Não reexecute este diretório** — ele não reconstrói o banco.
+
+Use [`supabase/schema.sql`](../schema.sql), um snapshot completo da produção
+gerado por introspecção do catálogo:
+
+```bash
+psql "$DATABASE_URL" -f supabase/schema.sql
+```
+
+Ele foi **verificado executando de fato** num PostgreSQL 16 + PostGIS vazio:
+zero erros, e o resultado confere com a produção objeto a objeto (18 tabelas,
+196 colunas, 46 funções, 62 índices, 58 constraints, 35 policies, 7 triggers,
+4 buckets — hashes das definições idênticos, exceto a qualificação de schema de
+`uuid_generate_v4()`, que é diferença de renderização por `search_path`).
+
+Esse arquivo fica **fora** deste diretório de propósito, para que
+`supabase db push` nunca tente aplicá-lo sobre a produção. Mudanças de schema
+continuam sendo feitas por migration, pelo fluxo descrito acima; o snapshot deve
+ser **regenerado depois delas**.
 
 ## ⛔ SQL que o PostgreSQL não aceita
 
