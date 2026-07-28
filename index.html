@@ -3300,7 +3300,7 @@ async function _abrirNovoAtivoFormulario(lat, lng){
       p_status: ehLum ? document.getElementById('nStatus').value : 'a_verificar', p_modernizado: ehLum ? document.getElementById('nMod').checked : false,
       p_endereco: document.getElementById('nEnd').value || null, p_patrimonio: document.getElementById('nPatr').value || null, p_obs: 'cadastro via mapa',
       p_tipo_ativo: nAtivo.value, p_tipo_luminaria: ehLum ? (document.getElementById('nTipoLum').value || null) : null,
-      p_classe_nbr: ehLum ? (document.getElementById('nClasse').value || null) : null, p_requer_aprovacao: false,
+      p_classe_nbr: ehLum ? (document.getElementById('nClasse').value || null) : null,
       p_angulo: ehLum ? (document.getElementById('nAngulo').value!==''?parseInt(document.getElementById('nAngulo').value):null) : null,
       p_material: ehLum ? (document.getElementById('nMaterial').value || null) : null });
     setBusy(false);
@@ -4430,14 +4430,10 @@ window._edit = function(){
     // {error:'Sem permissao para editar'} e afins chegam com error==null do PostgREST.
     // Sem esta checagem o app exibia "atualizado" mesmo quando nada tinha acontecido.
     if(data && data.error){ status.textContent='❌ '+data.error; status.style.color='#ef4444'; status.style.display='block'; return; }
-    // Editor cai na fila de aprovacao e o ponto NAO muda agora — a funcao devolve
-    // 'Alteracao registrada - aguardando aprovacao'. Mostrar a mensagem real evita
-    // que o editor pense que salvou e so descubra depois que nada mudou.
-    const emAprovacao = !!(data && data.message && /aprova/i.test(data.message));
-    status.textContent = (emAprovacao?'⏳ ':'✅ ') + ((data && data.message) || 'Ponto atualizado');
-    status.style.color = emAprovacao ? '#fbbf24' : '#4ade80';
+    status.textContent = '✅ ' + ((data && data.message) || 'Ponto atualizado');
+    status.style.color = '#4ade80';
     status.style.display='block';
-    setTimeout(()=>{ document.getElementById('detail').style.display='none'; }, emAprovacao ? 3000 : 1500);
+    setTimeout(()=>{ document.getElementById('detail').style.display='none'; }, 1500);
     state.choroData=null; state.densData=null; refresh(); loadStatsChips();
   };
 };
@@ -4584,7 +4580,7 @@ document.getElementById('btnNovo').onclick = ()=>{
       p_status: ehLum?document.getElementById('nStatus').value:'a_verificar', p_modernizado: ehLum?document.getElementById('nMod').checked:false,
       p_endereco:document.getElementById('nEnd').value||null, p_patrimonio:document.getElementById('nPatr').value||null, p_obs:'cadastro manual',
       p_tipo_ativo:nAtivo.value, p_tipo_luminaria: ehLum?(document.getElementById('nTipoLum').value||null):null,
-      p_classe_nbr: ehLum?(document.getElementById('nClasse').value||null):null, p_requer_aprovacao: false,
+      p_classe_nbr: ehLum?(document.getElementById('nClasse').value||null):null,
       p_angulo: ehLum ? (document.getElementById('nAngulo').value!==''?parseInt(document.getElementById('nAngulo').value):null) : null,
       p_material: ehLum ? (document.getElementById('nMaterial').value||null) : null });
     setBusy(false);
@@ -4979,7 +4975,7 @@ document.getElementById('bkApply').onclick=async ()=>{
   const pot=potStr===''?null:parseInt(potStr);
   if(pot!==null&&(isNaN(pot)||pot<0||pot>2000)){ toast('Potência fora da faixa (0-2000 W)',true); return; }
   if(!est&&!lamp&&potStr===''&&!mod){ toast('Nenhuma alteração selecionada',true); return; }
-  const ids=[...state.bulkSel]; let ok=0,fail=0,done=0,pendentes=0;
+  const ids=[...state.bulkSel]; let ok=0,fail=0,done=0;
   const msg=document.getElementById('bkStatusMsg'); msg.style.display='block';
   setBusy(true);
   const aplicar=async (id)=>{
@@ -4998,10 +4994,9 @@ document.getElementById('bkApply').onclick=async ()=>{
       p_material: p.material_piso||null });
     // A funcao devolve {error:...} sem lancar excecao. Contar esse retorno como
     // sucesso inflava o "ok": o usuario via "N pontos atualizados" sem que nenhum
-    // tivesse mudado. Editor cai na fila de aprovacao — contabilizado a parte.
+    // tivesse mudado.
     if(error){ fail++; console.error('Bulk falhou em '+p.id+': '+error.message); }
     else if(data && data.error){ fail++; console.error('Bulk recusado em '+p.id+': '+data.error); }
-    else if(data && data.message && /aprova/i.test(data.message)){ pendentes++; }
     else ok++;
     done++; msg.textContent=`⏳ Aplicando ${done} de ${ids.length}…`;
   };
@@ -5017,7 +5012,7 @@ document.getElementById('bkApply').onclick=async ()=>{
   const selAll=document.getElementById('bulkAll'); if(selAll) selAll.checked=false;
   ['bkStatus','bkLamp','bkMod'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('bkPot').value='';
-  toast(`Edição em massa: ${ok} atualizado(s)${pendentes?`, ${pendentes} aguardando aprovação`:''}${fail?`, ${fail} falha(s)`:''}`, fail>0);
+  toast(`Edição em massa: ${ok} atualizado(s)${fail?`, ${fail} falha(s)`:''}`, fail>0);
   state.choroData=null; state.densData=null;
   loadStatsChips();
   if(origem==='poligono' && state.poligono) aplicarPoligono();
@@ -5108,8 +5103,10 @@ async function loadCampanhas(){
   box.innerHTML='<div style="color:#6b7280"><span class="spin"></span> Carregando…</div>';
   const d=await rpc('ip_listar_campanhas'); if(d===null){ box.innerHTML='<div style="color:#f87171;font-size:12px">Falha ao carregar campanhas.</div>'; return; }
   const ativa=(d||[]).find(c=>c.status==='ativa');
-  const isAdmin=state.userRole==='admin';
-  const criar = isAdmin && !ativa ? `
+  // Campanhas sao trabalho de campo: editor tambem cria e encerra. A unica
+  // diferenca de papel que resta e a gestao de usuarios.
+  const podeGerir=podeEditar();
+  const criar = podeGerir && !ativa ? `
     <div class="bg-blue-950/20 border border-blue-900/50 rounded-lg p-4 mb-5">
       <div style="font-size:11px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">➕ Nova campanha</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -5117,7 +5114,7 @@ async function loadCampanhas(){
         <input id="campDesc" placeholder="Descrição (opcional)" style="flex:2;min-width:180px" class="px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm"/>
         <button class="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm rounded-lg font-semibold" onclick="window._criarCampanha()">Iniciar</button>
       </div>
-    </div>` : (isAdmin?'' : '<div style="color:#6b7280;font-size:12px;margin-bottom:12px">Apenas administradores criam/encerram campanhas.</div>');
+    </div>` : (podeGerir?'' : '<div style="color:#6b7280;font-size:12px;margin-bottom:12px">Apenas editores e administradores criam/encerram campanhas.</div>');
   const linhas=(d||[]).map(c=>{
     const pct = c.total_parque>0 ? Math.round(100*c.verificados/c.total_parque) : 0;
     const badge = c.status==='ativa' ? '<span class="badge" style="background:#0d3d24;color:#4ade80">ATIVA</span>' : '<span class="badge" style="background:#1f2a37;color:#9ca3af">encerrada</span>';
@@ -5125,7 +5122,7 @@ async function loadCampanhas(){
       <div class="flex-between" style="align-items:center;gap:8px;flex-wrap:wrap">
         <div><b class="body">${esc(c.nome)}</b> ${badge}
           <div class="text-gray" style="font-size:11px;margin-top:2px">${esc(c.descricao)||''} · início ${new Date(c.criado_em).toLocaleDateString('pt-BR')}${c.encerrada_em?(' · fim '+new Date(c.encerrada_em).toLocaleDateString('pt-BR')):''}</div></div>
-        ${c.status==='ativa'&&isAdmin?`<button class="btn" style="border-color:#7f1d1d;color:#f87171;padding:4px 10px;font-size:11px" onclick="window._encerrarCampanha('${c.id}')">Encerrar</button>`:''}
+        ${c.status==='ativa'&&podeGerir?`<button class="btn" style="border-color:#7f1d1d;color:#f87171;padding:4px 10px;font-size:11px" onclick="window._encerrarCampanha('${c.id}')">Encerrar</button>`:''}
       </div>
       <div class="flex-between text-gray" style="font-size:11px;margin-top:10px">
         <span>${(+c.verificados).toLocaleString('pt-BR')} de ${(+c.total_parque).toLocaleString('pt-BR')} pontos verificados</span><b style="color:#4ade80">${pct}%</b></div>

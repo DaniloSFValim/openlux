@@ -101,6 +101,7 @@ CREATE TYPE public.tipo_lampada     AS ENUM ('vapor_sodio', 'vapor_mercurio', 'm
 CREATE TYPE public.user_role        AS ENUM ('admin', 'editor', 'leitura');
 
 
+
 -- ============================================================================
 -- 3. SEQUENCES
 -- ============================================================================
@@ -191,23 +192,6 @@ CREATE TABLE IF NOT EXISTS public.equipamentos_modelo (
   vida_util_anos integer,
   garantia_anos integer,
   dias_manutencao_preventiva integer
-);
-
-CREATE TABLE IF NOT EXISTS public.fila_aprovacao (
-  id uuid DEFAULT gen_random_uuid() NOT NULL,
-  tipo_operacao text NOT NULL,
-  tabela_alvo text NOT NULL,
-  registro_id uuid NOT NULL,
-  usuario_id uuid NOT NULL,
-  dados_antes jsonb,
-  dados_depois jsonb,
-  motivo text,
-  status text DEFAULT 'pendente'::text,
-  aprovado_por uuid,
-  aprovado_em timestamp without time zone,
-  motivo_rejeicao text,
-  criado_em timestamp without time zone DEFAULT now(),
-  atualizado_em timestamp without time zone DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS public.ip_eficacia_luminosa (
@@ -304,7 +288,6 @@ CREATE TABLE IF NOT EXISTS public.pontos_luminaria (
   tipo_ativo ativo_tipo DEFAULT 'luminaria'::ativo_tipo NOT NULL,
   tipo_luminaria luminaria_tipo,
   classe_nbr text,
-  pendente_aprovacao boolean DEFAULT false,
   motivo_remocao text,
   health_status text DEFAULT 'cinza'::text,
   angulo_inclinacao_graus smallint,
@@ -390,7 +373,6 @@ ALTER TABLE public.bairros_niteroi ADD CONSTRAINT bairros_niteroi_pkey PRIMARY K
 ALTER TABLE public.campanhas ADD CONSTRAINT campanhas_pkey PRIMARY KEY (id);
 ALTER TABLE public.comunidades_zeis ADD CONSTRAINT comunidades_zeis_pkey PRIMARY KEY (id);
 ALTER TABLE public.equipamentos_modelo ADD CONSTRAINT equipamentos_modelo_pkey PRIMARY KEY (id);
-ALTER TABLE public.fila_aprovacao ADD CONSTRAINT fila_aprovacao_pkey PRIMARY KEY (id);
 ALTER TABLE public.ip_eficacia_luminosa ADD CONSTRAINT ip_eficacia_luminosa_pkey PRIMARY KEY (tipo);
 ALTER TABLE public.lotes_substituicao ADD CONSTRAINT lotes_substituicao_pkey PRIMARY KEY (id);
 ALTER TABLE public.metricas_diarias ADD CONSTRAINT metricas_diarias_pkey PRIMARY KEY (data);
@@ -431,7 +413,6 @@ ALTER TABLE public.equipamentos_modelo ADD CONSTRAINT equipamentos_modelo_potenc
 ALTER TABLE public.equipamentos_modelo ADD CONSTRAINT equipamentos_modelo_thd_percentual_check CHECK (((thd_percentual IS NULL) OR ((thd_percentual >= (0)::numeric) AND (thd_percentual <= (100)::numeric))));
 ALTER TABLE public.equipamentos_modelo ADD CONSTRAINT equipamentos_modelo_tipo_conectividade_check CHECK (((tipo_conectividade IS NULL) OR (tipo_conectividade = ANY (ARRAY['sem_tomada'::text, 'ansi_3pin'::text, 'ansi_7pin'::text, 'zhaga'::text]))));
 ALTER TABLE public.equipamentos_modelo ADD CONSTRAINT equipamentos_modelo_vida_util_anos_check CHECK (((vida_util_anos > 0) OR (vida_util_anos IS NULL)));
-ALTER TABLE public.fila_aprovacao ADD CONSTRAINT valid_status CHECK ((status = ANY (ARRAY['pendente'::text, 'aprovado'::text, 'rejeitado'::text])));
 ALTER TABLE public.ip_eficacia_luminosa ADD CONSTRAINT ip_eficacia_luminosa_lm_w_check CHECK ((lm_w >= (0)::numeric));
 ALTER TABLE public.painel_campos_disponveis ADD CONSTRAINT painel_campos_disponveis_tipo_check CHECK ((tipo = ANY (ARRAY['text'::text, 'number'::text, 'date'::text, 'boolean'::text, 'status'::text, 'other'::text])));
 ALTER TABLE public.pontos_luminaria ADD CONSTRAINT chk_potencia_w CHECK (((potencia_w IS NULL) OR ((potencia_w >= 0) AND (potencia_w <= 2000))));
@@ -460,9 +441,6 @@ CREATE INDEX idx_equip_vida_util ON public.equipamentos_modelo USING btree (vida
 CREATE INDEX idx_equipamentos_modelo_fabricante ON public.equipamentos_modelo USING btree (fabricante);
 CREATE INDEX idx_equipamentos_modelo_potencia ON public.equipamentos_modelo USING btree (potencia_w);
 CREATE INDEX idx_equipamentos_modelo_tecnologia ON public.equipamentos_modelo USING btree (tecnologia);
-CREATE INDEX idx_fila_criado ON public.fila_aprovacao USING btree (criado_em DESC);
-CREATE INDEX idx_fila_status ON public.fila_aprovacao USING btree (status);
-CREATE INDEX idx_fila_usuario ON public.fila_aprovacao USING btree (usuario_id);
 CREATE INDEX idx_hist_ponto ON public.pontos_luminaria_historico USING btree (ponto_id, alterado_em DESC);
 CREATE INDEX idx_interv_ponto ON public.pontos_intervencoes USING btree (ponto_id, data DESC);
 CREATE INDEX idx_lotes_registro ON public.lotes_substituicao USING btree (registro_id);
@@ -475,7 +453,6 @@ CREATE INDEX idx_pontos_geom ON public.pontos_luminaria USING gist (geom);
 CREATE INDEX idx_pontos_health_status ON public.pontos_luminaria USING btree (health_status);
 CREATE INDEX idx_pontos_modernizado ON public.pontos_luminaria USING btree (modernizado_led);
 CREATE INDEX idx_pontos_municipio ON public.pontos_luminaria USING btree (municipio_id);
-CREATE INDEX idx_pontos_pendente ON public.pontos_luminaria USING btree (pendente_aprovacao);
 CREATE INDEX idx_pontos_registro_pai ON public.pontos_luminaria USING btree (registro_pai_id);
 CREATE INDEX idx_registros_bairro_id ON public.registros_iluminacao USING btree (bairro_id);
 CREATE INDEX idx_registros_categoria ON public.registros_iluminacao USING btree (categoria);
@@ -578,103 +555,6 @@ CREATE OR REPLACE VIEW public.vw_totais_por_registro AS
 -- ============================================================================
 -- 11. FUNCOES E RPCs
 -- ============================================================================
-
-CREATE OR REPLACE FUNCTION public.aprovar_mudanca(p_fila_id uuid, p_aprovado boolean DEFAULT true, p_motivo_rejeicao text DEFAULT NULL::text)
- RETURNS jsonb
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO 'public'
-AS $function$
-DECLARE
-  v_user_id uuid;
-  v_fila record;
-  v_camp uuid;
-BEGIN
-  v_user_id := auth.uid();
-
-  IF NOT EXISTS (SELECT 1 FROM profiles WHERE id = v_user_id AND role = 'admin') THEN
-    RETURN jsonb_build_object('error', 'Apenas admins podem aprovar');
-  END IF;
-
-  SELECT * INTO v_fila FROM fila_aprovacao WHERE id = p_fila_id;
-  IF v_fila IS NULL THEN
-    RETURN jsonb_build_object('error', 'Registro de aprovação não encontrado');
-  END IF;
-
-  UPDATE fila_aprovacao SET
-    status = CASE WHEN p_aprovado THEN 'aprovado' ELSE 'rejeitado' END,
-    aprovado_por = v_user_id,
-    aprovado_em = now(),
-    motivo_rejeicao = p_motivo_rejeicao
-  WHERE id = p_fila_id;
-
-  IF p_aprovado THEN
-    -- Campanha ativa quando o campo registrou a mudança (Fase 2.1)
-    SELECT id INTO v_camp FROM campanhas
-    WHERE criado_em <= v_fila.criado_em
-      AND (encerrada_em IS NULL OR encerrada_em > v_fila.criado_em)
-    ORDER BY criado_em DESC LIMIT 1;
-
-    IF v_fila.tipo_operacao = 'UPDATE' THEN
-      UPDATE pontos_luminaria SET
-        tipo_lampada = COALESCE((v_fila.dados_depois->>'tipo_lampada')::tipo_lampada, tipo_lampada),
-        potencia_w = COALESCE((v_fila.dados_depois->>'potencia_w')::int, potencia_w),
-        status = COALESCE((v_fila.dados_depois->>'status')::status_luminaria, status),
-        modernizado_led = COALESCE((v_fila.dados_depois->>'modernizado_led')::boolean, modernizado_led),
-        observacoes = COALESCE(v_fila.dados_depois->>'observacoes', observacoes),
-        geom = CASE WHEN (v_fila.dados_depois->>'lat') IS NOT NULL AND (v_fila.dados_depois->>'lon') IS NOT NULL
-                    THEN ST_SetSRID(ST_MakePoint((v_fila.dados_depois->>'lon')::double precision,
-                                                 (v_fila.dados_depois->>'lat')::double precision), 4326)
-                    ELSE geom END,
-        tipo_luminaria = CASE WHEN (v_fila.dados_depois->>'tipo_luminaria') IS NOT NULL
-                              THEN (v_fila.dados_depois->>'tipo_luminaria')::luminaria_tipo
-                              ELSE tipo_luminaria END,
-        classe_nbr = COALESCE(v_fila.dados_depois->>'classe_nbr', classe_nbr),
-        angulo_inclinacao_graus = COALESCE((v_fila.dados_depois->>'angulo_inclinacao_graus')::int, angulo_inclinacao_graus),
-        material_piso = COALESCE(v_fila.dados_depois->>'material_piso', material_piso),
-        verificado_em  = CASE WHEN v_camp IS NOT NULL THEN v_fila.criado_em ELSE verificado_em END,
-        verificado_por = CASE WHEN v_camp IS NOT NULL THEN v_fila.usuario_id ELSE verificado_por END,
-        campanha_id    = CASE WHEN v_camp IS NOT NULL THEN v_camp ELSE campanha_id END,
-        pendente_aprovacao = false,
-        atualizado_em = now()
-      WHERE id = v_fila.registro_id;
-
-    ELSIF v_fila.tipo_operacao = 'INSERT' THEN
-      INSERT INTO pontos_luminaria (id, geom, tipo_lampada, potencia_w, status, modernizado_led,
-        endereco, numero_patrimonio, observacoes, tipo_ativo, tipo_luminaria, classe_nbr,
-        fonte, criado_em, criado_por, verificado_em, verificado_por, campanha_id)
-      VALUES (
-        v_fila.registro_id,
-        ST_SetSRID(ST_MakePoint((v_fila.dados_depois->>'lon')::double precision,
-                                (v_fila.dados_depois->>'lat')::double precision), 4326),
-        (v_fila.dados_depois->>'tipo_lampada')::tipo_lampada,
-        (v_fila.dados_depois->>'potencia_w')::int,
-        COALESCE(v_fila.dados_depois->>'status','a_verificar')::status_luminaria,
-        COALESCE((v_fila.dados_depois->>'modernizado_led')::boolean, false),
-        v_fila.dados_depois->>'endereco',
-        v_fila.dados_depois->>'numero_patrimonio',
-        v_fila.dados_depois->>'observacoes',
-        COALESCE(v_fila.dados_depois->>'tipo_ativo','luminaria')::ativo_tipo,
-        (v_fila.dados_depois->>'tipo_luminaria')::luminaria_tipo,
-        v_fila.dados_depois->>'classe_nbr',
-        'levantamento_campo'::fonte_ponto,
-        now(), v_fila.usuario_id,
-        CASE WHEN v_camp IS NOT NULL THEN v_fila.criado_em ELSE NULL END,
-        CASE WHEN v_camp IS NOT NULL THEN v_fila.usuario_id ELSE NULL END,
-        v_camp
-      );
-
-    ELSIF v_fila.tipo_operacao = 'DELETE' THEN
-      DELETE FROM pontos_luminaria WHERE id = v_fila.registro_id;
-    END IF;
-
-    RETURN jsonb_build_object('success', true, 'message', 'Mudança aprovada e aplicada');
-  ELSE
-    RETURN jsonb_build_object('success', true, 'message', 'Mudança rejeitada');
-  END IF;
-END;
-$function$
-;
 
 CREATE OR REPLACE FUNCTION public.atribuir_bairro_ponto()
  RETURNS trigger
@@ -795,60 +675,24 @@ END;
 $function$
 ;
 
-CREATE OR REPLACE FUNCTION public.ip_atualizar_ponto(p_id uuid, p_tipo text DEFAULT NULL::text, p_potencia integer DEFAULT NULL::integer, p_status text DEFAULT NULL::text, p_modernizado boolean DEFAULT NULL::boolean, p_obs text DEFAULT NULL::text, p_lat numeric DEFAULT NULL::numeric, p_lng numeric DEFAULT NULL::numeric, p_tipo_luminaria text DEFAULT NULL::text, p_classe_nbr text DEFAULT NULL::text, p_requer_aprovacao boolean DEFAULT false, p_angulo integer DEFAULT NULL::integer, p_material text DEFAULT NULL::text)
+CREATE OR REPLACE FUNCTION public.ip_atualizar_ponto(p_id uuid, p_tipo text DEFAULT NULL::text, p_potencia integer DEFAULT NULL::integer, p_status text DEFAULT NULL::text, p_modernizado boolean DEFAULT NULL::boolean, p_obs text DEFAULT NULL::text, p_lat numeric DEFAULT NULL::numeric, p_lng numeric DEFAULT NULL::numeric, p_tipo_luminaria text DEFAULT NULL::text, p_classe_nbr text DEFAULT NULL::text, p_angulo integer DEFAULT NULL::integer, p_material text DEFAULT NULL::text)
  RETURNS jsonb
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public'
 AS $function$
-DECLARE
-  v_user_id uuid;
-  v_role text;
-  v_dados_antes jsonb;
-  v_dados_depois jsonb;
-  v_camp uuid;
+DECLARE v_user_id uuid; v_role text; v_camp uuid;
 BEGIN
   v_user_id := auth.uid();
-  IF v_user_id IS NULL THEN
-    RETURN jsonb_build_object('error', 'Não autenticado');
-  END IF;
-
+  IF v_user_id IS NULL THEN RETURN jsonb_build_object('error','Não autenticado'); END IF;
   SELECT role INTO v_role FROM public.profiles WHERE id = v_user_id;
-  IF v_role IS NULL OR v_role NOT IN ('editor', 'admin') THEN
-    RETURN jsonb_build_object('error', 'Sem permissão para editar');
+  IF v_role IS NULL OR v_role NOT IN ('editor','admin') THEN
+    RETURN jsonb_build_object('error','Sem permissão para editar');
   END IF;
-
-  SELECT to_jsonb(p.*) INTO v_dados_antes FROM public.v_parque_export p WHERE id = p_id;
-  IF v_dados_antes IS NULL THEN
-    RETURN jsonb_build_object('error', 'Ponto não encontrado');
+  IF NOT EXISTS (SELECT 1 FROM public.pontos_luminaria WHERE id = p_id) THEN
+    RETURN jsonb_build_object('error','Ponto não encontrado');
   END IF;
-
-  IF p_requer_aprovacao AND v_role <> 'admin' THEN
-    v_dados_depois := jsonb_build_object(
-      'tipo_lampada', COALESCE(p_tipo, (v_dados_antes->>'tipo_lampada')),
-      'potencia_w', COALESCE(p_potencia, (v_dados_antes->>'potencia_w')::int),
-      'status', COALESCE(p_status, (v_dados_antes->>'status')),
-      'modernizado_led', COALESCE(p_modernizado, (v_dados_antes->>'modernizado_led')::boolean),
-      'observacoes', COALESCE(p_obs, (v_dados_antes->>'observacoes')),
-      'lat', COALESCE(p_lat, (v_dados_antes->>'lat')::numeric),
-      'lon', COALESCE(p_lng, (v_dados_antes->>'lon')::numeric),
-      'tipo_luminaria', COALESCE(p_tipo_luminaria, (v_dados_antes->>'tipo_luminaria')),
-      'classe_nbr', COALESCE(p_classe_nbr, (v_dados_antes->>'classe_nbr')),
-      'angulo_inclinacao_graus', COALESCE(p_angulo, (v_dados_antes->>'angulo_inclinacao_graus')::int),
-      'material_piso', COALESCE(p_material, (v_dados_antes->>'material_piso'))
-    );
-
-    INSERT INTO public.fila_aprovacao (tipo_operacao, tabela_alvo, registro_id, usuario_id, dados_antes, dados_depois)
-    VALUES ('UPDATE', 'pontos_luminaria', p_id, v_user_id, v_dados_antes, v_dados_depois);
-
-    UPDATE public.pontos_luminaria SET pendente_aprovacao = true WHERE id = p_id;
-
-    RETURN jsonb_build_object('success', true, 'message', 'Alteração registrada - aguardando aprovação');
-  END IF;
-
-  -- Recenseamento: edição direta durante campanha ativa carimba a verificação
   SELECT id INTO v_camp FROM public.campanhas WHERE status='ativa' ORDER BY criado_em DESC LIMIT 1;
-
   UPDATE public.pontos_luminaria SET
     tipo_lampada = COALESCE(p_tipo::tipo_lampada, tipo_lampada),
     potencia_w = COALESCE(p_potencia, potencia_w),
@@ -858,22 +702,17 @@ BEGIN
     geom = CASE WHEN p_lat IS NOT NULL AND p_lng IS NOT NULL
                 THEN ST_SetSRID(ST_MakePoint(p_lng::double precision, p_lat::double precision), 4326)
                 ELSE geom END,
-    tipo_luminaria = CASE WHEN p_tipo_luminaria IS NOT NULL
-                          THEN p_tipo_luminaria::luminaria_tipo
-                          ELSE tipo_luminaria END,
+    tipo_luminaria = CASE WHEN p_tipo_luminaria IS NOT NULL THEN p_tipo_luminaria::luminaria_tipo ELSE tipo_luminaria END,
     classe_nbr = COALESCE(p_classe_nbr, classe_nbr),
     angulo_inclinacao_graus = COALESCE(p_angulo, angulo_inclinacao_graus),
     material_piso = COALESCE(p_material, material_piso),
     verificado_em  = CASE WHEN v_camp IS NOT NULL THEN now() ELSE verificado_em END,
     verificado_por = CASE WHEN v_camp IS NOT NULL THEN v_user_id ELSE verificado_por END,
     campanha_id    = CASE WHEN v_camp IS NOT NULL THEN v_camp ELSE campanha_id END,
-    pendente_aprovacao = false,
     atualizado_em = now()
   WHERE id = p_id;
-
   RETURN jsonb_build_object('success', true, 'message', 'Ponto atualizado');
-END;
-$function$
+END; $function$
 ;
 
 CREATE OR REPLACE FUNCTION public.ip_bairro_geojson(p_bairro text)
@@ -1016,18 +855,15 @@ AS $function$
 DECLARE v_role text; v_id uuid;
 BEGIN
   SELECT role INTO v_role FROM public.profiles WHERE id = auth.uid();
-  IF v_role IS DISTINCT FROM 'admin' THEN
-    RETURN jsonb_build_object('error','Apenas administradores criam campanhas');
+  IF v_role IS NULL OR v_role NOT IN ('editor','admin') THEN
+    RETURN jsonb_build_object('error','Sem permissão para criar campanhas');
   END IF;
-  IF coalesce(trim(p_nome),'') = '' THEN
-    RETURN jsonb_build_object('error','Informe o nome da campanha');
-  END IF;
+  IF coalesce(trim(p_nome),'') = '' THEN RETURN jsonb_build_object('error','Informe o nome da campanha'); END IF;
   IF EXISTS (SELECT 1 FROM public.campanhas WHERE status='ativa') THEN
     RETURN jsonb_build_object('error','Já existe uma campanha ativa — encerre-a antes de criar outra');
   END IF;
   INSERT INTO public.campanhas (nome, descricao, criado_por)
-  VALUES (trim(p_nome), nullif(trim(coalesce(p_descricao,'')),''), auth.uid())
-  RETURNING id INTO v_id;
+  VALUES (trim(p_nome), nullif(trim(coalesce(p_descricao,'')),''), auth.uid()) RETURNING id INTO v_id;
   RETURN jsonb_build_object('success', true, 'id', v_id);
 END $function$
 ;
@@ -1087,14 +923,11 @@ AS $function$
 DECLARE v_role text;
 BEGIN
   SELECT role INTO v_role FROM public.profiles WHERE id = auth.uid();
-  IF v_role IS DISTINCT FROM 'admin' THEN
-    RETURN jsonb_build_object('error','Apenas administradores encerram campanhas');
+  IF v_role IS NULL OR v_role NOT IN ('editor','admin') THEN
+    RETURN jsonb_build_object('error','Sem permissão para encerrar campanhas');
   END IF;
-  UPDATE public.campanhas SET status='encerrada', encerrada_em=now()
-  WHERE id = p_id AND status='ativa';
-  IF NOT FOUND THEN
-    RETURN jsonb_build_object('error','Campanha não encontrada ou já encerrada');
-  END IF;
+  UPDATE public.campanhas SET status='encerrada', encerrada_em=now() WHERE id=p_id AND status='ativa';
+  IF NOT FOUND THEN RETURN jsonb_build_object('error','Campanha não encontrada ou já encerrada'); END IF;
   RETURN jsonb_build_object('success', true);
 END $function$
 ;
@@ -1327,53 +1160,40 @@ AS $function$
 $function$
 ;
 
-CREATE OR REPLACE FUNCTION public.ip_inserir_ponto(p_lat numeric, p_lng numeric, p_tipo text, p_potencia integer, p_status text, p_modernizado boolean, p_endereco text, p_patrimonio text, p_obs text, p_tipo_ativo text, p_tipo_luminaria text, p_classe_nbr text, p_requer_aprovacao boolean, p_angulo integer DEFAULT NULL::integer, p_material text DEFAULT NULL::text)
+CREATE OR REPLACE FUNCTION public.ip_inserir_ponto(p_lat numeric, p_lng numeric, p_tipo text, p_potencia integer, p_status text, p_modernizado boolean, p_endereco text, p_patrimonio text, p_obs text, p_tipo_ativo text, p_tipo_luminaria text, p_classe_nbr text, p_angulo integer DEFAULT NULL::integer, p_material text DEFAULT NULL::text)
  RETURNS text
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public'
 AS $function$
-DECLARE
-  v_role TEXT;
-  v_id UUID;
-  v_camp uuid;
+DECLARE v_role TEXT; v_id UUID; v_camp uuid;
 BEGIN
   SELECT role INTO v_role FROM public.profiles WHERE id = auth.uid();
   IF v_role IS NULL THEN v_role := 'leitura'; END IF;
-
-  IF v_role NOT IN ('editor', 'admin') THEN
+  IF v_role NOT IN ('editor','admin') THEN
     RAISE EXCEPTION 'Permissão negada: apenas editores e administradores podem criar pontos';
   END IF;
-
   v_id := gen_random_uuid();
   SELECT id INTO v_camp FROM public.campanhas WHERE status='ativa' ORDER BY criado_em DESC LIMIT 1;
-
   INSERT INTO public.pontos_luminaria (
-    id, geom, tipo_ativo, tipo_luminaria, potencia_w,
-    modernizado_led, tipo_lampada, status, observacoes,
-    endereco, numero_patrimonio, criado_em, criado_por, classe_nbr, fonte,
-    angulo_inclinacao_graus, material_piso,
-    verificado_em, verificado_por, campanha_id
+    id, geom, tipo_ativo, tipo_luminaria, potencia_w, modernizado_led, tipo_lampada, status,
+    observacoes, endereco, numero_patrimonio, criado_em, criado_por, classe_nbr, fonte,
+    angulo_inclinacao_graus, material_piso, verificado_em, verificado_por, campanha_id
   ) VALUES (
-    v_id,
-    ST_SetSRID(ST_MakePoint(p_lng::double precision, p_lat::double precision), 4326),
+    v_id, ST_SetSRID(ST_MakePoint(p_lng::double precision, p_lat::double precision), 4326),
     p_tipo_ativo::ativo_tipo,
-    CASE WHEN p_tipo_ativo = 'luminaria' AND p_tipo_luminaria IS NOT NULL THEN p_tipo_luminaria::luminaria_tipo ELSE NULL END,
-    CASE WHEN p_tipo_ativo = 'luminaria' THEN p_potencia ELSE NULL END,
-    CASE WHEN p_tipo_ativo = 'luminaria' THEN COALESCE(p_modernizado, false) ELSE false END,
-    CASE WHEN p_tipo_ativo = 'luminaria' THEN p_tipo::tipo_lampada ELSE NULL END,
-    COALESCE(p_status, 'a_verificar')::status_luminaria,
-    COALESCE(p_obs, ''),
-    p_endereco, p_patrimonio, NOW(), auth.uid(), p_classe_nbr,
-    'levantamento_campo'::fonte_ponto,
-    CASE WHEN p_tipo_ativo = 'luminaria' THEN p_angulo ELSE NULL END,
-    CASE WHEN p_tipo_ativo = 'luminaria' THEN p_material ELSE NULL END,
+    CASE WHEN p_tipo_ativo='luminaria' AND p_tipo_luminaria IS NOT NULL THEN p_tipo_luminaria::luminaria_tipo ELSE NULL END,
+    CASE WHEN p_tipo_ativo='luminaria' THEN p_potencia ELSE NULL END,
+    CASE WHEN p_tipo_ativo='luminaria' THEN COALESCE(p_modernizado,false) ELSE false END,
+    CASE WHEN p_tipo_ativo='luminaria' THEN p_tipo::tipo_lampada ELSE NULL END,
+    COALESCE(p_status,'a_verificar')::status_luminaria, COALESCE(p_obs,''),
+    p_endereco, p_patrimonio, NOW(), auth.uid(), p_classe_nbr, 'levantamento_campo'::fonte_ponto,
+    CASE WHEN p_tipo_ativo='luminaria' THEN p_angulo ELSE NULL END,
+    CASE WHEN p_tipo_ativo='luminaria' THEN p_material ELSE NULL END,
     now(), auth.uid(), v_camp
   );
-
   RETURN v_id::TEXT;
-END;
-$function$
+END; $function$
 ;
 
 CREATE OR REPLACE FUNCTION public.ip_intervencoes(p_id uuid)
@@ -1544,52 +1364,32 @@ AS $function$
 $function$
 ;
 
-CREATE OR REPLACE FUNCTION public.ip_registrar_intervencao(p_ponto uuid, p_tipo text, p_data text DEFAULT NULL::text, p_descricao text DEFAULT NULL::text, p_responsavel text DEFAULT NULL::text, p_lampada_nova text DEFAULT NULL::text, p_potencia_nova integer DEFAULT NULL::integer, p_requer_aprovacao boolean DEFAULT false)
+CREATE OR REPLACE FUNCTION public.ip_registrar_intervencao(p_ponto uuid, p_tipo text, p_data text DEFAULT NULL::text, p_descricao text DEFAULT NULL::text, p_responsavel text DEFAULT NULL::text, p_lampada_nova text DEFAULT NULL::text, p_potencia_nova integer DEFAULT NULL::integer)
  RETURNS jsonb
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public'
 AS $function$
-DECLARE
-  v_user_id uuid;
-  v_role text;
-  v_interv_id uuid;
-  v_dados jsonb;
+DECLARE v_user_id uuid; v_role text;
 BEGIN
   v_user_id := auth.uid();
-  IF v_user_id IS NULL THEN
-    RETURN jsonb_build_object('error', 'Não autenticado');
+  IF v_user_id IS NULL THEN RETURN jsonb_build_object('error','Não autenticado'); END IF;
+  SELECT role INTO v_role FROM public.profiles WHERE id = v_user_id;
+  IF v_role IS NULL OR v_role NOT IN ('editor','admin') THEN
+    RETURN jsonb_build_object('error','Sem permissão');
   END IF;
-
-  SELECT role INTO v_role FROM profiles WHERE id = v_user_id;
-  IF v_role NOT IN ('editor', 'admin') THEN
-    RETURN jsonb_build_object('error', 'Sem permissão');
+  IF NOT EXISTS (SELECT 1 FROM public.pontos_luminaria WHERE id = p_ponto) THEN
+    RETURN jsonb_build_object('error','Ponto não encontrado');
   END IF;
-
-  v_interv_id := gen_random_uuid();
-  v_dados := jsonb_build_object(
-    'ponto_id', p_ponto,
-    'tipo', p_tipo,
-    'data', p_data,
-    'descricao', p_descricao,
-    'responsavel', p_responsavel,
-    'lampada_nova', p_lampada_nova,
-    'potencia_nova', p_potencia_nova
+  INSERT INTO public.pontos_intervencoes (
+    ponto_id, tipo, data, descricao, responsavel, tipo_lampada_nova, potencia_nova_w, registrado_por
+  ) VALUES (
+    p_ponto, p_tipo::intervencao_tipo, COALESCE(p_data::date, CURRENT_DATE),
+    p_descricao, p_responsavel, NULLIF(p_lampada_nova,'')::tipo_lampada, p_potencia_nova,
+    COALESCE((SELECT email FROM public.profiles WHERE id = v_user_id), v_user_id::text)
   );
-
-  IF p_requer_aprovacao AND v_role != 'admin' THEN
-    INSERT INTO fila_aprovacao (tipo_operacao, tabela_alvo, registro_id, usuario_id, dados_depois)
-    VALUES ('INTERVENCAO', 'intervencoes', v_interv_id, v_user_id, v_dados);
-
-    RETURN jsonb_build_object('success', true, 'message', 'Intervenção registrada - aguardando aprovação');
-  END IF;
-
-  INSERT INTO intervencoes (id, ponto_id, tipo, data, descricao, responsavel, lampada_nova, potencia_nova, registrado_por, registrado_em)
-  VALUES (v_interv_id, p_ponto, p_tipo, p_data::date, p_descricao, p_responsavel, p_lampada_nova, p_potencia_nova, v_user_id, now());
-
   RETURN jsonb_build_object('success', true, 'message', 'Intervenção registrada');
-END;
-$function$
+END; $function$
 ;
 
 CREATE OR REPLACE FUNCTION public.ip_remover_ponto(p_id uuid, p_motivo text DEFAULT NULL::text)
@@ -1791,8 +1591,6 @@ ALTER TABLE public.ativos_removidos ADD CONSTRAINT ativos_removidos_removido_por
 ALTER TABLE public.ativos_removidos ADD CONSTRAINT ativos_removidos_restaurado_por_fkey FOREIGN KEY (restaurado_por) REFERENCES auth.users(id) ON DELETE SET NULL;
 ALTER TABLE public.campanhas ADD CONSTRAINT campanhas_municipio_id_fkey FOREIGN KEY (municipio_id) REFERENCES municipios(id);
 ALTER TABLE public.equipamentos_modelo ADD CONSTRAINT equipamentos_modelo_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id);
-ALTER TABLE public.fila_aprovacao ADD CONSTRAINT fila_aprovacao_aprovado_por_fkey FOREIGN KEY (aprovado_por) REFERENCES auth.users(id) ON DELETE SET NULL;
-ALTER TABLE public.fila_aprovacao ADD CONSTRAINT fila_aprovacao_usuario_id_fkey FOREIGN KEY (usuario_id) REFERENCES auth.users(id) ON DELETE CASCADE;
 ALTER TABLE public.lotes_substituicao ADD CONSTRAINT lotes_substituicao_registro_id_fkey FOREIGN KEY (registro_id) REFERENCES registros_iluminacao(id) ON DELETE CASCADE;
 ALTER TABLE public.pontos_intervencoes ADD CONSTRAINT pontos_intervencoes_ponto_id_fkey FOREIGN KEY (ponto_id) REFERENCES pontos_luminaria(id) ON DELETE CASCADE;
 ALTER TABLE public.pontos_luminaria ADD CONSTRAINT pontos_luminaria_bairro_id_fkey FOREIGN KEY (bairro_id) REFERENCES bairros_niteroi(id);
@@ -1813,7 +1611,6 @@ ALTER TABLE public.bairros_niteroi ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.campanhas ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.comunidades_zeis ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.equipamentos_modelo ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.fila_aprovacao ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ip_eficacia_luminosa ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.lotes_substituicao ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.metricas_diarias ENABLE ROW LEVEL SECURITY;
@@ -1837,7 +1634,10 @@ DROP POLICY IF EXISTS removidos_admin_all ON public.ativos_removidos;
 CREATE POLICY removidos_admin_all ON public.ativos_removidos AS PERMISSIVE FOR ALL TO public
   USING ((EXISTS ( SELECT 1
    FROM profiles
-  WHERE ((profiles.id = auth.uid()) AND (profiles.role = 'admin'::user_role)))));
+  WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::user_role, 'editor'::user_role]))))))
+  WITH CHECK ((EXISTS ( SELECT 1
+   FROM profiles
+  WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::user_role, 'editor'::user_role]))))));
 
 DROP POLICY IF EXISTS removidos_user_own ON public.ativos_removidos;
 
@@ -1847,9 +1647,9 @@ CREATE POLICY removidos_user_own ON public.ativos_removidos AS PERMISSIVE FOR SE
 DROP POLICY IF EXISTS removidos_view ON public.ativos_removidos;
 
 CREATE POLICY removidos_view ON public.ativos_removidos AS PERMISSIVE FOR SELECT TO public
-  USING (((removido_por = auth.uid()) OR (EXISTS ( SELECT 1
+  USING ((EXISTS ( SELECT 1
    FROM profiles
-  WHERE ((profiles.id = auth.uid()) AND (profiles.role = 'admin'::user_role))))));
+  WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::user_role, 'editor'::user_role]))))));
 
 DROP POLICY IF EXISTS "leitura publica" ON public.bairros_niteroi;
 
@@ -1871,7 +1671,7 @@ DROP POLICY IF EXISTS modelos_deletable ON public.equipamentos_modelo;
 CREATE POLICY modelos_deletable ON public.equipamentos_modelo AS PERMISSIVE FOR DELETE TO public
   USING ((EXISTS ( SELECT 1
    FROM profiles
-  WHERE ((profiles.id = auth.uid()) AND (profiles.role = 'admin'::user_role)))));
+  WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::user_role, 'editor'::user_role]))))));
 
 DROP POLICY IF EXISTS modelos_readable ON public.equipamentos_modelo;
 
@@ -1893,19 +1693,7 @@ DROP POLICY IF EXISTS modelos_writable ON public.equipamentos_modelo;
 CREATE POLICY modelos_writable ON public.equipamentos_modelo AS PERMISSIVE FOR INSERT TO public
   WITH CHECK ((EXISTS ( SELECT 1
    FROM profiles
-  WHERE ((profiles.id = auth.uid()) AND (profiles.role = 'admin'::user_role)))));
-
-DROP POLICY IF EXISTS fila_admin_all ON public.fila_aprovacao;
-
-CREATE POLICY fila_admin_all ON public.fila_aprovacao AS PERMISSIVE FOR ALL TO public
-  USING ((EXISTS ( SELECT 1
-   FROM profiles
-  WHERE ((profiles.id = auth.uid()) AND (profiles.role = 'admin'::user_role)))));
-
-DROP POLICY IF EXISTS fila_user_own ON public.fila_aprovacao;
-
-CREATE POLICY fila_user_own ON public.fila_aprovacao AS PERMISSIVE FOR SELECT TO public
-  USING ((usuario_id = auth.uid()));
+  WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::user_role, 'editor'::user_role]))))));
 
 DROP POLICY IF EXISTS eficacia_select ON public.ip_eficacia_luminosa;
 
@@ -1947,7 +1735,7 @@ DROP POLICY IF EXISTS pontos_delete ON public.pontos_luminaria;
 CREATE POLICY pontos_delete ON public.pontos_luminaria AS PERMISSIVE FOR DELETE TO public
   USING ((EXISTS ( SELECT 1
    FROM profiles
-  WHERE ((profiles.id = auth.uid()) AND (profiles.role = 'admin'::user_role)))));
+  WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::user_role, 'editor'::user_role]))))));
 
 DROP POLICY IF EXISTS pontos_insert ON public.pontos_luminaria;
 
@@ -2019,16 +1807,17 @@ DROP POLICY IF EXISTS admin_update_painel_config ON public.site_config;
 CREATE POLICY admin_update_painel_config ON public.site_config AS PERMISSIVE FOR UPDATE TO public
   USING ((EXISTS ( SELECT 1
    FROM profiles
-  WHERE ((profiles.id = auth.uid()) AND (profiles.role = 'admin'::user_role)))))
+  WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::user_role, 'editor'::user_role]))))))
   WITH CHECK ((EXISTS ( SELECT 1
    FROM profiles
-  WHERE ((profiles.id = auth.uid()) AND (profiles.role = 'admin'::user_role)))));
+  WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::user_role, 'editor'::user_role]))))));
 
 DROP POLICY IF EXISTS "config admin escreve" ON public.site_config;
 
-CREATE POLICY "config admin escreve" ON public.site_config AS PERMISSIVE FOR UPDATE TO authenticated
-  USING (is_admin())
-  WITH CHECK (is_admin());
+CREATE POLICY "config admin escreve" ON public.site_config AS PERMISSIVE FOR UPDATE TO public
+  USING ((EXISTS ( SELECT 1
+   FROM profiles
+  WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['admin'::user_role, 'editor'::user_role]))))));
 
 DROP POLICY IF EXISTS "config leitura publica" ON public.site_config;
 
@@ -2055,9 +1844,6 @@ GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.co
 GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.equipamentos_modelo TO anon;
 GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.equipamentos_modelo TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.equipamentos_modelo TO service_role;
-GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.fila_aprovacao TO anon;
-GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.fila_aprovacao TO authenticated;
-GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.fila_aprovacao TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.geography_columns TO anon;
 GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.geography_columns TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.geography_columns TO service_role;
@@ -2118,8 +1904,6 @@ GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.vw
 -- 17. GRANTS — FUNCOES
 -- ============================================================================
 
-GRANT EXECUTE ON FUNCTION public.aprovar_mudanca(p_fila_id uuid, p_aprovado boolean, p_motivo_rejeicao text) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.aprovar_mudanca(p_fila_id uuid, p_aprovado boolean, p_motivo_rejeicao text) TO service_role;
 GRANT EXECUTE ON FUNCTION public.atribuir_bairro_ponto() TO anon;
 GRANT EXECUTE ON FUNCTION public.atribuir_bairro_ponto() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.atribuir_bairro_ponto() TO service_role;
@@ -2137,8 +1921,9 @@ GRANT EXECUTE ON FUNCTION public.ip_atualizar_modelo(p_id uuid, p_fabricante tex
 GRANT EXECUTE ON FUNCTION public.ip_atualizar_painel_config(p_design text, p_campos jsonb) TO anon;
 GRANT EXECUTE ON FUNCTION public.ip_atualizar_painel_config(p_design text, p_campos jsonb) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.ip_atualizar_painel_config(p_design text, p_campos jsonb) TO service_role;
-GRANT EXECUTE ON FUNCTION public.ip_atualizar_ponto(p_id uuid, p_tipo text, p_potencia integer, p_status text, p_modernizado boolean, p_obs text, p_lat numeric, p_lng numeric, p_tipo_luminaria text, p_classe_nbr text, p_requer_aprovacao boolean, p_angulo integer, p_material text) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.ip_atualizar_ponto(p_id uuid, p_tipo text, p_potencia integer, p_status text, p_modernizado boolean, p_obs text, p_lat numeric, p_lng numeric, p_tipo_luminaria text, p_classe_nbr text, p_requer_aprovacao boolean, p_angulo integer, p_material text) TO service_role;
+GRANT EXECUTE ON FUNCTION public.ip_atualizar_ponto(p_id uuid, p_tipo text, p_potencia integer, p_status text, p_modernizado boolean, p_obs text, p_lat numeric, p_lng numeric, p_tipo_luminaria text, p_classe_nbr text, p_angulo integer, p_material text) TO anon;
+GRANT EXECUTE ON FUNCTION public.ip_atualizar_ponto(p_id uuid, p_tipo text, p_potencia integer, p_status text, p_modernizado boolean, p_obs text, p_lat numeric, p_lng numeric, p_tipo_luminaria text, p_classe_nbr text, p_angulo integer, p_material text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.ip_atualizar_ponto(p_id uuid, p_tipo text, p_potencia integer, p_status text, p_modernizado boolean, p_obs text, p_lat numeric, p_lng numeric, p_tipo_luminaria text, p_classe_nbr text, p_angulo integer, p_material text) TO service_role;
 GRANT EXECUTE ON FUNCTION public.ip_bairro_geojson(p_bairro text) TO anon;
 GRANT EXECUTE ON FUNCTION public.ip_bairro_geojson(p_bairro text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.ip_bairro_geojson(p_bairro text) TO service_role;
@@ -2187,8 +1972,9 @@ GRANT EXECUTE ON FUNCTION public.ip_health_status_summary(min_lng double precisi
 GRANT EXECUTE ON FUNCTION public.ip_historico_ponto(p_id uuid) TO anon;
 GRANT EXECUTE ON FUNCTION public.ip_historico_ponto(p_id uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.ip_historico_ponto(p_id uuid) TO service_role;
-GRANT EXECUTE ON FUNCTION public.ip_inserir_ponto(p_lat numeric, p_lng numeric, p_tipo text, p_potencia integer, p_status text, p_modernizado boolean, p_endereco text, p_patrimonio text, p_obs text, p_tipo_ativo text, p_tipo_luminaria text, p_classe_nbr text, p_requer_aprovacao boolean, p_angulo integer, p_material text) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.ip_inserir_ponto(p_lat numeric, p_lng numeric, p_tipo text, p_potencia integer, p_status text, p_modernizado boolean, p_endereco text, p_patrimonio text, p_obs text, p_tipo_ativo text, p_tipo_luminaria text, p_classe_nbr text, p_requer_aprovacao boolean, p_angulo integer, p_material text) TO service_role;
+GRANT EXECUTE ON FUNCTION public.ip_inserir_ponto(p_lat numeric, p_lng numeric, p_tipo text, p_potencia integer, p_status text, p_modernizado boolean, p_endereco text, p_patrimonio text, p_obs text, p_tipo_ativo text, p_tipo_luminaria text, p_classe_nbr text, p_angulo integer, p_material text) TO anon;
+GRANT EXECUTE ON FUNCTION public.ip_inserir_ponto(p_lat numeric, p_lng numeric, p_tipo text, p_potencia integer, p_status text, p_modernizado boolean, p_endereco text, p_patrimonio text, p_obs text, p_tipo_ativo text, p_tipo_luminaria text, p_classe_nbr text, p_angulo integer, p_material text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.ip_inserir_ponto(p_lat numeric, p_lng numeric, p_tipo text, p_potencia integer, p_status text, p_modernizado boolean, p_endereco text, p_patrimonio text, p_obs text, p_tipo_ativo text, p_tipo_luminaria text, p_classe_nbr text, p_angulo integer, p_material text) TO service_role;
 GRANT EXECUTE ON FUNCTION public.ip_intervencoes(p_id uuid) TO anon;
 GRANT EXECUTE ON FUNCTION public.ip_intervencoes(p_id uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.ip_intervencoes(p_id uuid) TO service_role;
@@ -2216,8 +2002,9 @@ GRANT EXECUTE ON FUNCTION public.ip_por_bairro() TO service_role;
 GRANT EXECUTE ON FUNCTION public.ip_qualidade_dado() TO anon;
 GRANT EXECUTE ON FUNCTION public.ip_qualidade_dado() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.ip_qualidade_dado() TO service_role;
-GRANT EXECUTE ON FUNCTION public.ip_registrar_intervencao(p_ponto uuid, p_tipo text, p_data text, p_descricao text, p_responsavel text, p_lampada_nova text, p_potencia_nova integer, p_requer_aprovacao boolean) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.ip_registrar_intervencao(p_ponto uuid, p_tipo text, p_data text, p_descricao text, p_responsavel text, p_lampada_nova text, p_potencia_nova integer, p_requer_aprovacao boolean) TO service_role;
+GRANT EXECUTE ON FUNCTION public.ip_registrar_intervencao(p_ponto uuid, p_tipo text, p_data text, p_descricao text, p_responsavel text, p_lampada_nova text, p_potencia_nova integer) TO anon;
+GRANT EXECUTE ON FUNCTION public.ip_registrar_intervencao(p_ponto uuid, p_tipo text, p_data text, p_descricao text, p_responsavel text, p_lampada_nova text, p_potencia_nova integer) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.ip_registrar_intervencao(p_ponto uuid, p_tipo text, p_data text, p_descricao text, p_responsavel text, p_lampada_nova text, p_potencia_nova integer) TO service_role;
 GRANT EXECUTE ON FUNCTION public.ip_remover_ponto(p_id uuid, p_motivo text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.ip_remover_ponto(p_id uuid, p_motivo text) TO service_role;
 GRANT EXECUTE ON FUNCTION public.ip_serie_metricas() TO anon;
