@@ -9,13 +9,13 @@ jobs:
   backup:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      
+      - uses: actions/checkout@v4
+
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
-      
+          node-version: '20'
+
       - name: Install Supabase CLI
         run: npm install -g supabase
 
@@ -25,10 +25,18 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
 
+      # O `|| true` e o `|| echo` que estavam aqui engoliam qualquer erro: um
+      # push recusado saia como "Nada para commitar" e o job terminava verde.
+      # Agora so nao commita quando de fato nao ha nada staged, e qualquer
+      # falha de commit ou push derruba o job.
       - name: Commit & Push Backup
         run: |
           git config --global user.email "bot@github.com"
           git config --global user.name "Backup Bot"
           git add backups/
-          git commit -m "chore: backup automático $(date +%Y-%m-%d)" || true
-          git push || echo "Nada para commitar"
+          if git diff --cached --quiet; then
+            echo "Nenhum backup novo para commitar."
+            exit 0
+          fi
+          git commit -m "chore: backup automático $(date +%Y-%m-%d)"
+          git push
