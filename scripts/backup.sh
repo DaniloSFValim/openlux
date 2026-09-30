@@ -36,6 +36,18 @@ if [ "${1:-}" = "--prod" ]; then
     echo "Localmente: exporte a variavel antes de rodar com --prod." >&2
     exit 1
   fi
+  # A CLI recusa URL malformada com apenas "failed to parse connection string",
+  # e o valor sai mascarado como *** no log do Actions — nao da para inspecionar
+  # a olho nem adivinhar. Este validador diz o que esta errado (nova linha
+  # colada, colchete do placeholder, caractere sem percent-encoding) sem nunca
+  # imprimir a senha.
+  if ! python3 "$(dirname "$0")/validar-db-url.py"; then
+    echo "" >&2
+    echo "Corrija SUPABASE_DB_URL em Settings -> Secrets and variables ->" >&2
+    echo "Actions e rode o workflow de novo." >&2
+    exit 1
+  fi
+
   supabase db dump --db-url "$SUPABASE_DB_URL" -f "$BACKUP_FILE"
   DESTINO="producao"
 else
