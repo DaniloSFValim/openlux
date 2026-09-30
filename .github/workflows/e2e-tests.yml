@@ -36,18 +36,17 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install chromium firefox --with-deps
 
-      - name: Start local server
-        run: npx http-server -p 8000 -c-1 &
-        continue-on-error: true
+      # Os dois passos que subiam o http-server na mao sairam: playwright.config.js
+      # ja declara `webServer`, que sobe o servidor E espera a URL responder
+      # antes do primeiro teste. Os passos manuais usavam `sleep 2` com
+      # continue-on-error, entao um servidor lento passava como pronto e os
+      # testes comecavam contra uma porta morta.
 
-      - name: Wait for server
-        run: |
-          sleep 2
-          curl http://localhost:8000 || echo "Server may not be ready"
-        continue-on-error: true
-
+      # Sem o `|| true` que estava aqui: ele fazia o passo terminar com sucesso
+      # mesmo com testes falhando. Um job verde sobre uma suite vermelha e pior
+      # que um job vermelho, porque ninguem vai olhar.
       - name: Run E2E Tests
-        run: npx playwright test || true
+        run: npx playwright test
         env:
           CI: true
           BASE_URL: 'http://localhost:8000'
