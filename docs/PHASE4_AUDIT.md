@@ -14,7 +14,7 @@ ações do autor no GitHub e no Zenodo constam como **pendentes**; nada foi publ
 | Arquivos de citação | Atendido, com pendência | `CITATION.cff` valida no esquema CFF 1.2.0 (0 erros). `.zenodo.json` é JSON válido, mas **não foi validado pelo Zenodo** (só um depósito de ensaio valida `license` e `related_identifiers`) |
 | Testes aprovados | Atendido | 110 no ambiente de trabalho; clone limpo com ambiente virtual novo: 101 passam, 2 ignorados (navegador e esquema CFF) |
 | Ausência de credenciais | Atendido | Busca de padrões de token, chaves e senhas em todos os arquivos e no histórico completo: nenhuma ocorrência |
-| Ausência de arquivos indevidos | Atendido | 62 arquivos versionados; nenhum `.h5`, `.zip`, `.tif`, `data/raw/`, `outputs/` ou credencial; maior arquivo 368 KB |
+| Ausência de arquivos indevidos | Atendido | 64 arquivos versionados em 880ac27; nenhum `.h5`, `.zip`, `.tif`, `data/raw/`, `outputs/` ou credencial; maior arquivo 368 KB |
 | Ausência de dados com redistribuição incompatível | **Pendente (SIDRA)** | NASA: política ESDIS lida (CC0 sem marcação de restrição; citação solicitada), com ressalva de enquadramento. Malha IBGE: licença compatível com CC BY 4.0 confirmada. **SIDRA: termos não verificados** (as páginas do IBGE bloquearam o acesso automatizado). Falchi: não usado |
 | `main` contém todo o trabalho | **Pendente** | O PR #1 foi mergeado antes dos commits da Fase 3; um novo PR leva as Fases 3 e 4 para `main` |
 | Branch padrão do repositório | **Pendente** | Hoje é `claude/happy-goodall-c12zd5`; deve ser `main` |
