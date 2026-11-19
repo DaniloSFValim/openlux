@@ -14,6 +14,8 @@ Autor: Danilo Valim. ORCID: *a ser informado*.
 - Geometria da grade Black Marble (15 arc-s): transformacao afim por tile e area dos
   pixels na esfera authalica (`openlux.geo`).
 - Verificacao de integridade de downloads: SHA-256 e assinatura HDF5 (`openlux.io`).
+- Agregacao zonal com cobertura fracionaria de pixels: media e mediana ponderadas,
+  intensidade radiante aparente, fracao valida (`openlux.zonal`).
 
 ## Estimativa, nao medicao
 
