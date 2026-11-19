@@ -15,9 +15,9 @@ ações do autor no GitHub e no Zenodo constam como **pendentes**; nada foi publ
 | Testes aprovados | Atendido | 110 no ambiente de trabalho; clone limpo com ambiente virtual novo: 101 passam, 2 ignorados (navegador e esquema CFF) |
 | Ausência de credenciais | Atendido | Busca de padrões de token, chaves e senhas em todos os arquivos e no histórico completo: nenhuma ocorrência |
 | Ausência de arquivos indevidos | Atendido | 64 arquivos versionados em 880ac27; nenhum `.h5`, `.zip`, `.tif`, `data/raw/`, `outputs/` ou credencial; maior arquivo 368 KB |
-| Ausência de dados com redistribuição incompatível | **Pendente (SIDRA)** | NASA: política ESDIS lida (CC0 sem marcação de restrição; citação solicitada), com ressalva de enquadramento. Malha IBGE: licença compatível com CC BY 4.0 confirmada. **SIDRA: termos não verificados** (as páginas do IBGE bloquearam o acesso automatizado). Falchi: não usado |
-| `main` contém todo o trabalho | **Pendente** | O PR #1 foi mergeado antes dos commits da Fase 3; um novo PR leva as Fases 3 e 4 para `main` |
-| Branch padrão do repositório | **Pendente** | Hoje é `claude/happy-goodall-c12zd5`; deve ser `main` |
+| Ausência de dados com redistribuição incompatível | Atendido, com ressalvas | NASA: política ESDIS lida (CC0 sem marcação de restrição; citação solicitada), com ressalva de enquadramento. Malha IBGE: licença compatível com CC BY 4.0 confirmada. SIDRA: reuso com citação, **conferido pelo autor** (texto não lido por ferramenta). Falchi: não usado. Citações dos dados no README |
+| `main` contém todo o trabalho | Atendido | PR #2 mergeado; `main` (`f3b6754`) contém todos os commits; clone limpo da `main`: 101 testes passam, 2 ignorados |
+| Branch padrão do repositório | Atendido | API do GitHub: `default_branch: main` |
 | Release correspondente à versão | **Pendente (autor)** | Tag `v0.1.0` a partir de `main`; ver `docs/PUBLICATION.md` |
 
 ## 4.4 Auditoria de coerência (antes da publicação)
@@ -40,5 +40,5 @@ da versão e Concept DOI resolvendo em `doi.org`, e correspondência entre o reg
 - Os resultados **não são validados** e há um problema científico não resolvido (aumento do piso de
   ruído do S-NPP a partir de 2022, mais um componente comum aos dois sensores não separado de um possível
   artefato do algoritmo compartilhado). A publicação de uma versão com DOI não resolve isso.
-- Termos do SIDRA não verificados; ressalva de enquadramento da política da NASA.
+- Ressalva de enquadramento da política da NASA; termos do SIDRA conferidos pelo autor, não por ferramenta.
 - Credenciais antigas ainda salvas em *Network secrets* do ambiente (ação do autor).
