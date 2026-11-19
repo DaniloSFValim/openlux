@@ -17,16 +17,20 @@ SOURCES = [
          institution="NASA / LAADS DAAC", doi="10.5067/VIIRS/VNP46A4.002",
          url="https://ladsweb.modaps.eosdis.nasa.gov/missions-and-measurements/products/VNP46A4",
          version="Colecao 2.0 (versao 002), tile h13v11, 2012-2025",
-         license="Politica de dados abertos da NASA/LAADS; citacao esperada.",
-         license_status="nao_confirmado",
-         note="Texto oficial da politica nao foi lido; afirmacao baseada em fontes secundarias."),
+         license="Politica ESDIS da NASA: dados de missoes lideradas pela NASA sem marcacao de restricao sao CC0; "
+                 "citacao solicitada.",
+         license_status="confirmado_com_ressalva",
+         note="Texto oficial lido; os arquivos nao trazem marcacao de restricao. Ressalva: o enquadramento "
+              "como missao liderada pela NASA e interpretacao do autor."),
     dict(name="NASA Black Marble VJ146A4 v2.0 (NOAA-20, anual)",
          institution="NASA / LAADS DAAC", doi="10.5067/VIIRS/VJ146A4.002",
          url="https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/details/allData/5200/VJ146A4",
          version="Colecao 2.0 (versao 002), tile h13v11, 2018-2025 (comparacao entre sensores)",
-         license="Politica de dados abertos da NASA/LAADS; citacao esperada.",
-         license_status="nao_confirmado",
-         note="Texto oficial da politica nao foi lido."),
+         license="Politica ESDIS da NASA: dados de missoes lideradas pela NASA sem marcacao de restricao sao CC0; "
+                 "citacao solicitada.",
+         license_status="confirmado_com_ressalva",
+         note="Texto oficial lido; os arquivos nao trazem marcacao de restricao. Ressalva: o enquadramento "
+              "como missao liderada pela NASA e interpretacao do autor."),
     dict(name="Malha Municipal Digital 2024 (RJ)", institution="IBGE",
          url="https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/"
              "malhas_municipais/municipio_2024/UFs/RJ/RJ_Municipios_2024.zip",
@@ -36,7 +40,7 @@ SOURCES = [
          license_status="confirmado", note=""),
     dict(name="Censo Demografico 2022: populacao residente (SIDRA, tabela 4709, variavel 93)",
          institution="IBGE", url="https://apisidra.ibge.gov.br/values/t/4709/n6/in%20n3%2033/v/93/p/2022",
-         version="Censo 2022", license="Termos especificos do SIDRA nao verificados.",
+         version="Censo 2022", license="Termos especificos do SIDRA nao verificados (paginas do IBGE bloquearam o acesso automatizado).",
          license_status="nao_confirmado", note=""),
 ]
 

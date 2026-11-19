@@ -283,7 +283,7 @@
   /* ---------- informações científicas ---------- */
   function renderInfo() {
     const lowValid = codes.filter((c) => M[c].valid.some((v) => v != null && v < 0.9)).map((c) => M[c].name);
-    const src = meta.sources.map((s) => `<tr><td><a href="${esc(s.url)}" rel="noopener">${esc(s.name)}</a>${s.doi ? `<br><span class="small">DOI: <a href="https://doi.org/${esc(s.doi)}" rel="noopener">${esc(s.doi)}</a></span>` : ''}</td><td>${esc(s.institution)}</td><td>${esc(s.version)}</td><td>${esc(s.license)} <strong>[${s.license_status === 'confirmado' ? 'confirmado' : 'não confirmado no texto oficial'}]</strong></td></tr>`).join('');
+    const src = meta.sources.map((s) => `<tr><td><a href="${esc(s.url)}" rel="noopener">${esc(s.name)}</a>${s.doi ? `<br><span class="small">DOI: <a href="https://doi.org/${esc(s.doi)}" rel="noopener">${esc(s.doi)}</a></span>` : ''}</td><td>${esc(s.institution)}</td><td>${esc(s.version)}</td><td>${esc(s.license)} <strong>[${({ confirmado: 'confirmado', confirmado_com_ressalva: 'confirmado com ressalva', nao_confirmado: 'não confirmado' })[s.license_status]}]</strong></td></tr>`).join('');
     const docs = meta.documents.map((d) => `<li><a href="${esc(d.url)}" rel="noopener">${esc(d.name)}</a> (${esc(d.institution)})</li>`).join('');
     const refs = meta.references.map((r) => `<li>${esc(r.cite)} <a href="https://doi.org/${esc(r.doi)}" rel="noopener">doi:${esc(r.doi)}</a></li>`).join('');
     const hashes = Object.entries(meta.run.output_sha256).map(([k, v]) => `<tr><td>${esc(k)}</td><td><code>${esc(v)}</code></td></tr>`).join('');

@@ -23,9 +23,9 @@ resultados cientificos validados.
 
 | Fonte | Termos | Situacao |
 |---|---|---|
-| NASA Black Marble VNP46A4 (DOI 10.5067/VIIRS/VNP46A4.002) e VJ146A4 (DOI 10.5067/VIIRS/VJ146A4.002) | Politica da NASA/LAADS: dados abertos, sem restricao a uso e redistribuicao; citacao esperada. | **Nao confirmado no texto oficial**: o PDF de politica do LAADS nao pode ser lido (503/reset); a afirmacao vem de resultados de busca. Conferir antes de publicar. |
+| NASA Black Marble VNP46A4 (DOI 10.5067/VIIRS/VNP46A4.002) e VJ146A4 (DOI 10.5067/VIIRS/VJ146A4.002) | Politica ESDIS da NASA (https://www.earthdata.nasa.gov/learn/use-data/data-use-policy, lida em 2026-11-19): dados de missoes lideradas pela NASA, sem marcacao de restricao ou licenca, sao licenciados como CC0, sem restricao de uso; citacao fortemente solicitada. | **Confirmado com ressalva.** Os arquivos inspecionados nao tem atributo de licenca ou restricao (49 atributos; produtor "VIIRS Land SIPS Processing Group"). O enquadramento como "missao liderada pela NASA" e interpretacao minha; o texto tambem diz que dados nao NASA distribuidos pela ESDIS seguem a licenca da organizacao patrocinadora. |
 | IBGE, Malha Municipal Digital 2024 | "Licenca compativel com Creative Commons BY 4.0", com isencao de responsabilidade (Notas Metodologicas 01/2025). | **Confirmado** no documento oficial. Exige credito ao IBGE. |
-| IBGE, Censo 2022 (SIDRA 4709, v93) | Termos especificos do SIDRA nao verificados. | **Em aberto.** |
+| IBGE, Censo 2022 (SIDRA 4709, v93) | Termos especificos do SIDRA nao verificados. | **Em aberto.** As paginas do IBGE (SIDRA, dados abertos, termos de uso) retornaram 403 ao acesso automatizado em 2026-11-19; so o proprio autor, em navegador, pode conferir. |
 | EOG VNL V2.x | Catalogo do Earth Engine: dominio publico, sem restricao. A pagina do EOG menciona CC BY 4.0 para "muitos dados". | **Conflito nao resolvido**; fonte nao usada nos resultados atuais (exige login). |
 | Falchi et al. (2016) | CC BY-NC 4.0; acesso por formulario. | Dados nao obtidos; nao podem ser redistribuidos. |
 
