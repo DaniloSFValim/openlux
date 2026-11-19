@@ -55,3 +55,18 @@ def pixel_row_areas_m2(transform: Affine, nrows: int) -> np.ndarray:
     lat_n = np.radians(transform.f + transform.e * rows)
     lat_s = np.radians(transform.f + transform.e * (rows + 1))
     return 0.5 * WGS84_A**2 * dlon * (_q(np.sin(lat_n)) - _q(np.sin(lat_s)))
+
+
+def bbox_window(transform: Affine, shape: tuple, bbox: tuple) -> tuple:
+    """Janela (r0, r1, c0, c1) de indices que contem ``bbox`` = (lon_min, lat_min, lon_max, lat_max).
+
+    Conservadora (floor/ceil) e recortada ao array.
+    """
+    lon_min, lat_min, lon_max, lat_max = bbox
+    px, py = abs(transform.a), abs(transform.e)
+    c0 = int(math.floor((lon_min - transform.c) / px + 1e-9))
+    c1 = int(math.ceil((lon_max - transform.c) / px - 1e-9))
+    r0 = int(math.floor((transform.f - lat_max) / py + 1e-9))
+    r1 = int(math.ceil((transform.f - lat_min) / py - 1e-9))
+    nrows, ncols = shape
+    return (max(r0, 0), min(r1, nrows), max(c0, 0), min(c1, ncols))

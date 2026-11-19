@@ -18,12 +18,12 @@ Autor: Danilo Valim. ORCID: *a ser informado*.
   observacoes e terra/agua (`openlux.io.read_blackmarble`).
 - Agregacao zonal com cobertura fracionaria de pixels: media e mediana ponderadas,
   intensidade radiante aparente, fracao valida (`openlux.zonal`).
-
 - Downloader verificado da LAADS (SHA-256, assinatura HDF5, tentativas com recuo) e
   registro de proveniencia (`openlux.download`, `openlux.provenance`).
 - Populacao do Censo 2022 (SIDRA 4709/v93) e malha municipal IBGE 2024 (`openlux.ibge`).
-- Indicadores temporais por municipio: tendencia (Theil-Sen + Kendall), variacao com piso
-  declarado e analise de sensibilidade (`openlux.temporal`, `openlux.pipeline`).
+- Indicadores temporais por municipio: tendencia (Theil-Sen + Kendall) em janelas separadas,
+  variacao com piso declarado, controles de ruido de fundo e comparacao S-NPP x NOAA-20
+  (`openlux.temporal`, `openlux.qa`, `openlux.pipeline`). Decisoes e achados: `docs/DECISIONS.md`.
 
 ## Resultados
 

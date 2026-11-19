@@ -67,3 +67,21 @@ def test_tile_transform_h13v11_origin_is_upper_left_corner():
     assert t.e == pytest.approx(-15 / 3600)
     # Borda inferior direita do tile (2400 px) = (-40, -30)
     assert t @ (2400, 2400) == pytest.approx((-40.0, -30.0))
+
+
+def test_bbox_window_covers_bbox_conservatively():
+    from openlux.geo import bbox_window
+    t = tile_transform(13, 11)
+    r0, r1, c0, c1 = bbox_window(t, (2400, 2400), (-44.89, -23.37, -40.96, -20.76))
+    assert (r0, r1, c0, c1) == (182, 809, 1226, 2170)
+    # a janela contem toda a caixa
+    lon_w, lat_n = t @ (c0, r0)
+    lon_e, lat_s = t @ (c1, r1)
+    assert lon_w <= -44.89 and lon_e >= -40.96 and lat_n >= -20.76 and lat_s <= -23.37
+
+
+def test_bbox_window_is_clipped_to_array():
+    from openlux.geo import bbox_window
+    t = tile_transform(13, 11)
+    r0, r1, c0, c1 = bbox_window(t, (2400, 2400), (-60, -40, -30, -10))
+    assert (r0, r1, c0, c1) == (0, 2400, 0, 2400)

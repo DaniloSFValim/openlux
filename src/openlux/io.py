@@ -78,3 +78,22 @@ def read_blackmarble(path, layer="AllAngle_Composite_Snow_Free", *, n_min=1,
     valid &= np.isin(lw, land_codes)
     out = np.where(valid, rad, np.nan).astype("float32")
     return out, tile_transform(h, v)
+
+
+def read_for_qa(path, layer="AllAngle_Composite_Snow_Free", *, window=None, allowed_quality=(QUALITY_GOOD,)):
+    """Radiancia (NaN em fill/negativo/qualidade nao permitida) e mascara terra/agua, SEM
+    mascarar mar: usada pelos controles de ruido de fundo. ``window`` = (r0, r1, c0, c1)."""
+    import h5py
+    import numpy as np
+
+    verify_hdf5(path)
+    sl = (slice(None), slice(None)) if window is None else (slice(window[0], window[1]),
+                                                           slice(window[2], window[3]))
+    with h5py.File(path, "r") as f:
+        g = f[_GRID]
+        rad = g[layer][sl].astype("float32")
+        qual = g[f"{layer}_Quality"][sl]
+        lw = g["Land_Water_Mask"][sl]
+    bad = (rad == RADIANCE_FILL) | (rad < 0) | ~np.isin(qual, allowed_quality)
+    rad[bad] = np.nan
+    return rad, lw
