@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "openlux"
-version = "0.0.1.dev0"
+version = "0.1.0"
 description = "Estimativa de poluicao luminosa baseada em sensoriamento remoto para o Estado do Rio de Janeiro"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -16,13 +16,13 @@ dependencies = [
     "h5py",
     "rasterio",
     "geopandas",
-    "pyarrow",
     "exactextract",
     "scipy",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest"]
+dev = ["pytest", "pyyaml"]
+web-tests = ["playwright"]  # teste da interface em navegador (opcional)
 
 [tool.setuptools.packages.find]
 where = ["src"]
