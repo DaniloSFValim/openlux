@@ -140,3 +140,12 @@ def test_release_notes_and_publication_guide_are_consistent():
     steps = re.findall(r"^(\d+)\. \*\*", pub.split("## 2.")[1].split("## 3.")[0], flags=re.M)
     assert steps == [str(i) for i in range(1, 12)]  # os 11 passos da integracao com o Zenodo
     assert "Concept DOI" in pub and "não pode estar dentro" in pub and "v0.1.0" in pub
+
+
+def test_no_data_source_is_left_unverified():
+    from openlux.webdata import SOURCES
+    pend = [x["name"] for x in SOURCES if x["license_status"] == "nao_confirmado"]
+    assert pend == []
+    sidra = next(x for x in SOURCES if "SIDRA" in x["name"])
+    assert sidra["license_status"] == "confirmado" and "autor" in sidra["note"]
+    assert "Citação das fontes do IBGE" in README

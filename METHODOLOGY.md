@@ -87,8 +87,9 @@ os produtos mensal e anual não foram estudadas aqui.
 | Municípios | IBGE, Malha Municipal Digital 2024 (RJ) | 92 municípios; SIRGAS 2000 (EPSG:4674); licença compatível com CC BY 4.0 (Notas Metodológicas 01/2025) |
 | População | IBGE, Censo Demográfico 2022, SIDRA tabela 4709, variável 93 (população residente) | Nível município; total do RJ 16.055.174 |
 
-A população é usada apenas em 2022 (ano do Censo). Os termos de uso do SIDRA não foram
-verificados (as páginas do IBGE bloquearam o acesso automatizado). Os dados da NASA seguem a política
+A população é usada apenas em 2022 (ano do Censo). Os termos de uso do SIDRA foram
+conferidos pelo autor em 2026-11-19 (reuso permitido com citação da fonte); o texto não foi lido por ferramenta
+automatizada, porque as páginas do IBGE bloquearam o acesso automatizado. Os dados da NASA seguem a política
 ESDIS (CC0 sem marcação de restrição, citação solicitada), com a ressalva de enquadramento descrita em
 `docs/DECISIONS.md`.
 

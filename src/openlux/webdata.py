@@ -40,8 +40,9 @@ SOURCES = [
          license_status="confirmado", note=""),
     dict(name="Censo Demografico 2022: populacao residente (SIDRA, tabela 4709, variavel 93)",
          institution="IBGE", url="https://apisidra.ibge.gov.br/values/t/4709/n6/in%20n3%2033/v/93/p/2022",
-         version="Censo 2022", license="Termos especificos do SIDRA nao verificados (paginas do IBGE bloquearam o acesso automatizado).",
-         license_status="nao_confirmado", note=""),
+         version="Censo 2022", license="Reuso permitido com citacao da fonte (IBGE).",
+         license_status="confirmado",
+         note="Conferido pelo autor nos termos do IBGE/SIDRA em 2026-11-19; o texto nao foi lido por ferramenta automatizada."),
 ]
 
 DOCS = [

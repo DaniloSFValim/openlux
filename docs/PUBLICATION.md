@@ -7,9 +7,9 @@ passos abaixo marcam o que foi verificado e o que precisa ser conferido na inter
 
 ## 1. Antes de criar a release (checklist)
 
-- [ ] O PR com as Fases 3 e 4 foi mergeado em `main` (a `main` atual **não** contém a documentação acadêmica, o `LICENSE`, o ORCID nem os metadados).
-- [ ] A branch padrão do repositório é `main` (hoje é `claude/happy-goodall-c12zd5`): *Settings → General → Default branch*.
-- [ ] Decisão sobre `web/data/`: os agregados derivados da NASA estão cobertos pela política ESDIS (com a ressalva de enquadramento em `docs/DECISIONS.md`), mas os **termos do SIDRA** (população) **não foram verificados**. O autor deve conferir, em navegador, os termos de uso do IBGE/SIDRA. Se houver dúvida, remover a população de `web/data/` (a intensidade por habitante deixa de aparecer) antes da release, porque o arquivo depositado no Zenodo é permanente.
+- [x] O PR com as Fases 3 e 4 foi mergeado em `main` (verificado: `main` contém `LICENSE`, `CITATION.cff`, `.zenodo.json`, `METHODOLOGY.md` e a documentação de publicação).
+- [x] A branch padrão do repositório é `main` (verificado pela API do GitHub).
+- [x] Decisão sobre `web/data/`: **mantido**. NASA: política ESDIS (CC0 sem marcação de restrição, com a ressalva de enquadramento em `docs/DECISIONS.md`). IBGE malha: licença compatível com CC BY 4.0. IBGE/SIDRA (população): reuso permitido com citação, conferido pelo autor em 2026-11-19; as citações estão no README.
 - [ ] A versão é 0.1.0 em `pyproject.toml`, `CITATION.cff`, `.zenodo.json` e `openlux.__version__` (verificado por teste). A tag deve ser `v0.1.0`.
 - [ ] Os testes passam em um clone limpo (ver `docs/PHASE4_AUDIT.md`).
 - [ ] Opcional e recomendado: ensaiar todo o fluxo no **Zenodo Sandbox** (`sandbox.zenodo.org`, serviço separado, com seu próprio vínculo ao GitHub e DOIs de teste), para conferir os metadados antes do registro definitivo. O campo `license` do `.zenodo.json` (`mit`) **não foi validado contra o Zenodo**; o ensaio confirma isso.
