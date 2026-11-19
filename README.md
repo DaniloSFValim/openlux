@@ -19,6 +19,17 @@ Autor: Danilo Valim. ORCID: *a ser informado*.
 - Agregacao zonal com cobertura fracionaria de pixels: media e mediana ponderadas,
   intensidade radiante aparente, fracao valida (`openlux.zonal`).
 
+- Downloader verificado da LAADS (SHA-256, assinatura HDF5, tentativas com recuo) e
+  registro de proveniencia (`openlux.download`, `openlux.provenance`).
+- Populacao do Censo 2022 (SIDRA 4709/v93) e malha municipal IBGE 2024 (`openlux.ibge`).
+- Indicadores temporais por municipio: tendencia (Theil-Sen + Kendall), variacao com piso
+  declarado e analise de sensibilidade (`openlux.temporal`, `openlux.pipeline`).
+
+## Resultados
+
+Nenhum resultado cientifico validado esta disponivel ainda. O pipeline ja executa sobre a
+serie VNP46A4 2012-2025, mas os produtos gerados nao foram validados nem interpretados.
+
 ## Estimativa, nao medicao
 
 Os valores derivados de radiancia orbital (VIIRS Day/Night Band) **nao sao medicoes do
@@ -29,6 +40,10 @@ brilho do ceu**. Sao uma estimativa baseada em sensoriamento remoto.
 ```bash
 pip install -e ".[dev]"
 pytest
+export EARTHDATA_TOKEN=...            # nunca versione o token
+python scripts/fetch_blackmarble.py --years 2012-2025
+python scripts/fetch_ibge.py
+python scripts/run_annual.py          # saidas em outputs/annual/
 ```
 
 Credenciais (quando necessarias) devem ser fornecidas por variaveis de ambiente
