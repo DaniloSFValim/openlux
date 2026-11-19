@@ -1,0 +1,28 @@
+{
+  "acquired_utc": "2026-11-19T17:34:13Z",
+  "checks": {
+    "n_municipios": 92,
+    "populacao_total_rj": 16055174
+  },
+  "code": {
+    "commit": "c28dfeb09900e582807366bdef04064e96f378eb",
+    "dirty": true
+  },
+  "files": [
+    {
+      "description": "Malha Municipal Digital 2024, RJ (EPSG:4674, SIRGAS 2000)",
+      "name": "RJ_Municipios_2024.zip",
+      "sha256": "30881e67e483fca5a0682118fbd5b5d20b3487806cd9cf18a27732d68080d314",
+      "size_bytes": 5127653,
+      "url": "https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2024/UFs/RJ/RJ_Municipios_2024.zip"
+    },
+    {
+      "description": "Censo Demografico 2022, populacao residente (SIDRA t4709, v93)",
+      "name": "sidra_4709_v93_RJ_2022.json",
+      "sha256": "2e12a003210a1bca5a4291ba3bbd3ec02fc981d987f27ba77dba089f067b9aa6",
+      "size_bytes": 24316,
+      "url": "https://apisidra.ibge.gov.br/values/t/4709/n6/in%20n3%2033/v/93/p/2022"
+    }
+  ],
+  "institution": "IBGE"
+}
