@@ -88,7 +88,7 @@ def test_meta_carries_provenance_and_windows():
 def test_sources_have_required_fields_and_no_unknown_license_is_hidden():
     for s in SOURCES:
         assert {"name", "institution", "url", "version", "license", "license_status"} <= set(s)
-        assert s["license_status"] in {"confirmado", "nao_confirmado"}
+        assert s["license_status"] in {"confirmado", "confirmado_com_ressalva", "nao_confirmado"}
         assert s["url"].startswith("https://")
 
 

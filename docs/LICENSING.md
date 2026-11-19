@@ -1,10 +1,9 @@
 # Licenciamento do OpenLux: opções e consequências
 
-**Nenhuma licença foi escolhida nem instalada.** Este documento serve para a decisão do autor.
-Até lá, o repositório não tem arquivo `LICENSE`; sem licença, por padrão todos os direitos ficam
-reservados e terceiros não têm permissão para reutilizar o código. Os campos `license` de
-`CITATION.cff` e `.zenodo.json` estão omitidos de propósito e devem ser preenchidos junto com a
-decisão. Este texto é uma análise técnica, não aconselhamento jurídico.
+**Decisão do autor (2026-11-19): MIT.** O arquivo `LICENSE` foi instalado na raiz (Copyright (c) 2026
+Danilo Valim) e declarada em `CITATION.cff` (`MIT`), `.zenodo.json` (`mit`) e `pyproject.toml`. A análise
+abaixo foi feita antes da decisão e foi mantida como registro. Este texto é uma análise técnica, não
+aconselhamento jurídico.
 
 ## 1. As três opções consideradas
 
@@ -56,25 +55,22 @@ A licença do código **não** se estende aos dados. Os dados têm termos própr
 
 | Dado | Termos | Consequência |
 |---|---|---|
-| Black Marble (NASA) | Política de dados abertos da NASA/LAADS; texto oficial **não confirmado** nesta pesquisa | Os arquivos brutos não são redistribuídos. `web/data/` contém **agregados municipais derivados**; a redistribuição deles depende dessa confirmação |
+| Black Marble (NASA) | Política ESDIS da NASA (lida no texto oficial): dados de missões lideradas pela NASA sem marcação de restrição são CC0; citação solicitada. **Confirmado com ressalva** de enquadramento | Os arquivos brutos não são redistribuídos. `web/data/` contém **agregados municipais derivados**, com citação dos conjuntos de dados |
 | Malha Municipal Digital 2024 (IBGE) | Licença compatível com CC BY 4.0 (Notas Metodológicas 01/2025), com crédito e isenção de responsabilidade | `web/data/municipios.geojson` é versão simplificada; exige crédito ao IBGE |
-| Censo 2022, SIDRA (IBGE) | **Não verificado** | A população por município em `web/data/` depende dessa verificação |
+| Censo 2022, SIDRA (IBGE) | **Não verificado** (páginas do IBGE bloquearam o acesso automatizado) | A população por município em `web/data/` depende dessa verificação, que só o autor pode fazer em navegador |
 | Atlas de Falchi et al. (2016) | CC BY-NC 4.0; não usado | Nunca incluir no repositório nem no Zenodo |
 
 Para os produtos derivados do OpenLux (tabelas e documentação), uma licença de conteúdo separada,
 como CC BY 4.0, é uma opção coerente com o crédito exigido pelo IBGE; ela não substitui a licença
 do código e deve ser decidida com a confirmação dos termos de NASA e SIDRA.
 
-## 5. Pontos que só o autor pode confirmar
+## 5. Pontos ainda abertos
 
-1. Qual licença do código (e, se desejado, qual licença de conteúdo para a documentação e os produtos derivados).
-2. Titular dos direitos autorais: o texto de uma licença permissiva usa nome e ano (por exemplo, "Danilo Valim, 2026").
-   Se alguma parte do trabalho foi feita com recursos ou sob regras de propriedade intelectual de uma instituição, confirme que o autor pode licenciá-la.
-3. Se os agregados de `web/data/` podem permanecer no repositório antes da confirmação dos termos de NASA e SIDRA.
+1. Termos do SIDRA para a população por município publicada em `web/data/` (ver seção 4).
+2. Licença de conteúdo para a documentação e os produtos derivados, se desejada (por exemplo, CC BY 4.0). Não foi decidida; o `LICENSE` MIT cobre o código.
+3. Titular dos direitos: se alguma parte do trabalho foi feita com recursos ou sob regras de propriedade intelectual de uma instituição, confirme que o autor pode licenciá-la.
 
-## 6. O que muda quando a licença for escolhida
+## 6. Efeitos da decisão MIT
 
-- Adicionar o `LICENSE` na raiz com o texto oficial da licença.
-- Preencher `license` em `CITATION.cff` (identificador SPDX) e em `.zenodo.json` (identificador aceito pelo Zenodo; confirmar no formulário).
-- Declarar a licença em `pyproject.toml` e no README (seção 1).
-- O teste `tests/test_docs_consistency.py` falha se a licença for declarada em um arquivo e não nos outros.
+- O Zenodo usa, para a licença do registro, nesta ordem, o `.zenodo.json`, o `CITATION.cff` e a licença detectada no GitHub. Como os três declaram MIT, não há conflito. O identificador do `.zenodo.json` seguiu o exemplo da ajuda do Zenodo (`mit`, minúsculas); outros repositórios usam `MIT`. **Não foi validado contra o Zenodo**: confira no formulário do rascunho.
+- O teste `tests/test_docs_consistency.py` falha se a licença for declarada em um arquivo e não nos outros, e confere o texto do `LICENSE`.

@@ -88,7 +88,9 @@ os produtos mensal e anual não foram estudadas aqui.
 | População | IBGE, Censo Demográfico 2022, SIDRA tabela 4709, variável 93 (população residente) | Nível município; total do RJ 16.055.174 |
 
 A população é usada apenas em 2022 (ano do Censo). Os termos de uso do SIDRA não foram
-verificados no texto oficial.
+verificados (as páginas do IBGE bloquearam o acesso automatizado). Os dados da NASA seguem a política
+ESDIS (CC0 sem marcação de restrição, citação solicitada), com a ressalva de enquadramento descrita em
+`docs/DECISIONS.md`.
 
 ## 5. Tratamento dos dados
 

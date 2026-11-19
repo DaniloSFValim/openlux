@@ -3,7 +3,8 @@
   "title": "OpenLux",
   "creators": [
     {
-      "name": "Valim, Danilo"
+      "name": "Valim, Danilo",
+      "orcid": "0009-0009-7250-6151"
     }
   ],
   "description": "O OpenLux é um software científico independente para estimar e acompanhar a poluição luminosa no Estado do Rio de Janeiro a partir da radiância noturna observada por satélite (NASA Black Marble, sensor VIIRS), agregada nos 92 municípios com a malha e a população do IBGE. Calcula radiância média e mediana, intensidade radiante aparente, fração da área iluminada, tendência temporal, controles de ruído de fundo e análises de sensibilidade, com registro de proveniência e execução reprodutível. Os resultados são estimativas baseadas em sensoriamento remoto, não medições do brilho do céu, e ainda não foram validados.",
@@ -19,6 +20,7 @@
     "Brazil"
   ],
   "access_right": "open",
+  "license": "mit",
   "version": "0.1.0",
   "language": "por",
   "related_identifiers": [

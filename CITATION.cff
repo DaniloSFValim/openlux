@@ -6,7 +6,7 @@ version: "0.1.0"
 authors:
   - family-names: "Valim"
     given-names: "Danilo"
-    # orcid: "https://orcid.org/0000-0000-0000-0000"   # A PREENCHER pelo autor; não inventar.
+    orcid: "https://orcid.org/0009-0009-7250-6151"
 repository-code: "https://github.com/DaniloSFValim/openlux"
 abstract: >-
   O OpenLux é um software científico independente para estimar e acompanhar a poluição
@@ -26,5 +26,5 @@ keywords:
   - zonal statistics
   - Rio de Janeiro
   - Brazil
-# license: a ser definida pelo autor (ver docs/LICENSING.md); campo omitido até a decisão.
+license: MIT
 # date-released: a ser preenchido na publicação da release.

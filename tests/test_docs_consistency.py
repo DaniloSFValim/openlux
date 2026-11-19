@@ -75,21 +75,45 @@ def test_citation_cff_is_valid_against_official_schema_if_available():
 
 def test_citation_cff_structure_without_external_schema():
     assert CFF["cff-version"] == "1.2.0" and CFF["type"] == "software" and CFF["title"] == "OpenLux"
-    assert CFF["authors"] == [{"family-names": "Valim", "given-names": "Danilo"}]
+    assert CFF["authors"] == [{"family-names": "Valim", "given-names": "Danilo", "orcid": f"https://orcid.org/{ORCID}"}]
     assert CFF["repository-code"] == "https://github.com/DaniloSFValim/openlux"
+
+
+ORCID = "0009-0009-7250-6151"  # informado pelo autor; nao inventado
+
+
+def _orcid_checksum_ok(o: str) -> bool:
+    """ISO 7064 mod 11-2, como nos identificadores ORCID."""
+    d = o.replace("-", "")
+    total = 0
+    for ch in d[:15]:
+        total = (total + int(ch)) * 2
+    r = (12 - total % 11) % 11
+    return d[15] == ("X" if r == 10 else str(r))
+
+
+def test_orcid_is_valid_and_identical_in_every_file():
+    assert re.fullmatch(r"\d{4}-\d{4}-\d{4}-\d{3}[\dX]", ORCID) and _orcid_checksum_ok(ORCID)
+    assert CFF["authors"][0]["orcid"] == f"https://orcid.org/{ORCID}"
+    assert ZEN["creators"][0]["orcid"] == ORCID
+    assert ORCID in README and ORCID in (ROOT / "web/index.html").read_text(encoding="utf-8")
 
 
 def test_zenodo_metadata_has_required_fields_and_no_invented_identity():
     assert ZEN["upload_type"] == "software" and ZEN["title"] == "OpenLux"
-    assert ZEN["creators"] == [{"name": "Valim, Danilo"}]
-    assert "orcid" not in json.dumps(ZEN).lower() and "affiliation" not in json.dumps(ZEN).lower()
-    assert "orcid" not in yaml.safe_dump(CFF).lower()
+    assert ZEN["creators"] == [{"name": "Valim, Danilo", "orcid": ORCID}]  # sem afiliacao inventada
+    assert "affiliation" not in json.dumps(ZEN).lower() and "affiliation" not in yaml.safe_dump(CFF).lower()
+    assert ZEN["access_right"] == "open"
 
 
-def test_license_declared_consistently_or_nowhere():
-    has_file = (ROOT / "LICENSE").exists()
-    declared = ["license" in CFF, "license" in ZEN, "license" in PYPROJECT.split("[project.optional")[0]]
-    assert all(declared) if has_file else not any(declared)
+def test_mit_license_is_installed_and_declared_consistently():
+    text = (ROOT / "LICENSE").read_text(encoding="utf-8")
+    assert text.startswith("MIT License") and "Copyright (c) 2026 Danilo Valim" in text
+    assert "Permission is hereby granted, free of charge" in text
+    assert CFF["license"] == "MIT" and ZEN["license"].lower() == "mit"
+    head = PYPROJECT.split("[project.optional")[0]
+    assert 'license = { text = "MIT" }' in head and "MIT License" in head
+    assert "Licença do código | MIT" in README
 
 
 def test_declared_dependencies_are_all_imported_by_the_code():
@@ -100,11 +124,19 @@ def test_declared_dependencies_are_all_imported_by_the_code():
         assert re.search(rf"^\s*(import|from) {d}\b", code, flags=re.M), f"dependencia nao usada: {d}"
 
 
-def test_required_terminology_is_used_and_pending_items_are_declared():
+def test_required_terminology_is_used():
     phrase = "estimativa de poluição luminosa baseada em sensoriamento remoto"
     for name, text in (("README", README), ("METHODOLOGY", METH),
                        ("web/index.html", (ROOT / "web/index.html").read_text(encoding="utf-8"))):
         assert phrase in text.lower(), name
     low = README.lower()
     assert "não medições do brilho do céu" in low or "não medição do brilho do céu" in low
-    assert "pendente de decisão do autor" in low and "a ser informado" in low
+
+
+def test_release_notes_and_publication_guide_are_consistent():
+    notes = (ROOT / "docs/RELEASE_NOTES_v0.1.0.md").read_text(encoding="utf-8")
+    pub = (ROOT / "docs/PUBLICATION.md").read_text(encoding="utf-8")
+    assert "v0.1.0" in notes and ORCID in notes and "não foram validados" in notes
+    steps = re.findall(r"^(\d+)\. \*\*", pub.split("## 2.")[1].split("## 3.")[0], flags=re.M)
+    assert steps == [str(i) for i in range(1, 12)]  # os 11 passos da integracao com o Zenodo
+    assert "Concept DOI" in pub and "não pode estar dentro" in pub and "v0.1.0" in pub

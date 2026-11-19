@@ -9,7 +9,8 @@ description = "Estimativa de poluicao luminosa baseada em sensoriamento remoto p
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [{ name = "Danilo Valim" }]
-# Licenca: decisao pendente (Fase 3). Nenhum arquivo LICENSE foi adotado ainda.
+license = { text = "MIT" }
+classifiers = ["License :: OSI Approved :: MIT License"]
 dependencies = [
     "numpy",
     "pandas",

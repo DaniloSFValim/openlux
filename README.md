@@ -16,7 +16,7 @@ qualquer número.
 | Áreas | Ciência de dados, geoprocessamento, sensoriamento remoto e ciências ambientais |
 | Repositório | https://github.com/DaniloSFValim/openlux |
 | Versão | 0.1.0 (pré-lançamento) |
-| Licença | **Pendente de decisão do autor** (ver [`docs/LICENSING.md`](docs/LICENSING.md)); nenhum arquivo `LICENSE` foi adotado |
+| Licença do código | MIT (arquivo [`LICENSE`](LICENSE)). Não se aplica aos dados de terceiros (ver [`docs/LICENSING.md`](docs/LICENSING.md)) |
 | DOI | A ser atribuído após a publicação no Zenodo |
 
 O OpenLux é um projeto autônomo, com código, metodologia e histórico de versões próprios, e usa
@@ -62,13 +62,17 @@ explorado como estudo de caso na interface, sem restringir a abrangência estadu
 
 | Fonte | Instituição | Uso | Termos |
 |---|---|---|---|
-| Black Marble VNP46A4 v2.0 (DOI 10.5067/VIIRS/VNP46A4.002) | NASA / LAADS DAAC | Radiância anual S-NPP (principal) | Política de dados abertos da NASA/LAADS; texto oficial **não confirmado** |
+| Black Marble VNP46A4 v2.0 (DOI 10.5067/VIIRS/VNP46A4.002) | NASA / LAADS DAAC | Radiância anual S-NPP (principal) | Política ESDIS da NASA: dados de missões lideradas pela NASA sem marcação de restrição são CC0; citação solicitada. Os arquivos não trazem marcação de restrição. Ressalva: o enquadramento como "missão liderada pela NASA" é interpretação do autor |
 | Black Marble VJ146A4 v2.0 (DOI 10.5067/VIIRS/VJ146A4.002) | NASA / LAADS DAAC | Comparação entre sensores | Idem |
 | Malha Municipal Digital 2024 (RJ) | IBGE | Limites municipais | Licença compatível com CC BY 4.0 (confirmada) |
 | Censo Demográfico 2022, SIDRA tabela 4709, variável 93 | IBGE | População residente (2022) | **Não verificados** |
 
 Cada fonte tem URL, versão, data de aquisição e SHA-256 registrados em
-`data/metadata/downloads/`. Dados brutos não são redistribuídos neste repositório. Fontes
+`data/metadata/downloads/`. Citação dos dados NASA (conforme a política da NASA, que solicita citar os
+conjuntos de dados): VIIRS Land SIPS Processing Group, *VIIRS/NPP Lunar BRDF-Adjusted Nighttime Lights Yearly
+L3 Global 15 arc second Linear Lat Lon Grid* [Dataset], NASA LAADS DAAC, https://doi.org/10.5067/VIIRS/VNP46A4.002,
+e *VIIRS/JPSS1 Lunar BRDF-Adjusted Nighttime Lights Yearly L3 Global 15 arc second Linear Lat Lon Grid*,
+https://doi.org/10.5067/VIIRS/VJ146A4.002 (acessos em 2026-11-19; títulos e DOI lidos dos atributos dos arquivos). Dados brutos não são redistribuídos neste repositório. Fontes
 candidatas **não usadas**: EOG VIIRS Nighttime Lights (exige login; licença com informação
 conflitante) e o Atlas de Falchi et al. (2016) (dados não obtidos; licença CC BY-NC 4.0).
 
@@ -164,7 +168,8 @@ valores publicados** e não foi definido limite de aprovação a priori.
 - O sinal da tendência depende da janela de anos.
 - A saturação do DNB em áreas muito iluminadas não foi avaliada.
 - População residente não é população exposta; a intensidade por habitante é um índice relativo.
-- Licenças de NASA e SIDRA não confirmadas no texto oficial.
+- Termos do SIDRA (população) não verificados: as páginas do IBGE bloquearam o acesso automatizado.
+- NASA: política ESDIS lida no texto oficial, com a ressalva de enquadramento indicada na seção 6.
 
 Lista completa: `METHODOLOGY.md`, seção 13.
 
@@ -205,8 +210,8 @@ O DOI do Zenodo será acrescentado após a publicação da release. Os metadados
 
 ## 17. Autor e ORCID
 
-Danilo Valim. ORCID: **a ser informado pelo autor**. Nenhuma afiliação institucional foi
-declarada nos metadados.
+Danilo Valim. ORCID: [https://orcid.org/0009-0009-7250-6151](https://orcid.org/0009-0009-7250-6151). Nenhuma afiliação
+institucional foi declarada nos metadados.
 
 ## 18. DOI
 
