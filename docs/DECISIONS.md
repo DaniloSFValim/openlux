@@ -67,3 +67,16 @@ inclinacao positiva.
 
 **Hipotese nao testada** para a queda em 2012-2021: a banda DNB e pouco sensivel a emissao azul dos
 LEDs (Levin et al., 2020), o que pode subestimar areas convertidas para LED.
+
+## 4. Interface (decisoes de cartografia e comunicacao)
+
+| Tema | Decisao |
+|---|---|
+| Classificacao | Radiancia media: quantis (5 classes) da distribuicao agrupada de todos os anos e municipios, **limites fixos entre anos** para que o controle de ano seja comparavel. Tendencia e variacao: limites em torno de zero (± mediana e ± percentil 90 de \|valor\|, agrupando as janelas). Intensidade por habitante: quantis dos 92 municipios. Todas rotuladas como "classificacao analitica", nao limiares fisicos. |
+| Cores | Sequencial YlOrRd e divergente PuOr (ColorBrewer, marcadas como seguras para daltonismo). Nao executei simulacao de daltonismo. Sem dado: cinza neutro com entrada propria na legenda. |
+| Significancia | Contorno espesso para p < 0,05 (Kendall) nos mapas de tendencia; tambem informada no tooltip (nao so por cor/borda). |
+| Tipos de dado | Selos distinguem "observado (agregado)", "derivado" e "controle de qualidade"; a classificacao e sempre rotulada como analitica. |
+| Mapa-base | Nenhum: so os poligonos do IBGE (evita dependencia e termos de tiles de terceiros). Projecao de exibicao Web Mercator; a escala e aproximada para a latitude do estado. |
+| Aviso | Resumo sempre visivel + numeros calculados a partir dos controles de ruido (`indicators.json`), nunca digitados. |
+| Verificacao | Teste em navegador compara a cor desenhada de municipios selecionados com uma classificacao reimplementada de forma independente em Python. |
+| Geometria | Simplificada (0,001 grau, ~110 m) so para exibicao; calculos usaram a malha completa. |

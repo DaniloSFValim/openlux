@@ -25,6 +25,11 @@ Autor: Danilo Valim. ORCID: *a ser informado*.
   variacao com piso declarado, controles de ruido de fundo e comparacao S-NPP x NOAA-20
   (`openlux.temporal`, `openlux.qa`, `openlux.pipeline`). Decisoes e achados: `docs/DECISIONS.md`.
 
+- Interface web estatica (`web/`): mapa coropletico dos 92 municipios, indicadores, ranking,
+  comparacao, painel estadual com controles de ruido de fundo, metodologia, fontes e
+  limitacoes. Classes fixas entre anos, legenda com unidade, fonte e periodo, aviso
+  metodologico permanente. Testada em navegador (Playwright).
+
 ## Resultados
 
 Nenhum resultado cientifico validado esta disponivel ainda. O pipeline ja executa sobre a
@@ -44,6 +49,8 @@ export EARTHDATA_TOKEN=...            # nunca versione o token
 python scripts/fetch_blackmarble.py --years 2012-2025
 python scripts/fetch_ibge.py
 python scripts/run_annual.py          # saidas em outputs/annual/
+python scripts/build_web_data.py      # gera web/data/ a partir das saidas reais
+python -m http.server -d web 8000     # interface em http://localhost:8000
 ```
 
 Credenciais (quando necessarias) devem ser fornecidas por variaveis de ambiente

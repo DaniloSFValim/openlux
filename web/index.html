@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenLux — estimativa de poluição luminosa no Estado do Rio de Janeiro</title>
+<meta name="description" content="OpenLux: estimativa de poluição luminosa baseada em sensoriamento remoto (NASA Black Marble) para os 92 municípios do Estado do Rio de Janeiro.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<a class="skip" href="#mapa">Ir para o mapa</a>
+
+<header class="site">
+  <div class="wrap">
+    <h1>OpenLux</h1>
+    <p class="subtitle">Estimativa de poluição luminosa baseada em sensoriamento remoto — Estado do Rio de Janeiro</p>
+    <p class="byline">Autor: Danilo Valim · ORCID: <em>a ser informado</em> · Software científico independente, em desenvolvimento</p>
+    <p class="lede">O OpenLux agrega a radiância noturna observada por satélite (NASA Black Marble, sensor VIIRS) nos 92 municípios do estado, com malha e população do IBGE. Os valores são uma <strong>estimativa baseada em sensoriamento remoto</strong>, e <strong>não medições do brilho do céu</strong>. Niterói pode ser explorado como estudo de caso.</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <section class="alert" role="note" aria-labelledby="alert-title" id="alert">
+    <h2 id="alert-title">Aviso metodológico: resultados não validados</h2>
+    <p>A série do sensor Suomi NPP apresenta, a partir de 2022, aumento do piso de ruído em áreas escuras, e o sinal das tendências depende da janela de anos. Não interprete os valores como mudança real de iluminação sem essa ressalva.</p>
+    <details><summary>Números e detalhes do aviso</summary><p id="alert-text">Carregando…</p></details>
+  </section>
+
+  <main>
+    <section class="explorer" aria-label="Mapa e painéis de análise">
+      <div class="map-col">
+        <div class="controls" role="group" aria-label="Controles do mapa">
+          <label>Indicador
+            <select id="indicator"></select>
+          </label>
+          <label id="year-wrap">Ano: <output id="year-out"></output>
+            <input type="range" id="year" step="1" aria-describedby="year-note">
+          </label>
+          <button type="button" id="case-btn">Estudo de caso: Niterói</button>
+          <button type="button" id="reset-btn">Ver o estado inteiro</button>
+        </div>
+        <p id="year-note" class="muted small">As classes de cor são fixas para todos os anos, para que os mapas de anos diferentes sejam comparáveis.</p>
+        <div id="mapa" role="region" aria-label="Mapa coroplético dos municípios do Estado do Rio de Janeiro. Use o seletor de município ou a tabela de ranking para navegar pelo teclado."></div>
+        <div id="legend" class="legend" aria-live="polite"></div>
+      </div>
+
+      <aside class="panel-col">
+        <div class="tabs" role="tablist" aria-label="Painéis">
+          <button role="tab" id="tab-mun" aria-controls="p-mun" aria-selected="true">Município</button>
+          <button role="tab" id="tab-rank" aria-controls="p-rank" aria-selected="false" tabindex="-1">Ranking</button>
+          <button role="tab" id="tab-cmp" aria-controls="p-cmp" aria-selected="false" tabindex="-1">Comparar</button>
+          <button role="tab" id="tab-state" aria-controls="p-state" aria-selected="false" tabindex="-1">Estado</button>
+        </div>
+        <div role="tabpanel" id="p-mun" aria-labelledby="tab-mun" class="panel">
+          <label class="block">Município
+            <select id="mun-select"></select>
+          </label>
+          <div id="mun-detail"><p class="muted">Selecione um município no mapa ou na lista.</p></div>
+        </div>
+        <div role="tabpanel" id="p-rank" aria-labelledby="tab-rank" class="panel" hidden>
+          <div class="row">
+            <label>Filtrar <input type="search" id="rank-filter" placeholder="nome do município"></label>
+            <button type="button" id="rank-dir" aria-label="Inverter ordem">Ordem: decrescente</button>
+          </div>
+          <div id="rank-note" class="muted small"></div>
+          <div class="table-wrap"><table id="rank-table"><thead></thead><tbody></tbody></table></div>
+        </div>
+        <div role="tabpanel" id="p-cmp" aria-labelledby="tab-cmp" class="panel" hidden>
+          <p class="muted small">Compare até três municípios (radiância média anual).</p>
+          <div class="row"><select id="cmp1" aria-label="Município 1"></select><select id="cmp2" aria-label="Município 2"></select><select id="cmp3" aria-label="Município 3"></select></div>
+          <div id="cmp-chart"></div>
+        </div>
+        <div role="tabpanel" id="p-state" aria-labelledby="tab-state" class="panel" hidden>
+          <div id="state-content"></div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <section class="info" id="info" aria-label="Informações científicas">
+    <h2>Informações científicas</h2>
+    <div id="info-content"></div>
+  </section>
+</div>
+
+<footer class="site">
+  <div class="wrap">
+    <p id="updated"></p>
+    <p class="small">Mapa desenhado com <a href="vendor/leaflet/LICENSE">Leaflet 1.9.4 (BSD-2-Clause)</a>, sem mapa-base de terceiros. Licença do código-fonte: <em>pendente de decisão do autor</em>. Malha municipal: IBGE (licença compatível com CC BY 4.0). Dados NASA: ver fontes e status de verificação de licença.</p>
+  </div>
+</footer>
+
+<script src="vendor/leaflet/leaflet.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
