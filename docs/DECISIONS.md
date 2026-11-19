@@ -102,3 +102,19 @@ Verificacoes **ainda nao feitas**: comparacao com valores publicados (nao se ide
 comparavel); unidades e CRS verificados por teste apenas nas funcoes (nao ha teste automatizado
 sobre dado real, que nao e redistribuivel); casos de maior diferenca nao foram investigados por
 municipio.
+
+## 6. Fracao da area acima de limiar (indicador E)
+
+F(tau) = sum(w * [L >= tau]) / sum(w) sobre os pixels validos de cada municipio.
+
+| Limiar | Natureza | Fundamento |
+|---|---|---|
+| 0,5 nW cm-2 sr-1 (`lit_0p5`) | **Documentado** | O guia do Black Marble (secao 2.3) informa que valores de composto < 0,5 sao zerados para remover ruido de fundo; F(0,5) e, portanto, a fracao da area com radiancia detectada no composto. |
+| `q50_ref` = 1,49 e `q90_ref` = 27,8 | **Parametro analitico do pesquisador** | Quantis 0,5 e 0,9 da radiancia dos pixels de terra ja iluminados (>= 0,5) em 2012, na caixa dos municipios; fixos para todos os anos. Gravados em `run_record.json`. |
+
+**Achado:** por usar o mesmo valor em que o produto zera ruido, F(0,5) e muito sensivel ao aumento do
+piso de ruido do S-NPP apos 2021. Fracao estadual (media ponderada pela area valida): S-NPP 0,329
+(2021), 0,441 (2022), 0,612 (2023), 0,531 (2025); NOAA-20 0,327, 0,375, 0,381 e 0,394. A diferenca
+entre sensores (0,15 em 2023) tem a mesma origem descrita na secao 3. **F(0,5) do S-NPP nao deve ser
+interpretado como expansao da area iluminada apos 2021 sem essa ressalva.** Em municipios muito
+urbanos a fracao satura em 1,0 (24 de 92 em 2025), o que limita sua capacidade de discriminar entre eles.

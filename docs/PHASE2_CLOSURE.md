@@ -6,7 +6,7 @@ evidencia. "Parcial" e "Nao atendido" indicam lacunas reais, nao ressalvas de fo
 | # | Criterio (secao 2.5) | Situacao | Evidencia e ressalvas |
 |---|---|---|---|
 | 1 | Pipeline executavel | **Atendido, com ressalva** | `fetch_blackmarble.py` -> `fetch_ibge.py` -> `run_annual.py` -> `build_web_data.py` executados de ponta a ponta no dado real. Depende de conta Earthdata com a licenca da LAADS aceita. Nao ha registro estruturado de logs (so saida padrao). |
-| 2 | Indicadores implementados | **Parcial** | Implementados: A (media, mediana, intensidade radiante aparente), B (intensidade por habitante, so 2022), C (serie anual, variacao, tendencia Theil-Sen/Kendall), sensibilidade. **Nao implementados:** C "alteracoes espaciais significativas" (mudanca pixel a pixel), D (comparacao com o Atlas de Falchi; dados nao obtidos), E (fracao da area acima de limiares; urbano x nao urbano). |
+| 2 | Indicadores implementados | **Parcial** | Implementados: A (media, mediana, intensidade radiante aparente), B (intensidade por habitante, so 2022), C (serie anual, variacao, tendencia Theil-Sen/Kendall), E (fracao da area acima de limiar; ver `docs/DECISIONS.md` secao 6), sensibilidade. **Nao implementados:** C "alteracoes espaciais significativas" (mudanca pixel a pixel), D (comparacao com o Atlas de Falchi; dados nao obtidos), E "urbano x nao urbano" (sem camada publica adequada verificada). A fracao acima de 0,5 do S-NPP e muito sensivel ao piso de ruido pos-2021. |
 | 3 | Testes automatizados aprovados | **Atendido** | 73 testes passam (72 sem navegador). Clone limpo: 66 passam, 1 ignorado. Cobrem funcoes matematicas, agregacao zonal, dados ausentes, CRS (rejeita CRS divergente), integridade de arquivos, reprodutibilidade. Testes usam dados sinteticos rotulados. |
 | 4 | Mapa com dados efetivamente processados | **Atendido** | `web/data/` e gerado de `outputs/annual/` por `build_web_data.py`; teste em navegador compara cores desenhadas com classificacao independente. Os resultados exibidos **nao sao validados** (aviso permanente). |
 | 5 | Fontes identificadas | **Atendido, com ressalva** | Painel "Fontes de dados" com instituicao, URL, versao/DOI e status de licenca. NASA e SIDRA: licenca **nao confirmada** no texto oficial. |
@@ -16,7 +16,7 @@ evidencia. "Parcial" e "Nao atendido" indicam lacunas reais, nao ressalvas de fo
 
 ## Lacunas conhecidas que nao bloqueiam o fechamento, mas devem ser decididas
 
-1. Indicadores D e E (ver linha 2). E decisao do autor implementa-los na Fase 2, adiar ou retira-los do escopo.
+1. Indicador D (Falchi) e as partes nao implementadas de C e E (ver linha 2): o autor decide adiar ou retirar do escopo. A fracao acima do limiar foi implementada depois do fechamento original, a pedido do autor.
 2. Aumento de radiancia apos 2022: investigado, nao resolvido (`docs/DECISIONS.md`, secao 3).
 3. Licencas de NASA, EOG e SIDRA nao confirmadas no texto oficial.
 4. Prazo e exigencias do edital PGC/UFF nao informados.
