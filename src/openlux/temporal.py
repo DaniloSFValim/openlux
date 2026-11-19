@@ -20,12 +20,12 @@ from scipy import stats
 from openlux.zonal import zonal_indicators
 
 
-def annual_table(loader, years, polygons, *, id_col: str, extra_cols=()) -> pd.DataFrame:
+def annual_table(loader, years, polygons, *, id_col: str, extra_cols=(), thresholds=None) -> pd.DataFrame:
     """``loader(year) -> (array, transform)``; devolve tabela longa (id_col, year, ...)."""
     frames = []
     for y in years:
         arr, transform = loader(y)
-        z = zonal_indicators(arr, transform, polygons)
+        z = zonal_indicators(arr, transform, polygons, thresholds=thresholds)
         z.insert(0, id_col, polygons[id_col].values)
         for i, c in enumerate(extra_cols, start=1):
             z.insert(i, c, polygons[c].values)

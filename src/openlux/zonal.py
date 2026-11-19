@@ -36,12 +36,15 @@ def _weighted_lower_median(values: np.ndarray, weights: np.ndarray) -> float:
     return float(v[min(idx, len(v) - 1)])
 
 
-def zonal_indicators(array: np.ndarray, transform: Affine, polygons, crs: str = "EPSG:4326") -> pd.DataFrame:
+def zonal_indicators(array: np.ndarray, transform: Affine, polygons, crs: str = "EPSG:4326",
+                     thresholds: dict | None = None) -> pd.DataFrame:
     """Calcula indicadores zonais. ``array`` usa NaN para pixels invalidos.
 
     ``polygons`` e um GeoDataFrame no mesmo CRS do raster. Retorna um DataFrame com o
-    mesmo indice de ``polygons``.
+    mesmo indice de ``polygons``. ``thresholds`` ({nome: L} em nW cm^-2 sr^-1) acrescenta a
+    coluna ``frac_above_<nome>`` = sum(w * [L >= limiar]) / sum(w) sobre pixels validos.
     """
+    thresholds = thresholds or {}
     if array.ndim != 2:
         raise ValueError("array deve ser 2D")
     from pyproj import CRS
@@ -75,15 +78,20 @@ def zonal_indicators(array: np.ndarray, transform: Affine, polygons, crs: str = 
         v = vals[ok]
         wsum = float(w.sum())
         if wsum == 0.0:
-            rows.append(dict(weight_sum=0.0, valid_fraction=0.0, mean_radiance=np.nan, median_radiance=np.nan,
-                             apparent_radiant_intensity_nw_sr=np.nan))
+            row = dict(weight_sum=0.0, valid_fraction=0.0, mean_radiance=np.nan, median_radiance=np.nan,
+                       apparent_radiant_intensity_nw_sr=np.nan)
+            row.update({f"frac_above_{k}": np.nan for k in thresholds})
+            rows.append(row)
             continue
         a_cm2 = row_area_cm2[cell[ok] // ncols]
-        rows.append(dict(
+        row = dict(
             weight_sum=wsum,
             valid_fraction=wsum / total_w,
             mean_radiance=float((w * v).sum() / wsum),
             median_radiance=_weighted_lower_median(v, w),
             apparent_radiant_intensity_nw_sr=float((w * v * a_cm2).sum()),
-        ))
+        )
+        for k, tau in thresholds.items():
+            row[f"frac_above_{k}"] = float((w * (v >= tau)).sum() / wsum)
+        rows.append(row)
     return pd.DataFrame(rows, index=polygons.index)

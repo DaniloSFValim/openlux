@@ -119,4 +119,37 @@ def test_compare_sensors_detects_same_trend_and_ratio(setup):
     r = compare_sensors(files, other, polys, "cd_mun", min_years=5)
     assert r["years"] == list(range(2012, 2022))
     assert all(v == pytest.approx(2.0) for v in r["ratio_b_over_a"].values())
+    assert all(v == pytest.approx(1.0) for v in r["state_lit_fraction_a"].values())
+    assert all(v == pytest.approx(1.0) for v in r["state_lit_fraction_b"].values())
     assert r["trend_sign_agreement"] == pytest.approx(1.0)
+
+
+def test_lit_fraction_and_analytic_thresholds(setup):
+    files, polys, pop, tmp = setup
+    rec = run_annual(files, polys, "cd_mun", pop, tmp / "o", population_year=2021, code_dir=tmp)
+    ann = pd.read_csv(tmp / "o" / "annual_main.csv")
+    # todos os pixels de A (5+i) e de B (1.0) estao >= 0,5: fracao 1,0 em todos os anos
+    assert (ann["frac_above_lit_0p5"] == 1.0).all()
+    thr = rec["parameters"]["thresholds_nw_cm2_sr"]
+    assert thr["lit_0p5"] == 0.5 and "q50_ref" in thr and "q90_ref" in thr
+    # janela = caixa dos poligonos (colunas 0-34): 20 colunas valem 5.0 e 15 valem 1.0 -> q50 = 5.0
+    assert thr["q50_ref"] == pytest.approx(5.0)
+    a12 = ann[(ann.cd_mun == "A") & (ann.year == 2012)].iloc[0]
+    b12 = ann[(ann.cd_mun == "B") & (ann.year == 2012)].iloc[0]
+    assert a12["frac_above_q50_ref"] == 1.0 and b12["frac_above_q50_ref"] == 0.0
+    assert rec["parameters"]["threshold_reference_year"] == 2012
+
+
+def test_analytic_thresholds_skipped_when_reference_year_has_no_lit_pixels(tmp_path):
+    files = {}
+    for year in range(2012, 2015):
+        p = tmp_path / f"y{year}.h5"
+        make_h5(p, lambda r, c: np.zeros_like(r))
+        files[year] = p
+    res = 15 / 3600
+    polys = gpd.GeoDataFrame({"cd_mun": ["A"]}, geometry=[box(-50, -20 - 10 * res, -50 + 10 * res, -20)],
+                             crs="EPSG:4326")
+    rec = run_annual(files, polys, "cd_mun", None, tmp_path / "o", min_years=3, code_dir=tmp_path)
+    assert list(rec["parameters"]["thresholds_nw_cm2_sr"]) == ["lit_0p5"]
+    ann = pd.read_csv(tmp_path / "o" / "annual_main.csv")
+    assert (ann["frac_above_lit_0p5"] == 0.0).all()

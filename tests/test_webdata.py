@@ -42,6 +42,19 @@ def _build():
                     "outputs": {"annual_main.csv": "0" * 64}})
 
 
+def test_lit_series_and_thresholds_are_carried_when_present():
+    ann = _annual().assign(frac_above_lit_0p5=[1.0, 0.9, 0.8, 0.5, 0.4, np.nan])
+    rec = {"processed_utc": "2026-01-01T00:00:00Z", "code": {"commit": "abc", "dirty": False},
+           "parameters": {"trend_windows": {"w1": [2012, 2013]}, "change_floor_nw_cm2_sr": {"w1": 0.4},
+                          "thresholds_nw_cm2_sr": {"lit_0p5": 0.5}}, "outputs": {}}
+    d = build_indicators(annual=ann, trends=_trends(), qa=pd.DataFrame({"year": [2012]}),
+                         sensitivity={}, sensor_comparison={}, run_record=rec)
+    assert d["municipios"]["1"]["lit"] == [1.0, 0.9, 0.8]
+    assert d["municipios"]["2"]["lit"] == [0.5, 0.4, None]
+    assert d["meta"]["thresholds_nw_cm2_sr"] == {"lit_0p5": 0.5}
+    json.dumps(d, allow_nan=False)
+
+
 def test_json_is_strict_no_nan_tokens():
     data = _build()
     text = json.dumps(data, allow_nan=False)  # levanta ValueError se houver NaN/inf

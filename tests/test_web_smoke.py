@@ -104,6 +104,14 @@ def test_indicator_switch_updates_legend_and_hides_year(page):
     assert page.locator("#year-wrap").is_visible()
 
 
+def test_lit_fraction_indicator_is_available_and_documented(page):
+    page.select_option("#indicator", "lit")
+    txt = page.inner_text("#legend")
+    assert "Fração da área" in txt and "≥" in txt and "piso de ruído" in txt
+    assert "fração da área válida" in txt
+    page.select_option("#indicator", "mean")
+
+
 def test_niteroi_case_button_shows_detail_and_chart(page):
     page.click("#tab-mun")
     page.click("#case-btn")

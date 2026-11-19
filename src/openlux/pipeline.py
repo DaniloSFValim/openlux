@@ -20,6 +20,9 @@ from openlux.qa import background_controls
 from openlux.temporal import annual_table, change, rank_agreement, trend
 
 NW_TO_MW = 1e-6
+#: Limiar documentado: o guia do Black Marble (secao 2.3) informa que valores de composto
+#: abaixo de 0,5 nW cm^-2 sr^-1 sao zerados para remover ruido de fundo.
+LIT_THRESHOLD = {"lit_0p5": 0.5}
 
 
 @dataclass(frozen=True)
@@ -39,11 +42,12 @@ SENSITIVITY = (
 )
 
 
-def _table(files, polygons, id_col, cfg: Config, extra_cols=()) -> pd.DataFrame:
+def _table(files, polygons, id_col, cfg: Config, extra_cols=(), thresholds=None) -> pd.DataFrame:
     def loader(year):
         return read_blackmarble(files[year], cfg.layer, n_min=cfg.n_min,
                                 allowed_quality=cfg.allowed_quality)
-    df = annual_table(loader, sorted(files), polygons, id_col=id_col, extra_cols=extra_cols)
+    df = annual_table(loader, sorted(files), polygons, id_col=id_col, extra_cols=extra_cols,
+                      thresholds=thresholds)
     return df.sort_values([id_col, "year"], kind="stable").reset_index(drop=True)
 
 
@@ -67,14 +71,16 @@ def _window_trends(df, id_col, years_window, min_years, floor_quantile):
 def run_annual(files: dict, polygons, id_col: str, population: pd.DataFrame | None, outdir, *,
                min_years=8, floor_quantile=0.25, population_year=2022, trend_windows=None,
                extra_cols=(), qa_baseline_years=None, configs=(MAIN, *SENSITIVITY),
-               code_dir=".") -> dict:
+               thresholds=None, threshold_quantiles=(0.5, 0.9), code_dir=".") -> dict:
     """Executa a serie. ``files``: {ano: caminho .h5}. Retorna o registro de execucao."""
     outdir = Path(outdir)
     outdir.mkdir(parents=True, exist_ok=True)
     years = sorted(files)
     first, last = years[0], years[-1]
     windows = trend_windows or {"all": (first, last)}
-    tables = {c.name: _table(files, polygons, id_col, c, extra_cols) for c in configs}
+    thr = dict(LIT_THRESHOLD if thresholds is None else thresholds)
+    thr.update(_analytic_thresholds(files[first], polygons, threshold_quantiles))
+    tables = {c.name: _table(files, polygons, id_col, c, extra_cols, thr) for c in configs}
     main = tables[MAIN.name]
 
     trend_frames, floors = [], {}
@@ -138,7 +144,8 @@ def run_annual(files: dict, polygons, id_col: str, population: pd.DataFrame | No
                         min_years=min_years, floor_quantile=floor_quantile,
                         change_floor_nw_cm2_sr=floors,
                         trend_windows={k: list(v) for k, v in windows.items()},
-                        population_year=population_year,
+                        population_year=population_year, thresholds_nw_cm2_sr=thr,
+                        threshold_reference_year=first, threshold_quantiles=list(threshold_quantiles),
                         qa_baseline_years=list(qa_baseline_years or years[:min(5, len(years))])),
         inputs={str(y): dict(name=Path(files[y]).name, sha256=sha256_file(files[y]))
                 for y in years},
@@ -146,6 +153,21 @@ def run_annual(files: dict, polygons, id_col: str, population: pd.DataFrame | No
     )
     write_json(outdir / "run_record.json", record)
     return record
+
+
+def _analytic_thresholds(path, polygons, quantiles) -> dict:
+    """Limiares analiticos: quantis da radiancia dos pixels de terra ja iluminados (>= limiar
+    documentado) no ano de referencia, na caixa dos poligonos. Parametros do pesquisador."""
+    if not quantiles:
+        return {}
+    _, t = read_blackmarble(path)
+    window = bbox_window(t, _shape(path), tuple(polygons.total_bounds))
+    rad, lw = read_for_qa(path, window=window)
+    sel = np.isin(lw, (0, 1, 5)) & np.isfinite(rad) & (rad >= LIT_THRESHOLD["lit_0p5"])
+    vals = rad[sel]
+    if vals.size == 0:  # ano de referencia sem pixels iluminados: nao ha distribuicao para quantis
+        return {}
+    return {f"q{int(round(q * 100))}_ref": float(f"{np.quantile(vals, q):.3g}") for q in quantiles}
 
 
 def _qa(files, polygons, baseline_years) -> pd.DataFrame:
@@ -177,14 +199,20 @@ def compare_sensors(files_a: dict, files_b: dict, polygons, id_col: str, *, min_
     inclinacao de Theil-Sen por municipio. Nao decide qual sensor esta certo.
     """
     common = sorted(set(files_a) & set(files_b))
-    ta = _table({y: files_a[y] for y in common}, polygons, id_col, MAIN)
-    tb = _table({y: files_b[y] for y in common}, polygons, id_col, MAIN)
+    ta = _table({y: files_a[y] for y in common}, polygons, id_col, MAIN, thresholds=LIT_THRESHOLD)
+    tb = _table({y: files_b[y] for y in common}, polygons, id_col, MAIN, thresholds=LIT_THRESHOLD)
 
     def state_mean(t):
         return t.groupby("year").apply(
             lambda g: float((g.mean_radiance * g.weight_sum).sum() / g.weight_sum.sum()),
             include_groups=False)
     ma, mb = state_mean(ta), state_mean(tb)
+
+    def state_lit(t):
+        return t.groupby("year").apply(
+            lambda g: float((g["frac_above_lit_0p5"] * g.weight_sum).sum() / g.weight_sum.sum()),
+            include_groups=False)
+    la, lb = state_lit(ta), state_lit(tb)
     sa = _window_trends(ta, id_col, (common[0], common[-1]), min_years, 0.25)[0].set_index(id_col)
     sb = _window_trends(tb, id_col, (common[0], common[-1]), min_years, 0.25)[0].set_index(id_col)
     ok = sa.slope.notna() & sb.slope.notna()
@@ -193,6 +221,8 @@ def compare_sensors(files_a: dict, files_b: dict, polygons, id_col: str, *, min_
         state_mean_a={int(y): float(v) for y, v in ma.items()},
         state_mean_b={int(y): float(v) for y, v in mb.items()},
         ratio_b_over_a={int(y): float(mb[y] / ma[y]) if ma[y] else None for y in common},
+        state_lit_fraction_a={int(y): float(v) for y, v in la.items()},
+        state_lit_fraction_b={int(y): float(v) for y, v in lb.items()},
         spearman_trend_slope=rank_agreement(sa.slope.to_numpy(), sb.slope.reindex(sa.index).to_numpy()),
         trend_sign_agreement=float((np.sign(sa.slope[ok]) == np.sign(sb.slope[ok])).mean())
         if ok.any() else None,

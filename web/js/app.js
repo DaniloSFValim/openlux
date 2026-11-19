@@ -54,6 +54,14 @@
     get: (m, i) => m.valid[i], breaks: [0.6, 0.85, 0.95, 0.999],
     scheme: 'Classes manuais (controle de qualidade): < 0,6; 0,6–0,85; 0,85–0,95; 0,95–0,999; ≥ 0,999.',
     period: (y) => `ano ${y}`, source: 'Pixels excluídos por máscara de água, qualidade ou fill (ver Metodologia).' };
+  const uniq = (a) => a.filter((v, i) => i === 0 || v > a[i - 1]);
+  if (codes.every((c) => M[c].lit)) {
+    const thr = (meta.thresholds_nw_cm2_sr || {}).lit_0p5;
+    IND.lit = { label: `Fração da área com radiância ≥ ${fmt(thr, 1)} nW·cm⁻²·sr⁻¹`, unit: 'fração da área válida (0–1)', kind: 'der', type: 'seq', yearly: true, d: 3,
+      get: (m, i) => m.lit[i], breaks: uniq(mkBreaksQ(pooled((m) => m.lit))),
+      scheme: `Quantis (até 5 classes) de todos os municípios e anos, limites fixos entre os anos; classes repetidas são fundidas. O limiar ${fmt(thr, 1)} é o valor abaixo do qual o produto zera a radiância (guia Black Marble). Esta fração é especialmente sensível ao piso de ruído do S-NPP a partir de 2022.`,
+      period: (y) => `ano ${y}`, source: 'Derivado: fração da área municipal válida com radiância ≥ limiar (cobertura fracionária; VNP46A4, S-NPP).' };
+  }
   const slopes = pooled((m) => winKeys.map((w) => m.trends[w] && m.trends[w].slope));
   const chgs = pooled((m) => winKeys.map((w) => m.trends[w] && m.trends[w].change_pct));
   const slopeBr = absBreaks(slopes), chgBr = absBreaks(chgs);
@@ -100,10 +108,11 @@
   }).addTo(map);
   map.fitBounds(gl.getBounds(), { padding: [8, 8] });
 
+  const palColor = (ind, k) => { const pal = ind.type === 'div' ? DIV : SEQ, n = ind.breaks.length;
+    return pal[n === pal.length - 1 ? k : Math.round((k * (pal.length - 1)) / n)]; };
   function colorFor(ind, v) {
     if (v == null) return NODATA;
-    const k = classOf(v, ind.breaks);
-    return (ind.type === 'div' ? DIV : SEQ)[k];
+    return palColor(ind, classOf(v, ind.breaks));
   }
   function className(ind, k) {
     const b = ind.breaks, n = b.length;
@@ -133,9 +142,8 @@
 
   function renderLegend(ind) {
     const [kcls, ktxt] = KIND[ind.kind];
-    const pal = ind.type === 'div' ? DIV : SEQ;
     const yr = ind.yearly ? years[st.iy] : null;
-    const items = pal.map((c, k) => `<li><span class="sw" style="background:${c}"></span>${esc(className(ind, k))}</li>`).join('') +
+    const items = Array.from({ length: ind.breaks.length + 1 }, (_, k) => `<li><span class="sw" style="background:${palColor(ind, k)}"></span>${esc(className(ind, k))}</li>`).join('') +
       `<li><span class="sw" style="background:${NODATA}"></span>sem dado${ind.kind === 'der' && ind.win ? ' / abaixo do piso' : ''}</li>`;
     $('legend').innerHTML = `<h3>${esc(ind.label)} <span class="badge ${kcls}">${ktxt}</span><span class="badge cls">Classes: classificação analítica</span></h3>
       <div><strong>Unidade:</strong> ${esc(ind.unit)} · <strong>Período:</strong> ${esc(ind.period(yr))}</div>
@@ -255,6 +263,9 @@
       <h4>Controle de ruído de fundo (pixels persistentemente escuros)</h4>
       <div id="qa-chart"></div>
       <p class="muted small">Pixels com mediana zero em 2012–2021 (classe definida só por esses anos). Se a radiância média desses pixels sobe, o piso de ruído mudou. Isso não é crescimento de iluminação.</p>
+      <h4>Fração da área iluminada (≥ limiar documentado): S-NPP × NOAA-20</h4>
+      <div id="lit-chart"></div>
+      <p class="muted small">Média estadual ponderada pela área válida. O limiar coincide com o valor em que o produto zera ruído de fundo, por isso o aumento do piso de ruído do S-NPP eleva esta fração.</p>
       <h4>Municípios por sinal da tendência</h4>
       <div class="table-wrap"><table><thead><tr><th>Janela</th><th class="num">Inclin. &gt; 0</th><th class="num">Inclin. &lt; 0</th><th class="num">p &lt; 0,05</th></tr></thead><tbody>${cnt}</tbody></table></div>
       <h4>Comparação entre sensores (média estadual, nW·cm⁻²·sr⁻¹)</h4>
@@ -263,6 +274,8 @@
       <h4>Sensibilidade à configuração (em relação à principal)</h4>
       <div class="table-wrap"><table><thead><tr><th>Janela</th><th>Variação</th><th class="num">ρ média (ano final)</th><th class="num">ρ inclinação</th><th class="num">Mesmo sinal</th></tr></thead><tbody>${sens}</tbody></table></div>`;
     OpenLuxCharts.lineChart($('state-chart'), { title: 'Radiância média estadual', years, yLabel: 'nW·cm⁻²·sr⁻¹', digits: 2, shadeFrom: 2022, shadeLabel: 'ruído S-NPP', series: [{ name: 'Estado (média ponderada)', values: data.state.mean, color: COL[0] }] });
+    if (sc.state_lit_fraction_a) OpenLuxCharts.lineChart($('lit-chart'), { title: 'Fração da área iluminada, média estadual', years: sc.years, yLabel: 'fração', digits: 3, shadeFrom: 2022, shadeLabel: 'ruído S-NPP', zeroBase: true,
+      series: [{ name: 'S-NPP', values: sc.years.map((y) => sc.state_lit_fraction_a[y]), color: COL[0] }, { name: 'NOAA-20', values: sc.years.map((y) => sc.state_lit_fraction_b[y]), color: COL[1] }] });
     OpenLuxCharts.lineChart($('qa-chart'), { title: 'Radiância média de pixels persistentemente escuros', years: data.qa.map((r) => r.year), yLabel: 'nW·cm⁻²·sr⁻¹', digits: 3, shadeFrom: 2022, shadeLabel: 'após 2021', zeroBase: true,
       series: [{ name: 'Terra', values: data.qa.map((r) => r.dark_land_mean), color: COL[1] }, { name: 'Mar', values: data.qa.map((r) => r.dark_sea_mean), color: COL[0] }] });
   }
@@ -279,6 +292,7 @@
         <p>Produto: NASA Black Marble VNP46A4 v2.0 (radiância noturna anual, grade de 15 arc-s ≈ 460 m), camada <code>AllAngle_Composite_Snow_Free</code>. São mantidos pixels de qualidade 0 (boa), sobre terra (códigos 0, 1 e 5 da máscara terra/água), sem valores de preenchimento ou negativos. Não há reamostragem.</p>
         <p><strong>Radiância média</strong> do município: L̄ = Σ wᵢ·Lᵢ / Σ wᵢ, onde wᵢ é a fração da área do pixel coberta pelo município (cobertura fracionária) e Lᵢ é a radiância (nW·cm⁻²·sr⁻¹) dos pixels válidos. A mediana é ponderada pelos mesmos pesos.</p>
         <p><strong>Intensidade radiante aparente</strong>: S = Σ wᵢ·Lᵢ·Aᵢ (nW·sr⁻¹), com Aᵢ a área elipsoidal (WGS84) do pixel. É uma intensidade na direção observada pelo sensor, <em>não</em> a emissão luminosa total do município. A soma bruta de pixels não é usada.</p>
+        <p><strong>Fração da área iluminada</strong>: F(τ) = Σ wᵢ·[Lᵢ ≥ τ] / Σ wᵢ sobre os pixels válidos, com τ = ${fmt((meta.thresholds_nw_cm2_sr || {}).lit_0p5, 1)} nW·cm⁻²·sr⁻¹ (valor abaixo do qual o produto zera ruído de fundo; guia do usuário, seção 2.3). Limiares analíticos adicionais (quantis da radiância dos pixels iluminados no ano de referência) constam em <code>run_record.json</code>.</p>
         <p><strong>Por habitante</strong>: S / população residente (Censo 2022), somente para 2022, em mW·sr⁻¹ por habitante; é um índice relativo.</p>
         <p><strong>Tendência</strong>: inclinação de Theil–Sen e teste de Kendall sobre a radiância média anual, com mínimo de 8 anos válidos, em duas janelas (${winKeys.map(wLabel).join(' e ')}). <strong>Variação percentual</strong>: definida só com linha de base ≥ piso (${winKeys.map((w) => `${wLabel(w)}: ${fmt(meta.change_floor_nw_cm2_sr[w], 2)}`).join('; ')} nW·cm⁻²·sr⁻¹; percentil 25 das médias municipais).</p>
         <p><strong>Classes de cor</strong> são classificações analíticas (quantis ou limites em torno de zero), não limiares físicos nem categorias oficiais de poluição luminosa.</p>

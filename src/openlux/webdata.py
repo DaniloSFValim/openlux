@@ -103,6 +103,7 @@ def build_indicators(*, annual, trends, qa, sensitivity, sensor_comparison, run_
             mean=[_clean(v) for v in g["mean_radiance"]],
             median=[_clean(v) for v in g["median_radiance"]],
             valid=[_clean(v, 4) for v in g["valid_fraction"]],
+            lit=[_clean(v, 4) for v in g["frac_above_lit_0p5"]] if "frac_above_lit_0p5" in g else None,
             intensity_nw_sr=[_clean(v, 3) for v in g["apparent_radiant_intensity_nw_sr"]],
             population=_clean(first["population"]) if first is not None else None,
             per_capita_mw_sr_hab=_clean(first["intensity_per_capita_mw_sr_hab"], 3)
@@ -123,6 +124,7 @@ def build_indicators(*, annual, trends, qa, sensitivity, sensor_comparison, run_
             years=years,
             windows={k: list(v) for k, v in params["trend_windows"].items()},
             change_floor_nw_cm2_sr={k: _clean(v) for k, v in params["change_floor_nw_cm2_sr"].items()},
+            thresholds_nw_cm2_sr={k: _clean(v) for k, v in params.get("thresholds_nw_cm2_sr", {}).items()},
             run=dict(processed_utc=run_record["processed_utc"],
                      code_commit=run_record["code"]["commit"], code_dirty=run_record["code"]["dirty"],
                      output_sha256=run_record["outputs"]),
