@@ -18,6 +18,7 @@ dependencies = [
     "geopandas",
     "pyarrow",
     "exactextract",
+    "scipy",
 ]
 
 [project.optional-dependencies]

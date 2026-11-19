@@ -1,0 +1,129 @@
+{
+  "acquired_utc": "2026-11-19T17:35:04Z",
+  "base_url": "https://ladsweb.modaps.eosdis.nasa.gov",
+  "code": {
+    "commit": "c28dfeb09900e582807366bdef04064e96f378eb",
+    "dirty": true
+  },
+  "collection": "Colecao 2.0 (versao 002)",
+  "doi": "10.5067/VIIRS/VNP46A4.002",
+  "failures": [],
+  "files": [
+    {
+      "downloaded_utc": "2026-11-19T17:33:51Z",
+      "name": "VNP46A4.A2012001.h13v11.002.2025086170108.h5",
+      "sha256": "772689356c6cb25bca37ff8b2e59c4e8e812184a004f5b8c7f576117325fa070",
+      "size_bytes": 84168826,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VNP46A4/2012/001/VNP46A4.A2012001.h13v11.002.2025086170108.h5",
+      "year": 2012
+    },
+    {
+      "downloaded_utc": "2026-11-19T17:33:56Z",
+      "name": "VNP46A4.A2013001.h13v11.002.2025087045253.h5",
+      "sha256": "20b9e00ce1ab4e5353fe3bb2d59a6e26e71663826a83ad5a738debcf870008ef",
+      "size_bytes": 85703451,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VNP46A4/2013/001/VNP46A4.A2013001.h13v11.002.2025087045253.h5",
+      "year": 2013
+    },
+    {
+      "downloaded_utc": "2026-11-19T17:34:00Z",
+      "name": "VNP46A4.A2014001.h13v11.002.2025091134728.h5",
+      "sha256": "3a695f053526595f54eb9a02ecf8b678de6efeac5718a2643ce325367db5a93f",
+      "size_bytes": 85692140,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VNP46A4/2014/001/VNP46A4.A2014001.h13v11.002.2025091134728.h5",
+      "year": 2014
+    },
+    {
+      "downloaded_utc": "2026-11-19T17:34:05Z",
+      "name": "VNP46A4.A2015001.h13v11.002.2025093111829.h5",
+      "sha256": "f273c18ef66a3a036046536f7b2aeefe96b7f17890ad4402158cf65de9112201",
+      "size_bytes": 86837522,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VNP46A4/2015/001/VNP46A4.A2015001.h13v11.002.2025093111829.h5",
+      "year": 2015
+    },
+    {
+      "downloaded_utc": "2026-11-19T17:34:11Z",
+      "name": "VNP46A4.A2016001.h13v11.002.2025101113318.h5",
+      "sha256": "96bb40714fb78d4633c6e5eb09797ee49c8f86d22b52dabd36f275eaac8dbdbd",
+      "size_bytes": 84968880,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VNP46A4/2016/001/VNP46A4.A2016001.h13v11.002.2025101113318.h5",
+      "year": 2016
+    },
+    {
+      "downloaded_utc": "2026-11-19T17:34:19Z",
+      "name": "VNP46A4.A2017001.h13v11.002.2025105144552.h5",
+      "sha256": "4251ec1c192699945c2cc5e6e2330ce35afefeb6908ed93284990185094356d5",
+      "size_bytes": 84903894,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VNP46A4/2017/001/VNP46A4.A2017001.h13v11.002.2025105144552.h5",
+      "year": 2017
+    },
+    {
+      "downloaded_utc": "2026-11-19T17:34:23Z",
+      "name": "VNP46A4.A2018001.h13v11.002.2025113133713.h5",
+      "sha256": "dce0bade4be67167b141d69361c4d204de77d7fbececec0626c56c98dca4e4d1",
+      "size_bytes": 85859763,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VNP46A4/2018/001/VNP46A4.A2018001.h13v11.002.2025113133713.h5",
+      "year": 2018
+    },
+    {
+      "downloaded_utc": "2026-11-19T17:34:28Z",
+      "name": "VNP46A4.A2019001.h13v11.002.2025133143159.h5",
+      "sha256": "1a88900ecc1c7fb5f8abcb1eda65a9efca91e7b14343357e50f94878b461e0cc",
+      "size_bytes": 85083900,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VNP46A4/2019/001/VNP46A4.A2019001.h13v11.002.2025133143159.h5",
+      "year": 2019
+    },
+    {
+      "downloaded_utc": "2026-11-19T17:34:37Z",
+      "name": "VNP46A4.A2020001.h13v11.002.2025134014932.h5",
+      "sha256": "ee478977631a201d92ee050549242f7a537b5c87dab1494a9602102b15125b50",
+      "size_bytes": 86034959,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VNP46A4/2020/001/VNP46A4.A2020001.h13v11.002.2025134014932.h5",
+      "year": 2020
+    },
+    {
+      "downloaded_utc": "2026-11-19T17:34:44Z",
+      "name": "VNP46A4.A2021001.h13v11.002.2025149104007.h5",
+      "sha256": "a4d061a7dbfca7c5957c027fa52d82752776894c8841b55b3849032e9ec26ded",
+      "size_bytes": 86743531,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VNP46A4/2021/001/VNP46A4.A2021001.h13v11.002.2025149104007.h5",
+      "year": 2021
+    },
+    {
+      "downloaded_utc": "2026-11-19T17:34:50Z",
+      "name": "VNP46A4.A2022001.h13v11.002.2025156103312.h5",
+      "sha256": "d8a5045101d874cbb4dfe11f7555a03229efc90ce67dd487bf03c95a6256c508",
+      "size_bytes": 88731153,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VNP46A4/2022/001/VNP46A4.A2022001.h13v11.002.2025156103312.h5",
+      "year": 2022
+    },
+    {
+      "downloaded_utc": "2026-11-19T17:34:55Z",
+      "name": "VNP46A4.A2023001.h13v11.002.2025161112706.h5",
+      "sha256": "3426db53c89d08da7d769a95aae5fc9ca38beb4ffe38a94490afa3a441ea2129",
+      "size_bytes": 94717389,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VNP46A4/2023/001/VNP46A4.A2023001.h13v11.002.2025161112706.h5",
+      "year": 2023
+    },
+    {
+      "downloaded_utc": "2026-11-19T17:34:59Z",
+      "name": "VNP46A4.A2024001.h13v11.002.2025161225303.h5",
+      "sha256": "8bfcba95fa3cf1b20b3b43bf0f01b19f1855abbb4ec55987f9c0c5e25a3f56d1",
+      "size_bytes": 94284560,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VNP46A4/2024/001/VNP46A4.A2024001.h13v11.002.2025161225303.h5",
+      "year": 2024
+    },
+    {
+      "downloaded_utc": "2026-11-19T17:35:04Z",
+      "name": "VNP46A4.A2025001.h13v11.002.2026076174035.h5",
+      "sha256": "088c1b07cc0acafb8a6d02d364136dc7a2b48f6234b55b0951053af306df6f2a",
+      "size_bytes": 93487015,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VNP46A4/2025/001/VNP46A4.A2025001.h13v11.002.2026076174035.h5",
+      "year": 2025
+    }
+  ],
+  "institution": "NASA / LAADS DAAC",
+  "product": "VNP46A4",
+  "source": "NASA LAADS DAAC",
+  "tile": "h13v11"
+}
