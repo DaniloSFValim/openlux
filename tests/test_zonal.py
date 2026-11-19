@@ -95,3 +95,13 @@ def test_deterministic_repeated_runs():
     a = zonal_indicators(arr, T, g)
     b = zonal_indicators(arr, T, g)
     assert a.equals(b)
+
+
+def test_mismatched_or_missing_polygon_crs_is_rejected():
+    arr = np.full((4, 4), 1.0, dtype="float32")
+    g = _gdf(box(0, 2, 2, 4)).set_crs("EPSG:4674", allow_override=True)
+    with pytest.raises(ValueError, match="CRS"):
+        zonal_indicators(arr, T, g)
+    g2 = gpd.GeoDataFrame({"id": [0]}, geometry=[box(0, 2, 2, 4)])  # sem CRS
+    with pytest.raises(ValueError, match="CRS"):
+        zonal_indicators(arr, T, g2)

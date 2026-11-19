@@ -14,8 +14,9 @@ Autor: Danilo Valim. ORCID: *a ser informado*.
 - Geometria da grade Black Marble (15 arc-s): transformacao afim por tile e area dos
   pixels no elipsoide WGS84 (formula exata; `openlux.geo`).
 - Verificacao de integridade de downloads: SHA-256 e assinatura HDF5 (`openlux.io`).
-- Leitor do produto Black Marble VNP46A3/A4 com mascaras de qualidade, contagem de
-  observacoes e terra/agua (`openlux.io.read_blackmarble`).
+- Leitor do produto Black Marble com mascaras de qualidade, contagem de observacoes e
+  terra/agua (`openlux.io.read_blackmarble`). Testado em dados reais do VNP46A4 (S-NPP) e do
+  VJ146A4 (NOAA-20); o VNP46A3 (mensal) **nao foi testado**.
 - Agregacao zonal com cobertura fracionaria de pixels: media e mediana ponderadas,
   intensidade radiante aparente, fracao valida (`openlux.zonal`).
 - Downloader verificado da LAADS (SHA-256, assinatura HDF5, tentativas com recuo) e

@@ -44,6 +44,10 @@ def zonal_indicators(array: np.ndarray, transform: Affine, polygons, crs: str = 
     """
     if array.ndim != 2:
         raise ValueError("array deve ser 2D")
+    from pyproj import CRS
+    if polygons.crs is None or CRS.from_user_input(polygons.crs) != CRS.from_user_input(crs):
+        raise ValueError(f"CRS dos poligonos ({polygons.crs}) difere do CRS do raster ({crs}); "
+                         "reprojete ou declare explicitamente a equivalencia antes de agregar")
     arr = np.asarray(array, dtype="float32")  # copia: o original nao e modificado
     nrows, ncols = arr.shape
     row_area_cm2 = pixel_row_areas_m2(transform, nrows) * M2_TO_CM2

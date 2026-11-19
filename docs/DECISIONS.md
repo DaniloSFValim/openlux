@@ -80,3 +80,25 @@ LEDs (Levin et al., 2020), o que pode subestimar areas convertidas para LED.
 | Aviso | Resumo sempre visivel + numeros calculados a partir dos controles de ruido (`indicators.json`), nunca digitados. |
 | Verificacao | Teste em navegador compara a cor desenhada de municipios selecionados com uma classificacao reimplementada de forma independente em Python. |
 | Geometria | Simplificada (0,001 grau, ~110 m) so para exibicao; calculos usaram a malha completa. |
+
+## 5. Validacao computacional (Fase 2.3), estado no fechamento
+
+Produzida por `scripts/validate_aggregation.py` sobre a serie real (14 anos, 92 municipios);
+saida em `outputs/validation/aggregation_stability.json` (nao versionada). Os numeros abaixo
+descrevem diferencas; **nao ha limite de aprovacao definido a priori**, e o leitor deve julgar
+se a estabilidade e suficiente para o uso pretendido.
+
+| Verificacao | Resultado |
+|---|---|
+| Consistencia raster x vetor (area dos pixels ponderada pela cobertura vs `AREA_KM2` do IBGE) | diferenca maxima por municipio 0,0015%; soma 43.750,425 km2 (raster) vs 43.750,427 km2 (IBGE) |
+| Criterio de agregacao: centro do pixel vs cobertura fracionaria | Spearman >= 0,9998; diferenca relativa da media: mediana 0,3-0,4%, percentil 95 1,2-1,9%, maxima 3,4-6,6% |
+| Resolucao: grade agregada 2x2 (~920 m) vs original | Spearman >= 0,9996; mediana 0,4-0,5%, p95 2,4-3,0%, maxima 6,6-11,5% |
+| Resolucao: grade agregada 4x4 (~1,8 km) vs original | Spearman >= 0,9988; mediana 1,3-1,8%, p95 5,7-8,0%, maxima 14,5-21,7% |
+| Configuracoes de mascara (qualidade 0+1, n_min 5 e 10) | Spearman ~ 1 (secao 1); near-nadir: 0,86-0,96 na tendencia |
+| Determinismo (serie real, duas execucoes completas) | os 8 arquivos de saida tem SHA-256 identico; entradas identicas |
+| Clone limpo da branch publicada + ambiente virtual novo | 66 testes passam, 1 ignorado (teste de navegador sem Playwright) |
+
+Verificacoes **ainda nao feitas**: comparacao com valores publicados (nao se identificou estudo
+comparavel); unidades e CRS verificados por teste apenas nas funcoes (nao ha teste automatizado
+sobre dado real, que nao e redistribuivel); casos de maior diferenca nao foram investigados por
+municipio.
