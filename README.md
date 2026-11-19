@@ -12,8 +12,10 @@ Autor: Danilo Valim. ORCID: *a ser informado*.
 ## Implementado e testado
 
 - Geometria da grade Black Marble (15 arc-s): transformacao afim por tile e area dos
-  pixels na esfera authalica (`openlux.geo`).
+  pixels no elipsoide WGS84 (formula exata; `openlux.geo`).
 - Verificacao de integridade de downloads: SHA-256 e assinatura HDF5 (`openlux.io`).
+- Leitor do produto Black Marble VNP46A3/A4 com mascaras de qualidade, contagem de
+  observacoes e terra/agua (`openlux.io.read_blackmarble`).
 - Agregacao zonal com cobertura fracionaria de pixels: media e mediana ponderadas,
   intensidade radiante aparente, fracao valida (`openlux.zonal`).
 

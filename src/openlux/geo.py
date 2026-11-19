@@ -14,7 +14,10 @@ import math
 import numpy as np
 from rasterio.transform import Affine, from_origin
 
-#: Raio da esfera de area equivalente ao elipsoide WGS84 (esfera authalica), em metros.
+#: Elipsoide WGS84 (diferenca para GRS80/SIRGAS 2000 na area e desprezivel para este uso).
+WGS84_A = 6378137.0
+WGS84_E2 = 0.00669437999014
+#: Raio da esfera de area equivalente ao elipsoide (so o TOTAL global coincide), metros.
 AUTHALIC_RADIUS_M = 6371007.1809
 
 PIXEL_ARCSEC = 15
@@ -30,14 +33,25 @@ def tile_transform(h: int, v: int) -> Affine:
     return from_origin(lon0, lat0, PIXEL_DEG, PIXEL_DEG)
 
 
-def pixel_row_areas_m2(transform: Affine, nrows: int) -> np.ndarray:
-    """Area (m2) de um pixel em cada linha, na esfera authalica.
+def _q(sin_lat: np.ndarray) -> np.ndarray:
+    """Funcao de area authalica q(phi) (Snyder, 1987): area da zona = a^2/2 * dlon * dq."""
+    e = math.sqrt(WGS84_E2)
+    return (1 - WGS84_E2) * (
+        sin_lat / (1 - WGS84_E2 * sin_lat**2)
+        - (1 / (2 * e)) * np.log((1 - e * sin_lat) / (1 + e * sin_lat))
+    )
 
-    A = R^2 * dlon(rad) * (sin(lat_norte) - sin(lat_sul)). A area depende apenas
-    da latitude, por isso e retornado um vetor por linha.
+
+def pixel_row_areas_m2(transform: Affine, nrows: int) -> np.ndarray:
+    """Area (m2) de um pixel em cada linha, no elipsoide WGS84 (formula exata).
+
+    A = (a^2 / 2) * dlon(rad) * [q(lat_norte) - q(lat_sul)]. A area depende apenas da
+    latitude, por isso e retornado um vetor por linha. Nao se usa a esfera authalica
+    porque ela so conserva a area no total global: em ~22 S superestima ~0,26%, vies
+    detectado ao comparar a area raster com a area oficial do IBGE.
     """
     dlon = math.radians(abs(transform.a))
     rows = np.arange(nrows)
     lat_n = np.radians(transform.f + transform.e * rows)
     lat_s = np.radians(transform.f + transform.e * (rows + 1))
-    return AUTHALIC_RADIUS_M**2 * dlon * (np.sin(lat_n) - np.sin(lat_s))
+    return 0.5 * WGS84_A**2 * dlon * (_q(np.sin(lat_n)) - _q(np.sin(lat_s)))
