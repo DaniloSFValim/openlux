@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openlux"
+version = "0.0.1.dev0"
+description = "Estimativa de poluicao luminosa baseada em sensoriamento remoto para o Estado do Rio de Janeiro"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Danilo Valim" }]
+# Licenca: decisao pendente (Fase 3). Nenhum arquivo LICENSE foi adotado ainda.
+dependencies = [
+    "numpy",
+    "pandas",
+    "h5py",
+    "rasterio",
+    "geopandas",
+    "pyarrow",
+    "exactextract",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

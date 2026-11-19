@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+.venv/
+build/
+dist/
+
+# Credenciais e ambiente (nunca versionar)
+.env
+.env.*
+*.token
+.netrc
+
+# Dados de terceiros (redistribuicao sujeita a licenca da fonte)
+data/raw/
+data/cache/
+*.h5
+*.hdf
+*.tif
+*.tiff
+*.gz
+
+# Produtos gerados em execucao local (publicar apenas o que for explicitamente permitido)
+outputs/*
+!outputs/.gitkeep
