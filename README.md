@@ -1,61 +1,214 @@
 # OpenLux
 
-Software cientifico independente para **estimativa de poluicao luminosa baseada em
-sensoriamento remoto** no Estado do Rio de Janeiro, a partir de dados publicos.
+**Estimativa de poluição luminosa baseada em sensoriamento remoto no Estado do Rio de Janeiro.**
 
-Autor: Danilo Valim. ORCID: *a ser informado*.
+Software científico independente, em desenvolvimento (versão 0.1.0). Não há resultado científico
+validado ainda; leia as seções *Resultados efetivamente disponíveis* e *Limitações* antes de usar
+qualquer número.
 
-> Estado atual: **desenvolvimento inicial (Fase 2)**. Nenhum resultado cientifico
-> foi produzido ou validado ainda. Este README descreve apenas o que esta implementado
-> e testado.
+## 1. Identificação
 
-## Implementado e testado
+| Campo | Valor |
+|---|---|
+| Nome | OpenLux |
+| Natureza | Software científico e ferramenta de análise espacial |
+| Autor | Danilo Valim |
+| Áreas | Ciência de dados, geoprocessamento, sensoriamento remoto e ciências ambientais |
+| Repositório | https://github.com/DaniloSFValim/openlux |
+| Versão | 0.1.0 (pré-lançamento) |
+| Licença | **Pendente de decisão do autor** (ver [`docs/LICENSING.md`](docs/LICENSING.md)); nenhum arquivo `LICENSE` foi adotado |
+| DOI | A ser atribuído após a publicação no Zenodo |
 
-- Geometria da grade Black Marble (15 arc-s): transformacao afim por tile e area dos
-  pixels no elipsoide WGS84 (formula exata; `openlux.geo`).
-- Verificacao de integridade de downloads: SHA-256 e assinatura HDF5 (`openlux.io`).
-- Leitor do produto Black Marble com mascaras de qualidade, contagem de observacoes e
-  terra/agua (`openlux.io.read_blackmarble`). Testado em dados reais do VNP46A4 (S-NPP) e do
-  VJ146A4 (NOAA-20); o VNP46A3 (mensal) **nao foi testado**.
-- Agregacao zonal com cobertura fracionaria de pixels: media e mediana ponderadas,
-  intensidade radiante aparente, fracao valida (`openlux.zonal`).
-- Downloader verificado da LAADS (SHA-256, assinatura HDF5, tentativas com recuo) e
-  registro de proveniencia (`openlux.download`, `openlux.provenance`).
-- Populacao do Censo 2022 (SIDRA 4709/v93) e malha municipal IBGE 2024 (`openlux.ibge`).
-- Indicadores temporais por municipio: tendencia (Theil-Sen + Kendall) em janelas separadas,
-  variacao com piso declarado, controles de ruido de fundo e comparacao S-NPP x NOAA-20
-  (`openlux.temporal`, `openlux.qa`, `openlux.pipeline`). Decisoes e achados: `docs/DECISIONS.md`.
+O OpenLux é um projeto autônomo, com código, metodologia e histórico de versões próprios, e usa
+exclusivamente dados públicos com procedência verificável.
 
-- Interface web estatica (`web/`): mapa coropletico dos 92 municipios, indicadores, ranking,
-  comparacao, painel estadual com controles de ruido de fundo, metodologia, fontes e
-  limitacoes. Classes fixas entre anos, legenda com unidade, fonte e periodo, aviso
-  metodologico permanente. Testada em navegador (Playwright).
+## 2. Resumo científico
 
-## Resultados
+O OpenLux agrega a radiância noturna observada pelo sensor VIIRS (produtos NASA Black Marble
+VNP46A4, Suomi NPP, 2012–2025, e VJ146A4, NOAA-20, 2018–2025) nos 92 municípios do Estado do Rio
+de Janeiro, usando a malha municipal e a população do IBGE. Para cada município e ano calcula
+radiância média e mediana, intensidade radiante aparente, fração da área iluminada, tendência
+temporal (Theil–Sen e Kendall) e controles de ruído de fundo, além de análises de sensibilidade
+às escolhas de máscara, de critério de agregação e de resolução. Toda execução registra
+proveniência (versões, parâmetros, hashes de entradas e saídas, versão do código) e é
+determinística. Os valores são *estimativas baseadas em sensoriamento remoto* da radiância
+noturna de superfície, **não medições do brilho do céu**.
 
-Nenhum resultado cientifico validado esta disponivel ainda. O pipeline ja executa sobre a
-serie VNP46A4 2012-2025, mas os produtos gerados nao foram validados nem interpretados.
+## 3. Pergunta de pesquisa
 
-## Estimativa, nao medicao
+> Como a estimativa de poluição luminosa baseada em sensoriamento remoto (radiância noturna
+> VIIRS) se distribui entre os 92 municípios do Estado do Rio de Janeiro e como evoluiu entre 2012
+> e o último ano completo disponível, e quão robustos são esses resultados à escolha do produto,
+> da máscara de qualidade e do método de agregação?
 
-Os valores derivados de radiancia orbital (VIIRS Day/Night Band) **nao sao medicoes do
-brilho do ceu**. Sao uma estimativa baseada em sensoriamento remoto.
+## 4. Objetivos
 
-## Desenvolvimento
+**Geral.** Construir uma ferramenta reproduzível e documentada para estimar e acompanhar a
+poluição luminosa no Estado do Rio de Janeiro a partir de dados públicos de satélite.
+
+**Específicos.** (i) Agregar a radiância anual por município com cobertura fracionária de
+pixels; (ii) calcular indicadores com unidades e hipóteses explícitas; (iii) analisar a evolução
+temporal e sua dependência da janela de anos; (iv) quantificar a sensibilidade a máscara,
+sensor, critério de agregação e resolução; (v) registrar a proveniência de cada resultado;
+(vi) disponibilizar os resultados em uma interface que distingua dado observado, indicador
+derivado e classificação analítica.
+
+## 5. Abrangência geográfica
+
+Estado do Rio de Janeiro, 92 municípios (malha IBGE 2024). O município de Niterói pode ser
+explorado como estudo de caso na interface, sem restringir a abrangência estadual.
+
+## 6. Fontes de dados
+
+| Fonte | Instituição | Uso | Termos |
+|---|---|---|---|
+| Black Marble VNP46A4 v2.0 (DOI 10.5067/VIIRS/VNP46A4.002) | NASA / LAADS DAAC | Radiância anual S-NPP (principal) | Política de dados abertos da NASA/LAADS; texto oficial **não confirmado** |
+| Black Marble VJ146A4 v2.0 (DOI 10.5067/VIIRS/VJ146A4.002) | NASA / LAADS DAAC | Comparação entre sensores | Idem |
+| Malha Municipal Digital 2024 (RJ) | IBGE | Limites municipais | Licença compatível com CC BY 4.0 (confirmada) |
+| Censo Demográfico 2022, SIDRA tabela 4709, variável 93 | IBGE | População residente (2022) | **Não verificados** |
+
+Cada fonte tem URL, versão, data de aquisição e SHA-256 registrados em
+`data/metadata/downloads/`. Dados brutos não são redistribuídos neste repositório. Fontes
+candidatas **não usadas**: EOG VIIRS Nighttime Lights (exige login; licença com informação
+conflitante) e o Atlas de Falchi et al. (2016) (dados não obtidos; licença CC BY-NC 4.0).
+
+## 7. Metodologia
+
+Resumo: leitura da camada `AllAngle_Composite_Snow_Free`; máscara por qualidade, número de
+observações e terra/água; agregação por cobertura fracionária de pixels na grade nativa; área
+dos pixels no elipsoide WGS84; indicadores por município e ano; tendência por Theil–Sen e
+Kendall em duas janelas; controles de ruído de fundo; sensibilidade e estabilidade. Equações,
+unidades, parâmetros, tratamento dos dados e reprodução passo a passo:
+[`METHODOLOGY.md`](METHODOLOGY.md). Decisões e achados: [`docs/DECISIONS.md`](docs/DECISIONS.md).
+
+## 8. Indicadores implementados
+
+| Indicador | Unidade | Observação |
+|---|---|---|
+| Radiância média e mediana ponderadas | nW·cm⁻²·sr⁻¹ | Pixels válidos, cobertura fracionária |
+| Intensidade radiante aparente | nW·sr⁻¹ | Radiância × área na direção do sensor; **não é emissão luminosa total** |
+| Fração da área válida | adimensional | Controle de qualidade |
+| Fração da área iluminada | adimensional | Limiar documentado 0,5 nW·cm⁻²·sr⁻¹; muito sensível ao piso de ruído do S-NPP após 2021 |
+| Intensidade por habitante (2022) | mW·sr⁻¹ por habitante | Índice relativo, só 2022 |
+| Variação absoluta e percentual | nW·cm⁻²·sr⁻¹ e % | Percentual só acima de um piso declarado |
+| Tendência (Theil–Sen, Kendall) | nW·cm⁻²·sr⁻¹ por ano | Duas janelas: 2012–2021 e 2012–2025 |
+| Controles de ruído de fundo | nW·cm⁻²·sr⁻¹ | Pixels persistentemente escuros, terra e mar |
+
+**Não implementados:** comparação com o Atlas de Falchi et al. (2016), mudança espacial pixel a pixel e
+comparação urbano × não urbano. Constam como trabalhos futuros.
+
+## 9. Arquitetura tecnológica
+
+Pipeline em Python, saídas em CSV/JSON e interface estática (HTML, CSS e JavaScript), sem banco de
+dados, servidor ou serviço pago.
+
+| Dependência | Justificativa |
+|---|---|
+| numpy, pandas | Arrays e tabelas |
+| h5py | Leitura do HDF-EOS5 do Black Marble |
+| rasterio | Transformações afins, rasterização e raster em memória |
+| geopandas, shapely, pyproj | Vetores, geometrias e verificação de CRS |
+| exactextract | Cobertura fracionária de pixels por polígono |
+| scipy | Theil–Sen, Kendall e Spearman |
+| pytest (opcional) | Testes |
+| playwright (opcional) | Teste da interface em navegador |
+| Leaflet 1.9.4 (copiado em `web/vendor/`, BSD-2-Clause) | Mapa, sem mapa-base de terceiros |
+
+Os gráficos da interface são SVG próprio, sem biblioteca.
+
+## 10. Instalação
 
 ```bash
+git clone https://github.com/DaniloSFValim/openlux && cd openlux
+python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
-pytest
-export EARTHDATA_TOKEN=...            # nunca versione o token
-python scripts/fetch_blackmarble.py --years 2012-2025
-python scripts/fetch_ibge.py
-python scripts/run_annual.py          # saidas em outputs/annual/
-python scripts/build_web_data.py      # gera web/data/ a partir das saidas reais
-python -m http.server -d web 8000     # interface em http://localhost:8000
 ```
 
-Credenciais (quando necessarias) devem ser fornecidas por variaveis de ambiente
-(`EARTHDATA_TOKEN`) e nunca versionadas. Dados de terceiros nao sao redistribuidos
-neste repositorio.
+Python 3.10 ou superior (testado em 3.13). O teste da interface exige
+`pip install -e ".[web-tests]"` e um Chromium (variável `OPENLUX_CHROMIUM` se não for o do
+Playwright).
 
-Licenca: **pendente de decisao do autor** (nenhum arquivo LICENSE adotado ainda).
+## 11. Reprodução
+
+Requer conta Earthdata Login com a licença da LAADS aceita e um token em `EARTHDATA_TOKEN`
+(nunca versione credenciais).
+
+```bash
+python scripts/fetch_blackmarble.py --years 2012-2025
+python scripts/fetch_blackmarble.py --product VJ146A4 --years 2018-2025
+python scripts/fetch_ibge.py
+python scripts/run_annual.py
+python scripts/validate_aggregation.py
+python scripts/build_web_data.py
+python -m http.server -d web 8000
+```
+
+Os hashes das entradas e das saídas de referência estão nos Apêndices A e C de
+[`METHODOLOGY.md`](METHODOLOGY.md).
+
+## 12. Validação
+
+Verificações computacionais realizadas (detalhes e números em `METHODOLOGY.md`, seção 11):
+testes automatizados com dados sintéticos rotulados; consistência da área raster × IBGE (diferença
+máxima de 0,0015 % por município); estabilidade frente ao critério de agregação e à resolução;
+sensibilidade à máscara e à camada; comparação entre sensores; determinismo (duas execuções
+completas com hashes idênticos); clone limpo da branch com testes aprovados. **Não há comparação com
+valores publicados** e não foi definido limite de aprovação a priori.
+
+## 13. Limitações
+
+- Estimativa de radiância orbital, não medição do brilho do céu; sem medições fotométricas de campo.
+- Resolução de ≈ 460 m; a banda DNB é pouco sensível à emissão azul de LEDs (Levin et al., 2020).
+- **Piso de ruído do S-NPP a partir de 2022** e um aumento comum aos dois sensores que não foi
+  separado de um possível artefato do algoritmo compartilhado. Investigado, não resolvido.
+- O sinal da tendência depende da janela de anos.
+- A saturação do DNB em áreas muito iluminadas não foi avaliada.
+- População residente não é população exposta; a intensidade por habitante é um índice relativo.
+- Licenças de NASA e SIDRA não confirmadas no texto oficial.
+
+Lista completa: `METHODOLOGY.md`, seção 13.
+
+## 14. Resultados efetivamente disponíveis
+
+Estão disponíveis, e **não validados**: (i) tabelas anuais por município (92 × 14 anos) para a
+configuração principal e quatro variações; (ii) tendências por janela e variação; (iii) controles
+de ruído de fundo, comparação S-NPP × NOAA-20 e estabilidade; (iv) a interface em `web/`,
+construída apenas a partir dessas saídas. Os dados da interface estão em `web/data/`.
+
+O único resultado interpretável com segurança hoje é metodológico: pixels persistentemente
+escuros do S-NPP, que tinham radiância média de 0,002–0,015 nW·cm⁻²·sr⁻¹ em 2012–2021, passam a
+0,059 em 2022 e 0,13–0,18 em 2023–2025 em terra, bem acima do NOAA-20. Mudanças reais de iluminação
+não devem ser inferidas da série S-NPP de 2022–2025 sem essa ressalva.
+
+## 15. Referências
+
+- Falchi, F. et al. (2016). The new world atlas of artificial night sky brightness. *Science Advances*, 2, e1600377. https://doi.org/10.1126/sciadv.1600377
+- Kendall, M. G. (1938). A new measure of rank correlation. *Biometrika*, 30, 81–93. https://doi.org/10.1093/biomet/30.1-2.81
+- Levin, N. et al. (2020). Remote sensing of night lights: A review and an outlook for the future. *Remote Sensing of Environment*, 237, 111443. https://doi.org/10.1016/j.rse.2019.111443
+- Mann, H. B. (1945). Nonparametric Tests Against Trend. *Econometrica*, 13, 245. https://doi.org/10.2307/1907187
+- Román, M. O. et al. (2018). NASA's Black Marble nighttime lights product suite. *Remote Sensing of Environment*, 210, 113–143. https://doi.org/10.1016/j.rse.2018.03.017
+- Sen, P. K. (1968). Estimates of the Regression Coefficient Based on Kendall's Tau. *Journal of the American Statistical Association*, 63, 1379–1389. https://doi.org/10.1080/01621459.1968.10480934
+- Snyder, J. P. (1987). Map projections: A working manual. *Professional Paper*. https://doi.org/10.3133/pp1395
+- Virtanen, P. et al. (2020). SciPy 1.0: fundamental algorithms for scientific computing in Python. *Nature Methods*, 17, 261–272. https://doi.org/10.1038/s41592-019-0686-2
+- Wang, Z., Román, M. O., Kalb, V. L., Miller, S. D., Zhang, J., Shrestha, R. M. (2021). Quantifying uncertainties in nighttime light retrievals from Suomi-NPP and NOAA-20 VIIRS Day/Night Band data. *Remote Sensing of Environment*, 263, 112557. https://doi.org/10.1016/j.rse.2021.112557
+- Wang, Z., Shrestha, R. M., Roman, M. O., Kalb, V. L. (2022). NASA’s Black Marble Multiangle Nighttime Lights Temporal Composites. *IEEE Geoscience and Remote Sensing Letters*, 19, 1–5. https://doi.org/10.1109/LGRS.2022.3176616
+
+Lista gerada e verificada por `scripts/verify_references.py` (arquivo [`docs/REFERENCES.md`](docs/REFERENCES.md)).
+A mesma lista sustenta [`METHODOLOGY.md`](METHODOLOGY.md), onde cada obra é citada no ponto de uso.
+
+## 16. Como citar
+
+> Valim, D. (2026). *OpenLux* (versão 0.1.0) [Software]. https://github.com/DaniloSFValim/openlux
+
+O DOI do Zenodo será acrescentado após a publicação da release. Os metadados de citação estão em
+[`CITATION.cff`](CITATION.cff).
+
+## 17. Autor e ORCID
+
+Danilo Valim. ORCID: **a ser informado pelo autor**. Nenhuma afiliação institucional foi
+declarada nos metadados.
+
+## 18. DOI
+
+A ser atribuído após a publicação efetiva do registro no Zenodo. Um DOI identifica a versão
+arquivada e não comprova avaliação científica nem validação independente do software.
