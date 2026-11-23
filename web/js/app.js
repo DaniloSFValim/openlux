@@ -88,6 +88,37 @@
     get: (m) => m.per_capita_mw_sr_hab, breaks: mkBreaksQ(pooled((m) => [m.per_capita_mw_sr_hab])),
     scheme: 'Quantis (5 classes) dos 92 municípios. Índice relativo: não representa consumo ou emissão individual.',
     period: () => 'ano 2022 (Censo)', source: 'Intensidade radiante aparente (radiância × área, direção do sensor) ÷ população residente do Censo 2022 (IBGE).' };
+  if (codes.every((c) => M[c].exposure)) {
+    const POPNOTE = ' População do Censo 2022 mantida fixa em todos os anos: a variação temporal reflete a radiância, não a demografia. Ponderação areal simples (sem dasimetria).';
+    const ex = (k) => (m, i) => m.exposure[k][i];
+    const exb = (k) => uniq(mkBreaksQ(pooled((m) => m.exposure[k])));
+    IND.popL = { label: 'Radiância ponderada pela população', unit: 'nW·cm⁻²·sr⁻¹', kind: 'der', type: 'seq', yearly: true, d: 2,
+      get: ex('pop_radiance'), breaks: exb('pop_radiance'),
+      scheme: 'Quantis (até 5 classes) de todos os municípios e anos, limites fixos entre os anos. Radiância que a população do município “habita” (Σ pop·L / Σ pop nos pixels válidos); não mede exposição individual.' + POPNOTE,
+      period: (y) => `ano ${y}`, source: 'Derivado: setores censitários do Censo 2022 (IBGE) × VNP46A4 (S-NPP); população do setor repartida entre os pixels pela fração de cobertura.' };
+    IND.popLit = { label: `População em áreas com radiância ≥ ${fmt((meta.thresholds_nw_cm2_sr || {}).lit_0p5 ?? 0.5, 1)} nW·cm⁻²·sr⁻¹`, unit: 'fração da população em pixels válidos (0–1)', kind: 'der', type: 'seq', yearly: true, d: 3,
+      get: ex('pop_lit'), breaks: exb('pop_lit'),
+      scheme: 'Quantis (até 5 classes) de todos os municípios e anos; classes repetidas são fundidas. Sensível ao piso de ruído do S-NPP a partir de 2022.' + POPNOTE,
+      period: (y) => `ano ${y}`, source: 'Derivado: setores censitários do Censo 2022 (IBGE) × VNP46A4 (S-NPP).' };
+    IND.urban = { label: 'Radiância média nas áreas urbanas (setores “Urbana”)', unit: 'nW·cm⁻²·sr⁻¹', kind: 'der', type: 'seq', yearly: true, d: 2,
+      get: ex('urban'), breaks: exb('urban'),
+      scheme: 'Quantis (até 5 classes). Classificação urbano/rural do IBGE (campo SITUACAO do Censo 2022), ponderada pela cobertura do pixel. Cinza: município sem área urbana válida.',
+      period: (y) => `ano ${y}`, source: 'Derivado: setores censitários do Censo 2022 (IBGE) × VNP46A4 (S-NPP).' };
+    IND.rural = { label: 'Radiância média nas áreas rurais (setores “Rural”)', unit: 'nW·cm⁻²·sr⁻¹', kind: 'der', type: 'seq', yearly: true, d: 2,
+      get: ex('rural'), breaks: exb('rural'),
+      scheme: 'Quantis (até 5 classes). Classificação urbano/rural do IBGE (SITUACAO), ponderada pela cobertura do pixel. Cinza: município sem área rural válida (7 municípios).',
+      period: (y) => `ano ${y}`, source: 'Derivado: setores censitários do Censo 2022 (IBGE) × VNP46A4 (S-NPP).' };
+  }
+  if (codes.every((c) => M[c].pixel_trend)) {
+    Object.keys(meta.windows).forEach((w) => {
+      [['up', 'aumento', 'pxup_'], ['down', 'redução', 'pxdown_']].forEach(([k, nome, pre]) => {
+        IND[pre + w] = { label: `Pixels iluminados com ${nome} significativo, ${wLabel(w)}`, unit: 'fração dos pixels iluminados testados (0–1)', kind: 'der', type: 'seq', d: 3, win: w,
+          get: (m) => (m.pixel_trend[w] ? m.pixel_trend[w][k] : null), breaks: uniq(mkBreaksQ(pooled((m) => Object.keys(meta.windows).map((x) => m.pixel_trend[x] && m.pixel_trend[x][k])))),
+          scheme: 'Quantis (até 5 classes), agrupando as janelas. Mann–Kendall + Sen por pixel, controle de falsas descobertas (Benjamini–Hochberg, 5%) sobre os pixels testados; só pixels com mediana ≥ 0,5 nW·cm⁻²·sr⁻¹ e ≥ 8 anos válidos. Não corrige dependência espacial. A janela que inclui 2022–2025 herda o piso de ruído do S-NPP.',
+          period: () => wLabel(w), source: 'Derivado da série anual por pixel (VNP46A4, S-NPP); participação ponderada pela cobertura do pixel no município.' };
+      });
+    });
+  }
   const KIND = { obs: ['obs', 'Observado (agregado)'], der: ['der', 'Derivado'], qa: ['qa', 'Controle de qualidade'] };
 
   const st = { ind: 'mean', iy: years.length - 1, sel: null };
@@ -219,6 +250,16 @@
         <dt>Intensidade aparente por habitante, 2022</dt><dd>${fmt(m.per_capita_mw_sr_hab, 1)} mW·sr⁻¹/hab <span class="badge der">derivado</span></dd>
       </dl>
       <div id="mun-chart"></div>
+      ${m.exposure ? `<h4 style="margin:.8rem 0 .2rem">Exposição populacional e urbano × rural, ${years[st.iy]} <span class="badge der">derivado</span></h4>
+      <dl class="stat">
+        <dt>Radiância ponderada pela população</dt><dd>${fmt(m.exposure.pop_radiance[st.iy], 2)} nW·cm⁻²·sr⁻¹</dd>
+        <dt>População em áreas iluminadas (≥ 0,5)</dt><dd>${m.exposure.pop_lit[st.iy] == null ? '—' : fmt(100 * m.exposure.pop_lit[st.iy], 1) + '%'}</dd>
+        <dt>Radiância média urbana / rural</dt><dd>${fmt(m.exposure.urban[st.iy], 2)} / ${fmt(m.exposure.rural[st.iy], 2)} nW·cm⁻²·sr⁻¹</dd>
+      </dl>
+      <p class="muted small">População do Censo 2022 fixa em todos os anos; ponderação areal simples. Não é exposição individual.</p>` : ''}
+      ${m.pixel_trend ? `<h4 style="margin:.8rem 0 .2rem">Mudança significativa por pixel <span class="badge der">derivado</span></h4>
+      <div class="table-wrap"><table><thead><tr><th>Janela</th><th class="num">Aumento</th><th class="num">Redução</th><th class="num">Pixels testados</th></tr></thead><tbody>${winKeys.map((w) => { const t = m.pixel_trend[w] || {}; return `<tr><td>${wLabel(w)}</td><td class="num">${t.up == null ? '—' : fmt(100 * t.up, 1) + '%'}</td><td class="num">${t.down == null ? '—' : fmt(100 * t.down, 1) + '%'}</td><td class="num">${t.n_px == null ? '—' : fmt(t.n_px, 0)}</td></tr>`; }).join('')}</tbody></table></div>
+      <p class="muted small">Participação dos pixels iluminados (mediana ≥ 0,5) com tendência significativa (FDR 5%). Janelas com 2022–2025 herdam o ruído do S-NPP.</p>` : ''}
       ${m.sensors ? `<h4 style="margin:.8rem 0 .2rem">Comparação entre sensores, 2018–2025 <span class="badge der">derivado</span></h4>
       <div class="table-wrap"><table><thead><tr><th>Sensor</th><th class="num">Inclin. (nW·cm⁻²·sr⁻¹/ano)</th><th class="num">p</th><th class="num">Δ 2021→2025</th></tr></thead><tbody>
       <tr><td>S-NPP</td><td class="num">${fmt(m.sensors.slope_snpp, 3)}</td><td class="num">${fmt(m.sensors.p_snpp, 3)}</td><td class="num">${fmt(m.sensors.change_snpp, 2)}</td></tr>

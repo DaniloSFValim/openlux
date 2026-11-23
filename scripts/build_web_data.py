@@ -25,8 +25,14 @@ def main():
     sm_path, ss_path = Path("outputs/sensors/municipal_comparison_2018_2025.csv"), Path("outputs/sensors/summary.json")
     sm = pd.read_csv(sm_path, dtype={"CD_MUN": str}) if sm_path.exists() else None
     ss = json.loads(ss_path.read_text()) if ss_path.exists() else None
+    sp = Path("outputs/sectors/sector_indicators_snpp.csv")
+    sectors = pd.read_csv(sp, dtype={"CD_MUN": str}) if sp.exists() else None
+    pixel_shares = {w: pd.read_csv(f"outputs/sectors/pixel_trend_snpp_{w}.csv", dtype={"CD_MUN": str})
+                    for w in rec["parameters"]["trend_windows"]
+                    if Path(f"outputs/sectors/pixel_trend_snpp_{w}.csv").exists()} or None
     data = build_indicators(annual=annual, trends=trends, qa=qa, sensitivity=sens,
-                            sensor_comparison=cmp_, run_record=rec, sensor_municipal=sm, sensor_summary=ss)
+                            sensor_comparison=cmp_, run_record=rec, sensor_municipal=sm, sensor_summary=ss,
+                            sectors=sectors, pixel_shares=pixel_shares)
     assert set(data["municipios"]) == set(mesh.CD_MUN), "municipios das saidas e da malha divergem"
     WEB.mkdir(parents=True, exist_ok=True)
     (WEB / "indicators.json").write_text(json.dumps(data, ensure_ascii=False, allow_nan=False,
