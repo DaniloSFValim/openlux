@@ -31,6 +31,10 @@ npx wrangler versions upload --dry-run   # idem (comando padrão das branches de
 O `wrangler.jsonc` na raiz declara o Worker de arquivos estáticos (`name: openlux`, `assets.directory: ./web`).
 Com ele, os dois comandos passam, e o `_headers` é honrado: `npx wrangler dev` serviu a pasta com todos os cabeçalhos
 definidos, e `OPENLUX_URL=http://127.0.0.1:8788 python -m pytest tests/test_web_smoke.py` passou (10 testes).
+A `compatibility_date` é irrelevante para um Worker só de arquivos estáticos; usei 2026-11-19, a data mais recente
+que o `wrangler` 4.166 sugere (uma data posterior à conhecida pelo runtime é uma causa possível de recusa, **não confirmada**).
+Mesmo com essa configuração o check **Workers Builds continuou falhando** em 2026-11-23 e o log do build só está no painel da Cloudflare:
+a causa real **ainda não foi identificada**. As reproduções locais (`deploy --dry-run`, `versions upload --dry-run`, `wrangler dev`) passam.
 **O nome deve coincidir com o Worker existente** (`openlux`); se o Worker tiver outro nome, ajuste o arquivo, senão a
 Cloudflare criaria um Worker novo em vez de atualizar o atual.
 

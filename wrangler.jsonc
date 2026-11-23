@@ -2,7 +2,7 @@
   // Worker de arquivos estaticos do OpenLux (sem codigo de servidor).
   // O nome deve coincidir com o Worker existente na Cloudflare ("openlux").
   "name": "openlux",
-  "compatibility_date": "2026-11-23",
+  "compatibility_date": "2026-11-19",
   "assets": {
     "directory": "./web"
   }
