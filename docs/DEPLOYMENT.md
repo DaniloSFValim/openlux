@@ -16,6 +16,24 @@ O site é estático (`web/`), sem etapa de build. URL pública: **https://openlu
 Use um projeto separado do sistema anterior de iluminação pública (o OpenLux é independente dele).
 Os nomes exatos dos campos mudam com a interface da Cloudflare: confira no painel.
 
+## 1.1. Configuração do Worker no repositório (`wrangler.jsonc`)
+
+A primeira prévia (PR #4) falhou no check **Workers Builds** da Cloudflare. O log do build só existe no
+painel (exige login), mas a causa foi **reproduzida localmente**: sem arquivo de configuração e sem
+`--assets`, os dois comandos padrão da Cloudflare falham com `Missing entry-point to Worker script or to
+assets directory`:
+
+```bash
+npx wrangler deploy --dry-run            # falha sem wrangler.jsonc
+npx wrangler versions upload --dry-run   # idem (comando padrão das branches de prévia)
+```
+
+O `wrangler.jsonc` na raiz declara o Worker de arquivos estáticos (`name: openlux`, `assets.directory: ./web`).
+Com ele, os dois comandos passam, e o `_headers` é honrado: `npx wrangler dev` serviu a pasta com todos os cabeçalhos
+definidos, e `OPENLUX_URL=http://127.0.0.1:8788 python -m pytest tests/test_web_smoke.py` passou (10 testes).
+**O nome deve coincidir com o Worker existente** (`openlux`); se o Worker tiver outro nome, ajuste o arquivo, senão a
+Cloudflare criaria um Worker novo em vez de atualizar o atual.
+
 ## 2. Verificação pós-implantação
 
 ```bash

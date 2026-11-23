@@ -19,6 +19,5 @@ evidencia. "Parcial" e "Nao atendido" indicam lacunas reais, nao ressalvas de fo
 1. Indicador D (Falchi) e as partes nao implementadas de C e E (ver linha 2): o autor decide adiar ou retirar do escopo. A fracao acima do limiar foi implementada depois do fechamento original, a pedido do autor.
 2. Aumento de radiancia apos 2022: investigado, nao resolvido (`docs/DECISIONS.md`, secao 3).
 3. Licencas de NASA, EOG e SIDRA nao confirmadas no texto oficial.
-4. Prazo e exigencias do edital PGC/UFF nao informados.
-5. Licenca do codigo pendente (Fase 3). ORCID pendente.
-6. Credenciais antigas ainda salvas em *Network secrets* do ambiente (acao do autor).
+4. Licenca do codigo pendente (Fase 3). ORCID pendente.
+5. Credenciais antigas ainda salvas em *Network secrets* do ambiente (acao do autor).

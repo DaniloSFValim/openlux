@@ -157,3 +157,12 @@ def test_site_url_is_the_same_everywhere_and_verification_is_documented():
     assert CFF["url"] == url and url in README and url.rstrip("/") in dep
     assert "OPENLUX_URL" in README and "OPENLUX_URL" in dep
     assert "Web Analytics" in dep and "detecção de bots" in dep  # injecoes da Cloudflare documentadas
+
+
+def test_wrangler_config_matches_the_deployed_worker_and_assets_folder():
+    import re as _re
+    raw = (ROOT / "wrangler.jsonc").read_text(encoding="utf-8")
+    cfg = json.loads(_re.sub(r"^\s*//.*$", "", raw, flags=_re.M))
+    assert cfg["name"] == "openlux"                       # Worker existente na Cloudflare
+    assert cfg["assets"]["directory"] == "./web" and (ROOT / "web" / "index.html").exists()
+    assert "main" not in cfg                              # so arquivos estaticos, sem codigo de servidor

@@ -22,6 +22,5 @@ Estado em 2026-11-19. Cada item cita a evidência; "pendente" indica decisão ou
 
 - Licença do código (e de conteúdo, se desejado) e titular dos direitos; ver `docs/LICENSING.md`.
 - ORCID (e, se quiser declarar, afiliação).
-- Prazo e exigências do edital PGC/UFF.
 - Remover as credenciais antigas dos *Network secrets*.
 - Decidir se os agregados de `web/data/` permanecem no repositório antes da confirmação das licenças.

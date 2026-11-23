@@ -25,3 +25,7 @@ data/cache/
 # Produtos gerados em execucao local (publicar apenas o que for explicitamente permitido)
 outputs/*
 !outputs/.gitkeep
+
+# Estado local do wrangler (Cloudflare) e dependencias de node
+.wrangler/
+node_modules/
