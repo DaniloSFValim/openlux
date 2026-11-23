@@ -275,3 +275,25 @@ com a saida de texto e o `run_record` de proveniencia.
 - **Zoom máximo 12** (um pixel de ≈ 460 m ocupa ≈ 13 px); sem mapa-base de terceiros, por causa da política de segurança (CSP) e dos termos de uso.
 - **Limitações.** Classes, não valores; vizinhança mais próxima na tela; herda o ruído do S-NPP; não é brilho do céu.
 
+## 11. Interface: link permanente, busca, contexto próprio e legenda em linguagem comum
+
+Público declarado pelo autor: pesquisador e leigo. Motivação: comparação com um mapa de brilho do céu modelado (lightpollutionmap.app, lido em 2026-11-23), que
+é bem mais fácil de consultar. Esse site mostra grandeza diferente (brilho do céu **modelado**, em mag/arcsec² e Bortle, a partir de entradas anuais do VIIRS da EOG);
+os números dele e os do OpenLux (radiância observada, em nW) **não são comparáveis nem conversíveis**. Não foi avaliada a acurácia do método dele.
+
+Implementado:
+1. **Link permanente.** Parâmetros `lat`, `lng`, `z`, `y` (ano), `l` (camada: `pixel` ou `mun`), `i` (indicador) e `m` (código do município). Valores inválidos são ignorados
+   (nunca quebram a página); a URL é atualizada a cada mudança de vista, ano, camada, indicador ou município; botão "Copiar link desta vista".
+2. **Busca de município.** Só nos nossos dados (sem serviço de geocodificação de terceiros, sem enviar a consulta do visitante a ninguém). Ignora acentos e caixa;
+   não busca endereços.
+3. **Legenda em linguagem comum.** Nomes simples das faixas (“sem luz detectada” a “muitíssima luz”) **ao lado** das faixas numéricas, mais um bloco “O que isto significa”.
+   Os nomes são rótulos de leitura: não são classes oficiais nem equivalem à escala Bortle.
+4. **Contexto geográfico próprio.** Limites municipais e **nomes dos municípios** a partir de zoom 9,5 (desligável), posicionados no centro do retângulo envolvente
+   (aproximado em formas irregulares). **Sem mapa-base de terceiros:** tiles externos exigiriam relaxar a política de segurança (CSP), expõem o IP do visitante a terceiros
+   e têm termos de uso que não foram verificados. Hidrografia e vias do IBGE seriam o próximo passo e exigem verificar licença e peso dos arquivos.
+
+**Não implementado (decisão registrada): escala Bortle/SQM, contagem de estrelas visíveis e “estimativa” do mês corrente.** Todas supõem um modelo de brilho do céu que o OpenLux não
+tem nem validou: a relação entre radiância orbital e brilho do céu depende de atmosfera, espectro e luz de fontes distantes (`docs/FIELD_VALIDATION.md`). Mostrar “Bortle 9,0” ou
+“< 200 estrelas” passaria precisão que os dados não sustentam. O composto anual do satélite para o ano corrente também não existe, então não há o que mostrar como “estimativa” do mês.
+Caminho: executar a validação em campo; só então avaliar uma relação calibrada, apresentada com incerteza.
+

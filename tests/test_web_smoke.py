@@ -316,3 +316,81 @@ def test_exposure_and_pixel_trend_indicators_render_and_match_data(page):
     assert f"{v:.2f}".replace(".", ",") in txt
     assert "Mudança significativa por pixel" in txt and "Censo 2022 fixa" in txt
     assert _relevant_errors(page.errors, page.injected) == []
+
+
+def _fresh(page, server, query=""):
+    """Nova aba no mesmo navegador, com captura de erros de console."""
+    pg = page.context.browser.new_context(viewport={"width": 1280, "height": 900}).new_page()
+    pg.errors = []
+    pg.on("console", lambda m: pg.errors.append(m.text) if m.type == "error" else None)
+    pg.on("pageerror", lambda e: pg.errors.append(str(e)))
+    pg.goto(server + "/" + query)
+    pg.wait_for_selector("#mapa path.leaflet-interactive")
+    return pg
+
+
+def _code(name):
+    d = json.loads((WEB / "data" / "indicators.json").read_text())
+    return next(c for c, m in d["municipios"].items() if m["name"] == name)
+
+
+def test_permalink_restores_the_view_and_follows_the_controls(page, server):
+    rio = _code("Rio de Janeiro")
+    pg = _fresh(page, server, f"?lat=-22.9&lng=-43.2&z=10&y=2018&l=mun&i=mean&m={rio}")
+    assert pg.inner_text("#year-out") == "2018"
+    assert pg.eval_on_selector("input[name=layer]:checked", "e => e.value") == "mun"
+    assert pg.eval_on_selector("#indicator", "e => e.value") == "mean" and pg.eval_on_selector("#mun-select", "e => e.value") == rio
+    assert "Rio de Janeiro" in pg.inner_text("#mun-detail")
+    q = pg.evaluate("() => Object.fromEntries(new URLSearchParams(location.search))")
+    assert q["y"] == "2018" and q["l"] == "mun" and q["m"] == rio and float(q["z"]) >= 6
+    pg.fill("#year", "0"); pg.dispatch_event("#year", "input")
+    assert pg.evaluate("() => new URLSearchParams(location.search).get('y')") == "2012"
+    pg.check('input[name="layer"][value="pixel"]')
+    assert pg.evaluate("() => new URLSearchParams(location.search).get('l')") == "pixel"
+    assert _relevant_errors(pg.errors, _cloudflare_injected(pg.content())) == []
+    pg.context.close()
+
+
+def test_permalink_ignores_invalid_parameters_without_errors(page, server):
+    pg = _fresh(page, server, "?lat=abc&lng=&z=99&y=1999&l=zzz&i=__proto__&m=0000000")
+    assert pg.inner_text("#year-out") == "2025"                       # ano padrao
+    assert pg.eval_on_selector("input[name=layer]:checked", "e => e.value") == "pixel"
+    assert pg.eval_on_selector("#indicator", "e => e.value") == "mean"
+    assert pg.locator("#mapa path.leaflet-interactive").count() == 92
+    assert _relevant_errors(pg.errors, _cloudflare_injected(pg.content())) == []
+    pg.context.close()
+
+
+def test_search_finds_municipality_ignoring_accents_and_case(page, server):
+    pg = _fresh(page, server)
+    for typed, name in (("niteroi", "Niterói"), ("NOVA FRI", "Nova Friburgo"), ("campos dos", "Campos dos Goytacazes")):
+        pg.fill("#mun-search", typed); pg.press("#mun-search", "Enter")
+        pg.wait_for_function("(c) => document.getElementById('mun-select').value === c", arg=_code(name))
+        assert name in pg.inner_text("#mun-detail")
+    pg.fill("#mun-search", "zzzz inexistente"); pg.press("#mun-search", "Enter")     # sem resultado: nada muda, sem erro
+    assert pg.eval_on_selector("#mun-select", "e => e.value") == _code("Campos dos Goytacazes")
+    assert _relevant_errors(pg.errors, _cloudflare_injected(pg.content())) == []
+    pg.context.close()
+
+
+def test_municipality_names_appear_only_when_zoomed_in_and_can_be_turned_off(page, server):
+    pg = _fresh(page, server)
+    assert pg.locator(".mlabel span").count() == 0                          # estado inteiro: sem rotulos
+    pg = _fresh(page, server, "?lat=-22.9&lng=-43.3&z=10.5&l=pixel")
+    pg.wait_for_selector(".mlabel span")
+    assert pg.locator(".mlabel span").count() > 0
+    pg.uncheck("#labels-chk")
+    assert pg.locator(".mlabel span").count() == 0
+    pg.context.close()
+
+
+def test_plain_language_legend_keeps_numeric_classes_and_does_not_claim_a_sky_scale(page, server):
+    pg = _fresh(page, server, "?l=pixel")
+    pg.wait_for_selector("#legend .meaning")
+    leg = pg.inner_text("#legend")
+    assert "Sem luz detectada" in leg and "Muitíssima luz" in leg
+    assert "0,5 a < 2" in leg and "≥ 100" in leg                       # as classes numericas continuam ao lado
+    assert "nem equivalem à escala Bortle" in leg and "não foram validados em campo" in leg
+    ui = (WEB / "index.html").read_text(encoding="utf-8") + (WEB / "js" / "app.js").read_text(encoding="utf-8")
+    assert "mag/arcsec" not in ui and "SQM" not in ui                  # sem escala de brilho do ceu antes da validacao em campo
+    pg.context.close()
