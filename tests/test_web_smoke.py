@@ -205,3 +205,28 @@ def test_deployed_files_are_identical_to_the_repository(server):
         if hashlib.sha256(body).digest() != hashlib.sha256(f.read_bytes()).digest():
             mismatches.append(rel)
     assert mismatches == []
+
+
+def test_exposure_and_pixel_trend_indicators_render_and_match_data(page):
+    """Cada indicador novo (setores/pixel) aparece no seletor, pinta o mapa sem erros e o painel do
+    municipio mostra os valores do JSON (conferidos de forma independente)."""
+    data = json.loads((WEB / "data" / "indicators.json").read_text())
+    m = next(iter(data["municipios"].values()))
+    if "exposure" not in m:
+        pytest.skip("dados sem indicadores de setores")
+    keys = page.evaluate("() => [...document.querySelectorAll('#indicator option')].map(o => o.value)")
+    novos = ["popL", "popLit", "urban", "rural"] + [f"{p}{w}" for w in data["meta"]["windows"]
+                                                   for p in ("pxup_", "pxdown_")]
+    assert set(novos) <= set(keys), set(novos) - set(keys)
+    for k in novos:
+        page.select_option("#indicator", k)
+        assert page.locator("#mapa path.leaflet-interactive").count() == 92
+        assert page.locator("#legend").inner_text().strip() != ""
+    last = len(data["meta"]["years"]) - 1
+    cd = next(c for c, mm in data["municipios"].items() if mm["name"] == "Niterói")
+    page.select_option("#mun-select", cd)
+    txt = page.locator("#mun-detail").inner_text().replace(" ", " ")
+    v = data["municipios"][cd]["exposure"]["pop_radiance"][last]
+    assert f"{v:.2f}".replace(".", ",") in txt
+    assert "Mudança significativa por pixel" in txt and "Censo 2022 fixa" in txt
+    assert _relevant_errors(page.errors, page.injected) == []

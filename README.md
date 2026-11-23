@@ -67,6 +67,7 @@ explorado como estudo de caso na interface, sem restringir a abrangência estadu
 | Black Marble VJ146A4 v2.0 (DOI 10.5067/VIIRS/VJ146A4.002) | NASA / LAADS DAAC | Comparação entre sensores | Idem |
 | Malha Municipal Digital 2024 (RJ) | IBGE | Limites municipais | Licença compatível com CC BY 4.0 (confirmada) |
 | Censo Demográfico 2022, SIDRA tabela 4709, variável 93 | IBGE | População residente (2022) | Reuso permitido com citação da fonte (conferido pelo autor em 2026-11-19) |
+| Malha de setores censitários 2022 com atributos (RJ) | IBGE | População por setor e situação urbana/rural | Mesma política de reuso do Censo 2022; o texto específico desta malha não foi lido por ferramenta (o IBGE bloqueia o acesso automatizado) |
 
 Cada fonte tem URL, versão, data de aquisição e SHA-256 registrados em
 `data/metadata/downloads/`. Citação dos dados NASA (conforme a política da NASA, que solicita citar os
@@ -77,8 +78,9 @@ https://doi.org/10.5067/VIIRS/VJ146A4.002 (acessos em 2026-11-19; títulos e DOI
 população residente (SIDRA, tabela 4709, variável 93), acesso em 2026-11-19. Os termos do SIDRA foram conferidos
 pelo autor (reuso permitido com citação da fonte); a forma de citação é redação do projeto.
 Dados brutos não são redistribuídos neste repositório. Fontes
-candidatas **não usadas**: EOG VIIRS Nighttime Lights (exige login; licença com informação
-conflitante) e o Atlas de Falchi et al. (2016) (dados não obtidos; licença CC BY-NC 4.0).
+candidatas **não usadas**: EOG VIIRS Nighttime Lights (exige login; CC BY 4.0 conforme o documento oficial do EOG, com
+atribuição e aviso obrigatórios) e o Atlas de Falchi et al. (2016) (dados não obtidos; licença CC BY-NC 4.0; baseado em
+um único composto VIIRS de 6 meses de 2014 e em outra grandeza, luminância zenital modelada).
 
 ## 7. Metodologia
 
@@ -103,8 +105,11 @@ unidades, parâmetros, tratamento dos dados e reprodução passo a passo:
 | Controles de ruído de fundo | nW·cm⁻²·sr⁻¹ | Pixels persistentemente escuros, terra e mar; análise mensal 2021–2023 |
 | Comparação municipal S-NPP × NOAA-20 (2018–2025) | vários | Níveis por ano, inclinações, variação 2021→2025; até 2021 os sensores concordam em nível, e a partir de 2022 o S-NPP lê mais alto |
 
-**Não implementados:** comparação com o Atlas de Falchi et al. (2016), mudança espacial pixel a pixel e
-comparação urbano × não urbano. Constam como trabalhos futuros.
+| Radiância ponderada pela população e população em áreas iluminadas | nW·cm⁻²·sr⁻¹ e fração | Setores do Censo 2022; **população fixa em 2022** em todos os anos; repartição areal simples; não é exposição individual |
+| Radiância e fração iluminada urbana × rural | nW·cm⁻²·sr⁻¹ e fração | Classificação `SITUACAO` do IBGE (Censo 2022) |
+| Mudança significativa por pixel | fração dos pixels iluminados | Mann–Kendall + Sen, FDR 5 %; sem correção de dependência espacial; as janelas com 2022–2025 herdam o ruído do S-NPP |
+
+**Não implementado:** comparação com o Atlas de Falchi et al. (2016) (dados não obtidos). Consta como trabalho futuro.
 
 ## 9. Arquitetura tecnológica
 
@@ -147,7 +152,9 @@ Requer conta Earthdata Login com a licença da LAADS aceita e um token em `EARTH
 python scripts/fetch_blackmarble.py --years 2012-2025
 python scripts/fetch_blackmarble.py --product VJ146A4 --years 2018-2025
 python scripts/fetch_ibge.py
+python scripts/fetch_sectors.py
 python scripts/run_annual.py
+python scripts/run_sectors.py
 python scripts/validate_aggregation.py
 python scripts/build_web_data.py
 python -m http.server -d web 8000
@@ -174,7 +181,8 @@ valores publicados** e não foi definido limite de aprovação a priori.
   específico do S-NPP, com início entre janeiro e março de 2022 e não sinalizado pelo campo de qualidade. A causa não foi identificada.
 - O sinal da tendência depende da janela de anos.
 - A saturação do DNB em áreas muito iluminadas não foi avaliada.
-- População residente não é população exposta; a intensidade por habitante é um índice relativo.
+- População residente não é população exposta; a intensidade por habitante é um índice relativo. Os indicadores por setor usam a população de 2022 em todos os anos.
+- Mudança por pixel: a assimetria de aumentos na janela 2012–2025 coincide com o ruído do S-NPP e não deve ser lida como mudança real.
 - NASA: política ESDIS lida no texto oficial, com a ressalva de enquadramento indicada na seção 6.
 
 Lista completa: `METHODOLOGY.md`, seção 13.

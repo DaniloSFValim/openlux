@@ -1,0 +1,17 @@
+{
+  "acquired_utc": "2026-11-23T22:54:09Z",
+  "code": {
+    "commit": "62f4dd42e23e3686e8d0bf6d326a2078483ce992",
+    "dirty": true
+  },
+  "files": [
+    {
+      "description": "Malha de setores censitarios 2022 com atributos, RJ (CD2022, SIRGAS 2000, EPSG:4674); atributo v0001 = populacao residente",
+      "name": "RJ_setores_CD2022.gpkg",
+      "sha256": "ec6cecdc0297d1b79e25e2772f531cad5c99ac57bc3ac1b30fb08418dc513222",
+      "size_bytes": 75198464,
+      "url": "https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios/malha_com_atributos/setores/gpkg/UF/RJ/RJ_setores_CD2022.gpkg"
+    }
+  ],
+  "institution": "IBGE"
+}

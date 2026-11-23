@@ -95,7 +95,8 @@ def simplify_geojson(gdf, *, tolerance=0.001, ndigits=4) -> dict:
 
 
 def build_indicators(*, annual, trends, qa, sensitivity, sensor_comparison, run_record,
-                     id_col="CD_MUN", name_col="NM_MUN", sensor_municipal=None, sensor_summary=None) -> dict:
+                     id_col="CD_MUN", name_col="NM_MUN", sensor_municipal=None, sensor_summary=None,
+                     sectors=None, pixel_shares=None) -> dict:
     years = sorted(int(y) for y in annual["year"].unique())
     params = run_record["parameters"]
     muni = {}
@@ -124,6 +125,23 @@ def build_indicators(*, annual, trends, qa, sensitivity, sensor_comparison, run_
                 slope_snpp=_clean(r["slope_a"]), p_snpp=_clean(r["p_a"]), slope_noaa20=_clean(r["slope_b"]),
                 p_noaa20=_clean(r["p_b"]), change_snpp=_clean(r.get("change_a")),
                 change_noaa20=_clean(r.get("change_b")), ratio_noaa20_over_snpp=_clean(r["mean_ratio_b_over_a"], 4))
+    if sectors is not None:  # indicadores por setor censitario (S-NPP), populacao FIXA do Censo 2022
+        for cd, g in sectors.groupby("CD_MUN", sort=True):
+            g = g.sort_values("year").set_index("year").reindex(years)
+            muni[str(cd)]["exposure"] = dict(
+                pop_radiance=[_clean(v, 3) for v in g["pop_weighted_radiance"]],
+                pop_lit=[_clean(v, 4) for v in g["pop_lit_fraction"]],
+                urban=[_clean(v, 3) for v in g["mean_urban"]],
+                rural=[_clean(v, 3) for v in g["mean_rural"]],
+                lit_urban=[_clean(v, 4) for v in g["frac_lit_urban"]],
+                lit_rural=[_clean(v, 4) for v in g["frac_lit_rural"]],
+                pop_valid=_clean(g["pop_valid_fraction"].min(), 4))
+    if pixel_shares is not None:  # participacao de pixels iluminados com mudanca significativa (FDR)
+        for wname, df in pixel_shares.items():
+            for _, r in df.iterrows():
+                muni[str(r[id_col])].setdefault("pixel_trend", {})[wname] = dict(
+                    up=_clean(r["share_increase"], 4), down=_clean(r["share_decrease"], 4),
+                    n_px=_clean(r["n_tested_weight"], 2))
     w = annual.copy()
     w["wm"] = w["mean_radiance"] * w["weight_sum"]
     state_mean = []

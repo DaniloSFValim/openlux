@@ -26,8 +26,9 @@ resultados cientificos validados.
 | NASA Black Marble VNP46A4 (DOI 10.5067/VIIRS/VNP46A4.002) e VJ146A4 (DOI 10.5067/VIIRS/VJ146A4.002) | Politica ESDIS da NASA (https://www.earthdata.nasa.gov/learn/use-data/data-use-policy, lida em 2026-11-19): dados de missoes lideradas pela NASA, sem marcacao de restricao ou licenca, sao licenciados como CC0, sem restricao de uso; citacao fortemente solicitada. | **Confirmado com ressalva.** Os arquivos inspecionados nao tem atributo de licenca ou restricao (49 atributos; produtor "VIIRS Land SIPS Processing Group"). O enquadramento como "missao liderada pela NASA" e interpretacao minha; o texto tambem diz que dados nao NASA distribuidos pela ESDIS seguem a licenca da organizacao patrocinadora. |
 | IBGE, Malha Municipal Digital 2024 | "Licenca compativel com Creative Commons BY 4.0", com isencao de responsabilidade (Notas Metodologicas 01/2025). | **Confirmado** no documento oficial. Exige credito ao IBGE. |
 | IBGE, Censo 2022 (SIDRA 4709, v93) | Reuso permitido com citacao da fonte, conforme os termos do IBGE/SIDRA. | **Confirmado pelo autor** em 2026-11-19, em navegador. As paginas do IBGE retornaram 403 ao acesso automatizado, entao o texto nao foi lido por ferramenta; a forma de citacao no README e redacao do projeto. |
-| EOG VNL V2.x | Catalogo do Earth Engine: dominio publico, sem restricao. A pagina do EOG menciona CC BY 4.0 para "muitos dados". | **Conflito nao resolvido**; fonte nao usada nos resultados atuais (exige login). |
-| Falchi et al. (2016) | CC BY-NC 4.0; acesso por formulario. | Dados nao obtidos; nao podem ser redistribuidos. |
+| EOG VNL V2.x | Documento oficial de licenca do EOG: CC BY 4.0, com atribuicao e o aviso do "Exhibit 1". O catalogo do Earth Engine a lista como dominio publico; o documento do proprio EOG prevalece. | **Confirmado no documento oficial do EOG** (lido nesta fase); fonte **nao usada** nos resultados (exige login). Se for usada, deve incluir a atribuicao e o aviso exigidos. |
+| Falchi et al. (2016) | CC BY-NC 4.0; dados por formulario de solicitacao. | Dados nao obtidos; nao podem ser redistribuidos e o uso nao comercial limita derivados. O atlas usa **um unico composto VIIRS de 6 meses** (mai, jun, set, out, nov e dez de 2014, do EOG) com mascara DMSP de 2013, e traz luminancia artificial no zenite (mcd/m2) em 30 arcsec: outra grandeza e outra epoca. |
+| IBGE, malha de setores censitarios 2022 com atributos (RJ, CD2022) | Mesma politica de reuso do IBGE para o Censo 2022 (citacao da fonte). | Termos do SIDRA conferidos pelo autor; a malha de setores esta no mesmo portal e **o texto especifico dela nao foi lido por ferramenta** (o IBGE retorna 403 a acesso automatizado). Dado bruto nao redistribuido. |
 
 ## 3. Investigacao do aumento apos 2022 (S-NPP)
 
@@ -192,3 +193,67 @@ existe um componente comum aos dois sensores, que pode ser real ou artefato do a
 **Recomendação provisória para tendências recentes:** usar o NOAA-20 como referência para 2018-2025, o S-NPP até 2021 para a série longa, e **não** apresentar tendências do S-NPP que cruzem 2021 sem esse confronto.
 Limites: o NOAA-20 tem só 8 anos; o ajuste usa 92 municípios por ano; um único tile; causa da divergência não identificada; não há verdade de campo.
 
+## 9. Fechamento da Fase 1 e indicadores adicionais da Fase 2
+
+### 9.1 Lacunas de fonte (Fase 1)
+
+- **Falchi et al. (2016).** O atlas e derivado de um unico composto VIIRS de 6 meses (2014) com mascara DMSP; a
+  grandeza e luminancia artificial zenital modelada (mcd/m2), nao radiancia no topo da atmosfera. Os dados nao
+  foram obtidos. Uma comparacao, se vier a ser feita, seria de **ordenacao espacial** (correlacao de postos), nunca de
+  valor absoluto, e nao validaria o OpenLux: seria uma conferencia de plausibilidade entre produtos relacionados.
+- **EOG VNL.** Licenca CC BY 4.0 conforme o documento oficial do EOG (atribuicao e aviso do Exhibit 1). Exige login;
+  nao usado. Continua sendo a candidata a cadeia de processamento independente.
+- **Anual (A4) x mensal (A3).** Media dos 12 mensais municipais / anual, 2021-2023, 92 municipios (script
+  `scripts/compare_monthly_annual.py`; mesmas mascaras e agregacao):
+
+  | Sensor | Ano | Spearman | Razao mensal/anual: mediana [p10, p90] |
+  |---|---|---|---|
+  | S-NPP | 2021 | 0,995 | 1,007 [0,949; 1,150] |
+  | S-NPP | 2022 | 0,999 | 1,025 [0,995; 1,143] |
+  | S-NPP | 2023 | 0,995 | 1,021 [0,968; 1,354] |
+  | NOAA-20 | 2021 | 0,997 | 1,017 [0,967; 1,157] |
+  | NOAA-20 | 2022 | 0,998 | 1,025 [0,997; 1,112] |
+  | NOAA-20 | 2023 | 0,997 | 1,005 [0,934; 1,101] |
+
+  Os produtos concordam na ordenacao e em nivel (mediana de 0,5 % a 2,5 %), com dispersao maior nas caudas. A causa
+  das diferencas nao foi isolada; o composto anual remove valores atipicos das observacoes do ano inteiro e zera
+  valores < 0,5 nW uma vez, enquanto o mensal o faz por mes (descricao do guia do produto), mas essa explicacao nao foi testada.
+
+### 9.2 Setores censitarios: exposicao populacional e urbano x rural
+
+- **Duplicidade na malha.** A malha tem 42.270 linhas para 41.700 setores: 133 setores multipoligonais aparecem em varias
+  linhas, **cada uma com a populacao inteira**. Somar linhas conta duas vezes. Agrupar por `CD_SETOR` (uma populacao por
+  setor, geometrias unidas, 2 poligonos invalidos reparados) reproduz **exatamente** o total do SIDRA (16.055.174) em
+  todos os 92 municipios. Setores de agua tem populacao 0.
+- **Populacao repartida por cobertura.** A populacao de cada setor e dividida entre os pixels que ele cobre,
+  proporcionalmente a fracao de cobertura (ponderacao areal simples, sem dasimetria; a populacao se conserva: 16.055.174
+  dentro da grade, 0 fora). A radiancia ponderada pela populacao de um municipio e sum(pop*L)/sum(pop) nos pixels validos.
+  **Isto nao e exposicao individual**: pessoas nao se distribuem uniformemente dentro do setor.
+- **Populacao fixa (2022).** Nao ha populacao anual por setor. A serie anual muda so pela radiancia.
+- **Urbano x rural.** Classificacao do IBGE (campo `SITUACAO`: Urbana/Rural) no Censo 2022; media e fracao iluminada
+  ponderadas pela cobertura. O criterio exato do IBGE para a classificacao **nao foi verificado nesta fase**; sabe-se
+  apenas que ela nao deriva de luminosidade (nao ha circularidade). 7 municipios nao tem area rural com pixels validos e
+  ficam sem o indicador rural (NaN, nunca zero).
+- **Setores menores que um pixel** (~0,21 km2) compartilham pixels; o ruido de um pixel afeta varios setores.
+- **Heranca do ruido do S-NPP.** Estes indicadores usam o S-NPP e herdam o piso de ruido pos-2021. Verificacao: a razao
+  NOAA-20/S-NPP da radiancia ponderada pela populacao (mediana entre municipios) e 1,002 em 2019, 0,988 em 2021, 0,957 em
+  2023 e 0,920 em 2025, com Spearman >= 0,997 em todos esses anos; o NOAA-20 tambem foi calculado (2018-2025) e esta em `outputs/sectors/`.
+- **SIRGAS 2000 ~ WGS84** (poucos metros), como no restante do projeto.
+
+### 9.3 Mudanca significativa por pixel
+
+- **Metodo.** Mann-Kendall com correcao de continuidade e de empates + inclinacao de Sen, por pixel; valores-p ajustados
+  por controle da taxa de falsas descobertas (Benjamini-Hochberg, 5 %) sobre os pixels testados. Pixels testados: mediana
+  anual >= 0,5 nW em terra (iluminados) e >= 8 anos validos. Participacao por municipio ponderada pela cobertura.
+- **Limitacoes.** BH assume independencia ou dependencia positiva; pixels vizinhos sao correlacionados e nao ha correcao
+  espacial dedicada. O teste detecta tendencia monotonica, nao mudanca de nivel. "Significativo" nao implica mudanca fisica.
+- **Resultado e cautela.** Janela 2012-2021 (92.338 pixels testados): 12.009 com aumento e 11.569 com reducao
+  significativos (13,0 % e 12,5 %), praticamente simetricos. Janela 2012-2025 (99.462 testados): 38.717 aumentos
+  e 5.536 reducoes (38,9 % e 5,6 %). A assimetria da segunda janela coincide com o piso de ruido do S-NPP pos-2021 e **nao
+  deve ser lida como aumento real de iluminacao**: a causa nao foi separada. As contagens saem de `outputs/sectors/run_sectors.jsonl`.
+
+### 9.4 Registro estruturado
+
+Os scripts novos escrevem eventos JSON por linha (`openlux.log.JsonLogger`) em `outputs/sectors/run_sectors.jsonl`:
+arquivos lidos, linhas deduplicadas, populacao dentro e fora da grade, pixels testados. Os scripts anteriores continuam
+com a saida de texto e o `run_record` de proveniencia.

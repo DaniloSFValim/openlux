@@ -114,3 +114,23 @@ def test_sensor_comparison_is_attached_per_municipality_and_summary_is_strict_js
     assert d["municipios"]["2"]["sensors"]["slope_snpp"] is None            # NaN -> null
     assert d["sensor_municipal"]["2018_2025"]["sign_agreement"] is None
     json.dumps(d, allow_nan=False)
+
+
+def test_exposure_and_pixel_trend_are_aligned_and_strict_json():
+    sec = pd.DataFrame({"CD_MUN": ["1"] * 3 + ["2"] * 2, "year": [2012, 2013, 2014, 2012, 2014],
+                        "pop_weighted_radiance": [10.0, 11, 12, 5, 6], "pop_lit_fraction": [1.0, 1, 0.9, 0.5, 0.4],
+                        "mean_urban": [8.0, 9, 10, np.nan, np.nan], "mean_rural": [1.0, 1, 1, 2, 2],
+                        "frac_lit_urban": [1.0] * 3 + [np.nan] * 2, "frac_lit_rural": [0.2] * 5,
+                        "pop_valid_fraction": [1.0, 1, 0.97, 1, 1]})
+    px = {"w1": pd.DataFrame({"CD_MUN": ["1", "2"], "share_increase": [0.3, np.nan],
+                              "share_decrease": [0.1, np.nan], "n_tested_weight": [50.0, 0.0]})}
+    rec = {"processed_utc": "2026-01-01T00:00:00Z", "code": {"commit": "abc", "dirty": False},
+           "parameters": {"trend_windows": {"w1": [2012, 2013]}, "change_floor_nw_cm2_sr": {"w1": 0.4}}, "outputs": {}}
+    d = build_indicators(annual=_annual(), trends=_trends(), qa=pd.DataFrame({"year": [2012]}), sensitivity={},
+                         sensor_comparison={}, run_record=rec, sectors=sec, pixel_shares=px)
+    e1, e2 = d["municipios"]["1"]["exposure"], d["municipios"]["2"]["exposure"]
+    assert e1["pop_radiance"] == [10.0, 11.0, 12.0] and e1["pop_valid"] == 0.97
+    assert e2["pop_radiance"] == [5.0, None, 6.0] and e2["urban"] == [None, None, None]   # ano ausente -> null
+    assert d["municipios"]["1"]["pixel_trend"]["w1"] == {"up": 0.3, "down": 0.1, "n_px": 50.0}
+    assert d["municipios"]["2"]["pixel_trend"]["w1"]["up"] is None
+    json.dumps(d, allow_nan=False)
