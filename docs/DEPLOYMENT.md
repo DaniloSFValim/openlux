@@ -31,10 +31,18 @@ npx wrangler versions upload --dry-run   # idem (comando padrão das branches de
 O `wrangler.jsonc` na raiz declara o Worker de arquivos estáticos (`name: openlux`, `assets.directory: ./web`).
 Com ele, os dois comandos passam, e o `_headers` é honrado: `npx wrangler dev` serviu a pasta com todos os cabeçalhos
 definidos, e `OPENLUX_URL=http://127.0.0.1:8788 python -m pytest tests/test_web_smoke.py` passou (10 testes).
-A `compatibility_date` é irrelevante para um Worker só de arquivos estáticos; usei 2026-11-19, a data mais recente
-que o `wrangler` 4.166 sugere (uma data posterior à conhecida pelo runtime é uma causa possível de recusa, **não confirmada**).
-Mesmo com essa configuração o check **Workers Builds continuou falhando** em 2026-11-23 e o log do build só está no painel da Cloudflare:
-a causa real **ainda não foi identificada**. As reproduções locais (`deploy --dry-run`, `versions upload --dry-run`, `wrangler dev`) passam.
+
+**Resultado na Cloudflare (2026-11-23).** Antes do `wrangler.jsonc`, o check falhava cedo, sem mensagem: era o erro documentado
+pela Cloudflare ("Missing Wrangler configuration file / Missing entry-point", na página *Troubleshooting builds*). Depois de adicioná-lo, o build
+**passa** e o check passa a falhar numa etapa posterior, com a mensagem: **"Preview creation failed: This Worker does not exist on your account."**
+Essa mensagem **não consta** da página de solução de problemas da Cloudflare e a causa **não foi identificada**. O que se sabe: o `name` coincide com o
+Worker (`Script: openlux`; um nome divergente geraria outro erro, documentado), e a data de compatibilidade não é a causa (o build passou). O que verificar no
+painel (a confirmar na interface atual): se o Worker `openlux` tem as *Preview URLs* habilitadas e se o build de produção (push em `main`) conclui. Uma falha
+de build **não retira do ar** a implantação atual. Se a criação de prévias não for necessária, desative os builds de branches que não são a de produção.
+
+A `compatibility_date` é irrelevante para um Worker só de arquivos estáticos; usei 2026-11-19, a data mais recente que o `wrangler` 4.166 sugere.
+As reproduções locais (`deploy --dry-run`, `versions upload --dry-run`, `wrangler dev`) passam.
+
 **O nome deve coincidir com o Worker existente** (`openlux`); se o Worker tiver outro nome, ajuste o arquivo, senão a
 Cloudflare criaria um Worker novo em vez de atualizar o atual.
 
