@@ -98,3 +98,19 @@ def test_simplified_geojson_keeps_only_code_and_name():
     fc = simplify_geojson(g, tolerance=0.001, ndigits=4)
     assert fc["type"] == "FeatureCollection" and len(fc["features"]) == 1
     assert fc["features"][0]["properties"] == {"CD_MUN": "1", "NM_MUN": "A"}
+
+
+def test_sensor_comparison_is_attached_per_municipality_and_summary_is_strict_json():
+    sm = pd.DataFrame({"CD_MUN": ["1", "2"], "slope_a": [0.4, np.nan], "p_a": [0.01, np.nan],
+                       "slope_b": [0.1, 0.2], "p_b": [0.3, 0.2], "mean_ratio_b_over_a": [0.9, np.nan],
+                       "change_a": [5.0, np.nan], "change_b": [2.0, 1.0]})
+    summ = {"2018_2025": {"spearman_slopes": 0.8, "sign_agreement": np.nan}, "levels_by_year": {"2018": {"spearman": 0.99}}}
+    rec = {"processed_utc": "2026-01-01T00:00:00Z", "code": {"commit": "abc", "dirty": False},
+           "parameters": {"trend_windows": {"w1": [2012, 2013]}, "change_floor_nw_cm2_sr": {"w1": 0.4}}, "outputs": {}}
+    d = build_indicators(annual=_annual(), trends=_trends(), qa=pd.DataFrame({"year": [2012]}), sensitivity={},
+                         sensor_comparison={}, run_record=rec, sensor_municipal=sm, sensor_summary=summ)
+    a = d["municipios"]["1"]["sensors"]
+    assert a["slope_snpp"] == 0.4 and a["slope_noaa20"] == 0.1 and a["ratio_noaa20_over_snpp"] == 0.9
+    assert d["municipios"]["2"]["sensors"]["slope_snpp"] is None            # NaN -> null
+    assert d["sensor_municipal"]["2018_2025"]["sign_agreement"] is None
+    json.dumps(d, allow_nan=False)

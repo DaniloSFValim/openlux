@@ -227,3 +227,52 @@ def compare_sensors(files_a: dict, files_b: dict, polygons, id_col: str, *, min_
         trend_sign_agreement=float((np.sign(sa.slope[ok]) == np.sign(sb.slope[ok])).mean())
         if ok.any() else None,
     )
+
+
+def compare_municipal_series(ta: pd.DataFrame, tb: pd.DataFrame, id_col: str, *, window, min_years,
+                             change_years=None):
+    """Compara, por municipio, duas series anuais de radiancia media (sensores A e B).
+
+    ``ta``/``tb``: tabelas anuais (colunas ``id_col``, ``year``, ``mean_radiance``, ``weight_sum``).
+    Retorna ``(df, resumo)``. ``df`` tem, por municipio, inclinacao de Theil-Sen de A e B na ``window``
+    (NaN se menos de ``min_years`` anos validos), razao media B/A dos anos da janela e, se
+    ``change_years=(y1, y2)``, a variacao absoluta de cada sensor entre esses anos. O resumo traz
+    concordancia de postos (Spearman) e de sinal das inclinacoes, razao mediana B/A e o numero de
+    municipios comparados. Nao decide qual sensor esta certo.
+    """
+    y0, y1 = window
+    rows = []
+    ids = sorted(set(ta[id_col]) | set(tb[id_col]))
+    for cd in ids:
+        ga = ta[(ta[id_col] == cd) & (ta.year >= y0) & (ta.year <= y1)].sort_values("year")
+        gb = tb[(tb[id_col] == cd) & (tb.year >= y0) & (tb.year <= y1)].sort_values("year")
+        sa = trend(ga["year"].to_numpy(), ga["mean_radiance"].to_numpy(), min_years=min_years)
+        sb = trend(gb["year"].to_numpy(), gb["mean_radiance"].to_numpy(), min_years=min_years)
+        m = ga.merge(gb, on="year", suffixes=("_a", "_b"))
+        with np.errstate(divide="ignore", invalid="ignore"):
+            ratio = (m["mean_radiance_b"] / m["mean_radiance_a"]).replace([np.inf, -np.inf], np.nan)
+        row = {id_col: cd, "slope_a": sa["slope"], "p_a": sa["p_value"], "slope_b": sb["slope"],
+               "p_b": sb["p_value"], "n_years_a": sa["n_years"], "n_years_b": sb["n_years"],
+               "mean_ratio_b_over_a": float(np.nanmean(ratio)) if len(ratio) and np.isfinite(ratio).any()
+               else np.nan}
+        if change_years:
+            c1, c2 = change_years
+            for tag, g in (("a", ta), ("b", tb)):
+                gg = g[g[id_col] == cd].set_index("year")["mean_radiance"]
+                row[f"change_{tag}"] = (float(gg[c2] - gg[c1]) if c1 in gg.index and c2 in gg.index
+                                        else np.nan)
+        rows.append(row)
+    df = pd.DataFrame(rows)
+    ok = df.slope_a.notna() & df.slope_b.notna()
+    summ = dict(
+        n_municipalities=int(ok.sum()),
+        spearman_slopes=rank_agreement(df.slope_a[ok].to_numpy(), df.slope_b[ok].to_numpy()),
+        sign_agreement=float((np.sign(df.slope_a[ok]) == np.sign(df.slope_b[ok])).mean()) if ok.any() else None,
+        median_ratio_b_over_a=float(df.mean_ratio_b_over_a.median()) if len(df) else None,
+    )
+    if change_years:
+        okc = df.change_a.notna() & df.change_b.notna()
+        summ["spearman_changes"] = rank_agreement(df.change_a[okc].to_numpy(), df.change_b[okc].to_numpy())
+        summ["median_change_a"] = float(df.change_a[okc].median()) if okc.any() else None
+        summ["median_change_b"] = float(df.change_b[okc].median()) if okc.any() else None
+    return df, summ

@@ -221,7 +221,7 @@ aprovação definido a priori**.
 
 | Verificação | Resultado |
 |---|---|
-| Testes unitários e de integração (dados sintéticos rotulados) | 123 testes (113 sem os testes de navegador): funções matemáticas, agregação zonal com valores calculados à mão, dados ausentes, CRS, integridade de arquivos, reprodutibilidade, dados e interface |
+| Testes unitários e de integração (dados sintéticos rotulados) | 128 testes (117 sem os testes de navegador): funções matemáticas, agregação zonal com valores calculados à mão, dados ausentes, CRS, integridade de arquivos, reprodutibilidade, dados e interface |
 | Consistência raster × vetor: área dos pixels ponderada vs `AREA_KM2` do IBGE | Diferença máxima por município de 0,0015 %; soma 43.750,425 km² vs 43.750,427 km² |
 | Critério de agregação: centro do pixel vs cobertura fracionária | Spearman ≥ 0,9998; diferença relativa da média: mediana 0,3–0,4 %, p95 1,2–1,9 %, máxima 3,4–6,6 % |
 | Resolução: agregação 2 × 2 | Spearman ≥ 0,9996; mediana 0,4–0,5 %, p95 2,4–3,0 %, máxima 6,6–11,5 % |
@@ -229,7 +229,7 @@ aprovação definido a priori**.
 | Configurações de máscara (qualidade 0+1, `n_min` 5 e 10) | Spearman ≈ 1 nos postos e nas inclinações |
 | Camada near-nadir | Spearman das inclinações 0,86–0,96 |
 | Determinismo | Duas execuções completas sobre os dados reais geram 8 arquivos com SHA-256 idêntico |
-| Comparação S-NPP × NOAA-20 (2018–2025) | Spearman das inclinações municipais 0,80; mesmo sinal em 81,5 % dos municípios |
+| Comparação S-NPP × NOAA-20 (2018–2025), por município | Níveis: Spearman ≥ 0,997 em todos os anos; razão mediana NOAA-20/S-NPP 0,98 a 1,01 até 2021 e 0,79 a 0,91 de 2022 a 2025. Inclinações 2018–2025: Spearman 0,80, mesmo sinal em 81,5 %; 2018–2021: 0,91 e 89 %. Detalhes em `docs/DECISIONS.md`, seção 8 |
 
 Verificações **não realizadas**: comparação com valores publicados; investigação por município dos
 casos de maior diferença na estabilidade; teste com dados reais em integração contínua (os dados

@@ -160,6 +160,21 @@ def test_lit_fraction_indicator_is_available_and_documented(page):
     page.select_option("#indicator", "mean")
 
 
+def test_sensor_comparison_indicators_and_panels(page):
+    page.select_option("#indicator", "slope_noaa20_1825")
+    leg = page.inner_text("#legend")
+    assert "NOAA-20" in leg and "2018–2025" in leg and "p < 0,05" in leg
+    page.select_option("#indicator", "slope_snpp_1825")
+    assert "S-NPP" in page.inner_text("#legend")
+    page.select_option("#indicator", "mean")
+    page.click("#case-btn")
+    detail = page.inner_text("#mun-detail")
+    assert "Comparação entre sensores, 2018–2025" in detail and "NOAA-20" in detail
+    page.click("#tab-state")
+    assert "Comparação municipal entre sensores" in page.inner_text("#state-content")
+    page.click("#tab-mun")
+
+
 def test_niteroi_case_button_shows_detail_and_chart(page):
     page.click("#tab-mun")
     page.click("#case-btn")

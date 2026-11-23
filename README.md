@@ -100,7 +100,8 @@ unidades, parâmetros, tratamento dos dados e reprodução passo a passo:
 | Intensidade por habitante (2022) | mW·sr⁻¹ por habitante | Índice relativo, só 2022 |
 | Variação absoluta e percentual | nW·cm⁻²·sr⁻¹ e % | Percentual só acima de um piso declarado |
 | Tendência (Theil–Sen, Kendall) | nW·cm⁻²·sr⁻¹ por ano | Duas janelas: 2012–2021 e 2012–2025 |
-| Controles de ruído de fundo | nW·cm⁻²·sr⁻¹ | Pixels persistentemente escuros, terra e mar |
+| Controles de ruído de fundo | nW·cm⁻²·sr⁻¹ | Pixels persistentemente escuros, terra e mar; análise mensal 2021–2023 |
+| Comparação municipal S-NPP × NOAA-20 (2018–2025) | vários | Níveis por ano, inclinações, variação 2021→2025; até 2021 os sensores concordam em nível, e a partir de 2022 o S-NPP lê mais alto |
 
 **Não implementados:** comparação com o Atlas de Falchi et al. (2016), mudança espacial pixel a pixel e
 comparação urbano × não urbano. Constam como trabalhos futuros.

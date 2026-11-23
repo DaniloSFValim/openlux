@@ -22,8 +22,11 @@ def main():
     sens = json.loads((OUT / "sensitivity.json").read_text())
     cmp_ = json.loads((OUT / "sensor_comparison_snpp_noaa20.json").read_text())
     rec = json.loads((OUT / "run_record.json").read_text())
+    sm_path, ss_path = Path("outputs/sensors/municipal_comparison_2018_2025.csv"), Path("outputs/sensors/summary.json")
+    sm = pd.read_csv(sm_path, dtype={"CD_MUN": str}) if sm_path.exists() else None
+    ss = json.loads(ss_path.read_text()) if ss_path.exists() else None
     data = build_indicators(annual=annual, trends=trends, qa=qa, sensitivity=sens,
-                            sensor_comparison=cmp_, run_record=rec)
+                            sensor_comparison=cmp_, run_record=rec, sensor_municipal=sm, sensor_summary=ss)
     assert set(data["municipios"]) == set(mesh.CD_MUN), "municipios das saidas e da malha divergem"
     WEB.mkdir(parents=True, exist_ok=True)
     (WEB / "indicators.json").write_text(json.dumps(data, ensure_ascii=False, allow_nan=False,

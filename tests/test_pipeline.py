@@ -153,3 +153,49 @@ def test_analytic_thresholds_skipped_when_reference_year_has_no_lit_pixels(tmp_p
     assert list(rec["parameters"]["thresholds_nw_cm2_sr"]) == ["lit_0p5"]
     ann = pd.read_csv(tmp_path / "o" / "annual_main.csv")
     assert (ann["frac_above_lit_0p5"] == 0.0).all()
+
+
+# --- comparacao municipal entre sensores -------------------------------------------------------
+
+def _tab(rows):
+    return pd.DataFrame(rows, columns=["cd_mun", "year", "mean_radiance", "weight_sum"])
+
+
+def test_compare_municipal_series_slopes_ratio_and_summary():
+    from openlux.pipeline import compare_municipal_series
+    ys = list(range(2018, 2026))
+    a = _tab([(c, y, v0 + k * (y - 2018), 10.0) for c, v0, k in (("A", 5, 1.0), ("B", 3, 0.0), ("C", 4, -0.5))
+              for y in ys])
+    b = _tab([(c, y, 0.8 * (v0 + k * (y - 2018)), 10.0) for c, v0, k in (("A", 5, 1.0), ("B", 3, 0.0), ("C", 4, -0.5))
+              for y in ys])
+    df, summ = compare_municipal_series(a, b, "cd_mun", window=(2018, 2025), min_years=8)
+    r = df.set_index("cd_mun")
+    assert r.loc["A", "slope_a"] == pytest.approx(1.0) and r.loc["A", "slope_b"] == pytest.approx(0.8)
+    assert r.loc["C", "slope_b"] == pytest.approx(-0.4)
+    assert r.loc["A", "mean_ratio_b_over_a"] == pytest.approx(0.8)
+    assert summ["n_municipalities"] == 3
+    assert summ["sign_agreement"] == pytest.approx(1.0)       # B tem inclinacao 0 em ambos: sinal igual
+    assert summ["spearman_slopes"] == pytest.approx(1.0)
+    assert summ["median_ratio_b_over_a"] == pytest.approx(0.8)
+
+
+def test_compare_municipal_series_detects_opposite_signs_and_short_series():
+    from openlux.pipeline import compare_municipal_series
+    ys = list(range(2018, 2026))
+    a = _tab([(c, y, 5 + (y - 2018) * s, 1.0) for c, s in (("A", 1.0), ("B", 1.0)) for y in ys])
+    b = _tab([("A", y, 5 + (y - 2018) * 1.0, 1.0) for y in ys] + [("B", y, 5 - (y - 2018) * 1.0, 1.0) for y in ys])
+    _, summ = compare_municipal_series(a, b, "cd_mun", window=(2018, 2025), min_years=8)
+    assert summ["sign_agreement"] == pytest.approx(0.5)
+    # janela curta com min_years maior que os anos disponiveis -> NaN, municipios nao comparados
+    df, s2 = compare_municipal_series(a, b, "cd_mun", window=(2018, 2020), min_years=5)
+    assert df.slope_a.isna().all() and s2["n_municipalities"] == 0
+
+
+def test_compare_municipal_series_change_between_two_years():
+    from openlux.pipeline import compare_municipal_series
+    ys = list(range(2018, 2026))
+    a = _tab([("A", y, 10.0 if y <= 2021 else 14.0, 1.0) for y in ys])
+    b = _tab([("A", y, 8.0 if y <= 2021 else 9.0, 1.0) for y in ys])
+    df, _ = compare_municipal_series(a, b, "cd_mun", window=(2018, 2025), min_years=8, change_years=(2021, 2025))
+    r = df.iloc[0]
+    assert r["change_a"] == pytest.approx(4.0) and r["change_b"] == pytest.approx(1.0)
