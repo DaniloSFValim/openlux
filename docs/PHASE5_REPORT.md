@@ -106,5 +106,5 @@ realizadas descrevem estabilidade e consistência; **nenhum limite de aprovaçã
 3. **Estender as análises mensais** a todos os anos e a indicadores municipais mensais, para separar sazonalidade (nuvens, observações) de deriva do instrumento.
 4. **Validação externa.** Procurar estudos comparáveis, medições fotométricas de campo (por exemplo, fotômetros em redes de monitoramento do céu) e comparar com o Atlas de Falchi et al. (2016), respeitando a licença CC BY-NC 4.0.
 5. **Efeito do LED.** Investigar a subestimação por insensibilidade ao azul (Levin et al., 2020) com dados de conversão da iluminação pública, se houver dados públicos.
-6. **Indicadores territoriais.** Implementar a fração iluminada por classe de uso do solo e a comparação urbano × não urbano, com uma camada pública verificada.
+6. **Indicadores territoriais.** O urbano × rural por setor do Censo 2022 já existe (`docs/DECISIONS.md` 9.2). Falta a fração iluminada por classe de uso do solo, com uma camada pública verificada, e verificar o critério de classificação urbano/rural do IBGE.
 7. **Avaliar a saturação** do DNB em núcleos urbanos, não avaliada neste trabalho.
