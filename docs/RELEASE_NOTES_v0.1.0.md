@@ -19,7 +19,12 @@ reprodutível e testado, mas os **resultados científicos não foram validados**
 - Registro estruturado (JSON por linha) nos scripts de setores; comparação entre o produto anual e a média
   dos mensais (2021–2023).
 - Interface web estática (`web/`) construída apenas a partir das saídas reais do pipeline, publicada em
-  https://openlux.labdados.org/ (ver `docs/DEPLOYMENT.md`).
+  https://openlux.labdados.org/ (ver `docs/DEPLOYMENT.md`). Camada de radiância **por pixel** (≈ 460 m, 6 classes fixas, iguais em
+  todos os anos) e camada por município; link permanente (URL com vista, ano, camada, indicador e município), busca de município,
+  nomes dos municípios e legenda em linguagem comum. A interface publica só a **classe** de cada pixel, não o valor da radiância.
+  Nenhum município é tratado como estudo de caso. Sem mapa-base de terceiros.
+- Protocolo **proposto** de validação em campo com SQM (`docs/FIELD_VALIDATION.md`), pré-especificação em rascunho
+  (`docs/field/preregistration.json`) e código de análise (`openlux.field`), testado só com dados sintéticos. **Nenhuma medição foi feita.**
 - Documentação: `README.md`, `METHODOLOGY.md`, `docs/DECISIONS.md`, `docs/LICENSING.md`, `CITATION.cff`.
 - Licença do código: MIT.
 
@@ -35,8 +40,14 @@ reprodutível e testado, mas os **resultados científicos não foram validados**
 - A população por setor é fixa (Censo 2022) e não é exposição individual; o critério de classificação
   urbano/rural do IBGE não foi verificado aqui, e o texto específico dos termos da malha de setores não foi
   lido por ferramenta (o IBGE bloqueia acesso automatizado).
+- A camada de pixel mostra a classe, não o valor, e herda o piso de ruído do S-NPP: a classe 0,5 a < 2 passa de 16,4 % dos pixels
+  válidos do estado em 2021 para 32,4 % em 2025, e parte disso pode ser ruído, não luz nova. A interface avisa nos anos ≥ 2022.
+- Os nomes simples das faixas (“sem luz detectada” a “muitíssima luz”) são rótulos de leitura, sem equivalência com a escala Bortle.
+  **Não há** escala Bortle/SQM, contagem de estrelas nem previsão de brilho do céu: isso exige um modelo validado em campo
+  (`docs/DECISIONS.md`, seção 11).
+- Os nomes dos municípios no mapa ficam no centro do retângulo envolvente (aproximado em formas irregulares) e podem se sobrepor.
 - Não implementado: comparação com o Atlas de Falchi et al. (2016) (dados não obtidos; outra grandeza e outra
-  época).
+  época) e validação em campo (protocolo escrito, sem medições).
 - Os dados brutos de terceiros não são redistribuídos. `web/data/` contém agregados municipais derivados
   (NASA) e a população do Censo 2022 (IBGE/SIDRA); a citação dos dados está no `README.md`.
 
