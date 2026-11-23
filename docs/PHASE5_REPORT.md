@@ -17,11 +17,11 @@ requisito externo: cada linha cita a evidência ou diz o que falta. O edital PGC
 | Interface web estática (mapa, painéis, informações científicas, aviso permanente) | Implementada e testada em navegador; publicada em https://openlux.labdados.org/ (verificado em 2026-11-23) | `web/` |
 | Documentação acadêmica, metadados de citação, licença MIT, verificação de referências | Concluída | `README.md`, `METHODOLOGY.md`, `CITATION.cff`, `.zenodo.json`, `LICENSE`, `docs/` |
 
-Dimensão: 15 módulos Python (~1,4 mil linhas em `src/`), 11 scripts, ~1,8 mil linhas de teste, 145 testes (133 sem os de navegador).
+Dimensão: 16 módulos Python (~1,4 mil linhas em `src/`), 12 scripts, ~1,9 mil linhas de teste, 153 testes (139 sem os de navegador).
 
 **Implementado após o fechamento original da Fase 2** (a pedido do autor, em branch própria, ainda não publicada em release): radiância ponderada pela
 população e população em áreas iluminadas (setores do Censo 2022, população fixa), radiância e fração iluminada urbano × rural, mudança significativa por pixel
-(Mann–Kendall + Sen + FDR) e registro estruturado dos scripts novos. Ver `docs/DECISIONS.md`, seção 9. Todos herdam o ruído do S-NPP pós-2021 e **não estão validados**.
+(Mann–Kendall + Sen + FDR) e registro estruturado dos scripts novos. Ver `docs/DECISIONS.md`, seção 9. Depois, a interface ganhou a camada de pixel (classes fixas, sem publicar valores) e o destaque a Niterói foi removido (seção 10). Todos herdam o ruído do S-NPP pós-2021 e **não estão validados**.
 
 **Não implementado** (constam como trabalho futuro): comparação com o Atlas de Falchi et al. (2016) (dados não obtidos; licença CC BY-NC 4.0; grandeza e época diferentes),
 indicadores municipais mensais.
@@ -81,7 +81,7 @@ realizadas descrevem estabilidade e consistência; **nenhum limite de aprovaçã
 
 | Requisito | Evidência | Situação |
 |---|---|---|
-| Software desenvolvido | Repositório GitHub, 145 testes | Concluído |
+| Software desenvolvido | Repositório GitHub, 153 testes | Concluído |
 | Autoria identificada | `CITATION.cff`, `.zenodo.json`, `LICENSE` | Concluído nos arquivos; conferir no registro publicado |
 | Repositório público | API do GitHub | Concluído |
 | DOI | Registro no Zenodo | **Pendente** |
