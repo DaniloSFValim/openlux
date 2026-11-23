@@ -254,7 +254,7 @@ aprovação definido a priori**.
 
 | Verificação | Resultado |
 |---|---|
-| Testes unitários e de integração (dados sintéticos rotulados) | 153 testes (139 sem os testes de navegador): funções matemáticas, agregação zonal com valores calculados à mão, dados ausentes, CRS, integridade de arquivos, reprodutibilidade, dados e interface |
+| Testes unitários e de integração (dados sintéticos rotulados) | 161 testes (147 sem os testes de navegador): funções matemáticas, agregação zonal com valores calculados à mão, dados ausentes, CRS, integridade de arquivos, reprodutibilidade, dados e interface |
 | Consistência raster × vetor: área dos pixels ponderada vs `AREA_KM2` do IBGE | Diferença máxima por município de 0,0015 %; soma 43.750,425 km² vs 43.750,427 km² |
 | Critério de agregação: centro do pixel vs cobertura fracionária | Spearman ≥ 0,9998; diferença relativa da média: mediana 0,3–0,4 %, p95 1,2–1,9 %, máxima 3,4–6,6 % |
 | Resolução: agregação 2 × 2 | Spearman ≥ 0,9996; mediana 0,4–0,5 %, p95 2,4–3,0 %, máxima 6,6–11,5 % |
@@ -267,6 +267,9 @@ aprovação definido a priori**.
 Verificações **não realizadas**: comparação com valores publicados; investigação por município dos
 casos de maior diferença na estabilidade; teste com dados reais em integração contínua (os dados
 não são redistribuídos).
+
+Validação em campo: o protocolo com SQM, a pré-especificação (`docs/field/preregistration.json`, em rascunho) e o código de análise
+(`openlux.field`, `scripts/run_field_validation.py`, testado só com dados sintéticos) estão descritos em `docs/FIELD_VALIDATION.md`. Não há medições.
 
 ## 12. Reprodução passo a passo
 
