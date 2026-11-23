@@ -87,6 +87,7 @@ mensais não foram implementados, e as diferenças metodológicas entre produtos
 |---|---|---|
 | Municípios | IBGE, Malha Municipal Digital 2024 (RJ) | 92 municípios; SIRGAS 2000 (EPSG:4674); licença compatível com CC BY 4.0 (Notas Metodológicas 01/2025) |
 | População | IBGE, Censo Demográfico 2022, SIDRA tabela 4709, variável 93 (população residente) | Nível município; total do RJ 16.055.174 |
+| Setores censitários | IBGE, malha de setores 2022 com atributos (RJ, `CD2022`), campos `v0001` (população) e `SITUACAO` | 41.700 setores únicos em 42.270 linhas; usada na seção 7.1 |
 
 A população é usada apenas em 2022 (ano do Censo). Os termos de uso do SIDRA foram
 conferidos pelo autor em 2026-11-19 (reuso permitido com citação da fonte); o texto não foi lido por ferramenta
@@ -164,6 +165,27 @@ Seja $L_i$ a radiância (nW·cm⁻²·sr⁻¹) do pixel válido $i$.
   27,8), fixos para todos os anos; são parâmetros do pesquisador, não limiares físicos.
 - Um polígono sem pixels válidos retorna NaN, nunca zero.
 
+### 7.1 Indicadores por setor censitário e por pixel
+
+Calculados por `scripts/run_sectors.py`, só para S-NPP (2012–2025) e NOAA-20 (2018–2025); ver `docs/DECISIONS.md`, seção 9.
+
+| Indicador | Definição | Unidade |
+|---|---|---|
+| Radiância ponderada pela população | $\sum_i p_i L_i \big/ \sum_i p_i$ nos pixels válidos, com $p_i$ = população do setor repartida pela fração de cobertura | nW·cm⁻²·sr⁻¹ |
+| População em áreas iluminadas | $\sum_i p_i [L_i \ge 0{,}5] \big/ \sum_i p_i$ nos pixels válidos | adimensional |
+| Radiância média urbana e rural | Média ponderada pela cobertura nos setores `SITUACAO` = Urbana ou Rural | nW·cm⁻²·sr⁻¹ |
+| Fração iluminada urbana e rural | Idem, fração com $L \ge 0{,}5$ | adimensional |
+| Pixels com mudança significativa | Participação (por cobertura) dos pixels testados com aumento ou redução (Mann–Kendall + Sen, FDR de Benjamini–Hochberg 5 %) | adimensional |
+
+- A malha de setores tem 133 setores multipoligonais repetidos em várias linhas, cada uma com a população inteira;
+  os setores são agrupados por `CD_SETOR` antes de qualquer soma (reproduz o SIDRA nos 92 municípios).
+- **A população é a do Censo 2022 em todos os anos.** A variação temporal reflete a radiância, não a demografia.
+- A repartição é areal simples (sem dasimetria). Não é exposição individual.
+- Pixels testados na mudança por pixel: mediana anual ≥ 0,5 nW·cm⁻²·sr⁻¹ em terra e ≥ 8 anos válidos. O controle
+  de falsas descobertas não corrige a dependência espacial entre pixels vizinhos.
+- Todos herdam o piso de ruído do S-NPP a partir de 2022; as janelas que o incluem produzem muito mais aumentos
+  significativos (2012–2021: 13,0 % de aumentos e 12,5 % de reduções entre os pixels testados; 2012–2025: 38,9 % e 5,6 %).
+
 ## 8. Análise temporal
 
 Para cada município e janela de anos, sobre a série de $\bar L_m$ dos anos válidos:
@@ -221,7 +243,7 @@ aprovação definido a priori**.
 
 | Verificação | Resultado |
 |---|---|
-| Testes unitários e de integração (dados sintéticos rotulados) | 129 testes (118 sem os testes de navegador): funções matemáticas, agregação zonal com valores calculados à mão, dados ausentes, CRS, integridade de arquivos, reprodutibilidade, dados e interface |
+| Testes unitários e de integração (dados sintéticos rotulados) | 145 testes (133 sem os testes de navegador): funções matemáticas, agregação zonal com valores calculados à mão, dados ausentes, CRS, integridade de arquivos, reprodutibilidade, dados e interface |
 | Consistência raster × vetor: área dos pixels ponderada vs `AREA_KM2` do IBGE | Diferença máxima por município de 0,0015 %; soma 43.750,425 km² vs 43.750,427 km² |
 | Critério de agregação: centro do pixel vs cobertura fracionária | Spearman ≥ 0,9998; diferença relativa da média: mediana 0,3–0,4 %, p95 1,2–1,9 %, máxima 3,4–6,6 % |
 | Resolução: agregação 2 × 2 | Spearman ≥ 0,9996; mediana 0,4–0,5 %, p95 2,4–3,0 %, máxima 6,6–11,5 % |
@@ -247,7 +269,9 @@ export EARTHDATA_TOKEN="..."        # gerado na conta Earthdata; nunca versione
 python scripts/fetch_blackmarble.py --years 2012-2025                        # VNP46A4
 python scripts/fetch_blackmarble.py --product VJ146A4 --years 2018-2025      # NOAA-20
 python scripts/fetch_ibge.py                                                 # malha + população
+python scripts/fetch_sectors.py                                              # malha de setores (Censo 2022)
 python scripts/run_annual.py                    # saídas em outputs/annual/
+python scripts/run_sectors.py                   # saídas em outputs/sectors/ (setores e mudança por pixel)
 python scripts/validate_aggregation.py          # saídas em outputs/validation/
 python scripts/build_web_data.py                # web/data/
 pytest                                          # testes
@@ -280,8 +304,12 @@ significativos).
 9. Premissa SIRGAS 2000 ≈ WGS84 (poucos metros); geometria exibida simplificada só para
    visualização.
 10. Mesmo algoritmo em S-NPP e NOAA-20: a concordância entre eles não prova ausência de artefato comum.
-11. Indicadores não implementados: comparação com o Atlas de Falchi et al. (2016), alterações espaciais
-    pixel a pixel e comparação urbano × não urbano.
+11. Indicador não implementado: comparação com o Atlas de Falchi et al. (2016) (dados não obtidos; grandeza e época
+    diferentes, ver `docs/DECISIONS.md`, seção 9.1).
+12. Indicadores por setor: população fixa de 2022, repartição areal simples, classificação urbano/rural do IBGE cujo
+    critério não foi verificado aqui, e herança do piso de ruído do S-NPP (seção 7.1).
+13. Mudança por pixel: o controle de falsas descobertas não corrige a dependência espacial; o teste detecta tendência
+    monotônica; a assimetria de aumentos na janela 2012–2025 coincide com o ruído do S-NPP e não deve ser lida como mudança real.
 
 ## 14. Referências
 
@@ -432,6 +460,14 @@ DOI 10.5067/VIIRS/VJ146A3.002. Usado apenas na análise mensal do piso de ruído
 | 2023 | 305 | VJ146A3.A2023305.h13v11.002.2025148171836.h5 | 70823150 | 66a0abc7aa0f87bb44a9c1ac1eadcf41405ad60f20d15c72208ba863f3cd64eb |
 | 2023 | 335 | VJ146A3.A2023335.h13v11.002.2025148172953.h5 | 76730553 | 2d78592ea60bcadf3996f3a337749b582d29f14d2a7faafb77052fa42befc9d1 |
 
+### A.6 IBGE, malha de setores censitários 2022 (RJ)
+
+Arquivo no mesmo estado em que foi usado por `scripts/run_sectors.py`; `scripts/fetch_sectors.py` confere o SHA-256 antes de usá-lo.
+
+| name | size_bytes | sha256 |
+|---|---|---|
+| RJ_setores_CD2022.gpkg | 75198464 | ec6cecdc0297d1b79e25e2772f531cad5c99ac57bc3ac1b30fb08418dc513222 |
+
 ## Apêndice B. Ambiente de referência
 
 Python 3.13.18, Linux. Pacotes (versões efetivamente usadas nos resultados e testes):
@@ -465,3 +501,14 @@ Execução `scripts/run_annual.py` com o commit `2889bb9` (árvore sem alteraç�
 | qa_background_controls.csv | 9ca617f1b24614f2cd395c530e566b5a646c2edcacb411b4b73fa6aed75f87cd |
 | sensitivity.json | b66919731f5ca8dc26ea6d06764f855e55f5e30c3a37b52359301e6f8ac4dd75 |
 | trends_main.csv | 7c5912e4278f41a0f26fd9cc13d0490441e6bbfd428f1be0e15d49e047a45666 |
+
+### C.2 Saídas de `scripts/run_sectors.py`
+
+Duas execuções completas produziram hashes idênticos (verificado apenas neste ambiente). SHA-256 de `outputs/sectors/`:
+
+| Arquivo | SHA-256 |
+|---|---|
+| pixel_trend_snpp_2012_2021.csv | edb9d33b3b6dd65a7f2c3ebed84c54d48044d793f1c539a4b1dbea4a7b6609fc |
+| pixel_trend_snpp_2012_2025.csv | 8701985e712b458af06815e04b1e631914fc03818179c0c900ef97d4b5d5bad6 |
+| sector_indicators_noaa20.csv | 79675dc4f6c546ff1a0de523669cdcfe22237ff7ab8d78f0800dec73e6f6e247 |
+| sector_indicators_snpp.csv | d487da2010e1db0bff270727c322d6b050e37baa648e6332284e8978b25d94e3 |

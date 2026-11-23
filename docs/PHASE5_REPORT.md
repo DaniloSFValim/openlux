@@ -17,10 +17,14 @@ requisito externo: cada linha cita a evidência ou diz o que falta. O edital PGC
 | Interface web estática (mapa, painéis, informações científicas, aviso permanente) | Implementada e testada em navegador; publicada em https://openlux.labdados.org/ (verificado em 2026-11-23) | `web/` |
 | Documentação acadêmica, metadados de citação, licença MIT, verificação de referências | Concluída | `README.md`, `METHODOLOGY.md`, `CITATION.cff`, `.zenodo.json`, `LICENSE`, `docs/` |
 
-Dimensão: 13 módulos Python (~1,1 mil linhas em `src/`), 8 scripts, ~1,6 mil linhas de teste, 129 testes (118 sem os de navegador).
+Dimensão: 15 módulos Python (~1,4 mil linhas em `src/`), 11 scripts, ~1,8 mil linhas de teste, 145 testes (133 sem os de navegador).
 
-**Não implementado** (constam como trabalho futuro): comparação com o Atlas de Falchi et al. (2016) (dados não obtidos; licença CC BY-NC 4.0), alterações espaciais
-significativas pixel a pixel, comparação urbano × não urbano, indicadores municipais mensais.
+**Implementado após o fechamento original da Fase 2** (a pedido do autor, em branch própria, ainda não publicada em release): radiância ponderada pela
+população e população em áreas iluminadas (setores do Censo 2022, população fixa), radiância e fração iluminada urbano × rural, mudança significativa por pixel
+(Mann–Kendall + Sen + FDR) e registro estruturado dos scripts novos. Ver `docs/DECISIONS.md`, seção 9. Todos herdam o ruído do S-NPP pós-2021 e **não estão validados**.
+
+**Não implementado** (constam como trabalho futuro): comparação com o Atlas de Falchi et al. (2016) (dados não obtidos; licença CC BY-NC 4.0; grandeza e época diferentes),
+indicadores municipais mensais.
 
 ## 2. Relatório de validação
 
@@ -77,7 +81,7 @@ realizadas descrevem estabilidade e consistência; **nenhum limite de aprovaçã
 
 | Requisito | Evidência | Situação |
 |---|---|---|
-| Software desenvolvido | Repositório GitHub, 129 testes | Concluído |
+| Software desenvolvido | Repositório GitHub, 145 testes | Concluído |
 | Autoria identificada | `CITATION.cff`, `.zenodo.json`, `LICENSE` | Concluído nos arquivos; conferir no registro publicado |
 | Repositório público | API do GitHub | Concluído |
 | DOI | Registro no Zenodo | **Pendente** |

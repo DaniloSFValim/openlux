@@ -60,7 +60,7 @@ def test_methodology_input_hashes_match_recorded_metadata():
             recorded.add(item["sha256"])
     appendix_a = METH.split("## Apêndice A")[1].split("## Apêndice B")[0]
     doc = set(re.findall(r"\b[0-9a-f]{64}\b", appendix_a))
-    assert doc == recorded and len(recorded) == 14 + 8 + 2 + 36 + 36
+    assert doc == recorded and len(recorded) == 14 + 8 + 2 + 36 + 36 + 1
 
 
 def test_citation_cff_is_valid_against_official_schema_if_available():

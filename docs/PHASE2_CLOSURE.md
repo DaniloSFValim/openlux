@@ -21,3 +21,14 @@ evidencia. "Parcial" e "Nao atendido" indicam lacunas reais, nao ressalvas de fo
 3. Licencas de NASA, EOG e SIDRA nao confirmadas no texto oficial.
 4. Licenca do codigo pendente (Fase 3). ORCID pendente.
 5. Credenciais antigas ainda salvas em *Network secrets* do ambiente (acao do autor).
+
+## Adendo (Fase 1/2, fechamento das lacunas)
+
+Texto acima preservado como registro do fechamento original. Depois dele, a pedido do autor ("Conclua a fase 1 e prossiga para a 2"):
+- **Implementados:** C "alterações espaciais significativas" (mudança por pixel, `docs/DECISIONS.md` 9.3), E "urbano × não urbano" com a classificação
+  `SITUACAO` dos setores do Censo 2022 (9.2), indicador populacional ponderado por radiância (9.2) e registro estruturado (9.4).
+- **Fase 1:** licença do EOG lida no documento oficial (CC BY 4.0); período de referência do atlas de Falchi (composto de 6 meses de 2014) e diferença de
+  grandeza documentados; diferença entre produtos anual e mensal medida (9.1).
+- **Continua não implementado:** indicador D (Falchi), porque os dados não foram obtidos.
+- Nenhum desses resultados foi validado externamente.
+
