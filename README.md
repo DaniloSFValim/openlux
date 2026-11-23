@@ -169,7 +169,8 @@ valores publicados** e não foi definido limite de aprovação a priori.
 - Estimativa de radiância orbital, não medição do brilho do céu; sem medições fotométricas de campo.
 - Resolução de ≈ 460 m; a banda DNB é pouco sensível à emissão azul de LEDs (Levin et al., 2020).
 - **Piso de ruído do S-NPP a partir de 2022** e um aumento comum aos dois sensores que não foi
-  separado de um possível artefato do algoritmo compartilhado. Investigado, não resolvido.
+  separado de um possível artefato do algoritmo compartilhado. A análise mensal (2021–2023) mostra um componente
+  específico do S-NPP, com início entre janeiro e março de 2022 e não sinalizado pelo campo de qualidade. A causa não foi identificada.
 - O sinal da tendência depende da janela de anos.
 - A saturação do DNB em áreas muito iluminadas não foi avaliada.
 - População residente não é população exposta; a intensidade por habitante é um índice relativo.

@@ -129,3 +129,22 @@ def test_laads_listing_missing_tile_raises(srv):
         (200, json.dumps({"content": []}).encode(), {})]
     with pytest.raises(DownloadFailed):
         laads_find_file("VNP46A4", 2023, 1, "h13v11", base=srv.url, sleep=lambda s: None)
+
+
+def test_laads_list_days_returns_sorted_day_directories_only(srv):
+    listing = {"content": [{"name": "060", "resourceType": "Directory"},
+                           {"name": "001", "resourceType": "Directory"},
+                           {"name": "readme.txt", "resourceType": "File"},
+                           {"name": "032", "resourceType": "Directory"}]}
+    srv.script["/api/v2/content/details/allData/5200/VNP46A3/2022?format=json"] = [
+        (200, json.dumps(listing).encode(), {})]
+    from openlux.download import laads_list_days
+    assert laads_list_days("VNP46A3", 2022, base=srv.url, sleep=lambda s: None) == [1, 32, 60]
+
+
+def test_laads_find_file_accepts_nonannual_day(srv):
+    listing = {"content": [{"name": "VNP46A3.A2022032.h13v11.002.2025155014811.h5"}]}
+    srv.script["/api/v2/content/details/allData/5200/VNP46A3/2022/032?format=json"] = [
+        (200, json.dumps(listing).encode(), {})]
+    name, url = laads_find_file("VNP46A3", 2022, 32, "h13v11", base=srv.url, sleep=lambda s: None)
+    assert ".A2022032." in name and url.endswith(f"/VNP46A3/2022/032/{name}")

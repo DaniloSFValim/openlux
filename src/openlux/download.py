@@ -106,5 +106,19 @@ def laads_find_file(product, year, doy, tile, *, base=LAADS_BASE, token=None, re
     return name, f"{base}/api/v2/content/archives/{path}/{name}"
 
 
+def laads_list_days(product, year, *, base=LAADS_BASE, token=None, retries=5, sleep=time.sleep):
+    """Dias do ano (inteiros, ordenados) com diretorio de dados para ``product`` em ``year``.
+
+    Produtos anuais tem so o dia 1; os mensais tem o primeiro dia de cada mes (001, 032, 060, ...).
+    """
+    path = f"allData/{LAADS_COLLECTION}/{product}/{year}"
+    resp, _ = _get_with_retries(f"{base}/api/v2/content/details/{path}?format=json", token,
+                                retries, 60, sleep)
+    with resp:
+        listing = json.load(resp)
+    return sorted(int(d["name"]) for d in listing.get("content", [])
+                  if d.get("resourceType") == "Directory" and d["name"].isdigit())
+
+
 def token_from_env(var="EARTHDATA_TOKEN"):
     return os.environ.get(var) or None

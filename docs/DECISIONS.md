@@ -118,3 +118,42 @@ piso de ruido do S-NPP apos 2021. Fracao estadual (media ponderada pela area val
 entre sensores (0,15 em 2023) tem a mesma origem descrita na secao 3. **F(0,5) do S-NPP nao deve ser
 interpretado como expansao da area iluminada apos 2021 sem essa ressalva.** Em municipios muito
 urbanos a fracao satura em 1,0 (24 de 92 em 2025), o que limita sua capacidade de discriminar entre eles.
+
+## 7. Análise mensal do piso de ruído (2021-2023)
+
+Pergunta: *quando* o piso de ruído do S-NPP começa a subir e isso acompanha algo observável? Dados: VNP46A3 (S-NPP) e
+VJ146A3 (NOAA-20), 36 meses de cada, tile h13v11 (hashes no Apêndice A.4/A.5 do `METHODOLOGY.md`). Método
+(`scripts/analyze_monthly_noise.py`): mesma classe de pixels escuros da seção 3 (mediana zero na linha de base anual 2012-2021 do S-NPP),
+camada `AllAngle_Composite_Snow_Free`, qualidade 0, terra; por mês, a radiância média e a fração de valores positivos
+desses pixels, o número mediano de observações e a composição de qualidade. Resultados mensais completos: `outputs/monthly/monthly_noise_controls.csv` (não versionado).
+
+**Meses de céu claro (junho a agosto; 13 a 18 observações por pixel nos dois sensores)**, fração de pixels escuros em terra com valor positivo:
+
+| Sensor | 2021 | 2022 | 2023 | 2023 / 2021 |
+|---|---|---|---|---|
+| S-NPP | 0,012 | 0,065 | 0,146 | ×12,3 |
+| NOAA-20 | 0,010 | 0,027 | 0,029 | ×2,8 |
+
+A radiância média desses pixels tem a mesma forma: S-NPP 0,020 → 0,043 → 0,097 (×4,9); NOAA-20 0,008 → 0,019 → 0,020 (×2,5).
+
+**Início no S-NPP** (fração positiva por mês, 2021 / 2022 / 2023): janeiro 0,016 / 0,032 / 0,683; fevereiro 0,015 / 0,240 / 0,346;
+março 0,010 / 0,147 / 0,449; abril 0,032 / 0,133 / 0,440. Em 2022, março e abril (21 e 17 observações) já estão claramente acima de 2021, enquanto
+o NOAA-20 nos mesmos meses fica em 0,053 e 0,067. O início cai, portanto, entre janeiro e março de 2022, com resolução mensal.
+
+**O que isso diz e o que não diz**
+
+1. Há um componente **específico do S-NPP**, que cresce de 2021 a 2023 e **não** aparece no NOAA-20 de 2022 para 2023.
+2. Há também um aumento **de 2021 para 2022 nos dois sensores** (×2,6 no NOAA-20), compatível com o componente comum da seção 3; esta análise não o explica.
+3. **Não é efeito de número de observações:** nos meses de céu claro as observações são comparáveis e a fração de qualidade ruim em terra permanece em 0,1 % nos três anos.
+   O aumento **não é sinalizado** pelo campo de qualidade do produto.
+4. O ruído é fortemente **sazonal** nos dois sensores e acompanha o número de observações (correlação de postos entre fração positiva e observações:
+   NOAA-20 −0,68, S-NPP −0,41, 36 meses cada), com picos em meses de poucas observações (por exemplo, outubro de 2021 tem mediana de 2 observações e 63 % de pixels de qualidade ruim).
+   Compor o ano com meses mais ou menos nublados também desloca o composto anual.
+5. A classe de pixels **no mar** é muito irregular de mês para mês nos dois sensores (embarcações, plataformas e queimas intermitentes); o controle em terra é mais confiável.
+
+**Limites:** três anos apenas; classe escura definida pelo S-NPP; um único tile; **a causa não foi identificada**. Possibilidades que esta análise **não testa**:
+mudanças nas correções do produto, comportamento do instrumento, outros fatores atmosféricos ou de geometria. Não há afirmação sobre a causa.
+
+**Consequências para o uso dos dados:** a série anual S-NPP a partir de 2022 não deve ser usada para tendência sem correção ou sem confronto com o NOAA-20 (disponível desde 2018);
+o piso de ruído deve ser reportado junto de qualquer indicador sensível a ele (como a fração iluminada com limiar 0,5). Correção ou uso preferencial do NOAA-20 para os anos recentes ficam como próximo passo.
+

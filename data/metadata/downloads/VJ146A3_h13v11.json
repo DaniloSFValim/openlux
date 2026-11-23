@@ -1,0 +1,341 @@
+{
+  "acquired_utc": "2026-11-23T18:38:35Z",
+  "base_url": "https://ladsweb.modaps.eosdis.nasa.gov",
+  "code": {
+    "commit": "83ad0f40522e1c6832298019be41869dd6b221e0",
+    "dirty": true
+  },
+  "collection": "Colecao 2.0 (versao 002)",
+  "doi": "10.5067/VIIRS/VJ146A3.002",
+  "failures": [],
+  "files": [
+    {
+      "downloaded_utc": "2026-11-23T18:35:42Z",
+      "doy": 1,
+      "name": "VJ146A3.A2021001.h13v11.002.2025111201703.h5",
+      "sha256": "39eb2caa148daa7bc9054f3fa42cdb001689cb36d9100225e52e6eec59e58478",
+      "size_bytes": 62142756,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2021/001/VJ146A3.A2021001.h13v11.002.2025111201703.h5",
+      "year": 2021
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:35:47Z",
+      "doy": 32,
+      "name": "VJ146A3.A2021032.h13v11.002.2025111203223.h5",
+      "sha256": "232b1636f30f71b5709424e19f39fb166a9c450e6ca99d9a7b0a7523a2484046",
+      "size_bytes": 69180065,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2021/032/VJ146A3.A2021032.h13v11.002.2025111203223.h5",
+      "year": 2021
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:35:53Z",
+      "doy": 60,
+      "name": "VJ146A3.A2021060.h13v11.002.2025111204101.h5",
+      "sha256": "67b6a3084dddd452d53898c466af41a8b0acfbe0b57dcd8fc8a15bdbf5d5d1a5",
+      "size_bytes": 73481424,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2021/060/VJ146A3.A2021060.h13v11.002.2025111204101.h5",
+      "year": 2021
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:35:58Z",
+      "doy": 91,
+      "name": "VJ146A3.A2021091.h13v11.002.2025111204959.h5",
+      "sha256": "9afcdae77f2dc0aacd261af9e3d235ebeb84f961ae8c2a5bb9c02a8f2afa718c",
+      "size_bytes": 77150669,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2021/091/VJ146A3.A2021091.h13v11.002.2025111204959.h5",
+      "year": 2021
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:36:03Z",
+      "doy": 121,
+      "name": "VJ146A3.A2021121.h13v11.002.2025111210607.h5",
+      "sha256": "ff7a91f0385ef225b27bd15c007c963309e6fb028b16e9fb1c50c4cfad9ac580",
+      "size_bytes": 77385989,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2021/121/VJ146A3.A2021121.h13v11.002.2025111210607.h5",
+      "year": 2021
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:36:08Z",
+      "doy": 152,
+      "name": "VJ146A3.A2021152.h13v11.002.2025111212139.h5",
+      "sha256": "f3c99e67ed4f7b875b78fb3a266d4f4f9282ca43141bb4942fdf46503487d3c6",
+      "size_bytes": 70622586,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2021/152/VJ146A3.A2021152.h13v11.002.2025111212139.h5",
+      "year": 2021
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:36:13Z",
+      "doy": 182,
+      "name": "VJ146A3.A2021182.h13v11.002.2025111213113.h5",
+      "sha256": "19e6c044bb350f3d13b7730f4d0143231e0e23a14c53649f2f98427e76548449",
+      "size_bytes": 75406841,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2021/182/VJ146A3.A2021182.h13v11.002.2025111213113.h5",
+      "year": 2021
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:36:21Z",
+      "doy": 213,
+      "name": "VJ146A3.A2021213.h13v11.002.2025111214016.h5",
+      "sha256": "937b2d86813b2ad78f0f850dde46f37257d8da0c66e6673fcf8bc1af8fed6cd2",
+      "size_bytes": 68505087,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2021/213/VJ146A3.A2021213.h13v11.002.2025111214016.h5",
+      "year": 2021
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:36:31Z",
+      "doy": 244,
+      "name": "VJ146A3.A2021244.h13v11.002.2025111215008.h5",
+      "sha256": "eed4524df98652520c5f6a508d892cc03a08ab82d306ab039b9b54fc74087298",
+      "size_bytes": 67160906,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2021/244/VJ146A3.A2021244.h13v11.002.2025111215008.h5",
+      "year": 2021
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:36:37Z",
+      "doy": 274,
+      "name": "VJ146A3.A2021274.h13v11.002.2025111215858.h5",
+      "sha256": "5b8bd26e995d8df400b64fd6ccbb5522a35e117b64b534f6e2c1b91a00237e50",
+      "size_bytes": 53835844,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2021/274/VJ146A3.A2021274.h13v11.002.2025111215858.h5",
+      "year": 2021
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:36:42Z",
+      "doy": 305,
+      "name": "VJ146A3.A2021305.h13v11.002.2025111220857.h5",
+      "sha256": "652563a6ba8b2a337388efa59214172e425aca98e7bd47f190641fffbed41562",
+      "size_bytes": 71779794,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2021/305/VJ146A3.A2021305.h13v11.002.2025111220857.h5",
+      "year": 2021
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:36:47Z",
+      "doy": 335,
+      "name": "VJ146A3.A2021335.h13v11.002.2025111222321.h5",
+      "sha256": "ce37c010817e29d8f3be510580cb2c5bf734eb11e6b10e7bafa0125308d98b34",
+      "size_bytes": 74499427,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2021/335/VJ146A3.A2021335.h13v11.002.2025111222321.h5",
+      "year": 2021
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:36:52Z",
+      "doy": 1,
+      "name": "VJ146A3.A2022001.h13v11.002.2025133143754.h5",
+      "sha256": "3549452096ae5284c6e27799773a3464c42fc4ac5cc181ae0b43023e742c49b3",
+      "size_bytes": 67537427,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2022/001/VJ146A3.A2022001.h13v11.002.2025133143754.h5",
+      "year": 2022
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:36:57Z",
+      "doy": 32,
+      "name": "VJ146A3.A2022032.h13v11.002.2025133145808.h5",
+      "sha256": "89d87757c67cbd0af1ad1bb3bc49179b7ebc6671cac0292e08dc5439609a2aa4",
+      "size_bytes": 74302288,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2022/032/VJ146A3.A2022032.h13v11.002.2025133145808.h5",
+      "year": 2022
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:37:01Z",
+      "doy": 60,
+      "name": "VJ146A3.A2022060.h13v11.002.2025133151153.h5",
+      "sha256": "06e23b90405a91ed91ca35f24eea99b1827ef15f7477d9e2ee5143e300bcf6e9",
+      "size_bytes": 72616784,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2022/060/VJ146A3.A2022060.h13v11.002.2025133151153.h5",
+      "year": 2022
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:37:07Z",
+      "doy": 91,
+      "name": "VJ146A3.A2022091.h13v11.002.2025133152531.h5",
+      "sha256": "c266b6b4a5b35035b4785a4efadf05fc55325cbedfe917e6e7876e3830abe13c",
+      "size_bytes": 74034219,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2022/091/VJ146A3.A2022091.h13v11.002.2025133152531.h5",
+      "year": 2022
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:37:12Z",
+      "doy": 121,
+      "name": "VJ146A3.A2022121.h13v11.002.2025133153643.h5",
+      "sha256": "87797937c62b68b03a827e173d14b18b4b5814f2e58a6b0c638f5568c193ff1f",
+      "size_bytes": 78026173,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2022/121/VJ146A3.A2022121.h13v11.002.2025133153643.h5",
+      "year": 2022
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:37:17Z",
+      "doy": 152,
+      "name": "VJ146A3.A2022152.h13v11.002.2025133154812.h5",
+      "sha256": "e905a648bf5c6188e0981fd8bd9571f171d77157312c4f9237f3f4e82b42f55e",
+      "size_bytes": 68413523,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2022/152/VJ146A3.A2022152.h13v11.002.2025133154812.h5",
+      "year": 2022
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:37:22Z",
+      "doy": 182,
+      "name": "VJ146A3.A2022182.h13v11.002.2025133155706.h5",
+      "sha256": "f8e2e17eeea94cd361cad2a34059668c6bc7fcbb26deae85ad81249174e3e81b",
+      "size_bytes": 75323687,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2022/182/VJ146A3.A2022182.h13v11.002.2025133155706.h5",
+      "year": 2022
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:37:26Z",
+      "doy": 213,
+      "name": "VJ146A3.A2022213.h13v11.002.2025133160627.h5",
+      "sha256": "d643aa3d035bb4b898a12047ed1aebccf45cf9ebcf0605724ec553ba9eb7dc5b",
+      "size_bytes": 72680835,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2022/213/VJ146A3.A2022213.h13v11.002.2025133160627.h5",
+      "year": 2022
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:37:31Z",
+      "doy": 244,
+      "name": "VJ146A3.A2022244.h13v11.002.2025133161735.h5",
+      "sha256": "0d2615801628d4332ad7e3691d5e2430670a4e900317d416a581c144cd1aca7f",
+      "size_bytes": 66994522,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2022/244/VJ146A3.A2022244.h13v11.002.2025133161735.h5",
+      "year": 2022
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:37:35Z",
+      "doy": 274,
+      "name": "VJ146A3.A2022274.h13v11.002.2025133162914.h5",
+      "sha256": "95985036aa4703d78be3a63556456918f0bfab3e6eff394059f1eaee2c394df5",
+      "size_bytes": 68284569,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2022/274/VJ146A3.A2022274.h13v11.002.2025133162914.h5",
+      "year": 2022
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:37:40Z",
+      "doy": 305,
+      "name": "VJ146A3.A2022305.h13v11.002.2025133163931.h5",
+      "sha256": "65ba8ba09677e26c23f6952e23c9291372ec920c31d1a030a4da05dd52f9f7cb",
+      "size_bytes": 70150014,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2022/305/VJ146A3.A2022305.h13v11.002.2025133163931.h5",
+      "year": 2022
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:37:45Z",
+      "doy": 335,
+      "name": "VJ146A3.A2022335.h13v11.002.2025133165037.h5",
+      "sha256": "88eff5818d2422442c0a8bc13d1637f2386ca01b8b2930ce3b08f3500cad5827",
+      "size_bytes": 69948817,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2022/335/VJ146A3.A2022335.h13v11.002.2025133165037.h5",
+      "year": 2022
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:37:49Z",
+      "doy": 1,
+      "name": "VJ146A3.A2023001.h13v11.002.2025147180254.h5",
+      "sha256": "98a306a0b2b204a13703e1ddee3f425fcb70a09f89e8c60f02950d47c91bcc16",
+      "size_bytes": 70758856,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2023/001/VJ146A3.A2023001.h13v11.002.2025147180254.h5",
+      "year": 2023
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:37:52Z",
+      "doy": 32,
+      "name": "VJ146A3.A2023032.h13v11.002.2025147182237.h5",
+      "sha256": "a789576a8cad0995a986bd2964e69d2eecedf156a0b5fde4d548b1d3bd141445",
+      "size_bytes": 60305090,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2023/032/VJ146A3.A2023032.h13v11.002.2025147182237.h5",
+      "year": 2023
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:37:57Z",
+      "doy": 60,
+      "name": "VJ146A3.A2023060.h13v11.002.2025147183915.h5",
+      "sha256": "a226f7117e7d14bc41ea56cf89eb0e34b3362bfd83bda678a65b9bbb24efea21",
+      "size_bytes": 76361879,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2023/060/VJ146A3.A2023060.h13v11.002.2025147183915.h5",
+      "year": 2023
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:38:01Z",
+      "doy": 91,
+      "name": "VJ146A3.A2023091.h13v11.002.2025147185322.h5",
+      "sha256": "5b0284ba95634c3ababbbdf5e90b1aa0ddf71b524280a8503bdd0404e8fdd9c7",
+      "size_bytes": 75695115,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2023/091/VJ146A3.A2023091.h13v11.002.2025147185322.h5",
+      "year": 2023
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:38:05Z",
+      "doy": 121,
+      "name": "VJ146A3.A2023121.h13v11.002.2025147190805.h5",
+      "sha256": "50f5c097ba14f51cf55c13809452cf397230d9c61c6152c8ea4ad31710ef53b4",
+      "size_bytes": 75561812,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2023/121/VJ146A3.A2023121.h13v11.002.2025147190805.h5",
+      "year": 2023
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:38:10Z",
+      "doy": 152,
+      "name": "VJ146A3.A2023152.h13v11.002.2025147192155.h5",
+      "sha256": "6860de295ade884030a8fa61a1da01f7da3b3c60aca8ac4dc1e0ded7e5804cfa",
+      "size_bytes": 76328813,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2023/152/VJ146A3.A2023152.h13v11.002.2025147192155.h5",
+      "year": 2023
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:38:14Z",
+      "doy": 182,
+      "name": "VJ146A3.A2023182.h13v11.002.2025147193319.h5",
+      "sha256": "aea2b17e53ba153bbc5cf59ed87ba7fdc72760bea55043eacd745bac8c54fa5c",
+      "size_bytes": 71334566,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2023/182/VJ146A3.A2023182.h13v11.002.2025147193319.h5",
+      "year": 2023
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:38:18Z",
+      "doy": 213,
+      "name": "VJ146A3.A2023213.h13v11.002.2025147194415.h5",
+      "sha256": "0b923e0ab3b5157655a641e2d2e540df429981ced00038e700a243cfab38ef76",
+      "size_bytes": 68781602,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2023/213/VJ146A3.A2023213.h13v11.002.2025147194415.h5",
+      "year": 2023
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:38:23Z",
+      "doy": 244,
+      "name": "VJ146A3.A2023244.h13v11.002.2025148165448.h5",
+      "sha256": "7d013649749b0c4105dbbf806a4b4e907c55b7a85aa23c380fd40d2a7927d470",
+      "size_bytes": 68326938,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2023/244/VJ146A3.A2023244.h13v11.002.2025148165448.h5",
+      "year": 2023
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:38:26Z",
+      "doy": 274,
+      "name": "VJ146A3.A2023274.h13v11.002.2025148170822.h5",
+      "sha256": "c071d8f8df75d61a984f70a7ee53fca40881bff426efe37135ce226567d92459",
+      "size_bytes": 57475144,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2023/274/VJ146A3.A2023274.h13v11.002.2025148170822.h5",
+      "year": 2023
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:38:30Z",
+      "doy": 305,
+      "name": "VJ146A3.A2023305.h13v11.002.2025148171836.h5",
+      "sha256": "66a0abc7aa0f87bb44a9c1ac1eadcf41405ad60f20d15c72208ba863f3cd64eb",
+      "size_bytes": 70823150,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2023/305/VJ146A3.A2023305.h13v11.002.2025148171836.h5",
+      "year": 2023
+    },
+    {
+      "downloaded_utc": "2026-11-23T18:38:35Z",
+      "doy": 335,
+      "name": "VJ146A3.A2023335.h13v11.002.2025148172953.h5",
+      "sha256": "2d78592ea60bcadf3996f3a337749b582d29f14d2a7faafb77052fa42befc9d1",
+      "size_bytes": 76730553,
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/5200/VJ146A3/2023/335/VJ146A3.A2023335.h13v11.002.2025148172953.h5",
+      "year": 2023
+    }
+  ],
+  "institution": "NASA / LAADS DAAC",
+  "product": "VJ146A3",
+  "source": "NASA LAADS DAAC",
+  "tile": "h13v11"
+}
