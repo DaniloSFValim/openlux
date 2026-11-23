@@ -17,14 +17,13 @@
     <h1>OpenLux</h1>
     <p class="subtitle">Estimativa de poluição luminosa baseada em sensoriamento remoto — Estado do Rio de Janeiro</p>
     <p class="byline">Autor: Danilo Valim · ORCID: <a href="https://orcid.org/0009-0009-7250-6151" rel="noopener">0009-0009-7250-6151</a> · Software científico independente, em desenvolvimento</p>
-    <p class="lede">O OpenLux agrega a radiância noturna observada por satélite (NASA Black Marble, sensor VIIRS) nos 92 municípios do estado, com malha e população do IBGE. Os valores são uma <strong>estimativa baseada em sensoriamento remoto</strong>, e <strong>não medições do brilho do céu</strong>. Niterói pode ser explorado como estudo de caso.</p>
+    <p class="lede">O OpenLux agrega a radiância noturna observada por satélite (NASA Black Marble, sensor VIIRS) nos 92 municípios do estado, com malha e população do IBGE. Os valores são uma <strong>estimativa baseada em sensoriamento remoto</strong>, e <strong>não medições do brilho do céu</strong>.</p>
   </div>
 </header>
 
 <div class="wrap">
   <section class="alert" role="note" aria-labelledby="alert-title" id="alert">
-    <h2 id="alert-title">Aviso metodológico: resultados não validados</h2>
-    <p>A série do sensor Suomi NPP apresenta, a partir de 2022, aumento do piso de ruído em áreas escuras, e o sinal das tendências depende da janela de anos. Não interprete os valores como mudança real de iluminação sem essa ressalva.</p>
+    <p><strong id="alert-title">Resultados não validados.</strong> A série do sensor Suomi NPP apresenta, a partir de 2022, aumento do piso de ruído em áreas escuras, e o sinal das tendências depende da janela de anos. Não interprete os valores como mudança real de iluminação sem essa ressalva.</p>
     <details><summary>Números e detalhes do aviso</summary><p id="alert-text">Carregando…</p></details>
   </section>
 
@@ -32,17 +31,22 @@
     <section class="explorer" aria-label="Mapa e painéis de análise">
       <div class="map-col">
         <div class="controls" role="group" aria-label="Controles do mapa">
-          <label>Indicador
+          <fieldset id="layer-wrap" class="layer-sel">
+            <legend>Camada</legend>
+            <label><input type="radio" name="layer" value="pixel" checked> Pixel (≈ 460 m)</label>
+            <label><input type="radio" name="layer" value="mun"> Município (agregado)</label>
+          </fieldset>
+          <label>Indicador (camada município)
             <select id="indicator"></select>
           </label>
           <label id="year-wrap">Ano: <output id="year-out"></output>
             <input type="range" id="year" step="1" aria-describedby="year-note">
           </label>
-          <button type="button" id="case-btn">Estudo de caso: Niterói</button>
           <button type="button" id="reset-btn">Ver o estado inteiro</button>
         </div>
         <p id="year-note" class="muted small">As classes de cor são fixas para todos os anos, para que os mapas de anos diferentes sejam comparáveis.</p>
-        <div id="mapa" role="region" aria-label="Mapa coroplético dos municípios do Estado do Rio de Janeiro. Use o seletor de município ou a tabela de ranking para navegar pelo teclado."></div>
+        <div id="mapa" role="region" aria-label="Mapa da radiância noturna no Estado do Rio de Janeiro, por pixel de cerca de 460 metros ou agregada por município. Use o seletor de município ou a tabela de ranking para navegar pelo teclado."></div>
+        <div id="pixel-readout" class="readout muted small" aria-live="polite" hidden></div>
         <div id="legend" class="legend" aria-live="polite"></div>
       </div>
 

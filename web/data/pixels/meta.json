@@ -1,0 +1,94 @@
+{
+  "classes": {
+    "breaks_nw_cm2_sr": [
+      0.5,
+      2.0,
+      8.0,
+      30.0,
+      100.0
+    ],
+    "first_code": 2,
+    "labels": [
+      "< 0,5",
+      "0,5 a < 2",
+      "2 a < 8",
+      "8 a < 30",
+      "30 a < 100",
+      "≥ 100"
+    ]
+  },
+  "code": {
+    "commit": "b3fb0371ed5b72e52bf8f5ae88b9d3dcdec64714",
+    "dirty": true
+  },
+  "codes": {
+    "0": "fora do estado",
+    "1": "sem dado valido"
+  },
+  "grid": {
+    "cols": 945,
+    "lat_north": -20.7625,
+    "lon_west": -44.891666666666666,
+    "pixel_deg": 0.004166666666666667,
+    "rows": 626
+  },
+  "sensor": "Suomi NPP (VNP46A4 v2.0), AllAngle_Composite_Snow_Free, qualidade 0, mascara de terra",
+  "years": {
+    "2012": {
+      "input_sha256": "772689356c6cb25bca37ff8b2e59c4e8e812184a004f5b8c7f576117325fa070",
+      "sha256": "42481feab1dc6e4eda55c42bc36a580e483fbe77486bdc57375940ce87c3c1e3"
+    },
+    "2013": {
+      "input_sha256": "20b9e00ce1ab4e5353fe3bb2d59a6e26e71663826a83ad5a738debcf870008ef",
+      "sha256": "c5600f14fcb3c07f5ebe3740b02164f5a1fc72e1eb39f777827ac722a9888816"
+    },
+    "2014": {
+      "input_sha256": "3a695f053526595f54eb9a02ecf8b678de6efeac5718a2643ce325367db5a93f",
+      "sha256": "815a86e683090debbdf98da03aa7efb4440d3cfba436d59b37b4d06b987e2d0a"
+    },
+    "2015": {
+      "input_sha256": "f273c18ef66a3a036046536f7b2aeefe96b7f17890ad4402158cf65de9112201",
+      "sha256": "34edb6ba80fff10f58d52a54efeb650e4873cdfbc2cb5b4b258271f44fe54c36"
+    },
+    "2016": {
+      "input_sha256": "96bb40714fb78d4633c6e5eb09797ee49c8f86d22b52dabd36f275eaac8dbdbd",
+      "sha256": "5287427dd7b734a7d65b887c8ee8d6e0533828fe548f69a0475858961f80dd47"
+    },
+    "2017": {
+      "input_sha256": "4251ec1c192699945c2cc5e6e2330ce35afefeb6908ed93284990185094356d5",
+      "sha256": "c35b0935187091d8367dda1227937f9a88cd08bd39fc855851d73dead2d1ba45"
+    },
+    "2018": {
+      "input_sha256": "dce0bade4be67167b141d69361c4d204de77d7fbececec0626c56c98dca4e4d1",
+      "sha256": "3576ed994d995c39f8ebde22e8b4190a17abea147eb2d19a1497d3f16f4911e1"
+    },
+    "2019": {
+      "input_sha256": "1a88900ecc1c7fb5f8abcb1eda65a9efca91e7b14343357e50f94878b461e0cc",
+      "sha256": "7a3de0e9a1e7e7b69d923ef3bd56d175ee931d4ac2e2b39ebbf0dd2a169acf1a"
+    },
+    "2020": {
+      "input_sha256": "ee478977631a201d92ee050549242f7a537b5c87dab1494a9602102b15125b50",
+      "sha256": "5c1a95c4770b3123aabe90f248f987c0c8976bcab35893a8b1c417175898522a"
+    },
+    "2021": {
+      "input_sha256": "a4d061a7dbfca7c5957c027fa52d82752776894c8841b55b3849032e9ec26ded",
+      "sha256": "e65304bbd08148d70fe2dd623c2f9eeb7fcf80eb47773673d1a6f0d0672d8839"
+    },
+    "2022": {
+      "input_sha256": "d8a5045101d874cbb4dfe11f7555a03229efc90ce67dd487bf03c95a6256c508",
+      "sha256": "d8f177fe0ce074c15998f8ec7b40466b62d9d96f6a15076add6265de82652a0c"
+    },
+    "2023": {
+      "input_sha256": "3426db53c89d08da7d769a95aae5fc9ca38beb4ffe38a94490afa3a441ea2129",
+      "sha256": "0c2c4c7606044eaf1713112dff13a6b61079c28dfa4bb30b8bd41473e16c940a"
+    },
+    "2024": {
+      "input_sha256": "8bfcba95fa3cf1b20b3b43bf0f01b19f1855abbb4ec55987f9c0c5e25a3f56d1",
+      "sha256": "ceb8ea3133acecb03e235202c3b00aaa82f5f8468397151b2705d50f5a33e708"
+    },
+    "2025": {
+      "input_sha256": "088c1b07cc0acafb8a6d02d364136dc7a2b48f6234b55b0951053af306df6f2a",
+      "sha256": "090b3b8ea1b352820e3d95058dda0a1c63b175d3c72349aa84192174930c396e"
+    }
+  }
+}

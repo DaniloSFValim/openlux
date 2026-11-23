@@ -18,6 +18,8 @@ import threading
 import urllib.request
 from pathlib import Path
 
+import re
+
 import numpy as np
 import pytest
 from helpers import WEB, has_cloudflare_injection, headers_for, parse_headers_file, strip_cloudflare_injections
@@ -102,6 +104,11 @@ def _expected_color(data, cd, year_index):
     return SEQ[sum(v >= b for b in br)], v
 
 
+def _layer(page, value):
+    page.check(f'input[name="layer"][value="{value}"]')
+    page.wait_for_function("(v) => document.querySelector('input[name=layer]:checked').value === v", arg=value)
+
+
 def test_renders_92_municipalities_without_errors(page):
     assert page.locator("#mapa path.leaflet-interactive").count() == 92
     assert _relevant_errors(page.errors, page.injected) == []
@@ -111,7 +118,9 @@ def test_rendered_colors_match_independent_classification(page):
     data = json.loads((WEB / "data" / "indicators.json").read_text())
     last = len(data["meta"]["years"]) - 1
     by_name = {m["name"]: cd for cd, m in data["municipios"].items()}
-    for name in ("Niterói", "Rio de Janeiro", "Arraial do Cabo", "Itatiaia"):
+    _layer(page, "mun")
+    page.select_option("#indicator", "mean")
+    for name in ("Campos dos Goytacazes", "Rio de Janeiro", "Arraial do Cabo", "Itatiaia"):
         cd = by_name[name]
         color, v = _expected_color(data, cd, last)
         page.select_option("#mun-select", cd)
@@ -122,6 +131,8 @@ def test_rendered_colors_match_independent_classification(page):
 
 
 def test_legend_has_units_source_period_and_nodata(page):
+    _layer(page, "mun")
+    page.select_option("#indicator", "mean")
     txt = page.inner_text("#legend")
     assert "Unidade:" in txt and "nW·cm⁻²·sr⁻¹" in txt and "Fonte:" in txt and "Período:" in txt
     assert "sem dado" in txt and "classificação analítica" in txt.lower()
@@ -167,7 +178,7 @@ def test_sensor_comparison_indicators_and_panels(page):
     page.select_option("#indicator", "slope_snpp_1825")
     assert "S-NPP" in page.inner_text("#legend")
     page.select_option("#indicator", "mean")
-    page.click("#case-btn")
+    page.select_option("#mun-select", next(c for c, m in json.loads((WEB / "data" / "indicators.json").read_text())["municipios"].items() if m["name"] == "Rio de Janeiro"))
     detail = page.inner_text("#mun-detail")
     assert "Comparação entre sensores, 2018–2025" in detail and "NOAA-20" in detail
     page.click("#tab-state")
@@ -175,11 +186,85 @@ def test_sensor_comparison_indicators_and_panels(page):
     page.click("#tab-mun")
 
 
-def test_niteroi_case_button_shows_detail_and_chart(page):
+def test_no_city_is_hardcoded_as_the_case_study(page):
+    """A interface nao privilegia um municipio: sem botao de estudo de caso e sem Niteroi no texto."""
+    assert page.locator("#case-btn").count() == 0
+    for sel in (".lede", "header", "#legend", ".controls button"):   # Niteroi segue na lista dos 92 municipios, sem destaque
+        assert "Niterói" not in page.inner_text(sel), sel
+    assert "Niterói" not in (WEB / "js" / "app.js").read_text(encoding="utf-8")
     page.click("#tab-mun")
-    page.click("#case-btn")
-    assert "Niterói" in page.inner_text("#mun-detail")
+    page.select_option("#mun-select", next(c for c, m in json.loads((WEB / "data" / "indicators.json").read_text())["municipios"].items() if m["name"] == "Rio de Janeiro"))
+    assert "Rio de Janeiro" in page.inner_text("#mun-detail")
     assert page.locator("#mun-chart svg.chart").count() == 1
+    assert _relevant_errors(page.errors, page.injected) == []
+
+
+def _px_expected(code, meta):
+    pal = ["#f2f2f2", "#ffeda0", "#fec44f", "#fd8d3c", "#e31a1c", "#800026"]
+    if code == 0:
+        return None
+    if code == 1:
+        return "#b4bac3"
+    return pal[code - meta["classes"]["first_code"]]
+
+
+def test_pixel_layer_is_default_and_matches_the_class_grid(page):
+    """Camada de pixel: legenda com unidade e fonte, canvas desenhado, e o pixel sob o cursor tem a cor
+    e a classe do arquivo data/pixels/<ano>.bin (conferidos de forma independente em Python)."""
+    meta = json.loads((WEB / "data" / "pixels" / "meta.json").read_text())
+    _layer(page, "pixel")
+    assert page.locator("#indicator").is_disabled()
+    page.wait_for_function("() => document.querySelector('#pixel-readout') && !document.querySelector('#pixel-readout').hidden")
+    leg = page.inner_text("#legend")
+    assert "nW·cm⁻²·sr⁻¹" in leg and "Fonte:" in leg and "não é o brilho do céu" in leg and "sem dado válido" in leg
+    year = page.evaluate("() => document.getElementById('year-out').textContent")
+    grid = np.fromfile(WEB / "data" / "pixels" / f"{year}.bin", dtype="uint8").reshape(meta["grid"]["rows"], meta["grid"]["cols"])
+    g = meta["grid"]
+    page.locator("#mapa").scroll_into_view_if_needed()
+    box = page.locator("#mapa").bounding_box()
+    page.wait_for_function("() => { const c=document.querySelector('canvas.openlux-pixels'); return c && c.width>0; }")
+    checked = agree = 0
+    classes_seen = set()
+    for fx in (0.35, 0.45, 0.55, 0.65):
+        for fy in (0.55, 0.65, 0.75, 0.82):
+            x, y = box["x"] + fx * box["width"], box["y"] + fy * box["height"]
+            page.mouse.move(x, y)
+            page.wait_for_timeout(40)
+            txt = page.inner_text("#pixel-readout")
+            m = re.search(r"\((-?\d+),(\d+)°, (-?\d+),(\d+)°\)", txt)
+            if not m:
+                continue
+            lat = float(f"{m.group(1)}.{m.group(2)}"); lon = float(f"{m.group(3)}.{m.group(4)}")
+            r, c = int((g["lat_north"] - lat) // g["pixel_deg"]), int((lon - g["lon_west"]) // g["pixel_deg"])
+            if not (0 <= r < g["rows"] and 0 <= c < g["cols"]):
+                continue
+            code = int(grid[r, c])
+            exp = _px_expected(code, meta)
+            rgba = page.evaluate("""([x, y]) => { const c=document.querySelector('canvas.openlux-pixels');
+                const b=c.getBoundingClientRect(); return Array.from(c.getContext('2d').getImageData(Math.round(x-b.x), Math.round(y-b.y), 1, 1).data); }""", [x, y])
+            got = "#%02x%02x%02x" % tuple(rgba[:3]) if rgba[3] else None
+            checked += 1
+            classes_seen.add(code)
+            agree += int(got == exp)
+    assert checked >= 10 and agree >= checked - 1, (checked, agree)   # tolera um pixel na divisa
+    assert len(classes_seen) >= 2                                      # a amostra tem mais de uma classe
+    assert _relevant_errors(page.errors, page.injected) == []
+
+
+def test_pixel_layer_warns_about_noise_from_2022_and_switches_back_to_municipal(page):
+    _layer(page, "pixel")
+    page.fill("#year", str(len(json.loads((WEB / "data" / "indicators.json").read_text())["meta"]["years"]) - 1))
+    page.dispatch_event("#year", "input")
+    page.wait_for_selector("#pxnote .pxnote")
+    assert "piso de ruído" in page.inner_text("#pxnote")
+    page.fill("#year", "0")
+    page.dispatch_event("#year", "input")
+    page.wait_for_function("() => document.getElementById('year-out').textContent === '2012'")
+    assert page.locator("#pxnote .pxnote").count() == 0
+    _layer(page, "mun")
+    assert page.locator("canvas.openlux-pixels").count() == 0
+    assert page.locator("#indicator").is_enabled()
+    page.fill("#year", str(13)); page.dispatch_event("#year", "input")
     assert _relevant_errors(page.errors, page.injected) == []
 
 
@@ -218,12 +303,13 @@ def test_exposure_and_pixel_trend_indicators_render_and_match_data(page):
     novos = ["popL", "popLit", "urban", "rural"] + [f"{p}{w}" for w in data["meta"]["windows"]
                                                    for p in ("pxup_", "pxdown_")]
     assert set(novos) <= set(keys), set(novos) - set(keys)
+    _layer(page, "mun")
     for k in novos:
         page.select_option("#indicator", k)
         assert page.locator("#mapa path.leaflet-interactive").count() == 92
         assert page.locator("#legend").inner_text().strip() != ""
     last = len(data["meta"]["years"]) - 1
-    cd = next(c for c, mm in data["municipios"].items() if mm["name"] == "Niterói")
+    cd = next(c for c, mm in data["municipios"].items() if mm["name"] == "Rio de Janeiro")
     page.select_option("#mun-select", cd)
     txt = page.locator("#mun-detail").inner_text().replace(" ", " ")
     v = data["municipios"][cd]["exposure"]["pop_radiance"][last]
