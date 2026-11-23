@@ -149,3 +149,11 @@ def test_no_data_source_is_left_unverified():
     sidra = next(x for x in SOURCES if "SIDRA" in x["name"])
     assert sidra["license_status"] == "confirmado" and "autor" in sidra["note"]
     assert "Citação das fontes do IBGE" in README
+
+
+def test_site_url_is_the_same_everywhere_and_verification_is_documented():
+    url = "https://openlux.labdados.org/"
+    dep = (ROOT / "docs/DEPLOYMENT.md").read_text(encoding="utf-8")
+    assert CFF["url"] == url and url in README and url.rstrip("/") in dep
+    assert "OPENLUX_URL" in README and "OPENLUX_URL" in dep
+    assert "Web Analytics" in dep and "detecção de bots" in dep  # injecoes da Cloudflare documentadas

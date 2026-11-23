@@ -11,7 +11,8 @@ reprodutível e testado, mas os **resultados científicos não foram validados**
   malha IBGE 2024), indicadores (radiância média e mediana, intensidade radiante aparente, fração da área
   iluminada, intensidade por habitante em 2022), tendência por janela, controles de ruído de fundo,
   análises de sensibilidade e estabilidade, proveniência e determinismo.
-- Interface web estática (`web/`) construída apenas a partir das saídas reais do pipeline.
+- Interface web estática (`web/`) construída apenas a partir das saídas reais do pipeline, publicada em
+  https://openlux.labdados.org/ (ver `docs/DEPLOYMENT.md`).
 - Documentação: `README.md`, `METHODOLOGY.md`, `docs/DECISIONS.md`, `docs/LICENSING.md`, `CITATION.cff`.
 - Licença do código: MIT.
 

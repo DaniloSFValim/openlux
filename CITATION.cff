@@ -8,6 +8,7 @@ authors:
     given-names: "Danilo"
     orcid: "https://orcid.org/0009-0009-7250-6151"
 repository-code: "https://github.com/DaniloSFValim/openlux"
+url: "https://openlux.labdados.org/"
 abstract: >-
   O OpenLux é um software científico independente para estimar e acompanhar a poluição
   luminosa no Estado do Rio de Janeiro a partir da radiância noturna observada por satélite

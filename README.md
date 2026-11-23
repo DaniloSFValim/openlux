@@ -15,6 +15,7 @@ qualquer número.
 | Autor | Danilo Valim |
 | Áreas | Ciência de dados, geoprocessamento, sensoriamento remoto e ciências ambientais |
 | Repositório | https://github.com/DaniloSFValim/openlux |
+| Site | https://openlux.labdados.org/ (interface; ver [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)) |
 | Versão | 0.1.0 (pré-lançamento) |
 | Licença do código | MIT (arquivo [`LICENSE`](LICENSE)). Não se aplica aos dados de terceiros (ver [`docs/LICENSING.md`](docs/LICENSING.md)) |
 | DOI | A ser atribuído após a publicação no Zenodo |
@@ -133,7 +134,8 @@ pip install -e ".[dev]"
 
 Python 3.10 ou superior (testado em 3.13). O teste da interface exige
 `pip install -e ".[web-tests]"` e um Chromium (variável `OPENLUX_CHROMIUM` se não for o do
-Playwright).
+Playwright). Para testar o site publicado: `OPENLUX_URL=https://openlux.labdados.org python -m pytest tests/test_web_smoke.py`
+(confere também que os arquivos publicados são idênticos aos do repositório).
 
 ## 11. Reprodução
 
