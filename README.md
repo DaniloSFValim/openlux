@@ -15,6 +15,7 @@ qualquer número.
 | Autor | Danilo Valim |
 | Áreas | Ciência de dados, geoprocessamento, sensoriamento remoto e ciências ambientais |
 | Repositório | https://github.com/DaniloSFValim/openlux |
+| Site | https://openlux.labdados.org/ (interface; ver [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)) |
 | Versão | 0.1.0 (pré-lançamento) |
 | Licença do código | MIT (arquivo [`LICENSE`](LICENSE)). Não se aplica aos dados de terceiros (ver [`docs/LICENSING.md`](docs/LICENSING.md)) |
 | DOI | A ser atribuído após a publicação no Zenodo |
@@ -99,7 +100,8 @@ unidades, parâmetros, tratamento dos dados e reprodução passo a passo:
 | Intensidade por habitante (2022) | mW·sr⁻¹ por habitante | Índice relativo, só 2022 |
 | Variação absoluta e percentual | nW·cm⁻²·sr⁻¹ e % | Percentual só acima de um piso declarado |
 | Tendência (Theil–Sen, Kendall) | nW·cm⁻²·sr⁻¹ por ano | Duas janelas: 2012–2021 e 2012–2025 |
-| Controles de ruído de fundo | nW·cm⁻²·sr⁻¹ | Pixels persistentemente escuros, terra e mar |
+| Controles de ruído de fundo | nW·cm⁻²·sr⁻¹ | Pixels persistentemente escuros, terra e mar; análise mensal 2021–2023 |
+| Comparação municipal S-NPP × NOAA-20 (2018–2025) | vários | Níveis por ano, inclinações, variação 2021→2025; até 2021 os sensores concordam em nível, e a partir de 2022 o S-NPP lê mais alto |
 
 **Não implementados:** comparação com o Atlas de Falchi et al. (2016), mudança espacial pixel a pixel e
 comparação urbano × não urbano. Constam como trabalhos futuros.
@@ -133,7 +135,8 @@ pip install -e ".[dev]"
 
 Python 3.10 ou superior (testado em 3.13). O teste da interface exige
 `pip install -e ".[web-tests]"` e um Chromium (variável `OPENLUX_CHROMIUM` se não for o do
-Playwright).
+Playwright). Para testar o site publicado: `OPENLUX_URL=https://openlux.labdados.org python -m pytest tests/test_web_smoke.py`
+(confere também que os arquivos publicados são idênticos aos do repositório).
 
 ## 11. Reprodução
 
@@ -167,7 +170,8 @@ valores publicados** e não foi definido limite de aprovação a priori.
 - Estimativa de radiância orbital, não medição do brilho do céu; sem medições fotométricas de campo.
 - Resolução de ≈ 460 m; a banda DNB é pouco sensível à emissão azul de LEDs (Levin et al., 2020).
 - **Piso de ruído do S-NPP a partir de 2022** e um aumento comum aos dois sensores que não foi
-  separado de um possível artefato do algoritmo compartilhado. Investigado, não resolvido.
+  separado de um possível artefato do algoritmo compartilhado. A análise mensal (2021–2023) mostra um componente
+  específico do S-NPP, com início entre janeiro e março de 2022 e não sinalizado pelo campo de qualidade. A causa não foi identificada.
 - O sinal da tendência depende da janela de anos.
 - A saturação do DNB em áreas muito iluminadas não foi avaliada.
 - População residente não é população exposta; a intensidade por habitante é um índice relativo.

@@ -11,10 +11,11 @@ from pathlib import Path
 
 import h5py
 
-from openlux.download import DownloadFailed, download_verified, laads_find_file, token_from_env
+from openlux.download import (DownloadFailed, download_verified, laads_find_file, laads_list_days,
+                              token_from_env)
 from openlux.provenance import code_version, write_json
 
-PRODUCTS = ("VNP46A4", "VNP46A3", "VJ146A4")  # S-NPP anual, S-NPP mensal, NOAA-20 anual
+PRODUCTS = ("VNP46A4", "VNP46A3", "VJ146A4", "VJ146A3")  # S-NPP e NOAA-20, anual (A4) e mensal (A3)
 
 
 def main():
@@ -30,16 +31,24 @@ def main():
     if not token:
         sys.exit("Defina EARTHDATA_TOKEN no ambiente (nunca em arquivos versionados).")
     files, failures = [], []
+    monthly = a.product.endswith("A3")  # mensais: um diretorio por mes (dia do ano do 1o dia)
     for year in range(y0, y1 + 1):
         try:
-            name, url = laads_find_file(a.product, year, 1, a.tile, token=token)
-            rec = download_verified(url, Path(a.out) / a.product / name, token=token)
-            files.append(dict(year=year, name=name, **{k: rec[k] for k in
-                              ("url", "sha256", "size_bytes", "downloaded_utc")}))
-            print(f"OK  {year} {name} {rec['size_bytes']} B sha256={rec['sha256'][:12]}...")
-        except Exception as e:  # registra e segue: o relatorio final lista as falhas
+            days = laads_list_days(a.product, year, token=token) if monthly else [1]
+        except Exception as e:
             failures.append(dict(year=year, error=str(e)))
-            print(f"FALHA {year}: {e}")
+            print(f"FALHA listagem {year}: {e}")
+            continue
+        for doy in days:
+            try:
+                name, url = laads_find_file(a.product, year, doy, a.tile, token=token)
+                rec = download_verified(url, Path(a.out) / a.product / name, token=token)
+                files.append(dict(year=year, doy=doy, name=name, **{k: rec[k] for k in
+                                  ("url", "sha256", "size_bytes", "downloaded_utc")}))
+                print(f"OK  {year}/{doy:03d} {name} {rec['size_bytes']} B sha256={rec['sha256'][:12]}...")
+            except Exception as e:  # registra e segue: o relatorio final lista as falhas
+                failures.append(dict(year=year, doy=doy, error=str(e)))
+                print(f"FALHA {year}/{doy:03d}: {e}")
     doi = None
     if files:  # DOI lido do atributo do proprio arquivo (nao digitado)
         with h5py.File(files[0]["name"] and Path(a.out) / a.product / files[0]["name"], "r") as f:

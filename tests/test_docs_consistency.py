@@ -60,7 +60,7 @@ def test_methodology_input_hashes_match_recorded_metadata():
             recorded.add(item["sha256"])
     appendix_a = METH.split("## Apêndice A")[1].split("## Apêndice B")[0]
     doc = set(re.findall(r"\b[0-9a-f]{64}\b", appendix_a))
-    assert doc == recorded and len(recorded) == 14 + 8 + 2
+    assert doc == recorded and len(recorded) == 14 + 8 + 2 + 36 + 36
 
 
 def test_citation_cff_is_valid_against_official_schema_if_available():
@@ -149,3 +149,32 @@ def test_no_data_source_is_left_unverified():
     sidra = next(x for x in SOURCES if "SIDRA" in x["name"])
     assert sidra["license_status"] == "confirmado" and "autor" in sidra["note"]
     assert "Citação das fontes do IBGE" in README
+
+
+def test_site_url_is_the_same_everywhere_and_verification_is_documented():
+    url = "https://openlux.labdados.org/"
+    dep = (ROOT / "docs/DEPLOYMENT.md").read_text(encoding="utf-8")
+    assert CFF["url"] == url and url in README and url.rstrip("/") in dep
+    assert "OPENLUX_URL" in README and "OPENLUX_URL" in dep
+    assert "Web Analytics" in dep and "detecção de bots" in dep  # injecoes da Cloudflare documentadas
+
+
+def test_wrangler_config_matches_the_deployed_worker_and_assets_folder():
+    import re as _re
+    raw = (ROOT / "wrangler.jsonc").read_text(encoding="utf-8")
+    cfg = json.loads(_re.sub(r"^\s*//.*$", "", raw, flags=_re.M))
+    assert cfg["name"] == "openlux"                       # Worker existente na Cloudflare
+    assert cfg["assets"]["directory"] == "./web" and (ROOT / "web" / "index.html").exists()
+    assert "main" not in cfg                              # so arquivos estaticos, sem codigo de servidor
+
+
+def test_phase5_report_does_not_claim_publication_or_unlisted_dois():
+    """Enquanto nao ha release, o relatorio nao pode afirmar DOIs; depois, so DOIs presentes no README e no CITATION."""
+    rep = (ROOT / "docs/PHASE5_REPORT.md").read_text(encoding="utf-8")
+    zen = set(re.findall(r"10\.5281/zenodo\.\d+", rep))
+    assert zen <= set(re.findall(r"10\.5281/zenodo\.\d+", README))
+    assert zen <= set(re.findall(r"10\.5281/zenodo\.\d+", (ROOT / "CITATION.cff").read_text(encoding="utf-8")))
+    if not zen:
+        assert "Registro no Zenodo, DOI da versão, Concept DOI | **Pendente**" in rep
+        assert "Release `v0.1.0` | **Pendente**" in rep
+    assert "não declara conformidade" in rep and "não foram validados" in rep

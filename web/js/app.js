@@ -75,6 +75,15 @@
       scheme: `Classificação analítica: limites em ± mediana e ± percentil 90 de |variação|. Cinza: linha de base abaixo do piso de ${fmt(meta.change_floor_nw_cm2_sr[w], 2)} nW·cm⁻²·sr⁻¹ (percentil 25 das médias municipais).`,
       period: () => `${meta.windows[w][0]} → ${meta.windows[w][1]}`, source: 'Derivado da radiância média dos anos inicial e final da janela.' };
   });
+  if (codes.every((c) => M[c].sensors)) {
+    const sbr = absBreaks(pooled((m) => [m.sensors.slope_snpp, m.sensors.slope_noaa20]));
+    const mk = (sensor, key, pkey) => ({ label: `Tendência da radiância (Theil–Sen), ${sensor}, 2018–2025`, unit: 'nW·cm⁻²·sr⁻¹ por ano', kind: 'der', type: 'div', d: 3, sigP: true,
+      get: (m) => m.sensors[key], pval: (m) => m.sensors[pkey], breaks: sbr,
+      scheme: 'Classificação analítica: limites em ± mediana e ± percentil 90 de |inclinação| (agrupando os dois sensores, para comparar os mapas). Contorno espesso: p < 0,05 (Kendall).',
+      period: () => '2018–2025', source: `Derivado da série anual de radiância média do ${sensor} (${sensor === 'NOAA-20' ? 'VJ146A4' : 'VNP46A4'}); mínimo de 8 anos válidos.` });
+    IND.slope_snpp_1825 = mk('S-NPP', 'slope_snpp', 'p_snpp');
+    IND.slope_noaa20_1825 = mk('NOAA-20', 'slope_noaa20', 'p_noaa20');
+  }
   IND.percap = { label: 'Intensidade radiante aparente por habitante, 2022', unit: 'mW·sr⁻¹ por habitante', kind: 'der', type: 'seq', d: 1,
     get: (m) => m.per_capita_mw_sr_hab, breaks: mkBreaksQ(pooled((m) => [m.per_capita_mw_sr_hab])),
     scheme: 'Quantis (5 classes) dos 92 municípios. Índice relativo: não representa consumo ou emissão individual.',
@@ -110,6 +119,7 @@
 
   const palColor = (ind, k) => { const pal = ind.type === 'div' ? DIV : SEQ, n = ind.breaks.length;
     return pal[n === pal.length - 1 ? k : Math.round((k * (pal.length - 1)) / n)]; };
+  const pOf = (ind, cd) => (ind.pval ? ind.pval(M[cd]) : (ind.win && M[cd].trends[ind.win] ? M[cd].trends[ind.win].p_value : null));
   function colorFor(ind, v) {
     if (v == null) return NODATA;
     return palColor(ind, classOf(v, ind.breaks));
@@ -127,13 +137,13 @@
     $('year-note').hidden = !ind.yearly;
     gl.eachLayer((layer) => {
       const cd = layer.feature.properties.CD_MUN, v = val(cd);
-      const sigP = ind.sigP && M[cd].trends[ind.win] && M[cd].trends[ind.win].p_value != null && M[cd].trends[ind.win].p_value < 0.05;
+      const pv = pOf(ind, cd), sigP = ind.sigP && pv != null && pv < 0.05;
       const sel = cd === st.sel;
       layer.setStyle({ fillColor: colorFor(ind, v), weight: sel ? 3.2 : sigP ? 2.2 : 0.6, color: sel ? '#0b5fff' : sigP ? '#000' : '#555', fillOpacity: 0.92 });
       if (sel || sigP) layer.bringToFront();
       let tip = `<strong>${esc(M[cd].name)}</strong><br>${v == null ? 'sem dado válido' : fmt(v, ind.d) + ' ' + esc(ind.unit)}`;
       if (v != null) tip += `<br><span class="muted">classe: ${esc(className(ind, classOf(v, ind.breaks)))}</span>`;
-      if (ind.sigP && M[cd].trends[ind.win]) tip += `<br>p = ${fmt(M[cd].trends[ind.win].p_value, 3)}`;
+      if (ind.sigP && pOf(ind, cd) != null) tip += `<br>p = ${fmt(pOf(ind, cd), 3)}`;
       layer.unbindTooltip().bindTooltip(tip, { sticky: true });
     });
     renderLegend(ind);
@@ -209,6 +219,11 @@
         <dt>Intensidade aparente por habitante, 2022</dt><dd>${fmt(m.per_capita_mw_sr_hab, 1)} mW·sr⁻¹/hab <span class="badge der">derivado</span></dd>
       </dl>
       <div id="mun-chart"></div>
+      ${m.sensors ? `<h4 style="margin:.8rem 0 .2rem">Comparação entre sensores, 2018–2025 <span class="badge der">derivado</span></h4>
+      <div class="table-wrap"><table><thead><tr><th>Sensor</th><th class="num">Inclin. (nW·cm⁻²·sr⁻¹/ano)</th><th class="num">p</th><th class="num">Δ 2021→2025</th></tr></thead><tbody>
+      <tr><td>S-NPP</td><td class="num">${fmt(m.sensors.slope_snpp, 3)}</td><td class="num">${fmt(m.sensors.p_snpp, 3)}</td><td class="num">${fmt(m.sensors.change_snpp, 2)}</td></tr>
+      <tr><td>NOAA-20</td><td class="num">${fmt(m.sensors.slope_noaa20, 3)}</td><td class="num">${fmt(m.sensors.p_noaa20, 3)}</td><td class="num">${fmt(m.sensors.change_noaa20, 2)}</td></tr></tbody></table></div>
+      <p class="muted small">Razão média NOAA-20/S-NPP no período: ${fmt(m.sensors.ratio_noaa20_over_snpp, 3)}.</p>` : ''}
       <h4 style="margin:.8rem 0 .2rem">Tendência e variação <span class="badge der">derivado</span></h4>
       <div class="table-wrap"><table><thead><tr><th>Janela</th><th class="num">Inclin. (nW·cm⁻²·sr⁻¹/ano)</th><th class="num">p</th><th class="num">τ</th><th class="num">Anos</th><th class="num">Δ abs.</th><th class="num">Δ %</th></tr></thead><tbody>${rows}</tbody></table></div>
       ${flip ? '<p class="note">O sinal da tendência muda entre as janelas: a variação em 2022–2025 pesa sobre o resultado (ver aviso e Limitações).</p>' : ''}
@@ -266,6 +281,10 @@
       <h4>Fração da área iluminada (≥ limiar documentado): S-NPP × NOAA-20</h4>
       <div id="lit-chart"></div>
       <p class="muted small">Média estadual ponderada pela área válida. O limiar coincide com o valor em que o produto zera ruído de fundo, por isso o aumento do piso de ruído do S-NPP eleva esta fração.</p>
+      ${data.sensor_municipal ? (() => { const sm = data.sensor_municipal, L = sm.levels_by_year, rows = Object.keys(L).map((y) => `<tr><td>${y}</td><td class="num">${fmt(L[y].spearman, 4)}</td><td class="num">${fmt(L[y].median_ratio_b_over_a, 3)}</td><td class="num">${fmt(L[y].median_abs_diff, 3)}</td></tr>`).join(''); const w = sm['2018_2025'], p = sm['2018_2021'];
+        return `<h4>Comparação municipal entre sensores (92 municípios)</h4><div class="table-wrap"><table><thead><tr><th>Ano</th><th class="num">ρ (níveis)</th><th class="num">NOAA-20 / S-NPP</th><th class="num">|S-NPP − NOAA-20|</th></tr></thead><tbody>${rows}</tbody></table></div>
+        <p class="small">Inclinações 2018–2021: ρ ${fmt(p.spearman_slopes, 2)}, mesmo sinal em ${fmt(100 * p.sign_agreement, 1)} %. Inclinações 2018–2025: ρ ${fmt(w.spearman_slopes, 2)}, mesmo sinal em ${fmt(100 * w.sign_agreement, 1)} %. Variação 2021→2025 (mediana): S-NPP ${fmt(w.median_change_a, 2)} e NOAA-20 ${fmt(w.median_change_b, 2)} nW·cm⁻²·sr⁻¹.</p>
+        <p class="muted small">Até 2021 os sensores concordam em nível; a partir de 2022 o S-NPP lê mais alto. Ver docs/DECISIONS.md (seção 8).</p>`; })() : ''}
       <h4>Municípios por sinal da tendência</h4>
       <div class="table-wrap"><table><thead><tr><th>Janela</th><th class="num">Inclin. &gt; 0</th><th class="num">Inclin. &lt; 0</th><th class="num">p &lt; 0,05</th></tr></thead><tbody>${cnt}</tbody></table></div>
       <h4>Comparação entre sensores (média estadual, nW·cm⁻²·sr⁻¹)</h4>

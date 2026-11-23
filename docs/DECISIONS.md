@@ -118,3 +118,77 @@ piso de ruido do S-NPP apos 2021. Fracao estadual (media ponderada pela area val
 entre sensores (0,15 em 2023) tem a mesma origem descrita na secao 3. **F(0,5) do S-NPP nao deve ser
 interpretado como expansao da area iluminada apos 2021 sem essa ressalva.** Em municipios muito
 urbanos a fracao satura em 1,0 (24 de 92 em 2025), o que limita sua capacidade de discriminar entre eles.
+
+## 7. Análise mensal do piso de ruído (2021-2023)
+
+Pergunta: *quando* o piso de ruído do S-NPP começa a subir e isso acompanha algo observável? Dados: VNP46A3 (S-NPP) e
+VJ146A3 (NOAA-20), 36 meses de cada, tile h13v11 (hashes no Apêndice A.4/A.5 do `METHODOLOGY.md`). Método
+(`scripts/analyze_monthly_noise.py`): mesma classe de pixels escuros da seção 3 (mediana zero na linha de base anual 2012-2021 do S-NPP),
+camada `AllAngle_Composite_Snow_Free`, qualidade 0, terra; por mês, a radiância média e a fração de valores positivos
+desses pixels, o número mediano de observações e a composição de qualidade. Resultados mensais completos: `outputs/monthly/monthly_noise_controls.csv` (não versionado).
+
+**Meses de céu claro (junho a agosto; 13 a 18 observações por pixel nos dois sensores)**, fração de pixels escuros em terra com valor positivo:
+
+| Sensor | 2021 | 2022 | 2023 | 2023 / 2021 |
+|---|---|---|---|---|
+| S-NPP | 0,012 | 0,065 | 0,146 | ×12,3 |
+| NOAA-20 | 0,010 | 0,027 | 0,029 | ×2,8 |
+
+A radiância média desses pixels tem a mesma forma: S-NPP 0,020 → 0,043 → 0,097 (×4,9); NOAA-20 0,008 → 0,019 → 0,020 (×2,5).
+
+**Início no S-NPP** (fração positiva por mês, 2021 / 2022 / 2023): janeiro 0,016 / 0,032 / 0,683; fevereiro 0,015 / 0,240 / 0,346;
+março 0,010 / 0,147 / 0,449; abril 0,032 / 0,133 / 0,440. Em 2022, março e abril (21 e 17 observações) já estão claramente acima de 2021, enquanto
+o NOAA-20 nos mesmos meses fica em 0,053 e 0,067. O início cai, portanto, entre janeiro e março de 2022, com resolução mensal.
+
+**O que isso diz e o que não diz**
+
+1. Há um componente **específico do S-NPP**, que cresce de 2021 a 2023 e **não** aparece no NOAA-20 de 2022 para 2023.
+2. Há também um aumento **de 2021 para 2022 nos dois sensores** (×2,6 no NOAA-20), compatível com o componente comum da seção 3; esta análise não o explica.
+3. **Não é efeito de número de observações:** nos meses de céu claro as observações são comparáveis e a fração de qualidade ruim em terra permanece em 0,1 % nos três anos.
+   O aumento **não é sinalizado** pelo campo de qualidade do produto.
+4. O ruído é fortemente **sazonal** nos dois sensores e acompanha o número de observações (correlação de postos entre fração positiva e observações:
+   NOAA-20 −0,68, S-NPP −0,41, 36 meses cada), com picos em meses de poucas observações (por exemplo, outubro de 2021 tem mediana de 2 observações e 63 % de pixels de qualidade ruim).
+   Compor o ano com meses mais ou menos nublados também desloca o composto anual.
+5. A classe de pixels **no mar** é muito irregular de mês para mês nos dois sensores (embarcações, plataformas e queimas intermitentes); o controle em terra é mais confiável.
+
+**Limites:** três anos apenas; classe escura definida pelo S-NPP; um único tile; **a causa não foi identificada**. Possibilidades que esta análise **não testa**:
+mudanças nas correções do produto, comportamento do instrumento, outros fatores atmosféricos ou de geometria. Não há afirmação sobre a causa.
+
+**Consequências para o uso dos dados:** a série anual S-NPP a partir de 2022 não deve ser usada para tendência sem correção ou sem confronto com o NOAA-20 (disponível desde 2018);
+o piso de ruído deve ser reportado junto de qualquer indicador sensível a ele (como a fração iluminada com limiar 0,5). Correção ou uso preferencial do NOAA-20 para os anos recentes ficam como próximo passo.
+
+## 8. Série municipal do NOAA-20 e comparação com o S-NPP (2018-2025)
+
+Método: o pipeline anual completo (`openlux.pipeline.run_annual`) sobre VJ146A4 2018-2025, mesma configuração principal, mesma malha e máscara
+(`scripts/compare_sensors_municipal.py`); comparação por município com `openlux.pipeline.compare_municipal_series`. Saídas em `outputs/noaa20/` e
+`outputs/sensors/` (não versionadas).
+
+**Níveis municipais por ano** (92 municípios; NOAA-20 em relação ao S-NPP):
+
+| Ano | Spearman | Razão mediana NOAA-20/S-NPP | |S-NPP − NOAA-20| mediano (nW·cm⁻²·sr⁻¹) |
+|---|---|---|---|
+| 2018 | 0,9994 | 0,981 | 0,024 |
+| 2019 | 0,9996 | 0,986 | 0,015 |
+| 2020 | 0,9996 | 1,012 | 0,024 |
+| 2021 | 0,9990 | 0,979 | 0,033 |
+| 2022 | 0,9990 | 0,913 | 0,105 |
+| 2023 | 0,9973 | 0,794 | 0,363 |
+| 2024 | 0,9982 | 0,853 | 0,283 |
+| 2025 | 0,9987 | 0,829 | 0,351 |
+
+**Forma da diferença** (ajuste robusto de Theil-Sen, NOAA-20 = α + β·S-NPP, 92 pontos por ano): β = 0,977; 0,975; 0,984; 0,952 (2018 a 2021) e 0,946; 0,916; 0,923; 0,887 (2022 a 2025),
+com α passando de ≈ +0,01 a +0,07 para −0,11 a −0,22. O excesso do S-NPP (S-NPP − NOAA-20) é positivo na grande maioria dos municípios e cresce com o brilho (correlação de postos 0,95 a 0,98 em 2023-2025).
+Em termos relativos, é maior nos municípios escuros (25 % a 35 % em Miguel Pereira, Piraí, Aperibé, Areal, Carapebus em 2025) e menor no núcleo urbano (≈ 10 % em Niterói e Itaboraí): a diferença
+combina um componente **aditivo** (piso de ruído) e um **relativo** (ganho). Não é só um deslocamento constante.
+
+**Tendência 2018-2025 por município** (Theil-Sen): S-NPP positiva em 89 de 92 (p < 0,05 em 59); NOAA-20 positiva em 72 de 92 (p < 0,05 em 53). Concordância entre sensores: Spearman das inclinações 0,80;
+mesmo sinal em 81,5 % (17 municípios com sinal oposto, todos com inclinações próximas de zero: |inclinação| mediana 0,043 no S-NPP e 0,008 no NOAA-20 nW·cm⁻²·sr⁻¹ por ano).
+Na janela 2018-2021, a concordância é maior (Spearman 0,91; mesmo sinal em 89 %). **Variação 2021 → 2025**: Spearman 0,97 entre sensores, mas a mediana é +0,52 no S-NPP contra +0,23 no NOAA-20.
+Niterói: inclinação S-NPP +0,459 (p = 0,109) e NOAA-20 +0,149 (p = 0,275); variação 2021 → 2025 de +6,23 e +4,26.
+
+**Leitura.** (i) Até 2021 os dois sensores concordam em nível (≈ 2 %) e em ordem dos municípios; a divergência começa em 2022, em linha com as seções 3 e 7. (ii) Mesmo no NOAA-20 há aumento positivo em 72 dos 92 municípios (2018-2025):
+existe um componente comum aos dois sensores, que pode ser real ou artefato do algoritmo compartilhado; **esta análise não os separa**. (iii) O S-NPP superestima a variação recente em relação ao NOAA-20 (mediana +0,52 contra +0,23).
+
+**Recomendação provisória para tendências recentes:** usar o NOAA-20 como referência para 2018-2025, o S-NPP até 2021 para a série longa, e **não** apresentar tendências do S-NPP que cruzem 2021 sem esse confronto.
+Limites: o NOAA-20 tem só 8 anos; o ajuste usa 92 municípios por ano; um único tile; causa da divergência não identificada; não há verdade de campo.
+

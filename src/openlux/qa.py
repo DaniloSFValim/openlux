@@ -12,6 +12,30 @@ import numpy as np
 import pandas as pd
 
 
+def dark_class_masks(baseline_arrays, land_mask, sea_mask) -> dict:
+    """Mascaras booleanas dos pixels escuros (mediana zero na linha de base) em terra e no mar."""
+    import warnings
+    base = np.stack([np.asarray(a, dtype="float64") for a in baseline_arrays])
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+        med = np.nanmedian(base, axis=0)
+    dark = med == 0
+    return {"land": dark & np.asarray(land_mask, bool), "sea": dark & np.asarray(sea_mask, bool)}
+
+
+def controls_for(array, masks: dict) -> dict:
+    """Media e fracao positiva dos pixels escuros de uma camada (terra e mar)."""
+    a = np.asarray(array, dtype="float64")
+    row = {}
+    for k, m in masks.items():
+        v = a[m]
+        v = v[np.isfinite(v)]
+        row[f"n_dark_{k}"] = int(m.sum())
+        row[f"dark_{k}_mean"] = float(v.mean()) if v.size else float("nan")
+        row[f"dark_{k}_frac_positive"] = float((v > 0).mean()) if v.size else float("nan")
+    return row
+
+
 def background_controls(arrays: dict, land_mask, sea_mask, *, baseline_years) -> pd.DataFrame:
     """Radiancia media e fracao positiva dos pixels escuros (terra e mar), por ano.
 
@@ -19,25 +43,8 @@ def background_controls(arrays: dict, land_mask, sea_mask, *, baseline_years) ->
     ``baseline_years`` igual a zero. Retorna colunas year, n_dark_land, dark_land_mean,
     dark_land_frac_positive, n_dark_sea, dark_sea_mean, dark_sea_frac_positive.
     """
-    base = np.stack([np.asarray(arrays[y], dtype="float64") for y in baseline_years])
-    with np.errstate(all="ignore"):
-        import warnings
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", RuntimeWarning)
-            med = np.nanmedian(base, axis=0)
-    dark = med == 0
-    classes = {"land": dark & np.asarray(land_mask, bool), "sea": dark & np.asarray(sea_mask, bool)}
-    rows = []
-    for y in sorted(arrays):
-        a = np.asarray(arrays[y], dtype="float64")
-        row = {"year": y}
-        for k, m in classes.items():
-            v = a[m]
-            v = v[np.isfinite(v)]
-            row[f"n_dark_{k}"] = int(m.sum())
-            row[f"dark_{k}_mean"] = float(v.mean()) if v.size else float("nan")
-            row[f"dark_{k}_frac_positive"] = float((v > 0).mean()) if v.size else float("nan")
-        rows.append(row)
+    masks = dark_class_masks([arrays[y] for y in baseline_years], land_mask, sea_mask)
+    rows = [{"year": y, **controls_for(arrays[y], masks)} for y in sorted(arrays)]
     cols = ["year", "n_dark_land", "dark_land_mean", "dark_land_frac_positive",
             "n_dark_sea", "dark_sea_mean", "dark_sea_frac_positive"]
     return pd.DataFrame(rows)[cols]

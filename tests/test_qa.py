@@ -42,3 +42,25 @@ def test_nan_pixels_are_ignored():
                              baseline_years=(2018,))
     r = df[df.year == 2019].iloc[0]
     assert r.dark_land_mean == 0.0 and r.n_dark_land == 4  # classe definida na linha de base
+
+
+def test_dark_class_masks_and_controls_for_match_background_controls():
+    from openlux.qa import controls_for, dark_class_masks
+    z = np.zeros((4, 4), dtype="float32")
+    base = [z.copy(), z.copy(), z.copy()]
+    for b in base:
+        b[0, 0] = 50.0                                   # sempre aceso: fora da classe escura
+    late = z.copy()
+    late[0, 0] = 80.0
+    late[3, 3] = 0.8
+    land = np.ones((4, 4), bool)
+    sea = np.zeros((4, 4), bool)
+    masks = dark_class_masks(base, land, sea)
+    assert masks["land"].sum() == 15 and masks["sea"].sum() == 0
+    got = controls_for(late, masks)
+    ref = background_controls({2018: base[0], 2019: base[1], 2020: base[2], 2022: late}, land, sea,
+                              baseline_years=(2018, 2019, 2020))
+    ref = ref[ref.year == 2022].iloc[0]
+    assert got["dark_land_mean"] == pytest.approx(ref.dark_land_mean)
+    assert got["dark_land_frac_positive"] == pytest.approx(ref.dark_land_frac_positive)
+    assert got["n_dark_land"] == ref.n_dark_land and np.isnan(got["dark_sea_mean"])

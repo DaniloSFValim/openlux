@@ -95,7 +95,7 @@ def simplify_geojson(gdf, *, tolerance=0.001, ndigits=4) -> dict:
 
 
 def build_indicators(*, annual, trends, qa, sensitivity, sensor_comparison, run_record,
-                     id_col="CD_MUN", name_col="NM_MUN") -> dict:
+                     id_col="CD_MUN", name_col="NM_MUN", sensor_municipal=None, sensor_summary=None) -> dict:
     years = sorted(int(y) for y in annual["year"].unique())
     params = run_record["parameters"]
     muni = {}
@@ -118,6 +118,12 @@ def build_indicators(*, annual, trends, qa, sensitivity, sensor_comparison, run_
                 n_years=_clean(r["n_years"]), change_abs=_clean(r["change_abs"]),
                 change_pct=_clean(r["change_pct"], 3)) for _, r in tr.iterrows()},
         )
+    if sensor_municipal is not None:  # comparacao municipal S-NPP (a) x NOAA-20 (b), janela 2018-2025
+        for _, r in sensor_municipal.iterrows():
+            muni[str(r[id_col])]["sensors"] = dict(
+                slope_snpp=_clean(r["slope_a"]), p_snpp=_clean(r["p_a"]), slope_noaa20=_clean(r["slope_b"]),
+                p_noaa20=_clean(r["p_b"]), change_snpp=_clean(r.get("change_a")),
+                change_noaa20=_clean(r.get("change_b")), ratio_noaa20_over_snpp=_clean(r["mean_ratio_b_over_a"], 4))
     w = annual.copy()
     w["wm"] = w["mean_radiance"] * w["weight_sum"]
     state_mean = []
@@ -140,6 +146,7 @@ def build_indicators(*, annual, trends, qa, sensitivity, sensor_comparison, run_
         qa=[{k: _clean(v, 5) for k, v in r.items()} for r in qa.to_dict("records")],
         sensitivity=_scrub(sensitivity),
         sensor_comparison=_scrub(sensor_comparison),
+        sensor_municipal=_scrub(sensor_summary) if sensor_summary is not None else None,
     )
 
 
