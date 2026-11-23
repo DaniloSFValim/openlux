@@ -84,3 +84,11 @@ canvas.openlux-pixels{position:absolute;left:0;top:0;pointer-events:none}
 header.site h1{margin:0;font-size:1.5rem}header.site .subtitle{margin:0}header.site .byline{margin:2px 0 0;font-size:.82rem}.lede{margin:.3rem 0 0;font-size:.95rem}
 
 #indicator{max-width:230px}#year{width:170px}.controls{gap:8px 14px}
+
+.controls .search input{min-width:190px}
+.controls .chk{flex-direction:row;align-items:center;gap:6px;color:var(--ink)}
+.mlabel span{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;font-size:.72rem;font-weight:600;color:#1a1a1a;pointer-events:none;
+  text-shadow:-1px -1px 0 #fff,1px -1px 0 #fff,-1px 1px 0 #fff,1px 1px 0 #fff,0 0 3px #fff}
+.legend details.meaning{margin-top:6px}
+.legend details.meaning summary{cursor:pointer;font-weight:600}
+.legend details.meaning ul{display:block;margin:4px 0 0 18px;padding:0;list-style:disc}

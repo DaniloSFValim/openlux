@@ -197,6 +197,12 @@ pixel a pixel. O navegador desenha cada pixel da tela pela vizinhança mais pró
 `data/pixels/meta.json` guarda a origem da grade, os limites, o hash de cada arquivo e o hash da entrada. Herda o piso de ruído do S-NPP
 a partir de 2022 (seção 13).
 
+### 7.3 Interface
+
+A vista é compartilhável por URL (`lat`, `lng`, `z`, `y`, `l`, `i`, `m`; valores inválidos são ignorados). A busca de município usa só os dados do projeto. Os nomes das faixas da
+legenda (“sem luz detectada” a “muitíssima luz”) são rótulos de leitura, sem equivalência com a escala Bortle ou com o brilho do céu. Não há mapa-base de terceiros nem escala de brilho
+do céu antes da validação em campo (`docs/DECISIONS.md` §11).
+
 ## 8. Análise temporal
 
 Para cada município e janela de anos, sobre a série de $\bar L_m$ dos anos válidos:
@@ -254,7 +260,7 @@ aprovação definido a priori**.
 
 | Verificação | Resultado |
 |---|---|
-| Testes unitários e de integração (dados sintéticos rotulados) | 161 testes (147 sem os testes de navegador): funções matemáticas, agregação zonal com valores calculados à mão, dados ausentes, CRS, integridade de arquivos, reprodutibilidade, dados e interface |
+| Testes unitários e de integração (dados sintéticos rotulados) | 166 testes (147 sem os testes de navegador): funções matemáticas, agregação zonal com valores calculados à mão, dados ausentes, CRS, integridade de arquivos, reprodutibilidade, dados e interface |
 | Consistência raster × vetor: área dos pixels ponderada vs `AREA_KM2` do IBGE | Diferença máxima por município de 0,0015 %; soma 43.750,425 km² vs 43.750,427 km² |
 | Critério de agregação: centro do pixel vs cobertura fracionária | Spearman ≥ 0,9998; diferença relativa da média: mediana 0,3–0,4 %, p95 1,2–1,9 %, máxima 3,4–6,6 % |
 | Resolução: agregação 2 × 2 | Spearman ≥ 0,9996; mediana 0,4–0,5 %, p95 2,4–3,0 %, máxima 6,6–11,5 % |

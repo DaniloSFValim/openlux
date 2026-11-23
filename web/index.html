@@ -42,7 +42,14 @@
           <label id="year-wrap">Ano: <output id="year-out"></output>
             <input type="range" id="year" step="1" aria-describedby="year-note">
           </label>
+          <label class="search">Buscar município
+            <input type="search" id="mun-search" list="mun-list" placeholder="nome do município" autocomplete="off">
+          </label>
+          <datalist id="mun-list"></datalist>
           <button type="button" id="reset-btn">Ver o estado inteiro</button>
+          <button type="button" id="link-btn">Copiar link desta vista</button>
+          <label class="chk"><input type="checkbox" id="labels-chk" checked> Nomes dos municípios</label>
+          <span id="link-status" class="muted small" role="status" aria-live="polite"></span>
         </div>
         <p id="year-note" class="muted small">As classes de cor são fixas para todos os anos, para que os mapas de anos diferentes sejam comparáveis.</p>
         <div id="mapa" role="region" aria-label="Mapa da radiância noturna no Estado do Rio de Janeiro, por pixel de cerca de 460 metros ou agregada por município. Use o seletor de município ou a tabela de ranking para navegar pelo teclado."></div>

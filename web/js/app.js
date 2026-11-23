@@ -206,10 +206,16 @@
   }
   async function renderPixelLegend() {
     const y = years[st.iy], c = pxMeta.classes;
-    const items = c.labels.map((l, k) => `<li><span class="sw" style="background:${PXPAL[k]}"></span>${esc(l)}</li>`).join('') + `<li><span class="sw" style="background:${NODATA}"></span>sem dado válido (água, qualidade)</li>`;
+    const PLAIN = ['Sem luz detectada', 'Muito pouca luz', 'Pouca luz', 'Luz moderada', 'Muita luz', 'Muitíssima luz'];
+    const items = c.labels.map((l, k) => `<li><span class="sw" style="background:${PXPAL[k]}"></span>${esc(PLAIN[k])} <span class="muted">· ${esc(l)}</span></li>`).join('') + `<li><span class="sw" style="background:${NODATA}"></span>sem dado válido (água, qualidade)</li>`;
     $('legend').innerHTML = `<h3>Radiância noturna por pixel <span class="badge obs">Observado</span><span class="badge cls">Classes fixas</span></h3>
       <div><strong>Unidade:</strong> nW·cm⁻²·sr⁻¹ · <strong>Período:</strong> ano ${y}</div><ul>${items}</ul>
-      <div class="small"><strong>Como ler:</strong> cada quadradinho tem cerca de 460 m. Cores mais escuras = mais luz emitida para cima, vista pelo satélite à noite. <strong>Isto não é o brilho do céu</strong> que uma pessoa enxerga do chão.</div>
+      <details class="meaning" open><summary>O que isto significa</summary><ul>
+        <li>O satélite registra a luz que sobe da superfície à noite, em quadradinhos (pixels) de cerca de 460 m. Cores mais escuras no mapa = mais luz detectada.</li>
+        <li><strong>Isto não é o brilho do céu</strong> que uma pessoa enxerga do chão: o céu também depende da atmosfera, das nuvens, da Lua e da luz de lugares distantes.</li>
+        <li>Mais luz detectada não é, por si só, medida de dano: o OpenLux mede a luz que o satélite vê, não seus efeitos.</li>
+        <li>Os nomes das faixas (de “sem luz detectada” a “muitíssima luz”) são só uma forma simples de ler os números: não são classes oficiais nem equivalem à escala Bortle.</li>
+        <li>Estes valores ainda <strong>não foram validados em campo</strong>.</li></ul></details>
       <div class="small"><strong>Classificação:</strong> limites fixos (0,5; 2; 8; 30; 100), iguais em todos os anos; 0,5 é o valor abaixo do qual o produto zera a radiância. Intervalos fechados à esquerda: [a, b). A grade mostra a classe, não o valor.</div>
       <div class="small muted"><strong>Fonte:</strong> NASA Black Marble VNP46A4 v2.0 (Suomi NPP), camada AllAngle_Composite_Snow_Free, qualidade 0, apenas terra; pixels do estado (malha IBGE 2024).</div><div id="pxnote"></div>`;
     const n = await pxNote(y); if (years[st.iy] === y && $('pxnote')) $('pxnote').innerHTML = n;
@@ -264,6 +270,7 @@
     });
     if (px) renderPixelLegend(); else renderLegend(ind);
     renderRank();
+    writeUrl();
   }
 
   function renderLegend(ind) {
@@ -468,5 +475,53 @@
     $('updated').textContent = `Última atualização dos dados: ${d.toLocaleDateString('pt-BR', { timeZone: 'UTC', day: '2-digit', month: 'long', year: 'numeric' })} (UTC). Dados não validados.`;
   }
 
+  /* ---------- nomes dos municípios (contexto geográfico próprio, sem mapa-base de terceiros) ---------- */
+  const labelLayer = L.layerGroup();
+  codes.forEach((cd) => { const c = layerByCode[cd].getBounds().getCenter();   // centro do retângulo envolvente: aproximado em formas irregulares
+    labelLayer.addLayer(L.marker(c, { icon: L.divIcon({ className: 'mlabel', html: `<span>${esc(M[cd].name)}</span>`, iconSize: [0, 0] }), interactive: false, keyboard: false })); });
+  const LABEL_ZOOM = 9.5;
+  function syncLabels() { const on = $('labels-chk').checked && map.getZoom() >= LABEL_ZOOM;
+    if (on && !map.hasLayer(labelLayer)) labelLayer.addTo(map); else if (!on && map.hasLayer(labelLayer)) map.removeLayer(labelLayer); }
+  $('labels-chk').addEventListener('change', syncLabels);
+
+  /* ---------- busca de município (só nos nossos dados, sem serviço externo) ---------- */
+  $('mun-list').innerHTML = codes.map((c) => `<option value="${esc(M[c].name)}"></option>`).join('');
+  function searchMun() {
+    const q = norm($('mun-search').value.trim()); if (!q) return;
+    const hit = codes.find((c) => norm(M[c].name) === q) || codes.find((c) => norm(M[c].name).startsWith(q)) || codes.find((c) => norm(M[c].name).includes(q));
+    if (hit) { showTab('mun'); select(hit); $('mun-search').value = M[hit].name; }
+  }
+  $('mun-search').addEventListener('change', searchMun);
+  $('mun-search').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); searchMun(); } });
+
+  /* ---------- link permanente: lat, lng, z, ano, camada, indicador e município na URL ---------- */
+  const mapBounds = gl.getBounds().pad(0.5);
+  function readUrl() {
+    const P = new URLSearchParams(location.search), num = (k) => { const v = P.get(k); return v !== null && v.trim() !== '' && isFinite(+v) ? +v : null; };
+    const y = num('y'); if (y != null && years.includes(y)) { st.iy = years.indexOf(y); yr.value = st.iy; yrOut(); }
+    const l = P.get('l'); if ((l === 'pixel' && pxLayer) || l === 'mun') st.layer = l;
+    const i = P.get('i'); if (i && Object.prototype.hasOwnProperty.call(IND, i)) { st.ind = i; $('indicator').value = i; }
+    const m = P.get('m'); if (m && Object.prototype.hasOwnProperty.call(M, m)) { st.sel = m; $('mun-select').value = m; }
+    document.querySelectorAll('input[name="layer"]').forEach((r) => { r.checked = r.value === st.layer; });
+    const lat = num('lat'), lng = num('lng'), z = num('z');
+    if (lat != null && lng != null && z != null && z >= 6 && z <= 12 && mapBounds.contains([lat, lng])) map.setView([lat, lng], z);
+    else if (st.sel) map.fitBounds(layerByCode[st.sel].getBounds(), { maxZoom: 10, padding: [30, 30] });
+  }
+  function writeUrl() {
+    const c = map.getCenter(), q = new URLSearchParams({ lat: c.lat.toFixed(4), lng: c.lng.toFixed(4), z: String(map.getZoom()), y: String(years[st.iy]), l: st.layer, i: st.ind });
+    if (st.sel) q.set('m', st.sel);
+    try { history.replaceState(null, '', '?' + q.toString()); } catch (e) { /* ambientes sem history: o link só não é atualizado */ }
+  }
+  readUrl();
+  map.on('moveend', writeUrl);
+  map.on('zoomend', syncLabels);
+  $('link-btn').addEventListener('click', async () => {
+    writeUrl();
+    try { await navigator.clipboard.writeText(location.href); $('link-status').textContent = 'Link copiado.'; }
+    catch (e) { $('link-status').textContent = 'Não foi possível copiar automaticamente: copie o endereço da barra do navegador (ele já contém esta vista).'; }
+  });
+
   render(); renderCmp(); renderState(); renderInfo();
+  if (st.sel) renderDetail();
+  syncLabels(); writeUrl();
 })();
