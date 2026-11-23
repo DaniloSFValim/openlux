@@ -166,3 +166,15 @@ def test_wrangler_config_matches_the_deployed_worker_and_assets_folder():
     assert cfg["name"] == "openlux"                       # Worker existente na Cloudflare
     assert cfg["assets"]["directory"] == "./web" and (ROOT / "web" / "index.html").exists()
     assert "main" not in cfg                              # so arquivos estaticos, sem codigo de servidor
+
+
+def test_phase5_report_does_not_claim_publication_or_unlisted_dois():
+    """Enquanto nao ha release, o relatorio nao pode afirmar DOIs; depois, so DOIs presentes no README e no CITATION."""
+    rep = (ROOT / "docs/PHASE5_REPORT.md").read_text(encoding="utf-8")
+    zen = set(re.findall(r"10\.5281/zenodo\.\d+", rep))
+    assert zen <= set(re.findall(r"10\.5281/zenodo\.\d+", README))
+    assert zen <= set(re.findall(r"10\.5281/zenodo\.\d+", (ROOT / "CITATION.cff").read_text(encoding="utf-8")))
+    if not zen:
+        assert "Registro no Zenodo, DOI da versão, Concept DOI | **Pendente**" in rep
+        assert "Release `v0.1.0` | **Pendente**" in rep
+    assert "não declara conformidade" in rep and "não foram validados" in rep
