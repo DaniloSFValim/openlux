@@ -56,8 +56,8 @@ derivado e classificação analítica.
 
 ## 5. Abrangência geográfica
 
-Estado do Rio de Janeiro, 92 municípios (malha IBGE 2024). O município de Niterói pode ser
-explorado como estudo de caso na interface, sem restringir a abrangência estadual.
+Estado do Rio de Janeiro, 92 municípios (malha IBGE 2024). Nenhum município é tratado como estudo de caso:
+a interface e as análises cobrem o estado inteiro. A validação em campo, quando existir, define seus próprios locais.
 
 ## 6. Fontes de dados
 
@@ -95,6 +95,7 @@ unidades, parâmetros, tratamento dos dados e reprodução passo a passo:
 
 | Indicador | Unidade | Observação |
 |---|---|---|
+| Radiância por pixel (camada do mapa) | classes de nW·cm⁻²·sr⁻¹ | S-NPP, qualidade 0, terra; 6 classes fixas (0,5; 2; 8; 30; 100), iguais em todos os anos. A interface publica **só a classe** de cada pixel, não o valor |
 | Radiância média e mediana ponderadas | nW·cm⁻²·sr⁻¹ | Pixels válidos, cobertura fracionária |
 | Intensidade radiante aparente | nW·sr⁻¹ | Radiância × área na direção do sensor; **não é emissão luminosa total** |
 | Fração da área válida | adimensional | Controle de qualidade |
@@ -157,6 +158,7 @@ python scripts/run_annual.py
 python scripts/run_sectors.py
 python scripts/validate_aggregation.py
 python scripts/build_web_data.py
+python scripts/build_web_pixels.py
 python -m http.server -d web 8000
 ```
 
@@ -170,7 +172,7 @@ testes automatizados com dados sintéticos rotulados; consistência da área ras
 máxima de 0,0015 % por município); estabilidade frente ao critério de agregação e à resolução;
 sensibilidade à máscara e à camada; comparação entre sensores; determinismo (duas execuções
 completas com hashes idênticos); clone limpo da branch com testes aprovados. **Não há comparação com
-valores publicados** e não foi definido limite de aprovação a priori.
+valores publicados** e não foi definido limite de aprovação a priori. Há um protocolo **proposto** de validação em campo com SQM, com critérios a congelar antes da coleta (`docs/FIELD_VALIDATION.md`); **nenhuma medição foi feita**.
 
 ## 13. Limitações
 
@@ -182,6 +184,7 @@ valores publicados** e não foi definido limite de aprovação a priori.
 - O sinal da tendência depende da janela de anos.
 - A saturação do DNB em áreas muito iluminadas não foi avaliada.
 - População residente não é população exposta; a intensidade por habitante é um índice relativo. Os indicadores por setor usam a população de 2022 em todos os anos.
+- Camada de pixel: mostra a classe e herda o piso de ruído do S-NPP; em 2021→2025 a classe 0,5 a < 2 passa de 16,4 % para 32,4 % dos pixels válidos do estado, e parte disso pode ser ruído, não luz nova. A interface mostra esse aviso nos anos ≥ 2022.
 - Mudança por pixel: a assimetria de aumentos na janela 2012–2025 coincide com o ruído do S-NPP e não deve ser lida como mudança real.
 - NASA: política ESDIS lida no texto oficial, com a ressalva de enquadramento indicada na seção 6.
 

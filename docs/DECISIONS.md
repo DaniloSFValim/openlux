@@ -257,3 +257,21 @@ Limites: o NOAA-20 tem só 8 anos; o ajuste usa 92 municípios por ano; um únic
 Os scripts novos escrevem eventos JSON por linha (`openlux.log.JsonLogger`) em `outputs/sectors/run_sectors.jsonl`:
 arquivos lidos, linhas deduplicadas, populacao dentro e fora da grade, pixels testados. Os scripts anteriores continuam
 com a saida de texto e o `run_record` de proveniencia.
+
+## 10. Interface: camada de pixel e remoção do estudo de caso
+
+- **Motivo.** O mapa só mostrava um valor por município (coroplético), o que esconde o que o produto tem de melhor (≈ 460 m) e sofre do
+  problema da unidade espacial modificável: o mesmo dado muda de aspecto conforme a divisão territorial. Além disso, a primeira tela
+  era ocupada por cabeçalho e aviso, e o mapa ficava abaixo da dobra. O destaque a Niterói foi retirado: nenhum município é privilegiado.
+  Validação em campo, quando existir, define seus próprios locais.
+- **Camada de pixel (padrão).** Grade de **classes** por ano, desenhada no navegador, ao lado da camada por município (que continua
+  disponível, com seu seletor de indicador). Detalhes em `METHODOLOGY.md` 7.2.
+- **Só a classe é publicada, não o valor.** Decisão minha, conservadora: publicar o valor de cada pixel seria redistribuir o dado da NASA
+  (política ESDIS, com a ressalva de enquadramento já registrada na seção 2), o que muda a decisão anterior de publicar só agregados e
+  amplia o repositório e o arquivo do Zenodo. Se o autor quiser consulta por valor, é decisão explícita dele.
+- **Aviso de ruído no próprio mapa.** Em anos ≥ 2022 a legenda mostra, calculado a partir das grades, quanto a classe 0,5 a < 2 cresceu
+  desde 2021: no estado, de 16,4 % para 32,4 % dos pixels válidos em 2025, enquanto a classe < 0,5 cai de 67,0 % para 46,8 %. Parte disso
+  é o piso de ruído do S-NPP (seção 3), não luz nova; esses números não separam as duas causas.
+- **Zoom máximo 12** (um pixel de ≈ 460 m ocupa ≈ 13 px); sem mapa-base de terceiros, por causa da política de segurança (CSP) e dos termos de uso.
+- **Limitações.** Classes, não valores; vizinhança mais próxima na tela; herda o ruído do S-NPP; não é brilho do céu.
+

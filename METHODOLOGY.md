@@ -15,8 +15,8 @@ cronológica estão em [`docs/DECISIONS.md`](docs/DECISIONS.md); o texto de apre
 
 Agregar a radiância noturna anual (NASA Black Marble) nos 92 municípios do Estado do Rio de
 Janeiro, calcular indicadores por município e por ano (2012–2025), analisar sua evolução e a
-sensibilidade a escolhas analíticas, registrando a proveniência de cada resultado. Niterói é
-tratado como estudo de caso na interface, sem restringir a abrangência estadual.
+sensibilidade a escolhas analíticas, registrando a proveniência de cada resultado. Nenhum município é
+tratado como estudo de caso; a abrangência é estadual.
 
 ## 2. Fundamentação científica
 
@@ -186,6 +186,17 @@ Calculados por `scripts/run_sectors.py`, só para S-NPP (2012–2025) e NOAA-20 
 - Todos herdam o piso de ruído do S-NPP a partir de 2022; as janelas que o incluem produzem muito mais aumentos
   significativos (2012–2021: 13,0 % de aumentos e 12,5 % de reduções entre os pixels testados; 2012–2025: 38,9 % e 5,6 %).
 
+### 7.2 Camada de pixel da interface
+
+`scripts/build_web_pixels.py` grava, para cada ano do S-NPP (VNP46A4, qualidade 0, apenas terra), uma grade `uint8` de **classes**
+na janela do estado (626 × 945 pixels de 15 arcsec, lat/lon): 0 fora do estado (pixels tocados pela malha municipal, `all_touched`),
+1 dentro do estado sem dado válido, 2 a 7 as classes de radiância com limites fixos 0,5; 2; 8; 30; 100 nW·cm⁻²·sr⁻¹, fechados à
+esquerda. Os limites são um esquema manual (não quantis), iguais em todos os anos, para que os mapas sejam comparáveis; 0,5 é o valor
+abaixo do qual o produto zera a radiância. A grade **não contém o valor** da radiância: a interface não redistribui o dado da NASA
+pixel a pixel. O navegador desenha cada pixel da tela pela vizinhança mais próxima (sem interpolação), a partir de `data/pixels/<ano>.bin`;
+`data/pixels/meta.json` guarda a origem da grade, os limites, o hash de cada arquivo e o hash da entrada. Herda o piso de ruído do S-NPP
+a partir de 2022 (seção 13).
+
 ## 8. Análise temporal
 
 Para cada município e janela de anos, sobre a série de $\bar L_m$ dos anos válidos:
@@ -243,7 +254,7 @@ aprovação definido a priori**.
 
 | Verificação | Resultado |
 |---|---|
-| Testes unitários e de integração (dados sintéticos rotulados) | 145 testes (133 sem os testes de navegador): funções matemáticas, agregação zonal com valores calculados à mão, dados ausentes, CRS, integridade de arquivos, reprodutibilidade, dados e interface |
+| Testes unitários e de integração (dados sintéticos rotulados) | 161 testes (147 sem os testes de navegador): funções matemáticas, agregação zonal com valores calculados à mão, dados ausentes, CRS, integridade de arquivos, reprodutibilidade, dados e interface |
 | Consistência raster × vetor: área dos pixels ponderada vs `AREA_KM2` do IBGE | Diferença máxima por município de 0,0015 %; soma 43.750,425 km² vs 43.750,427 km² |
 | Critério de agregação: centro do pixel vs cobertura fracionária | Spearman ≥ 0,9998; diferença relativa da média: mediana 0,3–0,4 %, p95 1,2–1,9 %, máxima 3,4–6,6 % |
 | Resolução: agregação 2 × 2 | Spearman ≥ 0,9996; mediana 0,4–0,5 %, p95 2,4–3,0 %, máxima 6,6–11,5 % |
@@ -256,6 +267,9 @@ aprovação definido a priori**.
 Verificações **não realizadas**: comparação com valores publicados; investigação por município dos
 casos de maior diferença na estabilidade; teste com dados reais em integração contínua (os dados
 não são redistribuídos).
+
+Validação em campo: o protocolo com SQM, a pré-especificação (`docs/field/preregistration.json`, em rascunho) e o código de análise
+(`openlux.field`, `scripts/run_field_validation.py`, testado só com dados sintéticos) estão descritos em `docs/FIELD_VALIDATION.md`. Não há medições.
 
 ## 12. Reprodução passo a passo
 
@@ -274,6 +288,7 @@ python scripts/run_annual.py                    # saídas em outputs/annual/
 python scripts/run_sectors.py                   # saídas em outputs/sectors/ (setores e mudança por pixel)
 python scripts/validate_aggregation.py          # saídas em outputs/validation/
 python scripts/build_web_data.py                # web/data/
+python scripts/build_web_pixels.py              # web/data/pixels/ (grades de classes)
 pytest                                          # testes
 python -m http.server -d web 8000               # interface
 ```
@@ -308,7 +323,9 @@ significativos).
     diferentes, ver `docs/DECISIONS.md`, seção 9.1).
 12. Indicadores por setor: população fixa de 2022, repartição areal simples, classificação urbano/rural do IBGE cujo
     critério não foi verificado aqui, e herança do piso de ruído do S-NPP (seção 7.1).
-13. Mudança por pixel: o controle de falsas descobertas não corrige a dependência espacial; o teste detecta tendência
+13. Camada de pixel: mostra a classe, não o valor; herda o piso de ruído do S-NPP (a classe 0,5 a < 2 sobe de 16,4 % para 32,4 % dos
+    pixels válidos do estado entre 2021 e 2025). A amostragem por vizinhança mais próxima na tela pode pular pixels em zoom afastado.
+14. Mudança por pixel: o controle de falsas descobertas não corrige a dependência espacial; o teste detecta tendência
     monotônica; a assimetria de aumentos na janela 2012–2025 coincide com o ruído do S-NPP e não deve ser lida como mudança real.
 
 ## 14. Referências

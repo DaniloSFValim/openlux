@@ -1,0 +1,1 @@
+site_id,visit_id,datetime_local,lat,lon,sqm_mpsas,sun_alt_deg,moon_alt_deg,cloud_free,temp_c,device_id,observer,ephemeris_source,notes

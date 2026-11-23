@@ -11,11 +11,12 @@
   };
   const norm = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
-  let data, geo;
+  let data, geo, pxMeta = null;
   try {
-    [data, geo] = await Promise.all([
+    [data, geo, pxMeta] = await Promise.all([
       fetch('data/indicators.json').then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }),
       fetch('data/municipios.geojson').then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }),
+      fetch('data/pixels/meta.json').then((r) => (r.ok ? r.json() : null)).catch(() => null),  // camada de pixel é opcional
     ]);
   } catch (e) {
     $('alert-text').textContent = 'Não foi possível carregar os dados (data/indicators.json). Sirva a pasta web/ por HTTP (por exemplo: python -m http.server) e gere os dados com scripts/build_web_data.py.';
@@ -121,7 +122,7 @@
   }
   const KIND = { obs: ['obs', 'Observado (agregado)'], der: ['der', 'Derivado'], qa: ['qa', 'Controle de qualidade'] };
 
-  const st = { ind: 'mean', iy: years.length - 1, sel: null };
+  const st = { ind: 'mean', iy: years.length - 1, sel: null, layer: pxMeta ? 'pixel' : 'mun' };
   const val = (cd, key = st.ind, iy = st.iy) => { const v = IND[key].get(M[cd], iy); return v == null || !isFinite(v) ? null : v; };
 
   /* ---------- aviso metodológico (dados) ---------- */
@@ -133,7 +134,7 @@
   })();
 
   /* ---------- mapa ---------- */
-  const map = L.map('mapa', { zoomSnap: 0.25, minZoom: 6, attributionControl: true });
+  const map = L.map('mapa', { zoomSnap: 0.25, minZoom: 6, maxZoom: 12, attributionControl: true });  // 12: um pixel de ~460 m já ocupa ~13 px
   map.attributionControl.setPrefix(false);
   map.attributionControl.addAttribution('Malha: IBGE (compatível com CC BY 4.0) · Radiância: NASA Black Marble · Exibição em Web Mercator; cálculos em grade lat/lon');
   L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);
@@ -147,6 +148,81 @@
     },
   }).addTo(map);
   map.fitBounds(gl.getBounds(), { padding: [8, 8] });
+
+  /* ---------- camada de pixel (grade de classes, desenhada no navegador) ---------- */
+  const PXPAL = ['#f2f2f2', '#ffeda0', '#fec44f', '#fd8d3c', '#e31a1c', '#800026'];  // < 0,5 neutro; depois amarelo → vinho
+  const hex2rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const pxCache = {};
+  function pxGrid(year) {
+    if (!pxCache[year]) {
+      const g = pxMeta.grid;
+      pxCache[year] = fetch(`data/pixels/${year}.bin`).then((r) => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+        .then((b) => { const a = new Uint8Array(b); if (a.length !== g.rows * g.cols) throw new Error('grade com tamanho inesperado'); return a; });
+    }
+    return pxCache[year];
+  }
+  const pxCell = (ll) => { const g = pxMeta.grid; // índice (linha, coluna) da grade lat/lon; null fora da janela
+    const c = Math.floor((ll.lng - g.lon_west) / g.pixel_deg), r = Math.floor((g.lat_north - ll.lat) / g.pixel_deg);
+    return r < 0 || c < 0 || r >= g.rows || c >= g.cols ? null : [r, c]; };
+  const PixelLayer = L.Layer.extend({
+    onAdd(m) {
+      this._map = m; this._cv = L.DomUtil.create('canvas', 'openlux-pixels leaflet-zoom-hide');
+      m.getPane('tilePane').appendChild(this._cv);
+      m.on('moveend zoomend resize', this.redraw, this); this.redraw();
+    },
+    onRemove(m) { m.off('moveend zoomend resize', this.redraw, this); this._cv.remove(); },
+    setGrid(a) { this._grid = a; this.redraw(); },
+    redraw() {
+      const m = this._map, cv = this._cv; if (!m || !cv) return;
+      const sz = m.getSize(), g = pxMeta.grid; cv.width = sz.x; cv.height = sz.y;
+      L.DomUtil.setPosition(cv, m.containerPointToLayerPoint([0, 0]));
+      if (!this._grid) return;
+      const ctx = cv.getContext('2d'), img = ctx.createImageData(sz.x, sz.y), d = img.data;
+      const cols = new Int32Array(sz.x), rows = new Int32Array(sz.y);
+      for (let x = 0; x < sz.x; x++) { const c = Math.floor((m.containerPointToLatLng([x, 0]).lng - g.lon_west) / g.pixel_deg); cols[x] = c < 0 || c >= g.cols ? -1 : c; }
+      for (let y = 0; y < sz.y; y++) { const r = Math.floor((g.lat_north - m.containerPointToLatLng([0, y]).lat) / g.pixel_deg); rows[y] = r < 0 || r >= g.rows ? -1 : r; }
+      const rgb = PXPAL.map(hex2rgb), nod = hex2rgb(NODATA);
+      for (let y = 0; y < sz.y; y++) { if (rows[y] < 0) continue; const base = rows[y] * g.cols;
+        for (let x = 0; x < sz.x; x++) { if (cols[x] < 0) continue;
+          const code = this._grid[base + cols[x]]; if (code === 0) continue;
+          const col = code === 1 ? nod : rgb[code - pxMeta.classes.first_code]; const i = (y * sz.x + x) * 4;
+          d[i] = col[0]; d[i + 1] = col[1]; d[i + 2] = col[2]; d[i + 3] = 235; } }
+      ctx.putImageData(img, 0, 0);
+    },
+  });
+  const pxLayer = pxMeta ? new PixelLayer() : null;
+  let pxLoaded = null;  // ano da grade atualmente desenhada
+  async function pxShow() {
+    const y = years[st.iy]; if (pxLoaded === y) return;
+    try { const a = await pxGrid(y); if (years[st.iy] === y && st.layer === 'pixel') { pxLayer.setGrid(a); pxLoaded = y; } }
+    catch (e) { $('pixel-readout').hidden = false; $('pixel-readout').textContent = 'Não foi possível carregar a camada de pixel deste ano.'; }
+  }
+  const pxShare = (a, code) => { let n = 0, t = 0; for (let i = 0; i < a.length; i++) { if (a[i] >= 2) { t++; if (a[i] === code) n++; } } return t ? n / t : NaN; };
+  async function pxNote(y) {
+    if (y < 2022) return '';
+    try { const [a, b] = await Promise.all([pxGrid(2021), pxGrid(y)]);
+      return `<div class="pxnote"><strong>Atenção (S-NPP, ${y}):</strong> a partir de 2022 o sensor tem um piso de ruído mais alto em áreas escuras. A parcela dos pixels com valor na classe ${esc(pxMeta.classes.labels[1])} passou de ${fmt(100 * pxShare(a, 3), 1)}% em 2021 para ${fmt(100 * pxShare(b, 3), 1)}% em ${y}, e a da classe ${esc(pxMeta.classes.labels[0])} caiu de ${fmt(100 * pxShare(a, 2), 1)}% para ${fmt(100 * pxShare(b, 2), 1)}%. Parte dessa mudança pode ser ruído, não luz nova (ver o aviso acima).</div>`;
+    } catch (e) { return ''; }
+  }
+  async function renderPixelLegend() {
+    const y = years[st.iy], c = pxMeta.classes;
+    const items = c.labels.map((l, k) => `<li><span class="sw" style="background:${PXPAL[k]}"></span>${esc(l)}</li>`).join('') + `<li><span class="sw" style="background:${NODATA}"></span>sem dado válido (água, qualidade)</li>`;
+    $('legend').innerHTML = `<h3>Radiância noturna por pixel <span class="badge obs">Observado</span><span class="badge cls">Classes fixas</span></h3>
+      <div><strong>Unidade:</strong> nW·cm⁻²·sr⁻¹ · <strong>Período:</strong> ano ${y}</div><ul>${items}</ul>
+      <div class="small"><strong>Como ler:</strong> cada quadradinho tem cerca de 460 m. Cores mais escuras = mais luz emitida para cima, vista pelo satélite à noite. <strong>Isto não é o brilho do céu</strong> que uma pessoa enxerga do chão.</div>
+      <div class="small"><strong>Classificação:</strong> limites fixos (0,5; 2; 8; 30; 100), iguais em todos os anos; 0,5 é o valor abaixo do qual o produto zera a radiância. Intervalos fechados à esquerda: [a, b). A grade mostra a classe, não o valor.</div>
+      <div class="small muted"><strong>Fonte:</strong> NASA Black Marble VNP46A4 v2.0 (Suomi NPP), camada AllAngle_Composite_Snow_Free, qualidade 0, apenas terra; pixels do estado (malha IBGE 2024).</div><div id="pxnote"></div>`;
+    const n = await pxNote(y); if (years[st.iy] === y && $('pxnote')) $('pxnote').innerHTML = n;
+  }
+  function pxReadout(ll) {
+    const box = $('pixel-readout'); if (st.layer !== 'pixel' || !pxLayer._grid) return;
+    const cell = pxCell(ll); box.hidden = false;
+    if (!cell) { box.textContent = 'Passe o cursor sobre o mapa (ou toque) para ver a classe do pixel.'; return; }
+    const code = pxLayer._grid[cell[0] * pxMeta.grid.cols + cell[1]], f = pxMeta.classes.first_code;
+    const what = code === 0 ? 'fora do estado' : code === 1 ? 'sem dado válido' : `${pxMeta.classes.labels[code - f]} nW·cm⁻²·sr⁻¹`;
+    box.textContent = `Pixel (${fmt(ll.lat, 3)}°, ${fmt(ll.lng, 3)}°), ano ${years[st.iy]}: ${what}. Mostra a classe, não o valor.`;
+  }
+  if (pxLayer) { map.on('mousemove click', (e) => pxReadout(e.latlng)); }
 
   const palColor = (ind, k) => { const pal = ind.type === 'div' ? DIV : SEQ, n = ind.breaks.length;
     return pal[n === pal.length - 1 ? k : Math.round((k * (pal.length - 1)) / n)]; };
@@ -163,21 +239,30 @@
   }
 
   function render() {
-    const ind = IND[st.ind];
-    $('year-wrap').hidden = !ind.yearly;
-    $('year-note').hidden = !ind.yearly;
+    const ind = IND[st.ind], px = st.layer === 'pixel';
+    $('year-wrap').hidden = !(px || ind.yearly);
+    $('year-note').hidden = !(px || ind.yearly);
+    $('indicator').disabled = px;
+    if (pxLayer) { if (px) { if (!map.hasLayer(pxLayer)) pxLayer.addTo(map); pxShow(); } else if (map.hasLayer(pxLayer)) { map.removeLayer(pxLayer); pxLoaded = null; } }
+    $('pixel-readout').hidden = !px;
+    if (px) $('pixel-readout').textContent = 'Passe o cursor sobre o mapa (ou toque) para ver a classe do pixel.';
     gl.eachLayer((layer) => {
-      const cd = layer.feature.properties.CD_MUN, v = val(cd);
-      const pv = pOf(ind, cd), sigP = ind.sigP && pv != null && pv < 0.05;
-      const sel = cd === st.sel;
-      layer.setStyle({ fillColor: colorFor(ind, v), weight: sel ? 3.2 : sigP ? 2.2 : 0.6, color: sel ? '#0b5fff' : sigP ? '#000' : '#555', fillOpacity: 0.92 });
+      const cd = layer.feature.properties.CD_MUN, sel = cd === st.sel;
+      if (px) {
+        layer.setStyle({ fillOpacity: 0, weight: sel ? 3.2 : 0.8, color: sel ? '#0b5fff' : '#3b3b3b', opacity: sel ? 1 : 0.7 });
+        if (sel) layer.bringToFront();
+        layer.unbindTooltip().bindTooltip(`<strong>${esc(M[cd].name)}</strong>`, { sticky: true });
+        return;
+      }
+      const v = val(cd), pv = pOf(ind, cd), sigP = ind.sigP && pv != null && pv < 0.05;
+      layer.setStyle({ fillColor: colorFor(ind, v), weight: sel ? 3.2 : sigP ? 2.2 : 0.6, color: sel ? '#0b5fff' : sigP ? '#000' : '#555', fillOpacity: 0.92, opacity: 1 });
       if (sel || sigP) layer.bringToFront();
       let tip = `<strong>${esc(M[cd].name)}</strong><br>${v == null ? 'sem dado válido' : fmt(v, ind.d) + ' ' + esc(ind.unit)}`;
       if (v != null) tip += `<br><span class="muted">classe: ${esc(className(ind, classOf(v, ind.breaks)))}</span>`;
       if (ind.sigP && pOf(ind, cd) != null) tip += `<br>p = ${fmt(pOf(ind, cd), 3)}`;
       layer.unbindTooltip().bindTooltip(tip, { sticky: true });
     });
-    renderLegend(ind);
+    if (px) renderPixelLegend(); else renderLegend(ind);
     renderRank();
   }
 
@@ -203,8 +288,8 @@
   const optionsHtml = (blank) => (blank ? '<option value="">— nenhum —</option>' : '') + codes.map((c) => `<option value="${c}">${esc(M[c].name)}</option>`).join('');
   $('mun-select').innerHTML = '<option value="">Selecione…</option>' + optionsHtml(false);
   $('mun-select').addEventListener('change', (e) => select(e.target.value || null));
-  const NIT = codes.find((c) => M[c].name === 'Niterói');
-  $('case-btn').addEventListener('click', () => { showTab('mun'); select(NIT); });
+  if (!pxLayer) $('layer-wrap').hidden = true;
+  document.querySelectorAll('input[name="layer"]').forEach((r) => { r.checked = r.value === st.layer; r.addEventListener('change', (e) => { if (e.target.checked) { st.layer = e.target.value; render(); } }); });
   $('reset-btn').addEventListener('click', () => map.fitBounds(gl.getBounds(), { padding: [8, 8] }));
 
   /* ---------- abas ---------- */
@@ -295,7 +380,8 @@
 
   /* ---------- comparação ---------- */
   ['cmp1', 'cmp2', 'cmp3'].forEach((id, i) => { $(id).innerHTML = optionsHtml(true); $(id).addEventListener('change', renderCmp); });
-  $('cmp1').value = NIT; $('cmp2').value = codes.find((c) => M[c].name === 'Rio de Janeiro') || '';
+  const byPop = codes.slice().sort((a, b) => (M[b].population || 0) - (M[a].population || 0));  // padrão neutro: os dois mais populosos
+  $('cmp1').value = byPop[0]; $('cmp2').value = byPop[1];
   function renderCmp() {
     const sel = ['cmp1', 'cmp2', 'cmp3'].map((i) => $(i).value).filter(Boolean);
     const series = sel.map((c, i) => ({ name: M[c].name, values: M[c].mean, color: COL[i] }));
