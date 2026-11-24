@@ -1,0 +1,46 @@
+{
+  "titulo": "OpenLux: indicadores municipais de radiância noturna (S-NPP, RJ)",
+  "versao_software": "0.1.0",
+  "doi_versao": "10.5281/zenodo.24510755",
+  "doi_conceito": "10.5281/zenodo.24510754",
+  "codigo_commit": "2889bb9d49d70f8ceed3df7a1df6e1ca686a221e",
+  "processado_utc": "2026-11-19T18:32:48Z",
+  "cobertura": {
+    "municipios": 92,
+    "anos": [
+      2012,
+      2025
+    ]
+  },
+  "licenca": {
+    "id": "CC-BY-4.0",
+    "url": "https://creativecommons.org/licenses/by/4.0/",
+    "status": "proposta: a confirmar pelo autor antes da publicação",
+    "nota": "Dados derivados de NASA (política ESDIS, sem restrição) e IBGE (reuso com citação). CC BY 4.0 exige apenas a atribuição indicada em 'citacao'."
+  },
+  "citacao": "Valim, D. (2026). OpenLux: versão 0.1.0 [Software]. Zenodo. https://doi.org/10.5281/zenodo.24510755. Dados de radiância: VIIRS Land SIPS Processing Group, VIIRS/NPP Lunar BRDF-Adjusted Nighttime Lights Yearly L3 Global 15 arc second Linear Lat Lon Grid [Dataset], NASA LAADS DAAC, https://doi.org/10.5067/VIIRS/VNP46A4.002. Malha municipal: IBGE, Malha Municipal Digital 2024 (UF RJ). População: IBGE, Censo Demográfico 2022, SIDRA tabela 4709, variável 93.",
+  "unidades": {
+    "radiancia": "nW·cm⁻²·sr⁻¹ (média e mediana anuais dos pixels válidos, ponderadas pela área)",
+    "intensidade_radiante_aparente": "nW·sr⁻¹",
+    "tendencia_inclinacao": "inclinação de Theil–Sen da radiância média, nW·cm⁻²·sr⁻¹ por ano",
+    "tendencia_mudanca_pct": "100 × (L̄(t2) − L̄(t1)) / L̄(t1), em %",
+    "tendencia_p_valor": "teste de Kendall sobre a mesma série (sem correção de múltiplas janelas)",
+    "fracao": "adimensional, de 0 a 1"
+  },
+  "ressalvas": [
+    "Resultados não validados em campo. Estimativas baseadas em sensoriamento remoto; não são medições do brilho do céu.",
+    "O sensor Suomi NPP (VNP46A4) tem mais ruído em áreas escuras desde 2022. Não interpretar as diferenças entre 2021 e 2022 como mudança real de iluminação sem essa ressalva. A causa não foi separada de um possível artefato do algoritmo.",
+    "A população é a do Censo 2022 em todos os anos (repartição simples). Não é exposição individual.",
+    "Os valores são agregados municipais; não há dados brutos de radiância por pixel neste arquivo."
+  ],
+  "arquivos": {
+    "openlux_municipios_snpp_serie.csv": {
+      "sha256": "94e3767cb3de6269e0fe5463be37a541c1d9a055b63a7503d121853ea800252f",
+      "bytes": 90628
+    },
+    "openlux_municipios_snpp_resumo.csv": {
+      "sha256": "f0d5d109d4cc4a2f0e185045d62f380b3aaa7a252529b1d1dcdb2672b6ba431e",
+      "bytes": 7937
+    }
+  }
+}
