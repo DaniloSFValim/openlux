@@ -22,7 +22,7 @@ reprodutível e testado, mas os **resultados científicos não foram validados**
   https://openlux.labdados.org/ (ver `docs/DEPLOYMENT.md`). Camada de radiância **por pixel** (≈ 460 m, 6 classes fixas, iguais em
   todos os anos) e camada por município; link permanente (URL com vista, ano, camada, indicador e município), busca de município,
   nomes dos municípios e legenda em linguagem comum. A interface publica só a **classe** de cada pixel, não o valor da radiância.
-  Nenhum município é tratado como estudo de caso. Sem mapa-base de terceiros.
+  Nenhum município é tratado como estudo de caso. Seletor de sensor (Suomi NPP 2012–2025 e NOAA-20 2018–2025), camada de **mudança por pixel**, tema claro/escuro e opacidade ajustável. O mapa-base do OpenStreetMap é **opcional e vem desligado**: só ao ligá-lo o navegador contata o servidor deles (que recebe o IP do visitante).
 - Protocolo **proposto** de validação em campo com SQM (`docs/FIELD_VALIDATION.md`), pré-especificação em rascunho
   (`docs/field/preregistration.json`) e código de análise (`openlux.field`), testado só com dados sintéticos. **Nenhuma medição foi feita.**
 - Documentação: `README.md`, `METHODOLOGY.md`, `docs/DECISIONS.md`, `docs/LICENSING.md`, `CITATION.cff`.
@@ -34,8 +34,8 @@ reprodutível e testado, mas os **resultados científicos não foram validados**
   comum aos dois sensores que não foi separado de um possível artefato do algoritmo compartilhado. O sinal
   das tendências depende da janela de anos.
 - Os indicadores por setor e por pixel usam o S-NPP e herdam esse piso de ruído. Na mudança por pixel, a
-  janela 2012–2021 dá 13,0 % de aumentos e 12,5 % de reduções entre os pixels testados; a janela 2012–2025 dá
-  38,9 % e 5,6 %. Essa assimetria coincide com o ruído do S-NPP e **não deve ser lida como mudança real de
+  janela S-NPP 2012–2021 dá 11,4 % de aumentos e 14,1 % de reduções entre os pixels do estado testados; a janela 2012–2025 dá
+  36,8 % e 6,3 %; e o NOAA-20 (2018–2025, 8 anos) dá 38,8 % e 3,0 %. Essa assimetria coincide com o ruído do S-NPP, mas o NOAA-20 também a mostra, então a causa não foi separada e **não deve ser lida como mudança real de
   iluminação**. O controle de falsas descobertas não corrige a dependência espacial.
 - A população por setor é fixa (Censo 2022) e não é exposição individual; o critério de classificação
   urbano/rural do IBGE não foi verificado aqui, e o texto específico dos termos da malha de setores não foi

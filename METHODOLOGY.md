@@ -184,24 +184,26 @@ Calculados por `scripts/run_sectors.py`, só para S-NPP (2012–2025) e NOAA-20 
 - Pixels testados na mudança por pixel: mediana anual ≥ 0,5 nW·cm⁻²·sr⁻¹ em terra e ≥ 8 anos válidos. O controle
   de falsas descobertas não corrige a dependência espacial entre pixels vizinhos.
 - Todos herdam o piso de ruído do S-NPP a partir de 2022; as janelas que o incluem produzem muito mais aumentos
-  significativos (2012–2021: 13,0 % de aumentos e 12,5 % de reduções entre os pixels testados; 2012–2025: 38,9 % e 5,6 %).
+  significativos. Entre os pixels do estado testados: S-NPP 2012–2021, 11,4 % de aumentos e 14,1 % de reduções (72.003 pixels); S-NPP 2012–2025, 36,8 % e 6,3 % (77.176);
+  NOAA-20 2018–2025, 38,8 % e 3,0 % (73.559; série de 8 anos, o mínimo). O NOAA-20 tem piso de ruído bem menor, então o ruído do S-NPP não explica sozinho a assimetria; o restante
+  não foi separado de um possível artefato do algoritmo compartilhado. Só pixels do estado entram no teste e no controle de falsas descobertas.
 
 ### 7.2 Camada de pixel da interface
 
-`scripts/build_web_pixels.py` grava, para cada ano do S-NPP (VNP46A4, qualidade 0, apenas terra), uma grade `uint8` de **classes**
+`scripts/build_web_pixels.py` grava, para cada ano de cada sensor (S-NPP 2012–2025, NOAA-20 2018–2025; qualidade 0, apenas terra), em `web/data/pixels/<sensor>/`, uma grade `uint8` de **classes**
 na janela do estado (626 × 945 pixels de 15 arcsec, lat/lon): 0 fora do estado (pixels tocados pela malha municipal, `all_touched`),
 1 dentro do estado sem dado válido, 2 a 7 as classes de radiância com limites fixos 0,5; 2; 8; 30; 100 nW·cm⁻²·sr⁻¹, fechados à
 esquerda. Os limites são um esquema manual (não quantis), iguais em todos os anos, para que os mapas sejam comparáveis; 0,5 é o valor
 abaixo do qual o produto zera a radiância. A grade **não contém o valor** da radiância: a interface não redistribui o dado da NASA
 pixel a pixel. O navegador desenha cada pixel da tela pela vizinhança mais próxima (sem interpolação), a partir de `data/pixels/<ano>.bin`;
-`data/pixels/meta.json` guarda a origem da grade, os limites, o hash de cada arquivo e o hash da entrada. Herda o piso de ruído do S-NPP
+`data/pixels/meta.json` guarda a origem da grade, os limites, o hash de cada arquivo e o hash da entrada. Também grava, por sensor e janela, a grade de **mudança por pixel** (códigos 0 fora do estado, 1 não testado, 2 sem mudança significativa, 3 aumento, 4 redução; seção 7.1). Herda o piso de ruído do S-NPP
 a partir de 2022 (seção 13).
 
 ### 7.3 Interface
 
-A vista é compartilhável por URL (`lat`, `lng`, `z`, `y`, `l`, `i`, `m`; valores inválidos são ignorados). A busca de município usa só os dados do projeto. Os nomes das faixas da
-legenda (“sem luz detectada” a “muitíssima luz”) são rótulos de leitura, sem equivalência com a escala Bortle ou com o brilho do céu. Não há mapa-base de terceiros nem escala de brilho
-do céu antes da validação em campo (`docs/DECISIONS.md` §11).
+A vista é compartilhável por URL (`lat`, `lng`, `z`, `y`, `l`, `i`, `m`, `s` sensor, `v` visão; valores inválidos são ignorados; o mapa-base opcional não entra na URL). A busca de município usa só os dados do projeto. Os nomes das faixas da
+legenda (“sem luz detectada” a “muitíssima luz”) são rótulos de leitura, sem equivalência com a escala Bortle ou com o brilho do céu. O mapa-base do OpenStreetMap é opcional e vem desligado (ao ligar, o servidor deles recebe o IP do visitante); não há escala de brilho
+do céu antes da validação em campo (`docs/DECISIONS.md` §11 e §12).
 
 ## 8. Análise temporal
 
@@ -260,7 +262,7 @@ aprovação definido a priori**.
 
 | Verificação | Resultado |
 |---|---|
-| Testes unitários e de integração (dados sintéticos rotulados) | 166 testes (147 sem os testes de navegador): funções matemáticas, agregação zonal com valores calculados à mão, dados ausentes, CRS, integridade de arquivos, reprodutibilidade, dados e interface |
+| Testes unitários e de integração (dados sintéticos rotulados) | 171 testes (148 sem os testes de navegador): funções matemáticas, agregação zonal com valores calculados à mão, dados ausentes, CRS, integridade de arquivos, reprodutibilidade, dados e interface |
 | Consistência raster × vetor: área dos pixels ponderada vs `AREA_KM2` do IBGE | Diferença máxima por município de 0,0015 %; soma 43.750,425 km² vs 43.750,427 km² |
 | Critério de agregação: centro do pixel vs cobertura fracionária | Spearman ≥ 0,9998; diferença relativa da média: mediana 0,3–0,4 %, p95 1,2–1,9 %, máxima 3,4–6,6 % |
 | Resolução: agregação 2 × 2 | Spearman ≥ 0,9996; mediana 0,4–0,5 %, p95 2,4–3,0 %, máxima 6,6–11,5 % |
@@ -527,10 +529,11 @@ Execução `scripts/run_annual.py` com o commit `2889bb9` (árvore sem alteraç�
 
 ### C.2 Saídas de `scripts/run_sectors.py`
 
-Duas execuções completas produziram hashes idênticos (verificado apenas neste ambiente). SHA-256 de `outputs/sectors/`:
+Duas execuções completas produziram hashes idênticos nos cinco arquivos (verificado apenas neste ambiente). Só pixels do estado entram no teste por pixel. SHA-256 de `outputs/sectors/`:
 
 | Arquivo | SHA-256 |
 |---|---|
+| pixel_trend_noaa20_2018_2025.csv | dc67ec8f4f2f00e0feda217cc9ead57f3194ba4eae33a71a6458b718cbf96e1f |
 | pixel_trend_snpp_2012_2021.csv | edb9d33b3b6dd65a7f2c3ebed84c54d48044d793f1c539a4b1dbea4a7b6609fc |
 | pixel_trend_snpp_2012_2025.csv | 8701985e712b458af06815e04b1e631914fc03818179c0c900ef97d4b5d5bad6 |
 | sector_indicators_noaa20.csv | 79675dc4f6c546ff1a0de523669cdcfe22237ff7ab8d78f0800dec73e6f6e247 |

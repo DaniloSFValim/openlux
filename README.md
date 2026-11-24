@@ -108,8 +108,8 @@ unidades, parâmetros, tratamento dos dados e reprodução passo a passo:
 
 | Radiância ponderada pela população e população em áreas iluminadas | nW·cm⁻²·sr⁻¹ e fração | Setores do Censo 2022; **população fixa em 2022** em todos os anos; repartição areal simples; não é exposição individual |
 | Radiância e fração iluminada urbana × rural | nW·cm⁻²·sr⁻¹ e fração | Classificação `SITUACAO` do IBGE (Censo 2022) |
-| Interface: link permanente, busca de município, nomes dos municípios, legenda em linguagem comum | — | Parâmetros de URL `lat`, `lng`, `z`, `y`, `l`, `i`, `m`; sem mapa-base de terceiros; **sem** escala Bortle/SQM (decisão em `docs/DECISIONS.md` §11) |
-| Mudança significativa por pixel | fração dos pixels iluminados | Mann–Kendall + Sen, FDR 5 %; sem correção de dependência espacial; as janelas com 2022–2025 herdam o ruído do S-NPP |
+| Interface: link permanente, busca de município, nomes dos municípios, legenda em linguagem comum | — | Parâmetros de URL `lat`, `lng`, `z`, `y`, `l`, `i`, `m`, `s`, `v`; tema claro/escuro; mapa-base do OpenStreetMap **opcional e desligado por padrão**; **sem** escala Bortle/SQM (decisões em `docs/DECISIONS.md` §11 e §12) |
+| Mudança significativa por pixel (S-NPP 2012–2021 e 2012–2025; NOAA-20 2018–2025) | fração dos pixels iluminados do estado; também camada do mapa | Mann–Kendall + Sen, FDR 5 %; sem correção de dependência espacial; as janelas com 2022–2025 herdam o ruído do S-NPP, e o NOAA-20 mostra assimetria parecida, não separada de um possível artefato comum |
 
 **Não implementado:** comparação com o Atlas de Falchi et al. (2016) (dados não obtidos). Consta como trabalho futuro.
 
@@ -128,7 +128,7 @@ dados, servidor ou serviço pago.
 | scipy | Theil–Sen, Kendall e Spearman |
 | pytest (opcional) | Testes |
 | playwright (opcional) | Teste da interface em navegador |
-| Leaflet 1.9.4 (copiado em `web/vendor/`, BSD-2-Clause) | Mapa, sem mapa-base de terceiros |
+| Leaflet 1.9.4 (copiado em `web/vendor/`, BSD-2-Clause) | Mapa; o mapa-base do OpenStreetMap é opcional e desligado por padrão |
 
 Os gráficos da interface são SVG próprio, sem biblioteca.
 
