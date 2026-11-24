@@ -31,7 +31,8 @@ def test_state_mask_marks_pixels_touched_by_polygon():
 
 
 def test_published_pixel_grids_match_their_metadata():
-    """Arquivos de web/data/pixels: tamanho = linhas x colunas, hash igual ao do meta.json, so codigos validos."""
+    """web/data/pixels/<sensor>/: tamanho = linhas x colunas, hash igual ao do meta.json, so codigos validos, mascara
+    do estado igual em todos os arquivos e contagens da mudanca iguais as da grade."""
     import hashlib
     import json
     from pathlib import Path
@@ -42,11 +43,35 @@ def test_published_pixel_grids_match_their_metadata():
     meta = json.loads((d / "meta.json").read_text(encoding="utf-8"))
     g = meta["grid"]
     assert meta["classes"]["breaks_nw_cm2_sr"] == BREAKS and len(meta["classes"]["labels"]) == len(BREAKS) + 1
-    assert len(meta["years"]) == 14 and {int(y) for y in meta["years"]} == set(range(2012, 2026))
-    for y, e in meta["years"].items():
-        raw = (d / f"{y}.bin").read_bytes()
-        assert len(raw) == g["rows"] * g["cols"] and hashlib.sha256(raw).hexdigest() == e["sha256"]
-        a = np.frombuffer(raw, dtype="uint8")
-        assert a.max() <= FIRST_RADIANCE_CODE + len(BREAKS)
-    outside = [int((np.frombuffer((d / f"{y}.bin").read_bytes(), dtype="uint8") == 0).sum()) for y in meta["years"]]
-    assert len(set(outside)) == 1          # a mascara do estado e a mesma em todos os anos
+    assert set(meta["sensors"]) == {"snpp", "noaa20"}
+    assert {int(y) for y in meta["sensors"]["snpp"]["years"]} == set(range(2012, 2026))
+    assert {int(y) for y in meta["sensors"]["noaa20"]["years"]} == set(range(2018, 2026))
+    outside = set()
+    for sk, sm in meta["sensors"].items():
+        for y, e in sm["years"].items():
+            raw = (d / sk / f"{y}.bin").read_bytes()
+            assert len(raw) == g["rows"] * g["cols"] and hashlib.sha256(raw).hexdigest() == e["sha256"]
+            a = np.frombuffer(raw, dtype="uint8")
+            assert a.max() <= FIRST_RADIANCE_CODE + len(BREAKS)
+            outside.add(int((a == 0).sum()))
+        for w, e in sm["change"].items():
+            raw = (d / sk / f"change_{w}.bin").read_bytes()
+            assert len(raw) == g["rows"] * g["cols"] and hashlib.sha256(raw).hexdigest() == e["sha256"]
+            a = np.frombuffer(raw, dtype="uint8")
+            assert a.max() <= 4
+            outside.add(int((a == 0).sum()))
+            for name, code in (("untested", 1), ("not_significant", 2), ("increase", 3), ("decrease", 4)):
+                assert e["counts"][name] == int((a == code).sum())
+    assert len(outside) == 1                # a mascara do estado e a mesma em todos os arquivos
+
+
+def test_change_codes_distinguish_untested_insignificant_increase_and_decrease():
+    from openlux.pixelmap import (CHANGE_DECREASE, CHANGE_INCREASE, CHANGE_NOT_SIGNIFICANT, CHANGE_UNTESTED,
+                                  change_codes)
+    label = np.array([[1, -1, 0, 0, 1]], dtype="int8")
+    tested = np.array([[True, True, True, False, True]])
+    inside = np.array([[True, True, True, True, False]])
+    c = change_codes(label, tested, inside)
+    assert c.dtype == np.uint8
+    assert c.tolist() == [[CHANGE_INCREASE, CHANGE_DECREASE, CHANGE_NOT_SIGNIFICANT, CHANGE_UNTESTED, CODE_OUTSIDE]]
+    assert len({CODE_OUTSIDE, CHANGE_UNTESTED, CHANGE_NOT_SIGNIFICANT, CHANGE_INCREASE, CHANGE_DECREASE}) == 5
