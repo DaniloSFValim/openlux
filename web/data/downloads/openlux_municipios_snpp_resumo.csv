@@ -1,4 +1,4 @@
-cod_municipio,municipio,populacao_2022,intensidade_por_habitante_mW_sr-1_hab-1,tendencia_2012_2021_inclinacao_nW_cm-2_sr-1_por_ano,tendencia_2012_2021_p_valor_kendall,tendencia_2012_2021_mudanca_pct,tendencia_2012_2025_inclinacao_nW_cm-2_sr-1_por_ano,tendencia_2012_2025_p_valor_kendall,tendencia_2012_2025_mudanca_pct
+﻿cod_municipio,municipio,populacao_2022,intensidade_por_habitante_mW_sr-1_hab-1,tendencia_2012_2021_inclinacao_nW_cm-2_sr-1_por_ano,tendencia_2012_2021_p_valor_kendall,tendencia_2012_2021_mudanca_pct,tendencia_2012_2025_inclinacao_nW_cm-2_sr-1_por_ano,tendencia_2012_2025_p_valor_kendall,tendencia_2012_2025_mudanca_pct
 3300100,Angra dos Reis,167434,72.497,-0.028569,0.009148,-11.385,0.018808,0.518253,30.498
 3300159,Aperibé,11034,94.146,-0.006939,0.38072,-0.384,0.023879,0.101021,63.478
 3300209,Araruama,129671,238.332,0.099101,0.009148,33.688,0.273024,4e-06,133.631

@@ -412,6 +412,9 @@
     if (cd && layerByCode[cd]) map.fitBounds(layerByCode[cd].getBounds(), { maxZoom: 10, padding: [30, 30] });
   }
   const COL = ['#0072B2', '#E69F00', '#009E73', '#CC79A7'];
+  const EXPORT_NOTES = ['Fonte: OpenLux 0.1.0, doi:10.5281/zenodo.24510755 · NASA Black Marble (VNP46A4, S-NPP) · malha e população: IBGE.',
+    'Resultados não validados. O S-NPP tem mais ruído em áreas escuras desde 2022; não é mudança real de iluminação sem essa ressalva.'];
+  const safeName = (t) => String(t).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase();
   function renderDetail() {
     const box = $('mun-detail');
     if (!st.sel) { box.innerHTML = '<p class="muted">Selecione um município no mapa ou na lista.</p>'; return; }
@@ -423,7 +426,11 @@
     const sgn = winKeys.map((w) => m.trends[w] && m.trends[w].slope).filter((v) => v != null).map(Math.sign);
     const flip = sgn.length > 1 && new Set(sgn).size > 1;
     const lowValid = m.valid.some((v) => v != null && v < 0.9);
-    box.innerHTML = `<h3 style="margin:.2rem 0">${esc(m.name)} <span class="muted small">(${st.sel})</span></h3>
+    box.innerHTML = `<div class="profile-tools no-print">
+        <button type="button" class="btn-sm" data-act="csv">Baixar dados deste município (CSV)</button>
+        <button type="button" class="btn-sm" data-act="print">Imprimir perfil</button>
+      </div>
+      <h3 style="margin:.2rem 0">${esc(m.name)} <span class="muted small">(${st.sel})</span></h3>
       <dl class="stat">
         <dt>População (Censo 2022)</dt><dd>${m.population == null ? '—' : fmt(m.population, 0)}</dd>
         <dt>Radiância média ${years[st.iy]}</dt><dd>${fmt(m.mean[st.iy], 2)} nW·cm⁻²·sr⁻¹ <span class="badge obs">observado (agregado)</span></dd>
@@ -456,8 +463,30 @@
       title: `Radiância média anual, ${m.name}`, years, yLabel: 'nW·cm⁻²·sr⁻¹', digits: 2,
       shadeFrom: 2022, shadeLabel: 'ruído S-NPP',
       series: [{ name: m.name, values: m.mean, color: COL[0] }, { name: 'Estado (média ponderada)', values: data.state.mean, color: '#7a828c', dash: '5 4', width: 1.6 }],
+      exportName: 'grafico-' + safeName(m.name) + '-radiancia-media', exportNotes: EXPORT_NOTES,
     });
+    box.insertAdjacentHTML('beforeend', `<p class="print-only small">Perfil gerado pelo OpenLux 0.1.0 (doi:10.5281/zenodo.24510755). Fonte: NASA Black Marble (VNP46A4, S-NPP); malha e população do IBGE. Resultados não validados; o S-NPP tem ruído em áreas escuras desde 2022.</p>`);
   }
+
+  function downloadProfileCsv() {
+    const m = M[st.sel]; if (!m) return;
+    const cols = ['cod_municipio', 'municipio', 'ano', 'radiancia_media_nW_cm-2_sr-1', 'radiancia_mediana_nW_cm-2_sr-1',
+      'fracao_area_valida', 'fracao_area_iluminada_limiar_0.5_nW_cm-2_sr-1', 'intensidade_radiante_aparente_nW_sr-1'];
+    const v = (a, i) => (a && a[i] != null ? a[i] : '');
+    const rows = years.map((y, i) => [st.sel, m.name, y, v(m.mean, i), v(m.median, i), v(m.valid, i), v(m.lit, i), v(m.intensity_nw_sr, i)].map((x) => `"${String(x).replace(/"/g, '""')}"`).join(','));
+    const blob = new Blob(['\uFEFF' + cols.join(',') + '\n' + rows.join('\n') + '\n'], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'openlux-' + safeName(m.name) + '-serie-snpp.csv';
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+  $('mun-detail').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-act]'); if (!b) return;
+    if (b.dataset.act === 'csv') downloadProfileCsv();
+    if (b.dataset.act === 'print') {
+      document.body.classList.add('print-profile');
+      window.addEventListener('afterprint', () => document.body.classList.remove('print-profile'), { once: true });
+      window.print();
+    }
+  });
 
   /* ---------- ranking ---------- */
   let rankDesc = true;
@@ -483,7 +512,8 @@
     const sel = ['cmp1', 'cmp2', 'cmp3'].map((i) => $(i).value).filter(Boolean);
     const series = sel.map((c, i) => ({ name: M[c].name, values: M[c].mean, color: COL[i] }));
     series.push({ name: 'Estado (média ponderada)', values: data.state.mean, color: '#7a828c', dash: '5 4', width: 1.6 });
-    OpenLuxCharts.lineChart($('cmp-chart'), { title: 'Radiância média anual: comparação', years, yLabel: 'nW·cm⁻²·sr⁻¹', digits: 2, shadeFrom: 2022, shadeLabel: 'ruído S-NPP', series });
+    OpenLuxCharts.lineChart($('cmp-chart'), { title: 'Radiância média anual: comparação (' + sel.map((c) => M[c].name).join(', ') + ')', years, yLabel: 'nW·cm⁻²·sr⁻¹', digits: 2, shadeFrom: 2022, shadeLabel: 'ruído S-NPP', series,
+      exportName: 'grafico-comparacao-radiancia-media', exportNotes: EXPORT_NOTES });
   }
 
   /* ---------- estado ---------- */
@@ -516,7 +546,8 @@
       <p class="small">Concordância das inclinações municipais entre sensores (${sc.years[0]}–${sc.years.at(-1)}): Spearman ${fmt(sc.spearman_trend_slope, 2)}; mesmo sinal em ${fmt(100 * sc.trend_sign_agreement, 1)}% dos municípios.</p>
       <h4>Sensibilidade à configuração (em relação à principal)</h4>
       <div class="table-wrap"><table><thead><tr><th>Janela</th><th>Variação</th><th class="num">ρ média (ano final)</th><th class="num">ρ inclinação</th><th class="num">Mesmo sinal</th></tr></thead><tbody>${sens}</tbody></table></div>`;
-    OpenLuxCharts.lineChart($('state-chart'), { title: 'Radiância média estadual', years, yLabel: 'nW·cm⁻²·sr⁻¹', digits: 2, shadeFrom: 2022, shadeLabel: 'ruído S-NPP', series: [{ name: 'Estado (média ponderada)', values: data.state.mean, color: COL[0] }] });
+    OpenLuxCharts.lineChart($('state-chart'), { title: 'Radiância média estadual', years, yLabel: 'nW·cm⁻²·sr⁻¹', digits: 2, shadeFrom: 2022, shadeLabel: 'ruído S-NPP', series: [{ name: 'Estado (média ponderada)', values: data.state.mean, color: COL[0] }],
+      exportName: 'grafico-estado-radiancia-media', exportNotes: EXPORT_NOTES });
     if (sc.state_lit_fraction_a) OpenLuxCharts.lineChart($('lit-chart'), { title: 'Fração da área iluminada, média estadual', years: sc.years, yLabel: 'fração', digits: 3, shadeFrom: 2022, shadeLabel: 'ruído S-NPP', zeroBase: true,
       series: [{ name: 'S-NPP', values: sc.years.map((y) => sc.state_lit_fraction_a[y]), color: COL[0] }, { name: 'NOAA-20', values: sc.years.map((y) => sc.state_lit_fraction_b[y]), color: COL[1] }] });
     OpenLuxCharts.lineChart($('qa-chart'), { title: 'Radiância média de pixels persistentemente escuros', years: data.qa.map((r) => r.year), yLabel: 'nW·cm⁻²·sr⁻¹', digits: 3, shadeFrom: 2022, shadeLabel: 'após 2021', zeroBase: true,

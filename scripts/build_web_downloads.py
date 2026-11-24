@@ -69,7 +69,7 @@ def build(src: Path = SRC, out: Path = OUT) -> dict:
     out.mkdir(parents=True, exist_ok=True)
 
     serie = out / "openlux_municipios_snpp_serie.csv"
-    with serie.open("w", encoding="utf-8", newline="") as f:
+    with serie.open("w", encoding="utf-8-sig", newline="") as f:  # BOM: abre certo no Excel
         w = csv.writer(f)
         w.writerow([h for h, _ in SERIE_COLS])
         for cod in sorted(munis):
@@ -94,7 +94,7 @@ def build(src: Path = SRC, out: Path = OUT) -> dict:
     for win in windows:
         cols += [f"tendencia_{win}_inclinacao_nW_cm-2_sr-1_por_ano", f"tendencia_{win}_p_valor_kendall",
                  f"tendencia_{win}_mudanca_pct"]
-    with resumo.open("w", encoding="utf-8", newline="") as f:
+    with resumo.open("w", encoding="utf-8-sig", newline="") as f:
         w = csv.writer(f)
         w.writerow(cols)
         for cod in sorted(munis):
