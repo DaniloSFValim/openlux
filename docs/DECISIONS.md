@@ -346,3 +346,18 @@ Pedido do autor: botão para acrescentar camadas (com o OpenStreetMap desligado 
   piso de ruído bem menor (e que ainda assim mostra aumento comum aos dois sensores, seção 9.3).
 - **Não implementado:** exportar a animação como vídeo/GIF (não foi pedido); quadros lado a lado dos dois sensores.
 
+## 14. Piloto de campo com duas pessoas e ferramentas de apoio
+
+Decisão do autor (2026-11-24): colaboração começa como **rede piloto de poucas pessoas treinadas, sem plataforma** (formulário/CSV, revisão pelo autor); depois, expansão para o Sudeste e o Brasil.
+Equipe: o autor (RJ) e no máximo uma pessoa em SP. Detalhes em `docs/FIELD_VALIDATION.md` seção 10 e no desenho `docs/superpowers/specs/2026-11-24-field-pilot-design.md`.
+
+- **Não foi feito de propósito:** plataforma de envio, contas, fotos e moderação (custo e riscos, entre eles a LGPD, desproporcionais para duas pessoas), expansão para o Sudeste e fotometria de câmera.
+- **Entregue:** validador do CSV (`openlux.field.validate_measurements`, `scripts/check_measurements.py`); contexto de satélite que informa se o disco do raio ultrapassa a borda do tile (`complete`) e recusa
+  locais com contexto incompleto; calibração cruzada entre aparelhos com níveis de instrumento (`colocated_offsets`, `split_validation_readings`); gerador de locais candidatos (`candidate_sites`,
+  `scripts/suggest_sites.py`); download da malha de uma UF (`scripts/fetch_mesh.py`). Tudo testado só com dados sintéticos e com um teste de fumaça com dados circulares (que prova que o código roda, não a ciência).
+- **Limiares de calibração e de sanidade são propostas do projeto**, sem base em norma ou literatura, a congelar na pré-especificação.
+- **Achado de viabilidade:** o tile `h13v11` já cobre o leste de SP. A radiância de contexto do NOAA-20 em 2025 a 10 km vai de ≈ 0,2 (interior da Mantiqueira e do Vale do Paraíba) a ≈ 85 (centro de SP),
+  cerca de 450 vezes, suficiente para o gradiente. Pontos costeiros têm só 39 % a 61 % do raio de 50 km com pixel válido (máscara de água); para o piloto convêm locais no interior.
+- **Sudeste, depois:** 4 tiles (`h12v10`, `h12v11`, `h13v10`, `h13v11`), 3 novos, ≈ 6 GB para os dois sensores (estimativa a partir de ≈ 90 MB por tile-ano). O trabalho real é generalizar os scripts, hoje fixos no RJ,
+  e juntar tiles nos municípios que cruzam a divisa; a grade do Sudeste teria ≈ 9 milhões de pixels por ano (≈ 15 vezes a do RJ), exigindo tiles de classes no site.
+

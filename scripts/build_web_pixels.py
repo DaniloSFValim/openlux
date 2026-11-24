@@ -18,12 +18,11 @@ from rasterio.transform import Affine
 from openlux.geo import bbox_window
 from openlux.io import read_blackmarble, sha256_file
 from openlux.log import JsonLogger
-from openlux.pixelmap import BREAKS, FIRST_RADIANCE_CODE, change_codes, radiance_classes, state_mask
+from openlux.pixelmap import BREAKS, FIRST_RADIANCE_CODE, LABELS, change_codes, radiance_classes, state_mask
 from openlux.pixeltrend import significant_change
 from openlux.provenance import code_version, write_json
 
 RAW, OUT = Path("data/raw"), Path("web/data/pixels")
-LABELS = ["< 0,5", "0,5 a < 2", "2 a < 8", "8 a < 30", "30 a < 100", "≥ 100"]
 SENSORS = {"snpp": ("VNP46A4", "Suomi NPP (VNP46A4 v2.0)"), "noaa20": ("VJ146A4", "NOAA-20 (VJ146A4 v2.0)")}
 CHANGE_WINDOWS = {"snpp": {"2012_2021": (2012, 2021), "2012_2025": (2012, 2025)}, "noaa20": {"2018_2025": (2018, 2025)}}
 TAU, ALPHA, MIN_N = 0.5, 0.05, 8   # iguais a scripts/run_sectors.py

@@ -2,7 +2,7 @@
 """Analise da validacao em campo (SQM) conforme docs/field/preregistration.json.
 
 Uso: python scripts/run_field_validation.py --measurements campo.csv --year 2025 [--exploratory]
-O CSV tem uma linha por LEITURA (modelo: docs/field/measurements_template.csv). Sem a pre-especificacao
+O CSV tem uma linha por LEITURA (modelo: docs/field/measurements_template.csv; confira antes com scripts/check_measurements.py). Sem a pre-especificacao
 congelada (status = "frozen"), so roda com --exploratory e o resultado fica marcado como exploratorio.
 Sem medicoes reais nao ha o que analisar; este script nao gera dados.
 """
@@ -15,7 +15,9 @@ from pathlib import Path
 
 import pandas as pd
 
-from openlux.field import QCParams, context_radiance, leave_one_out, permutation_max_spearman, qc_visits, site_summary
+from openlux.field import (CalibrationParams, QCParams, colocated_offsets, context_radiance, leave_one_out, permutation_max_spearman,
+                           qc_visits, site_summary, split_validation_readings, validate_measurements)
+from openlux.geo import tile_transform
 from openlux.io import read_blackmarble, sha256_file
 from openlux.log import JsonLogger
 from openlux.provenance import code_version, write_json
@@ -39,6 +41,10 @@ def evaluate(sites, sensor_key, pre, log):
     rad, t = read_blackmarble(path)
     radii = pre["radii_km"]
     ctx = [context_radiance(rad, t, r.lon, r.lat, radii) for r in sites.itertuples()]
+    clipped = [sid for sid, c in zip(sites["site_id"], ctx) if not all(c[r]["complete"] for r in radii)]
+    if clipped:      # disco do maior raio ultrapassa a borda do tile: o contexto seria parcial
+        return dict(sensor=prod, verdict="insufficient_data", context_complete=False,
+                    reason=f"locais com contexto incompleto (borda do tile a menos de {max(radii)} km): {clipped}"), {}
     x = {r: [c[r]["mean"] for c in ctx] for r in radii}
     vf = {r: min(c[r]["valid_fraction"] for c in ctx) for r in radii}
     y = sites["luminance_cd_m2"].to_numpy()
@@ -65,6 +71,7 @@ def main():
     ap.add_argument("--measurements", required=True)
     ap.add_argument("--year", type=int, required=True, help="ano do produto anual a usar (o mais recente disponivel se faltar)")
     ap.add_argument("--exploratory", action="store_true")
+    ap.add_argument("--reference-device", default=None, help="device_id do aparelho de referencia (padrao: instruments.reference_device_id da pre-especificacao)")
     a = ap.parse_args()
     pre = json.loads(PREREG.read_text(encoding="utf-8"))
     frozen = pre["status"] == "frozen"
@@ -72,20 +79,37 @@ def main():
         sys.exit("Pre-especificacao nao congelada (status != 'frozen'). Aprove e congele antes da coleta, ou use --exploratory.")
     pre["_year"] = a.year
     log = JsonLogger(OUT / "run_field.jsonl")
-    df = pd.read_csv(a.measurements)
+    df = pd.read_csv(a.measurements, dtype=str, keep_default_na=False)
+    m = re.fullmatch(r"h(\d{2})v(\d{2})", pre.get("tile", "h13v11"))
+    t = tile_transform(int(m.group(1)), int(m.group(2)))
+    issues = validate_measurements(df, tile_bounds=(t.c, t.f - 10.0, t.c + 10.0, t.f), max_radius_km=max(pre["radii_km"]))
+    if (issues["severity"] == "erro").any():
+        print(issues[issues["severity"] == "erro"].to_string(index=False))
+        sys.exit("O arquivo de medicoes tem erros (rode scripts/check_measurements.py). Corrija antes de analisar.")
+    for c in ("lat", "lon", "sqm_mpsas", "sun_alt_deg", "moon_alt_deg", "temp_c"):
+        df[c] = pd.to_numeric(df[c])
+    df["cloud_free"] = df["cloud_free"].map(lambda x: str(x).strip().lower() in ("true", "1", "sim", "yes", "verdadeiro"))
     qc = QCParams(**pre["qc"])
-    visits = qc_visits(df, qc)
-    summ = site_summary(df, qc)
-    coords = df.groupby("site_id")[["lat", "lon"]].agg(["min", "max"])
-    if ((coords.xs("max", axis=1, level=1) - coords.xs("min", axis=1, level=1)) > 0.001).any().any():
-        sys.exit("Coordenadas de um mesmo local variam mais de ~100 m entre as linhas: confira o CSV.")
-    pos = df.groupby("site_id")[["lat", "lon"]].mean().reset_index()
+    devices = sorted(df["device_id"].unique())
+    ref = a.reference_device or pre["instruments"].get("reference_device_id") or (devices[0] if len(devices) == 1 else "")
+    if not ref:
+        sys.exit("Ha mais de um aparelho: informe o de referencia (--reference-device ou instruments.reference_device_id na pre-especificacao).")
+    if ref not in devices:
+        sys.exit(f"Aparelho de referencia {ref!r} nao aparece no arquivo (aparelhos: {devices}).")
+    offsets = colocated_offsets(df, ref, CalibrationParams(**pre["cross_calibration"]), qc)
+    val, expl = split_validation_readings(df, offsets, ref)
+    log.log("instrumentos", reference=ref, devices=devices, validation_readings=len(val), exploratory_readings=len(expl))
+    visits = qc_visits(val, qc) if len(val) else pd.DataFrame(columns=["site_id", "visit_id", "pass"])
+    summ = site_summary(val, qc) if len(val) else pd.DataFrame(columns=["site_id", "n_valid_visits", "luminance_cd_m2"])
+    pos = val.groupby("site_id")[["lat", "lon"]].mean().reset_index() if len(val) else pd.DataFrame(columns=["site_id", "lat", "lon"])
     sites = summ.merge(pos, on="site_id")
     enough = sites[sites["n_valid_visits"] >= pre["min_valid_visits_per_site"]].reset_index(drop=True)
     log.log("sites", total=len(summ), usable=len(enough), visits=len(visits), visits_passed=int(visits["pass"].sum()))
     report = dict(mode="confirmatorio" if frozen else "EXPLORATORIO (pre-especificacao nao congelada)",
                   preregistration_sha256=sha256_file(PREREG), measurements_sha256=sha256_file(a.measurements),
-                  n_sites_total=len(summ), n_sites_usable=len(enough), code=code_version())
+                  n_sites_total=len(summ), n_sites_usable=len(enough), code=code_version(), reference_device=ref,
+                  calibration=offsets.to_dict("records"), readings_validation=len(val), readings_exploratory=len(expl),
+                  exploratory_devices=sorted(set(expl["device_id"])) if len(expl) else [])
     if len(enough) < pre["min_sites"]:
         report["verdict"] = "insufficient_data"
         report["reason"] = f"{len(enough)} locais utilizaveis < min_sites = {pre['min_sites']}"

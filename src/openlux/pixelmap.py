@@ -15,6 +15,7 @@ from rasterio.features import rasterize
 
 BREAKS = [0.5, 2.0, 8.0, 30.0, 100.0]
 CODE_OUTSIDE, CODE_INSIDE_NODATA, FIRST_RADIANCE_CODE = 0, 1, 2
+LABELS = ["< 0,5", "0,5 a < 2", "2 a < 8", "8 a < 30", "30 a < 100", "≥ 100"]   # rotulos das classes de radiancia
 
 
 def radiance_classes(radiance, inside, breaks=BREAKS) -> np.ndarray:
