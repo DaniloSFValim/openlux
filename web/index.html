@@ -17,47 +17,62 @@
     <h1>OpenLux</h1>
     <p class="subtitle">Estimativa de poluição luminosa baseada em sensoriamento remoto — Estado do Rio de Janeiro</p>
     <p class="byline">Autor: Danilo Valim · ORCID: <a href="https://orcid.org/0009-0009-7250-6151" rel="noopener">0009-0009-7250-6151</a> · Software científico independente, em desenvolvimento</p>
-    <p class="lede">O OpenLux agrega a radiância noturna observada por satélite (NASA Black Marble, sensor VIIRS) nos 92 municípios do estado, com malha e população do IBGE. Os valores são uma <strong>estimativa baseada em sensoriamento remoto</strong>, e <strong>não medições do brilho do céu</strong>.</p>
+    <p class="lede">O OpenLux mostra a radiância noturna vista por satélite (NASA Black Marble, sensor VIIRS) nos 92 municípios do estado. É uma <strong>estimativa baseada em sensoriamento remoto</strong>, <strong>não uma medição do brilho do céu</strong>.</p>
   </div>
 </header>
 
 <div class="wrap">
   <section class="alert" role="note" aria-labelledby="alert-title" id="alert">
-    <p><strong id="alert-title">Resultados não validados.</strong> A série do sensor Suomi NPP apresenta, a partir de 2022, aumento do piso de ruído em áreas escuras, e o sinal das tendências depende da janela de anos. Não interprete os valores como mudança real de iluminação sem essa ressalva.</p>
+    <p><strong id="alert-title">Resultados não validados.</strong> O sensor Suomi NPP tem mais ruído em áreas escuras desde 2022; não interprete os valores como mudança real de iluminação sem essa ressalva.</p>
     <details><summary>Números e detalhes do aviso</summary><p id="alert-text">Carregando…</p></details>
   </section>
 
   <main>
     <section class="explorer" aria-label="Mapa e painéis de análise">
       <div class="map-col">
-        <div class="controls" role="group" aria-label="Controles do mapa">
-          <fieldset id="layer-wrap" class="layer-sel">
-            <legend>Camada</legend>
-            <label><input type="radio" name="layer" value="pixel" checked> Pixel (≈ 460 m)</label>
-            <label><input type="radio" name="layer" value="mun"> Município (agregado)</label>
-          </fieldset>
-          <label>Indicador (camada município)
-            <select id="indicator"></select>
-          </label>
-          <label id="year-wrap">Ano: <output id="year-out"></output>
-            <input type="range" id="year" step="1" aria-describedby="year-note">
-          </label>
-          <label class="search">Buscar município
-            <input type="search" id="mun-search" list="mun-list" placeholder="nome do município" autocomplete="off">
-          </label>
-          <datalist id="mun-list"></datalist>
-          <button type="button" id="reset-btn">Ver o estado inteiro</button>
-          <button type="button" id="link-btn">Copiar link desta vista</button>
-          <label class="chk"><input type="checkbox" id="labels-chk" checked> Nomes dos municípios</label>
-          <span id="link-status" class="muted small" role="status" aria-live="polite"></span>
-        </div>
-        <p id="year-note" class="muted small">As classes de cor são fixas para todos os anos, para que os mapas de anos diferentes sejam comparáveis.</p>
         <div id="mapa" role="region" aria-label="Mapa da radiância noturna no Estado do Rio de Janeiro, por pixel de cerca de 460 metros ou agregada por município. Use o seletor de município ou a tabela de ranking para navegar pelo teclado."></div>
         <div id="pixel-readout" class="readout muted small" aria-live="polite" hidden></div>
         <div id="legend" class="legend" aria-live="polite"></div>
       </div>
 
       <aside class="panel-col">
+      <div class="ctrl-panel">
+          <div class="controls" role="group" aria-label="Controles do mapa">
+            <fieldset id="layer-wrap" class="layer-sel">
+              <legend>Camada</legend>
+              <label><input type="radio" name="layer" value="pixel" checked> Pixel (≈ 460 m)</label>
+              <label><input type="radio" name="layer" value="mun"> Município (agregado)</label>
+            </fieldset>
+            <span id="px-wrap" class="px-wrap">
+              <label>Sensor <select id="px-sensor"></select></label>
+              <label>Mostrar <select id="px-view"></select></label>
+            </span>
+            <label>Indicador (camada município)
+              <select id="indicator"></select>
+            </label>
+            <label id="year-wrap">Ano: <output id="year-out"></output>
+              <input type="range" id="year" step="1" aria-describedby="year-note">
+            </label>
+            <label class="search">Buscar município
+              <input type="search" id="mun-search" list="mun-list" placeholder="nome do município" autocomplete="off">
+            </label>
+            <datalist id="mun-list"></datalist>
+            <button type="button" id="reset-btn">Ver o estado inteiro</button>
+            <button type="button" id="link-btn">Copiar link desta vista</button>
+            <span id="link-status" class="muted small" role="status" aria-live="polite"></span>
+          </div>
+          <details class="display" id="display-opts">
+            <summary>Exibição do mapa</summary>
+            <div class="controls">
+              <label>Opacidade da camada <input type="range" id="px-opacity" min="0.3" max="1" step="0.05" value="0.9"></label>
+              <label>Tema <select id="theme-sel"><option value="auto">Automático</option><option value="light">Claro</option><option value="dark">Escuro</option></select></label>
+              <label class="chk"><input type="checkbox" id="labels-chk" checked> Nomes dos municípios</label>
+              <label class="chk"><input type="checkbox" id="base-chk"> Mapa-base (OpenStreetMap)</label>
+            </div>
+            <p class="muted small">O mapa-base vem do servidor do OpenStreetMap: ao ligá-lo, seu navegador baixa imagens de lá e o servidor recebe o seu endereço IP. Fica desligado por padrão.</p>
+          </details>
+          <p id="year-note" class="muted small">As classes de cor são fixas para todos os anos, para que os mapas de anos diferentes sejam comparáveis.</p>
+      </div>
         <div class="tabs" role="tablist" aria-label="Painéis">
           <button role="tab" id="tab-mun" aria-controls="p-mun" aria-selected="true">Município</button>
           <button role="tab" id="tab-rank" aria-controls="p-rank" aria-selected="false" tabindex="-1">Ranking</button>
@@ -99,7 +114,7 @@
 <footer class="site">
   <div class="wrap">
     <p id="updated"></p>
-    <p class="small">Mapa desenhado com <a href="vendor/leaflet/LICENSE">Leaflet 1.9.4 (BSD-2-Clause)</a>, sem mapa-base de terceiros. Licença do código-fonte: MIT. Malha municipal: IBGE (licença compatível com CC BY 4.0). Dados NASA: ver fontes e status de verificação de licença.</p>
+    <p class="small">Mapa desenhado com <a href="vendor/leaflet/LICENSE">Leaflet 1.9.4 (BSD-2-Clause)</a>, mapa-base opcional do OpenStreetMap (desligado por padrão). Licença do código-fonte: MIT. Malha municipal: IBGE (licença compatível com CC BY 4.0). Dados NASA: ver fontes e status de verificação de licença.</p>
   </div>
 </footer>
 
