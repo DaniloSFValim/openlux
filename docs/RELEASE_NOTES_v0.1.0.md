@@ -23,8 +23,11 @@ reprodutível e testado, mas os **resultados científicos não foram validados**
   todos os anos) e camada por município; link permanente (URL com vista, ano, camada, indicador e município), busca de município,
   nomes dos municípios e legenda em linguagem comum. A interface publica só a **classe** de cada pixel, não o valor da radiância.
   Nenhum município é tratado como estudo de caso. Seletor de sensor (Suomi NPP 2012–2025 e NOAA-20 2018–2025), camada de **mudança por pixel**, tema claro/escuro e opacidade ajustável. Botão **Camadas** dentro do mapa e **animação** ano a ano, que só roda a pedido, mostra o ano e avisa o ruído do S-NPP desde 2022. O mapa-base do OpenStreetMap é **opcional e vem desligado**: só ao ligá-lo o navegador contata o servidor deles (que recebe o IP do visitante).
-- Protocolo **proposto** de validação em campo com SQM (`docs/FIELD_VALIDATION.md`), pré-especificação em rascunho
-  (`docs/field/preregistration.json`) e código de análise (`openlux.field`), testado só com dados sintéticos. **Nenhuma medição foi feita.**
+- **Validação em campo (preparada, sem medições):** protocolo **proposto** com SQM (`docs/FIELD_VALIDATION.md`), pré-especificação em rascunho
+  (`docs/field/preregistration.json`) e código de análise (`openlux.field`), para um piloto de **duas pessoas** (RJ e leste de SP) sem plataforma de envio. Inclui conferência do
+  CSV de medições (`scripts/check_measurements.py`), proteção contra contexto de satélite cortado na borda do tile, **calibração cruzada** entre aparelhos com níveis de instrumento
+  (o SQM do autor é a referência; celular e câmera sem calibração ficam sempre como dado exploratório) e sugestão de locais candidatos estratificados pela radiância de satélite
+  (`scripts/suggest_sites.py`, com a malha municipal de SP). Tudo testado só com dados sintéticos. **Nenhuma medição foi feita.**
 - Documentação: `README.md`, `METHODOLOGY.md`, `docs/DECISIONS.md`, `docs/LICENSING.md`, `CITATION.cff`.
 - Licença do código: MIT.
 
@@ -47,9 +50,10 @@ reprodutível e testado, mas os **resultados científicos não foram validados**
   (`docs/DECISIONS.md`, seção 11).
 - Os nomes dos municípios no mapa ficam no centro do retângulo envolvente (aproximado em formas irregulares) e podem se sobrepor.
 - Não implementado: comparação com o Atlas de Falchi et al. (2016) (dados não obtidos; outra grandeza e outra
-  época) e validação em campo (protocolo escrito, sem medições).
+  época) e validação em campo (protocolo e ferramentas escritos, sem medições). Os limiares de calibração e de sanidade do piloto são **propostas do projeto**,
+  sem base em norma ou literatura, e a pré-especificação ainda não foi congelada; o instrumento da segunda pessoa não está definido. Expansão para o Sudeste e o Brasil: não feita (`docs/DECISIONS.md`, seção 14).
 - Os dados brutos de terceiros não são redistribuídos. `web/data/` contém agregados municipais derivados
-  (NASA) e a população do Censo 2022 (IBGE/SIDRA); a citação dos dados está no `README.md`.
+  (NASA), a população do Censo 2022 (IBGE/SIDRA) e grades de **classes** por pixel (só o código da classe, nunca o valor da radiância); a citação dos dados está no `README.md`.
 
 ## Como citar
 
