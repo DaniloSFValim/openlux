@@ -17,7 +17,7 @@ requisito externo: cada linha cita a evidência ou diz o que falta. O edital PGC
 | Interface web estática (mapa, painéis, informações científicas, aviso permanente) | Implementada e testada em navegador; publicada em https://openlux.labdados.org/ (verificado em 2026-11-23) | `web/` |
 | Documentação acadêmica, metadados de citação, licença MIT, verificação de referências | Concluída | `README.md`, `METHODOLOGY.md`, `CITATION.cff`, `.zenodo.json`, `LICENSE`, `docs/` |
 
-Dimensão: 17 módulos Python (~1,6 mil linhas em `src/`), 13 scripts, ~2,3 mil linhas de teste, 171 testes (148 sem os de navegador).
+Dimensão: 17 módulos Python (~1,6 mil linhas em `src/`), 13 scripts, ~2,3 mil linhas de teste, 175 testes (148 sem os de navegador).
 
 **Implementado após o fechamento original da Fase 2** (a pedido do autor, em branch própria, ainda não publicada em release): radiância ponderada pela
 população e população em áreas iluminadas (setores do Censo 2022, população fixa), radiância e fração iluminada urbano × rural, mudança significativa por pixel
@@ -81,7 +81,7 @@ realizadas descrevem estabilidade e consistência; **nenhum limite de aprovaçã
 
 | Requisito | Evidência | Situação |
 |---|---|---|
-| Software desenvolvido | Repositório GitHub, 171 testes | Concluído |
+| Software desenvolvido | Repositório GitHub, 175 testes | Concluído |
 | Autoria identificada | `CITATION.cff`, `.zenodo.json`, `LICENSE` | Concluído nos arquivos; conferir no registro publicado |
 | Repositório público | API do GitHub | Concluído |
 | DOI | Registro no Zenodo | **Pendente** |

@@ -53,7 +53,13 @@
             <label id="year-wrap">Ano: <output id="year-out"></output>
               <input type="range" id="year" step="1" aria-describedby="year-note">
             </label>
-            <label class="search">Buscar município
+            <span id="anim-wrap" class="anim-wrap">
+            <button type="button" id="play-btn" aria-pressed="false">▶ Animar</button>
+            <label>Velocidade <select id="speed-sel"><option value="400">Rápida</option><option value="1000" selected>Normal</option><option value="2000">Lenta</option></select></label>
+            <label class="chk"><input type="checkbox" id="loop-chk" checked> Repetir</label>
+            <span id="anim-status" class="muted small" role="status" aria-live="polite"></span>
+          </span>
+          <label class="search">Buscar município
               <input type="search" id="mun-search" list="mun-list" placeholder="nome do município" autocomplete="off">
             </label>
             <datalist id="mun-list"></datalist>
@@ -61,16 +67,6 @@
             <button type="button" id="link-btn">Copiar link desta vista</button>
             <span id="link-status" class="muted small" role="status" aria-live="polite"></span>
           </div>
-          <details class="display" id="display-opts">
-            <summary>Exibição do mapa</summary>
-            <div class="controls">
-              <label>Opacidade da camada <input type="range" id="px-opacity" min="0.3" max="1" step="0.05" value="0.9"></label>
-              <label>Tema <select id="theme-sel"><option value="auto">Automático</option><option value="light">Claro</option><option value="dark">Escuro</option></select></label>
-              <label class="chk"><input type="checkbox" id="labels-chk" checked> Nomes dos municípios</label>
-              <label class="chk"><input type="checkbox" id="base-chk"> Mapa-base (OpenStreetMap)</label>
-            </div>
-            <p class="muted small">O mapa-base vem do servidor do OpenStreetMap: ao ligá-lo, seu navegador baixa imagens de lá e o servidor recebe o seu endereço IP. Fica desligado por padrão.</p>
-          </details>
           <p id="year-note" class="muted small">As classes de cor são fixas para todos os anos, para que os mapas de anos diferentes sejam comparáveis.</p>
       </div>
         <div class="tabs" role="tablist" aria-label="Painéis">

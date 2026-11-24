@@ -330,3 +330,19 @@ Pedido do autor: aproximar o visual de um mapa de brilho do céu modelado (light
 
 **Limitações.** Com o mapa-base ligado, a classe "sem luz" fica quase transparente para mostrar o mapa por baixo; o filtro de cor que escurece o mapa-base é um efeito de exibição e não altera o dado.
 
+## 13. Interface: painel de camadas e animação da evolução
+
+Pedido do autor: botão para acrescentar camadas (com o OpenStreetMap desligado por padrão) e animação da evolução ano a ano, para quem quiser.
+
+- **Painel "Camadas"** (botão dentro do mapa, no canto superior direito): camada de pixel (com opacidade), limites municipais, nomes dos municípios, mapa-base do OpenStreetMap e tema. O que vem de terceiros
+  (só o OpenStreetMap) **fica desligado por padrão** e só liga por escolha do visitante, com aviso de que o servidor recebe o IP.
+- **Só o OpenStreetMap como camada externa.** Outros mapas-base não foram adicionados: o CARTO exige chave de API (seção 12) e os termos de uma camada de imagem de satélite (por exemplo, a Esri) **não foram verificados**.
+  Qualquer camada nova de terceiros deve entrar com termos lidos, atribuição e a mesma regra de opt-in.
+- **Animação.** Botão "Animar", velocidade (rápida 0,4 s, normal 1 s, lenta 2 s) e repetição. **Nunca inicia sozinha.** Percorre, na ordem, os anos do sensor escolhido (S-NPP 2012–2025; NOAA-20 2018–2025), funciona na
+  camada de pixel (radiância por ano) e nos indicadores municipais anuais, e não existe para a mudança por pixel (não tem ano). Os anos são pré-carregados antes de começar, para não piscar.
+  Para ao mexer em qualquer controle (ano, camada, sensor, visão, indicador) e quando a aba fica oculta; as classes de cor são as mesmas em todos os quadros.
+- **Leitura científica da animação.** O ano aparece em destaque sobre o mapa e, **para o S-NPP a partir de 2022, um aviso fixo**: o salto de 2021 para 2022 que a animação mostra é, em boa parte, o piso de ruído do S-NPP em
+  áreas escuras (a classe 0,5 a < 2 passa de 16,4 % para 32,4 % dos pixels válidos do estado entre 2021 e 2025), e **não deve ser lido como luz nova**. Para a série pós-2018 é preferível animar o NOAA-20, que tem
+  piso de ruído bem menor (e que ainda assim mostra aumento comum aos dois sensores, seção 9.3).
+- **Não implementado:** exportar a animação como vídeo/GIF (não foi pedido); quadros lado a lado dos dois sensores.
+

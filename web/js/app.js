@@ -122,7 +122,7 @@
   }
   const KIND = { obs: ['obs', 'Observado (agregado)'], der: ['der', 'Derivado'], qa: ['qa', 'Controle de qualidade'] };
 
-  const st = { ind: 'mean', iy: years.length - 1, sel: null, layer: pxMeta ? 'pixel' : 'mun', sensor: 'snpp', view: 'rad', alpha: 0.9, basemap: false };
+  const st = { ind: 'mean', iy: years.length - 1, sel: null, layer: pxMeta ? 'pixel' : 'mun', sensor: 'snpp', view: 'rad', alpha: 0.9, basemap: false, outlines: true, pxOn: true, playing: false };
   const val = (cd, key = st.ind, iy = st.iy) => { const v = IND[key].get(M[cd], iy); return v == null || !isFinite(v) ? null : v; };
 
   /* ---------- aviso metodológico (dados) ---------- */
@@ -138,6 +138,25 @@
   map.attributionControl.setPrefix(false);
   map.attributionControl.addAttribution('Malha: IBGE (compatível com CC BY 4.0) · Radiância: NASA Black Marble · Exibição em Web Mercator; cálculos em grade lat/lon');
   L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);
+  // HUD: ano em destaque e aviso de ruído do S-NPP (visíveis durante a animação)
+  const Hud = L.Control.extend({ options: { position: 'topleft' }, onAdd() { const d = L.DomUtil.create('div', 'hud'); d.innerHTML = '<div class="y" id="hud-year"></div><div class="w" id="hud-warn" hidden>S-NPP: piso de ruído maior desde 2022; não leia como luz nova.</div>'; return d; } });
+  new Hud().addTo(map);
+  // Painel "Camadas": o visitante liga/desliga camadas. Terceiros (mapa-base) só se ele ligar.
+  const LayersCtl = L.Control.extend({ options: { position: 'topright' }, onAdd() {
+    const d = L.DomUtil.create('div', 'layers-ctl');
+    d.innerHTML = `<button type="button" id="layers-btn" aria-expanded="false" aria-controls="layers-panel">Camadas</button>
+      <div class="lp" id="layers-panel" hidden>
+        <label><input type="checkbox" id="px-chk" checked> Camada de pixel</label>
+        <div class="sub"><label>Opacidade <input type="range" id="px-opacity" min="0.3" max="1" step="0.05" value="0.9" aria-label="Opacidade da camada de pixel"></label></div>
+        <label><input type="checkbox" id="outline-chk" checked> Limites municipais</label>
+        <label><input type="checkbox" id="labels-chk" checked> Nomes dos municípios</label>
+        <label><input type="checkbox" id="base-chk"> Mapa-base (OpenStreetMap)</label>
+        <div class="sub small">Ao ligar, seu navegador baixa imagens do servidor do OpenStreetMap, que recebe o seu endereço IP. Desligado por padrão.</div>
+        <label>Tema <select id="theme-sel"><option value="auto">Automático</option><option value="light">Claro</option><option value="dark">Escuro</option></select></label>
+      </div>`;
+    L.DomEvent.disableClickPropagation(d); L.DomEvent.disableScrollPropagation(d); return d; } });
+  new LayersCtl().addTo(map);
+  $('layers-btn').addEventListener('click', () => { const open = $('layers-panel').hidden; $('layers-panel').hidden = !open; $('layers-btn').setAttribute('aria-expanded', String(open)); });
   // Mapa-base OPCIONAL (desligado por padrão): ao ligar, o navegador baixa imagens do servidor do OpenStreetMap, que recebe o IP do visitante.
   const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 12, className: 'osm-tiles', attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap</a> contributors' });
   const layerByCode = {};
@@ -296,13 +315,18 @@
     $('px-wrap').hidden = !px;
     $('indicator').disabled = px;
     document.documentElement.classList.toggle('is-dark', isDark());
-    if (pxLayer) { if (px) { if (!map.hasLayer(pxLayer)) pxLayer.addTo(map); pxShow(); } else if (map.hasLayer(pxLayer)) map.removeLayer(pxLayer); }
+    if (pxLayer) { if (px && st.pxOn) { if (!map.hasLayer(pxLayer)) pxLayer.addTo(map); pxShow(); } else if (map.hasLayer(pxLayer)) map.removeLayer(pxLayer); }
+    const yearly = px ? st.view === 'rad' : !!ind.yearly;
+    const hudText = px && st.view !== 'rad' ? `mudança ${st.view.replace('_', '–')}` : (yearly ? String(years[st.iy]) : '');
+    $('hud-year').textContent = hudText; $('hud-year').parentElement.hidden = !hudText;
+    $('hud-warn').hidden = !(yearly && years[st.iy] >= 2022 && (!px || st.sensor === 'snpp'));
+    $('play-btn').disabled = !yearly;
     $('pixel-readout').hidden = !px;
     if (px) $('pixel-readout').textContent = 'Passe o cursor sobre o mapa (ou toque) para ver a classe do pixel.';
     gl.eachLayer((layer) => {
       const cd = layer.feature.properties.CD_MUN, sel = cd === st.sel;
       if (px) {
-        layer.setStyle({ fillOpacity: 0, weight: sel ? 3.2 : 0.8, color: sel ? (isDark() ? '#6ea2ff' : '#0b5fff') : (isDark() ? '#b9c3d1' : '#3b3b3b'), opacity: sel ? 1 : 0.7 });
+        layer.setStyle({ fillOpacity: 0, weight: sel ? 3.2 : 0.8, color: sel ? (isDark() ? '#6ea2ff' : '#0b5fff') : (isDark() ? '#b9c3d1' : '#3b3b3b'), opacity: sel ? 1 : (st.outlines ? 0.7 : 0) });
         if (sel) layer.bringToFront();
         layer.unbindTooltip().bindTooltip(`<strong>${esc(M[cd].name)}</strong>`, { sticky: true });
         return;
@@ -337,25 +361,25 @@
   const yr = $('year'); yr.min = 0; yr.max = years.length - 1; yr.value = st.iy;
   const yrOut = () => { $('year-out').textContent = years[st.iy]; yr.setAttribute('aria-valuetext', String(years[st.iy])); };
   yrOut();
-  $('indicator').addEventListener('change', (e) => { st.ind = e.target.value; render(); });
+  $('indicator').addEventListener('change', (e) => { stopAnim(); st.ind = e.target.value; render(); });
   function clampYear() {   // o NOAA-20 só tem 2018–2025: leva o ano ao mais próximo disponível
     if (!pxMeta) return; const ok = sensorYears(st.sensor);
     if (!ok.includes(years[st.iy])) { const near = ok.reduce((b, v) => (Math.abs(v - years[st.iy]) < Math.abs(b - years[st.iy]) ? v : b), ok[0]); st.iy = years.indexOf(near); yr.value = st.iy; yrOut(); }
   }
-  yr.addEventListener('input', (e) => { st.iy = +e.target.value; yrOut(); if (st.layer === 'pixel' && st.view === 'rad') clampYear(); render(); if (st.sel) renderDetail(); });
+  yr.addEventListener('input', (e) => { stopAnim(); st.iy = +e.target.value; yrOut(); if (st.layer === 'pixel' && st.view === 'rad') clampYear(); render(); if (st.sel) renderDetail(); });
   const optionsHtml = (blank) => (blank ? '<option value="">— nenhum —</option>' : '') + codes.map((c) => `<option value="${c}">${esc(M[c].name)}</option>`).join('');
   $('mun-select').innerHTML = '<option value="">Selecione…</option>' + optionsHtml(false);
   $('mun-select').addEventListener('change', (e) => select(e.target.value || null));
   if (!pxLayer) $('layer-wrap').hidden = true;
-  document.querySelectorAll('input[name="layer"]').forEach((r) => { r.checked = r.value === st.layer; r.addEventListener('change', (e) => { if (e.target.checked) { st.layer = e.target.value; render(); } }); });
+  document.querySelectorAll('input[name="layer"]').forEach((r) => { r.checked = r.value === st.layer; r.addEventListener('change', (e) => { if (e.target.checked) { stopAnim(); st.layer = e.target.value; render(); } }); });
   $('reset-btn').addEventListener('click', () => map.fitBounds(gl.getBounds(), { padding: [8, 8] }));
   if (pxMeta) {
     $('px-sensor').innerHTML = Object.entries(pxMeta.sensors).map(([k, v]) => `<option value="${k}">${esc(v.name)}</option>`).join('');
     const fixView = () => { if (st.view !== 'rad' && !pxMeta.sensors[st.sensor].change[st.view]) st.view = 'rad'; };
     const fillView = () => { fixView(); $('px-view').innerHTML = '<option value="rad">Radiância por ano</option>' + Object.entries(pxMeta.sensors[st.sensor].change).map(([w, v]) => `<option value="${w}">Mudança ${v.years[0]}–${v.years[1]}</option>`).join(''); $('px-view').value = st.view; $('px-sensor').value = st.sensor; };
     fillView();
-    $('px-sensor').addEventListener('change', (e) => { st.sensor = e.target.value; fillView(); clampYear(); render(); });
-    $('px-view').addEventListener('change', (e) => { st.view = e.target.value; clampYear(); render(); });
+    $('px-sensor').addEventListener('change', (e) => { stopAnim(); st.sensor = e.target.value; fillView(); clampYear(); render(); });
+    $('px-view').addEventListener('change', (e) => { stopAnim(); st.view = e.target.value; clampYear(); render(); });
     window.openluxFillView = fillView;   // usado ao restaurar o estado da URL
   } else { $('px-wrap').hidden = true; }
   $('px-opacity').addEventListener('input', (e) => { st.alpha = +e.target.value; if (pxLayer && map.hasLayer(pxLayer)) pxShow(); });
@@ -540,6 +564,41 @@
     const d = new Date(meta.run.processed_utc);
     $('updated').textContent = `Última atualização dos dados: ${d.toLocaleDateString('pt-BR', { timeZone: 'UTC', day: '2-digit', month: 'long', year: 'numeric' })} (UTC). Dados não validados.`;
   }
+
+  $('px-chk').addEventListener('change', (e) => { st.pxOn = e.target.checked; render(); });
+  $('outline-chk').addEventListener('change', (e) => { st.outlines = e.target.checked; render(); });
+
+  /* ---------- animação da evolução ano a ano (a pedido do visitante; nunca inicia sozinha) ---------- */
+  let animTimer = null;
+  const frameYears = () => (st.layer === 'pixel' ? sensorYears(st.sensor).sort((a, b) => a - b) : years);
+  function stopAnim() {
+    if (animTimer) clearTimeout(animTimer);
+    animTimer = null; st.playing = false;
+    $('play-btn').textContent = '▶ Animar'; $('play-btn').setAttribute('aria-pressed', 'false');
+    if ($('anim-status').textContent === 'Carregando os anos…') $('anim-status').textContent = '';
+  }
+  function showFrame(y) { st.iy = years.indexOf(y); yr.value = st.iy; yrOut(); render(); if (st.sel) renderDetail(); }
+  function stepAnim() {
+    const ys = frameYears(), cur = ys.indexOf(years[st.iy]); let nxt = cur + 1;
+    if (nxt >= ys.length) { if (!$('loop-chk').checked) { stopAnim(); $('anim-status').textContent = 'Fim da série.'; return; } nxt = 0; }
+    showFrame(ys[nxt]);
+    animTimer = setTimeout(stepAnim, +$('speed-sel').value);
+  }
+  async function startAnim() {
+    if ($('play-btn').disabled) return;
+    st.playing = true; $('play-btn').textContent = '⏸ Pausar'; $('play-btn').setAttribute('aria-pressed', 'true'); $('anim-status').textContent = '';
+    if (st.layer === 'pixel') {      // pré-carrega todos os anos do sensor para a animação não piscar
+      $('anim-status').textContent = 'Carregando os anos…';
+      try { await Promise.all(sensorYears(st.sensor).map((y) => pxGrid(`${st.sensor}/${y}`))); }
+      catch (e) { stopAnim(); $('anim-status').textContent = 'Não foi possível carregar todos os anos.'; return; }
+      if (!st.playing) return;       // o visitante parou ou mexeu nos controles enquanto carregava
+      $('anim-status').textContent = '';
+    }
+    const ys = frameYears(); if (years[st.iy] === ys[ys.length - 1]) showFrame(ys[0]);   // no último ano, recomeça do primeiro
+    animTimer = setTimeout(stepAnim, +$('speed-sel').value);
+  }
+  $('play-btn').addEventListener('click', () => { if (st.playing) { stopAnim(); } else { startAnim(); } });
+  document.addEventListener('visibilitychange', () => { if (document.hidden && st.playing) stopAnim(); });
 
   /* ---------- nomes dos municípios (contexto geográfico próprio, sem mapa-base de terceiros) ---------- */
   const labelLayer = L.layerGroup();
