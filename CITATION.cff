@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: "Se você usar este software, cite-o como abaixo. O DOI será acrescentado após a publicação da release no Zenodo."
+message: "Se você usar este software, cite-o como abaixo."
 type: software
 title: "OpenLux"
 version: "0.1.0"
@@ -28,4 +28,11 @@ keywords:
   - Rio de Janeiro
   - Brazil
 license: MIT
-# date-released: a ser preenchido na publicação da release.
+date-released: "2026-11-24"
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.24510755
+    description: "DOI da versão 0.1.0 (Zenodo)"
+  - type: doi
+    value: 10.5281/zenodo.24510754
+    description: "Concept DOI do projeto (todas as versões)"

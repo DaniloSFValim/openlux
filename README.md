@@ -18,7 +18,7 @@ qualquer número.
 | Site | https://openlux.labdados.org/ (interface; ver [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)) |
 | Versão | 0.1.0 (pré-lançamento) |
 | Licença do código | MIT (arquivo [`LICENSE`](LICENSE)). Não se aplica aos dados de terceiros (ver [`docs/LICENSING.md`](docs/LICENSING.md)) |
-| DOI | A ser atribuído após a publicação no Zenodo |
+| DOI | [10.5281/zenodo.24510755](https://doi.org/10.5281/zenodo.24510755) (versão 0.1.0; concept DOI [10.5281/zenodo.24510754](https://doi.org/10.5281/zenodo.24510754)) |
 
 O OpenLux é um projeto autônomo, com código, metodologia e histórico de versões próprios, e usa
 exclusivamente dados públicos com procedência verificável.
@@ -223,7 +223,7 @@ A mesma lista sustenta [`METHODOLOGY.md`](METHODOLOGY.md), onde cada obra é cit
 
 > Valim, D. (2026). *OpenLux* (versão 0.1.0) [Software]. https://github.com/DaniloSFValim/openlux
 
-O DOI do Zenodo será acrescentado após a publicação da release. Os metadados de citação estão em
+DOI da versão 0.1.0: https://doi.org/10.5281/zenodo.24510755. Os metadados de citação estão em
 [`CITATION.cff`](CITATION.cff).
 
 ## 17. Autor e ORCID
@@ -233,5 +233,6 @@ institucional foi declarada nos metadados.
 
 ## 18. DOI
 
-A ser atribuído após a publicação efetiva do registro no Zenodo. Um DOI identifica a versão
+Versão 0.1.0: [10.5281/zenodo.24510755](https://doi.org/10.5281/zenodo.24510755). Concept DOI do projeto (resolve sempre para a
+versão mais recente): [10.5281/zenodo.24510754](https://doi.org/10.5281/zenodo.24510754). Um DOI identifica a versão
 arquivada e não comprova avaliação científica nem validação independente do software.

@@ -48,11 +48,11 @@ posterior em `main` (selo/DOI no README, identificador em `CITATION.cff`); ele e
 
 | Campo | Valor |
 |---|---|
-| DOI específico da versão v0.1.0 | _preencher após a publicação_ |
-| Concept DOI do projeto | _preencher após a publicação_ |
-| URL permanente do registro Zenodo | _preencher_ |
+| DOI específico da versão v0.1.0 | 10.5281/zenodo.24510755 |
+| Concept DOI do projeto | 10.5281/zenodo.24510754 |
+| URL permanente do registro Zenodo | https://zenodo.org/records/24510755 |
 | URL do repositório | https://github.com/DaniloSFValim/openlux |
-| Data da publicação | _preencher_ |
+| Data da publicação | 2026-11-24 (registro publicado pelo autor; conferido pela API pública) |
 
 ## 4. Depois da publicação
 
