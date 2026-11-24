@@ -19,6 +19,7 @@ from rasterio.transform import Affine
 from openlux.geo import bbox_window
 from openlux.io import read_blackmarble, sha256_file
 from openlux.log import JsonLogger
+from openlux.pixelmap import state_mask
 from openlux.pixeltrend import significant_change, trend_shares
 from openlux.provenance import write_json
 from openlux.sectors import dedupe_sectors, sector_indicators, sector_overlay
@@ -28,7 +29,7 @@ OUT = Path("outputs/sectors")
 TAU = 0.5  # mesmo limiar de referencia da fracao iluminada municipal (docs/DECISIONS.md)
 ALPHA = 0.05  # FDR (Benjamini-Hochberg) da mudanca por pixel
 MIN_N = 8  # anos validos minimos por pixel (igual a min_years municipal)
-WINDOWS = {"snpp": {"2012_2021": (2012, 2021), "2012_2025": (2012, 2025)}, "noaa20": {}}
+WINDOWS = {"snpp": {"2012_2021": (2012, 2021), "2012_2025": (2012, 2025)}, "noaa20": {"2018_2025": (2018, 2025)}}
 
 
 def main():
@@ -38,6 +39,7 @@ def main():
         sys.exit("Malha de setores ausente. Rode scripts/fetch_ibge.py --sectors.")
     raw = gpd.read_file(gpkg)
     log.log("sectors_read", rows=len(raw), sha256=sha256_file(gpkg))
+    mesh = gpd.read_file(next(glob.iglob(str(RAW / "ibge/RJ_Municipios_2024/*.shp")))).set_crs("EPSG:4326", allow_override=True)
     sec = dedupe_sectors(raw)
     log.log("sectors_deduped", sectors=len(sec), population=float(sec["pop"].sum()),
             rows_removed=len(raw) - len(sec))
@@ -56,6 +58,7 @@ def main():
             shape = f["HDFEOS/GRIDS/VIIRS_Grid_DNB_2d/Data Fields/AllAngle_Composite_Snow_Free"].shape
         r0, r1, c0, c1 = bbox_window(t, shape, tuple(sec.total_bounds))
         tw = t * Affine.translation(c0, r0)
+        inside = state_mask(list(mesh.geometry), (r1 - r0, c1 - c0), tw)   # so pixels do estado entram no teste e no FDR
         ov = sector_overlay(sec, (r1 - r0, c1 - c0), tw)
         log.log("overlay", sensor=sensor, window=[r0, r1, c0, c1], rows=len(ov),
                 population_outside_grid=ov.attrs["population_outside_grid"],
@@ -76,7 +79,7 @@ def main():
             stack = np.stack([layers[y] for y in yrs])
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", RuntimeWarning)   # fatias so com NaN (mar/agua) sao esperadas
-                active = np.nanmedian(stack, axis=0) >= TAU      # pixels iluminados na mediana dos anos
+                active = (np.nanmedian(stack, axis=0) >= TAU) & inside   # iluminados na mediana dos anos, dentro do estado
             lab = significant_change(stack, yrs, min_n=MIN_N, alpha=ALPHA, active=active)
             sh = trend_shares(ov, lab["label"], lab["tested"])
             sh.insert(0, "window", wname); sh.insert(0, "sensor", sensor)
@@ -92,7 +95,7 @@ def main():
     write_json(OUT / "run_record_sectors.json", {
         "parameters": {"tau_nw_cm2_sr": TAU, "population_year": 2022, "population_static": True,
                        "valid_quality": [0], "sectors_deduped": len(sec),
-                       "pixel_trend": {"alpha": ALPHA, "min_n": MIN_N, "active": "mediana anual >= tau"}},
+                       "pixel_trend": {"alpha": ALPHA, "min_n": MIN_N, "active": "mediana anual >= tau, dentro do estado"}},
         "input_sha256": {"sectors_gpkg": sha256_file(gpkg), **inputs}, "outputs": outputs})
     print("OK", [o["path"] for o in outputs])
 

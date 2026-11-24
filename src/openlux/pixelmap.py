@@ -34,3 +34,19 @@ def state_mask(geometries, shape, transform) -> np.ndarray:
     m = rasterize([(g, 1) for g in geometries], out_shape=shape, transform=transform, fill=0,
                   all_touched=True, dtype="uint8")
     return m.astype(bool)
+
+
+#: Camada de mudanca por pixel (Mann-Kendall + Sen + FDR, openlux.pixeltrend). 0 fora do estado.
+CHANGE_UNTESTED, CHANGE_NOT_SIGNIFICANT, CHANGE_INCREASE, CHANGE_DECREASE = 1, 2, 3, 4
+
+
+def change_codes(label, tested, inside) -> np.ndarray:
+    """Codigos uint8 da mudanca por pixel: 1 nao testado (nao iluminado ou poucos anos), 2 sem mudanca
+    significativa, 3 aumento significativo, 4 reducao significativa; 0 fora do estado."""
+    label, tested, inside = np.asarray(label), np.asarray(tested, dtype=bool), np.asarray(inside, dtype=bool)
+    out = np.full(label.shape, CODE_OUTSIDE, dtype="uint8")
+    out[inside] = CHANGE_UNTESTED
+    out[inside & tested] = CHANGE_NOT_SIGNIFICANT
+    out[inside & tested & (label == 1)] = CHANGE_INCREASE
+    out[inside & tested & (label == -1)] = CHANGE_DECREASE
+    return out

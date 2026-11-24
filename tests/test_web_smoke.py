@@ -149,7 +149,7 @@ def test_alert_banner_is_data_driven_and_visible(page):
 def test_no_demo_values_and_expression_present(page):
     body = page.inner_text("body")
     assert "estimativa baseada em sensoriamento remoto" in body.lower()
-    assert "não medições do brilho do céu" in body.lower()
+    assert "não uma medição do brilho do céu" in body.lower()
     assert "lorem" not in body.lower()
 
 
@@ -209,6 +209,7 @@ def _px_expected(code, meta):
 
 
 def test_pixel_layer_is_default_and_matches_the_class_grid(page):
+    page.evaluate("() => document.documentElement.removeAttribute('data-theme')")
     """Camada de pixel: legenda com unidade e fonte, canvas desenhado, e o pixel sob o cursor tem a cor
     e a classe do arquivo data/pixels/<ano>.bin (conferidos de forma independente em Python)."""
     meta = json.loads((WEB / "data" / "pixels" / "meta.json").read_text())
@@ -218,7 +219,7 @@ def test_pixel_layer_is_default_and_matches_the_class_grid(page):
     leg = page.inner_text("#legend")
     assert "nW·cm⁻²·sr⁻¹" in leg and "Fonte:" in leg and "não é o brilho do céu" in leg and "sem dado válido" in leg
     year = page.evaluate("() => document.getElementById('year-out').textContent")
-    grid = np.fromfile(WEB / "data" / "pixels" / f"{year}.bin", dtype="uint8").reshape(meta["grid"]["rows"], meta["grid"]["cols"])
+    grid = np.fromfile(WEB / "data" / "pixels" / "snpp" / f"{year}.bin", dtype="uint8").reshape(meta["grid"]["rows"], meta["grid"]["cols"])
     g = meta["grid"]
     page.locator("#mapa").scroll_into_view_if_needed()
     box = page.locator("#mapa").bounding_box()
@@ -379,6 +380,7 @@ def test_municipality_names_appear_only_when_zoomed_in_and_can_be_turned_off(pag
     pg = _fresh(page, server, "?lat=-22.9&lng=-43.3&z=10.5&l=pixel")
     pg.wait_for_selector(".mlabel span")
     assert pg.locator(".mlabel span").count() > 0
+    pg.click("#display-opts summary")
     pg.uncheck("#labels-chk")
     assert pg.locator(".mlabel span").count() == 0
     pg.context.close()
@@ -393,4 +395,115 @@ def test_plain_language_legend_keeps_numeric_classes_and_does_not_claim_a_sky_sc
     assert "nem equivalem à escala Bortle" in leg and "não foram validados em campo" in leg
     ui = (WEB / "index.html").read_text(encoding="utf-8") + (WEB / "js" / "app.js").read_text(encoding="utf-8")
     assert "mag/arcsec" not in ui and "SQM" not in ui                  # sem escala de brilho do ceu antes da validacao em campo
+    pg.context.close()
+
+
+def _meta():
+    return json.loads((WEB / "data" / "pixels" / "meta.json").read_text(encoding="utf-8"))
+
+
+def _canvas_rgb(pg, fx, fy):
+    box = pg.locator("#mapa").bounding_box()
+    x, y = box["x"] + fx * box["width"], box["y"] + fy * box["height"]
+    pg.mouse.move(x, y)
+    pg.wait_for_timeout(40)
+    rgba = pg.evaluate("""([x, y]) => { const c=document.querySelector('canvas.openlux-pixels'); const b=c.getBoundingClientRect();
+        return Array.from(c.getContext('2d').getImageData(Math.round(x-b.x), Math.round(y-b.y), 1, 1).data); }""", [x, y])
+    return rgba, pg.inner_text("#pixel-readout")
+
+
+def test_noaa20_sensor_clamps_the_year_and_matches_its_own_grid(page, server):
+    meta = _meta()
+    pg = _fresh(page, server, "?l=pixel&y=2013")
+    pg.select_option("#px-sensor", "noaa20")
+    assert pg.inner_text("#year-out") == "2018"                          # NOAA-20 so existe de 2018 a 2025
+    assert pg.evaluate("() => new URLSearchParams(location.search).get('s')") == "noaa20"
+    assert "NOAA-20" in pg.inner_text("#legend") and "VJ146A4" in pg.inner_text("#legend")
+    g = meta["grid"]
+    grid = np.fromfile(WEB / "data" / "pixels" / "noaa20" / "2018.bin", dtype="uint8").reshape(g["rows"], g["cols"])
+    pg.locator("#mapa").scroll_into_view_if_needed()
+    checked = agree = 0
+    for fx in (0.4, 0.5, 0.6):
+        for fy in (0.6, 0.7, 0.8):
+            rgba, txt = _canvas_rgb(pg, fx, fy)
+            m = re.search(r"\((-?\d+),(\d+)\u00b0, (-?\d+),(\d+)\u00b0\)", txt)
+            if not m:
+                continue
+            lat, lon = float(f"{m.group(1)}.{m.group(2)}"), float(f"{m.group(3)}.{m.group(4)}")
+            r, c = int((g["lat_north"] - lat) // g["pixel_deg"]), int((lon - g["lon_west"]) // g["pixel_deg"])
+            if 0 <= r < g["rows"] and 0 <= c < g["cols"]:
+                exp = _px_expected(int(grid[r, c]), meta)
+                got = "#%02x%02x%02x" % tuple(rgba[:3]) if rgba[3] else None
+                checked += 1
+                agree += int(got == exp)
+    assert checked >= 6 and agree >= checked - 1, (checked, agree)
+    pg.fill("#year", "0"); pg.dispatch_event("#year", "input")
+    assert pg.inner_text("#year-out") == "2018"
+    assert _relevant_errors(pg.errors, _cloudflare_injected(pg.content())) == []
+    pg.context.close()
+
+
+def test_change_layer_legend_counts_and_colors_match_the_grid(page, server):
+    meta = _meta()
+    pg = _fresh(page, server, "?l=pixel&s=snpp&v=2012_2021")
+    leg = pg.inner_text("#legend")
+    cn = meta["sensors"]["snpp"]["change"]["2012_2021"]["counts"]
+    tested = cn["increase"] + cn["decrease"] + cn["not_significant"]
+    assert "Aumento significativo" in leg and "Redução significativa" in leg and "Não testado" in leg and "não foram validados em campo" in leg
+    assert ("%.1f%%" % (100 * cn["increase"] / tested)).replace(".", ",") in leg       # percentuais conferidos a partir do meta.json
+    assert pg.is_hidden("#year-wrap")                                                   # a mudanca nao tem controle de ano
+    pg.select_option("#px-view", "2012_2025")
+    leg2 = pg.inner_text("#legend")
+    assert "inclui 2022–2025" in leg2 and "não leia como luz nova" in leg2             # aviso do ruido do S-NPP nesta janela
+    pg.select_option("#px-sensor", "noaa20")
+    assert pg.eval_on_selector("#px-view", "e => e.value") == "rad"                    # janelas de um sensor nao valem para o outro
+    pg.select_option("#px-view", "2018_2025")
+    assert "série curta" in pg.inner_text("#legend")
+    assert _relevant_errors(pg.errors, _cloudflare_injected(pg.content())) == []
+    pg.context.close()
+
+
+def test_basemap_is_off_by_default_and_only_requests_openstreetmap_after_opt_in(page, server):
+    pg = page.context.browser.new_context(viewport={"width": 1280, "height": 900}).new_page()
+    pg.errors = []
+    pg.on("console", lambda m: pg.errors.append(m.text) if m.type == "error" else None)
+    seen = []
+    png = bytes.fromhex("89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000d4944415478da63f8cfc0f01f0005000201a52f6f2b0000000049454e44ae426082")
+    pg.route("https://tile.openstreetmap.org/**", lambda route: (seen.append(route.request.url), route.fulfill(status=200, content_type="image/png", body=png)))
+    pg.goto(server + "/?lat=-22.9&lng=-43.3&z=9")
+    pg.wait_for_selector("#mapa path.leaflet-interactive")
+    pg.wait_for_timeout(600)
+    assert seen == []                                                                    # nada de terceiros sem opt-in
+    assert not pg.is_checked("#base-chk")                                                 # desligado por padrao
+    pg.click("#display-opts summary")
+    assert "endereço IP" in pg.inner_text("#display-opts")                              # o aviso de privacidade esta visivel
+    pg.check("#base-chk")
+    pg.wait_for_function("() => document.querySelectorAll('.osm-tiles img.leaflet-tile').length > 0")
+    assert seen and all(u.startswith("https://tile.openstreetmap.org/") for u in seen)
+    assert "OpenStreetMap" in pg.inner_text(".leaflet-control-attribution")            # atribuicao obrigatoria visivel
+    pg.uncheck("#base-chk")
+    assert pg.locator(".osm-tiles img.leaflet-tile").count() == 0
+    assert _relevant_errors(pg.errors, _cloudflare_injected(pg.content())) == []
+    pg.context.close()
+
+
+def test_dark_theme_switches_palette_and_opacity_changes_alpha(page, server):
+    meta = _meta()
+    pg = _fresh(page, server, "?lat=-22.9&lng=-43.3&z=10&l=pixel&y=2025")
+    pg.locator("#mapa").scroll_into_view_if_needed()
+    pg.click("#display-opts summary")
+    light, _ = _canvas_rgb(pg, 0.5, 0.6)
+    pg.select_option("#theme-sel", "dark")
+    assert pg.evaluate("() => document.documentElement.getAttribute('data-theme')") == "dark"
+    pg.wait_for_timeout(150)
+    dark, _ = _canvas_rgb(pg, 0.5, 0.6)
+    assert light[3] > 0 and dark[3] > 0 and light[:3] != dark[:3]                       # paleta diferente por tema
+    dark_hex = {"#1b2230", "#420a68", "#932667", "#dd513a", "#fca50a", "#fcffa4"}
+    assert "#%02x%02x%02x" % tuple(dark[:3]) in dark_hex
+    pg.fill("#px-opacity", "0.5"); pg.dispatch_event("#px-opacity", "input")
+    pg.wait_for_timeout(100)
+    half, _ = _canvas_rgb(pg, 0.5, 0.6)
+    assert abs(half[3] - round(0.5 * 255)) <= 1
+    pg.select_option("#theme-sel", "light")
+    assert _relevant_errors(pg.errors, _cloudflare_injected(pg.content())) == []
     pg.context.close()

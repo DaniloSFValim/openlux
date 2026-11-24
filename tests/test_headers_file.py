@@ -27,6 +27,9 @@ def test_csp_is_strict_for_scripts_and_same_origin_only():
     assert "'unsafe-eval'" not in csp
     assert directives["default-src"] == ["'self'"]
     assert directives["connect-src"] == ["'self'"]           # so os dados do proprio site
+    # unica excecao a "so do proprio dominio": imagens do mapa-base opcional do OpenStreetMap (um unico host, so imagens)
+    assert directives["img-src"] == ["'self'", "data:", "https://tile.openstreetmap.org"]
+    assert directives["style-src"] == ["'self'", "'unsafe-inline'"] and directives["font-src"] == ["'self'"]
     assert directives["frame-ancestors"] == ["'none'"] and directives["object-src"] == ["'none'"]
     assert "http:" not in csp and "*" not in csp.replace("'self'", "")
 

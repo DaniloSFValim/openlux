@@ -4,9 +4,11 @@
   --seq0:#ffffb2; --focus:#0b5fff;
 }
 @media (prefers-color-scheme: dark){
-  :root{ --bg:#0f1318; --surface:#171c23; --ink:#e8ecf1; --muted:#9aa5b4; --line:#2c3440;
+  :root:not([data-theme="light"]){ --bg:#0f1318; --surface:#171c23; --ink:#e8ecf1; --muted:#9aa5b4; --line:#2c3440;
     --accent:#6ea2ff; --warn-bg:#2a2112; --warn-line:#e69f00; --nodata:#59616d; --sea:#18202b; --focus:#6ea2ff; }
 }
+:root[data-theme="dark"]{ --bg:#0f1318; --surface:#171c23; --ink:#e8ecf1; --muted:#9aa5b4; --line:#2c3440;
+    --accent:#6ea2ff; --warn-bg:#2a2112; --warn-line:#e69f00; --nodata:#59616d; --sea:#18202b; --focus:#6ea2ff; }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
@@ -92,3 +94,19 @@ header.site h1{margin:0;font-size:1.5rem}header.site .subtitle{margin:0}header.s
 .legend details.meaning{margin-top:6px}
 .legend details.meaning summary{cursor:pointer;font-weight:600}
 .legend details.meaning ul{display:block;margin:4px 0 0 18px;padding:0;list-style:disc}
+
+.px-wrap{display:contents}
+details.display{margin:4px 0 6px}
+details.display summary{cursor:pointer;font-size:.88rem;font-weight:600}
+.is-dark .osm-tiles{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9) saturate(.6)}
+.is-dark .mlabel span{color:#e8ecf1;text-shadow:-1px -1px 0 #0b0f14,1px -1px 0 #0b0f14,-1px 1px 0 #0b0f14,1px 1px 0 #0b0f14,0 0 3px #0b0f14}
+.osm-tiles .leaflet-tile{outline:1px solid transparent}   /* evita emendas visiveis entre tiles quando ha filtro de cor */
+
+.ctrl-panel{padding:10px 12px;margin-bottom:10px;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+.ctrl-panel .controls{margin-bottom:4px}
+.ctrl-panel .controls label select,.ctrl-panel .controls label input[type=search]{max-width:100%}
+@media (max-width: 900px){
+  .explorer{display:flex;flex-direction:column;align-items:stretch}
+  .map-col,.panel-col{display:contents}
+  #mapa{order:1}#pixel-readout{order:2}.ctrl-panel{order:3}#legend{order:4}.tabs{order:5}.panel{order:6}
+}

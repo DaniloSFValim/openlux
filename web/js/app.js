@@ -122,7 +122,7 @@
   }
   const KIND = { obs: ['obs', 'Observado (agregado)'], der: ['der', 'Derivado'], qa: ['qa', 'Controle de qualidade'] };
 
-  const st = { ind: 'mean', iy: years.length - 1, sel: null, layer: pxMeta ? 'pixel' : 'mun' };
+  const st = { ind: 'mean', iy: years.length - 1, sel: null, layer: pxMeta ? 'pixel' : 'mun', sensor: 'snpp', view: 'rad', alpha: 0.9, basemap: false };
   const val = (cd, key = st.ind, iy = st.iy) => { const v = IND[key].get(M[cd], iy); return v == null || !isFinite(v) ? null : v; };
 
   /* ---------- aviso metodológico (dados) ---------- */
@@ -138,6 +138,8 @@
   map.attributionControl.setPrefix(false);
   map.attributionControl.addAttribution('Malha: IBGE (compatível com CC BY 4.0) · Radiância: NASA Black Marble · Exibição em Web Mercator; cálculos em grade lat/lon');
   L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);
+  // Mapa-base OPCIONAL (desligado por padrão): ao ligar, o navegador baixa imagens do servidor do OpenStreetMap, que recebe o IP do visitante.
+  const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 12, className: 'osm-tiles', attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap</a> contributors' });
   const layerByCode = {};
   const gl = L.geoJSON(geo, {
     style: () => ({ weight: 0.6, color: '#555', fillOpacity: 0.92 }),
@@ -150,28 +152,46 @@
   map.fitBounds(gl.getBounds(), { padding: [8, 8] });
 
   /* ---------- camada de pixel (grade de classes, desenhada no navegador) ---------- */
-  const PXPAL = ['#f2f2f2', '#ffeda0', '#fec44f', '#fd8d3c', '#e31a1c', '#800026'];  // < 0,5 neutro; depois amarelo → vinho
+  // Claro: amarelo → vinho (YlOrRd). Escuro: inferno, perceptualmente uniforme e feita para fundo escuro.
+  const PXPAL = { light: ['#f2f2f2', '#ffeda0', '#fec44f', '#fd8d3c', '#e31a1c', '#800026'], dark: ['#1b2230', '#420a68', '#932667', '#dd513a', '#fca50a', '#fcffa4'] };
+  const CHPAL = { light: { 1: '#e9ecf0', 2: '#c9ced6', 3: '#e66101', 4: '#5e3c99' }, dark: { 1: '#222b3a', 2: '#3a4557', 3: '#ff9e4a', 4: '#9b8fe0' } };
   const hex2rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const sysDark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : { matches: false };
+  const isDark = () => { const t = document.documentElement.getAttribute('data-theme'); return t === 'dark' || (t !== 'light' && sysDark.matches); };
+  const themeKey = () => (isDark() ? 'dark' : 'light');
+  const nodataRgb = () => hex2rgb((getComputedStyle(document.documentElement).getPropertyValue('--nodata').trim() || '#b4bac3').slice(0, 7));
   const pxCache = {};
-  function pxGrid(year) {
-    if (!pxCache[year]) {
+  function pxGrid(path) {
+    if (!pxCache[path]) {
       const g = pxMeta.grid;
-      pxCache[year] = fetch(`data/pixels/${year}.bin`).then((r) => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+      pxCache[path] = fetch(`data/pixels/${path}.bin`).then((r) => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
         .then((b) => { const a = new Uint8Array(b); if (a.length !== g.rows * g.cols) throw new Error('grade com tamanho inesperado'); return a; });
     }
-    return pxCache[year];
+    return pxCache[path];
+  }
+  const sensorYears = (sk) => Object.keys(pxMeta.sensors[sk].years).map(Number);
+  const pxPath = () => (st.view === 'rad' ? `${st.sensor}/${years[st.iy]}` : `${st.sensor}/change_${st.view}`);
+  function pxPalette() {   // código da grade → [r, g, b, fator de opacidade]
+    const pal = new Array(8).fill(null), th = themeKey();
+    if (st.view === 'rad') {
+      pal[1] = [...nodataRgb(), 1];
+      PXPAL[th].forEach((h, k) => { pal[pxMeta.classes.first_code + k] = [...hex2rgb(h), k === 0 && st.basemap ? 0.25 : 1]; });  // com mapa-base, "sem luz" fica quase transparente
+    } else {
+      Object.entries(CHPAL[th]).forEach(([c, h]) => { pal[+c] = [...hex2rgb(h), +c <= 2 && st.basemap ? 0.3 : 1]; });
+    }
+    return pal;
   }
   const pxCell = (ll) => { const g = pxMeta.grid; // índice (linha, coluna) da grade lat/lon; null fora da janela
     const c = Math.floor((ll.lng - g.lon_west) / g.pixel_deg), r = Math.floor((g.lat_north - ll.lat) / g.pixel_deg);
     return r < 0 || c < 0 || r >= g.rows || c >= g.cols ? null : [r, c]; };
   const PixelLayer = L.Layer.extend({
     onAdd(m) {
-      this._map = m; this._cv = L.DomUtil.create('canvas', 'openlux-pixels leaflet-zoom-hide');
-      m.getPane('tilePane').appendChild(this._cv);
+      this._map = m; if (!m.getPane('pixels')) { const pn = m.createPane('pixels'); pn.style.zIndex = 250; pn.style.pointerEvents = 'none'; }
+      this._cv = L.DomUtil.create('canvas', 'openlux-pixels leaflet-zoom-hide'); m.getPane('pixels').appendChild(this._cv);
       m.on('moveend zoomend resize', this.redraw, this); this.redraw();
     },
     onRemove(m) { m.off('moveend zoomend resize', this.redraw, this); this._cv.remove(); },
-    setGrid(a) { this._grid = a; this.redraw(); },
+    setGrid(a, pal, alpha) { this._grid = a; this._pal = pal; this._alpha = alpha; this.redraw(); },
     redraw() {
       const m = this._map, cv = this._cv; if (!m || !cv) return;
       const sz = m.getSize(), g = pxMeta.grid; cv.width = sz.x; cv.height = sz.y;
@@ -181,52 +201,76 @@
       const cols = new Int32Array(sz.x), rows = new Int32Array(sz.y);
       for (let x = 0; x < sz.x; x++) { const c = Math.floor((m.containerPointToLatLng([x, 0]).lng - g.lon_west) / g.pixel_deg); cols[x] = c < 0 || c >= g.cols ? -1 : c; }
       for (let y = 0; y < sz.y; y++) { const r = Math.floor((g.lat_north - m.containerPointToLatLng([0, y]).lat) / g.pixel_deg); rows[y] = r < 0 || r >= g.rows ? -1 : r; }
-      const rgb = PXPAL.map(hex2rgb), nod = hex2rgb(NODATA);
+      const pal = this._pal;
       for (let y = 0; y < sz.y; y++) { if (rows[y] < 0) continue; const base = rows[y] * g.cols;
         for (let x = 0; x < sz.x; x++) { if (cols[x] < 0) continue;
-          const code = this._grid[base + cols[x]]; if (code === 0) continue;
-          const col = code === 1 ? nod : rgb[code - pxMeta.classes.first_code]; const i = (y * sz.x + x) * 4;
-          d[i] = col[0]; d[i + 1] = col[1]; d[i + 2] = col[2]; d[i + 3] = 235; } }
+          const col = pal[this._grid[base + cols[x]]]; if (!col) continue; const i = (y * sz.x + x) * 4;
+          d[i] = col[0]; d[i + 1] = col[1]; d[i + 2] = col[2]; d[i + 3] = Math.round(this._alpha * col[3]); } }
       ctx.putImageData(img, 0, 0);
     },
   });
   const pxLayer = pxMeta ? new PixelLayer() : null;
-  let pxLoaded = null;  // ano da grade atualmente desenhada
   async function pxShow() {
-    const y = years[st.iy]; if (pxLoaded === y) return;
-    try { const a = await pxGrid(y); if (years[st.iy] === y && st.layer === 'pixel') { pxLayer.setGrid(a); pxLoaded = y; } }
+    const path = pxPath();
+    try { const a = await pxGrid(path); if (pxPath() === path && st.layer === 'pixel') pxLayer.setGrid(a, pxPalette(), Math.round(255 * st.alpha)); }
     catch (e) { $('pixel-readout').hidden = false; $('pixel-readout').textContent = 'Não foi possível carregar a camada de pixel deste ano.'; }
   }
   const pxShare = (a, code) => { let n = 0, t = 0; for (let i = 0; i < a.length; i++) { if (a[i] >= 2) { t++; if (a[i] === code) n++; } } return t ? n / t : NaN; };
   async function pxNote(y) {
-    if (y < 2022) return '';
-    try { const [a, b] = await Promise.all([pxGrid(2021), pxGrid(y)]);
-      return `<div class="pxnote"><strong>Atenção (S-NPP, ${y}):</strong> a partir de 2022 o sensor tem um piso de ruído mais alto em áreas escuras. A parcela dos pixels com valor na classe ${esc(pxMeta.classes.labels[1])} passou de ${fmt(100 * pxShare(a, 3), 1)}% em 2021 para ${fmt(100 * pxShare(b, 3), 1)}% em ${y}, e a da classe ${esc(pxMeta.classes.labels[0])} caiu de ${fmt(100 * pxShare(a, 2), 1)}% para ${fmt(100 * pxShare(b, 2), 1)}%. Parte dessa mudança pode ser ruído, não luz nova (ver o aviso acima).</div>`;
+    if (y < 2022 || st.view !== 'rad') return '';
+    const sk = st.sensor, nm = pxMeta.sensors[sk].name;
+    try { const [a, b] = await Promise.all([pxGrid(`${sk}/2021`), pxGrid(`${sk}/${y}`)]);
+      const lab = pxMeta.classes.labels, why = sk === 'snpp'
+        ? 'a partir de 2022 o sensor tem um piso de ruído mais alto em áreas escuras. Parte dessa mudança pode ser ruído, não luz nova (ver o aviso acima).'
+        : 'o NOAA-20 tem piso de ruído bem menor que o S-NPP, mas usa o mesmo algoritmo: uma mudança comum aos dois sensores não é separável aqui.';
+      return `<div class="pxnote"><strong>Atenção (${esc(nm)}, ${y}):</strong> a parcela dos pixels com valor na classe ${esc(lab[1])} passou de ${fmt(100 * pxShare(a, 3), 1)}% em 2021 para ${fmt(100 * pxShare(b, 3), 1)}% em ${y}, e a da classe ${esc(lab[0])} foi de ${fmt(100 * pxShare(a, 2), 1)}% para ${fmt(100 * pxShare(b, 2), 1)}%. ${why}</div>`;
     } catch (e) { return ''; }
   }
+  const PLAIN = ['Sem luz detectada', 'Muito pouca luz', 'Pouca luz', 'Luz moderada', 'Muita luz', 'Muitíssima luz'];
   async function renderPixelLegend() {
+    const th = themeKey(), sk = st.sensor, sm = pxMeta.sensors[sk];
+    if (st.view !== 'rad') { renderChangeLegend(th, sk, sm); return; }
     const y = years[st.iy], c = pxMeta.classes;
-    const PLAIN = ['Sem luz detectada', 'Muito pouca luz', 'Pouca luz', 'Luz moderada', 'Muita luz', 'Muitíssima luz'];
-    const items = c.labels.map((l, k) => `<li><span class="sw" style="background:${PXPAL[k]}"></span>${esc(PLAIN[k])} <span class="muted">· ${esc(l)}</span></li>`).join('') + `<li><span class="sw" style="background:${NODATA}"></span>sem dado válido (água, qualidade)</li>`;
+    const items = c.labels.map((l, k) => `<li><span class="sw" style="background:${PXPAL[th][k]}"></span>${esc(PLAIN[k])} <span class="muted">· ${esc(l)}</span></li>`).join('') + `<li><span class="sw" style="background:var(--nodata)"></span>sem dado válido (água, qualidade)</li>`;
     $('legend').innerHTML = `<h3>Radiância noturna por pixel <span class="badge obs">Observado</span><span class="badge cls">Classes fixas</span></h3>
-      <div><strong>Unidade:</strong> nW·cm⁻²·sr⁻¹ · <strong>Período:</strong> ano ${y}</div><ul>${items}</ul>
+      <div><strong>Sensor:</strong> ${esc(sm.name)} · <strong>Unidade:</strong> nW·cm⁻²·sr⁻¹ · <strong>Período:</strong> ano ${y}</div><ul>${items}</ul>
       <details class="meaning" open><summary>O que isto significa</summary><ul>
-        <li>O satélite registra a luz que sobe da superfície à noite, em quadradinhos (pixels) de cerca de 460 m. Cores mais escuras no mapa = mais luz detectada.</li>
+        <li>O satélite registra a luz que sobe da superfície à noite, em quadradinhos (pixels) de cerca de 460 m. Cores mais claras e quentes no mapa = mais luz detectada.</li>
         <li><strong>Isto não é o brilho do céu</strong> que uma pessoa enxerga do chão: o céu também depende da atmosfera, das nuvens, da Lua e da luz de lugares distantes.</li>
         <li>Mais luz detectada não é, por si só, medida de dano: o OpenLux mede a luz que o satélite vê, não seus efeitos.</li>
         <li>Os nomes das faixas (de “sem luz detectada” a “muitíssima luz”) são só uma forma simples de ler os números: não são classes oficiais nem equivalem à escala Bortle.</li>
         <li>Estes valores ainda <strong>não foram validados em campo</strong>.</li></ul></details>
-      <div class="small"><strong>Classificação:</strong> limites fixos (0,5; 2; 8; 30; 100), iguais em todos os anos; 0,5 é o valor abaixo do qual o produto zera a radiância. Intervalos fechados à esquerda: [a, b). A grade mostra a classe, não o valor.</div>
-      <div class="small muted"><strong>Fonte:</strong> NASA Black Marble VNP46A4 v2.0 (Suomi NPP), camada AllAngle_Composite_Snow_Free, qualidade 0, apenas terra; pixels do estado (malha IBGE 2024).</div><div id="pxnote"></div>`;
-    const n = await pxNote(y); if (years[st.iy] === y && $('pxnote')) $('pxnote').innerHTML = n;
+      <div class="small"><strong>Classificação:</strong> limites fixos (0,5; 2; 8; 30; 100), iguais em todos os anos e sensores; 0,5 é o valor abaixo do qual o produto zera a radiância. Intervalos fechados à esquerda: [a, b). A grade mostra a classe, não o valor.</div>
+      <div class="small muted"><strong>Fonte:</strong> NASA Black Marble ${esc(sm.product)} v2.0, camada AllAngle_Composite_Snow_Free, qualidade 0, apenas terra; pixels do estado (malha IBGE 2024).</div><div id="pxnote"></div>`;
+    const n = await pxNote(y); if (years[st.iy] === y && st.view === 'rad' && $('pxnote')) $('pxnote').innerHTML = n;
+  }
+  function renderChangeLegend(th, sk, sm) {
+    const w = sm.change[st.view], cn = w.counts, tested = cn.increase + cn.decrease + cn.not_significant, pc = (v) => fmt(100 * v / tested, 1) + '%';
+    const lbl = `${w.years[0]}–${w.years[1]}`, noisy = sk === 'snpp' && w.years[1] >= 2022;
+    const items = [[3, 'Aumento significativo', cn.increase], [4, 'Redução significativa', cn.decrease], [2, 'Sem mudança significativa', cn.not_significant]]
+      .map(([c, t, n]) => `<li><span class="sw" style="background:${CHPAL[th][c]}"></span>${t} <span class="muted">· ${pc(n)} dos pixels testados</span></li>`).join('')
+      + `<li><span class="sw" style="background:${CHPAL[th][1]}"></span>Não testado <span class="muted">· sem luz na mediana dos anos ou poucos anos válidos</span></li>`;
+    $('legend').innerHTML = `<h3>Mudança por pixel, ${esc(lbl)} <span class="badge der">Derivado</span><span class="badge cls">Mann–Kendall + Sen, FDR 5%</span></h3>
+      <div><strong>Sensor:</strong> ${esc(sm.name)} · <strong>Janela:</strong> ${esc(lbl)} (${w.n_years} anos) · <strong>Pixels testados:</strong> ${fmt(tested, 0)}</div><ul>${items}</ul>
+      ${noisy ? `<div class="pxnote"><strong>Atenção:</strong> esta janela inclui 2022–2025, quando o S-NPP tem mais ruído em áreas escuras. Os aumentos predominam (${pc(cn.increase)} contra ${pc(cn.decrease)} de reduções), e isso coincide com esse ruído: <strong>não leia como luz nova</strong>. Compare com a janela 2012–2021 ou com o NOAA-20.</div>` : ''}
+      ${sk === 'noaa20' ? `<div class="pxnote"><strong>Atenção:</strong> série curta (${w.n_years} anos, o mínimo exigido); o teste tem pouco poder. Aumentos comuns aos dois sensores não são separáveis de um possível artefato do algoritmo compartilhado.</div>` : ''}
+      <details class="meaning" open><summary>O que isto significa</summary><ul>
+        <li>Cada pixel é testado separadamente sobre a série anual da janela. A cor mostra o sentido da tendência quando ela é estatisticamente significativa.</li>
+        <li>O controle de falsas descobertas (5%) vale para os pixels do estado, mas pixels vizinhos são parecidos entre si e isso não é corrigido.</li>
+        <li><strong>Significativo não quer dizer luz nova</strong>, nem dano: pode ser ruído do sensor, mudança de lâmpada, vegetação, ocupação.</li>
+        <li>Só entram pixels iluminados (mediana anual ≥ ${esc(String(pxMeta.change_params.tau_nw_cm2_sr).replace('.', ','))} nW·cm⁻²·sr⁻¹) com pelo menos ${pxMeta.change_params.min_valid_years} anos válidos.</li>
+        <li>Estes resultados <strong>não foram validados em campo</strong>.</li></ul></details>
+      <div class="small muted"><strong>Fonte:</strong> NASA Black Marble ${esc(sm.product)} v2.0, mesma série da camada de radiância; método em METHODOLOGY.md, seção 7.1.</div>`;
   }
   function pxReadout(ll) {
     const box = $('pixel-readout'); if (st.layer !== 'pixel' || !pxLayer._grid) return;
     const cell = pxCell(ll); box.hidden = false;
     if (!cell) { box.textContent = 'Passe o cursor sobre o mapa (ou toque) para ver a classe do pixel.'; return; }
     const code = pxLayer._grid[cell[0] * pxMeta.grid.cols + cell[1]], f = pxMeta.classes.first_code;
-    const what = code === 0 ? 'fora do estado' : code === 1 ? 'sem dado válido' : `${pxMeta.classes.labels[code - f]} nW·cm⁻²·sr⁻¹`;
-    box.textContent = `Pixel (${fmt(ll.lat, 3)}°, ${fmt(ll.lng, 3)}°), ano ${years[st.iy]}: ${what}. Mostra a classe, não o valor.`;
+    let what;
+    if (st.view === 'rad') what = code === 0 ? 'fora do estado' : code === 1 ? 'sem dado válido' : `${pxMeta.classes.labels[code - f]} nW·cm⁻²·sr⁻¹`;
+    else what = pxMeta.change_codes[String(code)] || 'fora do estado';
+    box.textContent = `Pixel (${fmt(ll.lat, 4)}°, ${fmt(ll.lng, 4)}°), ${st.view === 'rad' ? 'ano ' + years[st.iy] : 'mudança ' + st.view.replace('_', '–')}, ${pxMeta.sensors[st.sensor].name.split(' (')[0]}: ${what}. Mostra a classe, não o valor.`;
   }
   if (pxLayer) { map.on('mousemove click', (e) => pxReadout(e.latlng)); }
 
@@ -246,16 +290,19 @@
 
   function render() {
     const ind = IND[st.ind], px = st.layer === 'pixel';
-    $('year-wrap').hidden = !(px || ind.yearly);
-    $('year-note').hidden = !(px || ind.yearly);
+    const showYear = px ? st.view === 'rad' : ind.yearly;
+    $('year-wrap').hidden = !showYear;
+    $('year-note').hidden = !showYear;
+    $('px-wrap').hidden = !px;
     $('indicator').disabled = px;
-    if (pxLayer) { if (px) { if (!map.hasLayer(pxLayer)) pxLayer.addTo(map); pxShow(); } else if (map.hasLayer(pxLayer)) { map.removeLayer(pxLayer); pxLoaded = null; } }
+    document.documentElement.classList.toggle('is-dark', isDark());
+    if (pxLayer) { if (px) { if (!map.hasLayer(pxLayer)) pxLayer.addTo(map); pxShow(); } else if (map.hasLayer(pxLayer)) map.removeLayer(pxLayer); }
     $('pixel-readout').hidden = !px;
     if (px) $('pixel-readout').textContent = 'Passe o cursor sobre o mapa (ou toque) para ver a classe do pixel.';
     gl.eachLayer((layer) => {
       const cd = layer.feature.properties.CD_MUN, sel = cd === st.sel;
       if (px) {
-        layer.setStyle({ fillOpacity: 0, weight: sel ? 3.2 : 0.8, color: sel ? '#0b5fff' : '#3b3b3b', opacity: sel ? 1 : 0.7 });
+        layer.setStyle({ fillOpacity: 0, weight: sel ? 3.2 : 0.8, color: sel ? (isDark() ? '#6ea2ff' : '#0b5fff') : (isDark() ? '#b9c3d1' : '#3b3b3b'), opacity: sel ? 1 : 0.7 });
         if (sel) layer.bringToFront();
         layer.unbindTooltip().bindTooltip(`<strong>${esc(M[cd].name)}</strong>`, { sticky: true });
         return;
@@ -291,13 +338,32 @@
   const yrOut = () => { $('year-out').textContent = years[st.iy]; yr.setAttribute('aria-valuetext', String(years[st.iy])); };
   yrOut();
   $('indicator').addEventListener('change', (e) => { st.ind = e.target.value; render(); });
-  yr.addEventListener('input', (e) => { st.iy = +e.target.value; yrOut(); render(); if (st.sel) renderDetail(); });
+  function clampYear() {   // o NOAA-20 só tem 2018–2025: leva o ano ao mais próximo disponível
+    if (!pxMeta) return; const ok = sensorYears(st.sensor);
+    if (!ok.includes(years[st.iy])) { const near = ok.reduce((b, v) => (Math.abs(v - years[st.iy]) < Math.abs(b - years[st.iy]) ? v : b), ok[0]); st.iy = years.indexOf(near); yr.value = st.iy; yrOut(); }
+  }
+  yr.addEventListener('input', (e) => { st.iy = +e.target.value; yrOut(); if (st.layer === 'pixel' && st.view === 'rad') clampYear(); render(); if (st.sel) renderDetail(); });
   const optionsHtml = (blank) => (blank ? '<option value="">— nenhum —</option>' : '') + codes.map((c) => `<option value="${c}">${esc(M[c].name)}</option>`).join('');
   $('mun-select').innerHTML = '<option value="">Selecione…</option>' + optionsHtml(false);
   $('mun-select').addEventListener('change', (e) => select(e.target.value || null));
   if (!pxLayer) $('layer-wrap').hidden = true;
   document.querySelectorAll('input[name="layer"]').forEach((r) => { r.checked = r.value === st.layer; r.addEventListener('change', (e) => { if (e.target.checked) { st.layer = e.target.value; render(); } }); });
   $('reset-btn').addEventListener('click', () => map.fitBounds(gl.getBounds(), { padding: [8, 8] }));
+  if (pxMeta) {
+    $('px-sensor').innerHTML = Object.entries(pxMeta.sensors).map(([k, v]) => `<option value="${k}">${esc(v.name)}</option>`).join('');
+    const fixView = () => { if (st.view !== 'rad' && !pxMeta.sensors[st.sensor].change[st.view]) st.view = 'rad'; };
+    const fillView = () => { fixView(); $('px-view').innerHTML = '<option value="rad">Radiância por ano</option>' + Object.entries(pxMeta.sensors[st.sensor].change).map(([w, v]) => `<option value="${w}">Mudança ${v.years[0]}–${v.years[1]}</option>`).join(''); $('px-view').value = st.view; $('px-sensor').value = st.sensor; };
+    fillView();
+    $('px-sensor').addEventListener('change', (e) => { st.sensor = e.target.value; fillView(); clampYear(); render(); });
+    $('px-view').addEventListener('change', (e) => { st.view = e.target.value; clampYear(); render(); });
+    window.openluxFillView = fillView;   // usado ao restaurar o estado da URL
+  } else { $('px-wrap').hidden = true; }
+  $('px-opacity').addEventListener('input', (e) => { st.alpha = +e.target.value; if (pxLayer && map.hasLayer(pxLayer)) pxShow(); });
+  $('base-chk').addEventListener('change', (e) => { st.basemap = e.target.checked; if (st.basemap) osm.addTo(map); else map.removeLayer(osm); render(); });
+  const setTheme = (v) => { if (v === 'light' || v === 'dark') document.documentElement.setAttribute('data-theme', v); else document.documentElement.removeAttribute('data-theme'); };
+  try { const t = localStorage.getItem('openlux-theme'); if (t === 'light' || t === 'dark') { setTheme(t); $('theme-sel').value = t; } } catch (e) { /* sem armazenamento: segue o tema do sistema */ }
+  $('theme-sel').addEventListener('change', (e) => { setTheme(e.target.value); try { localStorage.setItem('openlux-theme', e.target.value); } catch (er) { /* ignora */ } render(); });
+  if (sysDark.addEventListener) sysDark.addEventListener('change', () => render());
 
   /* ---------- abas ---------- */
   const TABS = ['mun', 'rank', 'cmp', 'state'];
@@ -503,12 +569,15 @@
     const i = P.get('i'); if (i && Object.prototype.hasOwnProperty.call(IND, i)) { st.ind = i; $('indicator').value = i; }
     const m = P.get('m'); if (m && Object.prototype.hasOwnProperty.call(M, m)) { st.sel = m; $('mun-select').value = m; }
     document.querySelectorAll('input[name="layer"]').forEach((r) => { r.checked = r.value === st.layer; });
+    const sn = P.get('s'); if (pxMeta && sn && Object.prototype.hasOwnProperty.call(pxMeta.sensors, sn)) st.sensor = sn;
+    const vw = P.get('v'); if (pxMeta && vw && (vw === 'rad' || Object.prototype.hasOwnProperty.call(pxMeta.sensors[st.sensor].change, vw))) st.view = vw;
+    if (pxMeta) { window.openluxFillView(); if (st.layer === 'pixel' && st.view === 'rad') clampYear(); }
     const lat = num('lat'), lng = num('lng'), z = num('z');
     if (lat != null && lng != null && z != null && z >= 6 && z <= 12 && mapBounds.contains([lat, lng])) map.setView([lat, lng], z);
     else if (st.sel) map.fitBounds(layerByCode[st.sel].getBounds(), { maxZoom: 10, padding: [30, 30] });
   }
   function writeUrl() {
-    const c = map.getCenter(), q = new URLSearchParams({ lat: c.lat.toFixed(4), lng: c.lng.toFixed(4), z: String(map.getZoom()), y: String(years[st.iy]), l: st.layer, i: st.ind });
+    const c = map.getCenter(), q = new URLSearchParams({ lat: c.lat.toFixed(4), lng: c.lng.toFixed(4), z: String(map.getZoom()), y: String(years[st.iy]), l: st.layer, i: st.ind, s: st.sensor, v: st.view });
     if (st.sel) q.set('m', st.sel);
     try { history.replaceState(null, '', '?' + q.toString()); } catch (e) { /* ambientes sem history: o link só não é atualizado */ }
   }

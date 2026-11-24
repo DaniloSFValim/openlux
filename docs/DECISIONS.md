@@ -247,10 +247,16 @@ Limites: o NOAA-20 tem só 8 anos; o ajuste usa 92 municípios por ano; um únic
   anual >= 0,5 nW em terra (iluminados) e >= 8 anos validos. Participacao por municipio ponderada pela cobertura.
 - **Limitacoes.** BH assume independencia ou dependencia positiva; pixels vizinhos sao correlacionados e nao ha correcao
   espacial dedicada. O teste detecta tendencia monotonica, nao mudanca de nivel. "Significativo" nao implica mudanca fisica.
-- **Resultado e cautela.** Janela 2012-2021 (92.338 pixels testados): 12.009 com aumento e 11.569 com reducao
-  significativos (13,0 % e 12,5 %), praticamente simetricos. Janela 2012-2025 (99.462 testados): 38.717 aumentos
-  e 5.536 reducoes (38,9 % e 5,6 %). A assimetria da segunda janela coincide com o piso de ruido do S-NPP pos-2021 e **nao
-  deve ser lida como aumento real de iluminacao**: a causa nao foi separada. As contagens saem de `outputs/sectors/run_sectors.jsonl`.
+- **Conjunto testado (corrigido).** Só pixels do estado (malha municipal) entram no teste e no controle de falsas descobertas. **Erratum:** a primeira
+  versão deste texto (PR #5) citava 13,0 % e 12,5 % (2012-2021) e 38,9 % e 5,6 % (2012-2025); essas contagens vinham de um teste feito sobre a janela retangular
+  inteira, que inclui terra de estados vizinhos e mar (20.605 pixels iluminados fora do estado), e eram relatadas como se fossem do estado. Refeito só com pixels do estado.
+  **Os resultados por pixel e por município não mudaram:** dentro do estado, 0 de 72.003 pixels trocam de rótulo entre os dois conjuntos de teste, e os CSV municipais têm os mesmos hashes; o que estava errado eram só os totais citados.
+- **Resultado e cautela (S-NPP).** Janela 2012-2021 (72.003 pixels testados): 8.231 com aumento (11,4 %) e 10.138 com redução (14,1 %) significativos, com reduções um
+  pouco mais frequentes que aumentos. Janela 2012-2025 (77.176 testados): 28.375 aumentos (36,8 %) e 4.876 reduções (6,3 %). A assimetria da segunda janela coincide com o
+  piso de ruido do S-NPP pos-2021.
+- **NOAA-20, janela 2018-2025 (8 anos, o minimo exigido; 73.559 testados):** 28.522 aumentos (38,8 %) e 2.205 reducoes (3,0 %). Como o NOAA-20 tem piso de ruido bem menor, **o ruido
+  do S-NPP nao explica sozinho a assimetria**; sobra um aumento comum aos dois sensores que nao foi separado de um possivel artefato do algoritmo compartilhado (secao 3).
+  Nada disso deve ser lido como aumento real de iluminacao. As contagens saem de `outputs/sectors/run_sectors.jsonl` e de `web/data/pixels/meta.json` (iguais).
 
 ### 9.4 Registro estruturado
 
@@ -272,7 +278,7 @@ com a saida de texto e o `run_record` de proveniencia.
 - **Aviso de ruído no próprio mapa.** Em anos ≥ 2022 a legenda mostra, calculado a partir das grades, quanto a classe 0,5 a < 2 cresceu
   desde 2021: no estado, de 16,4 % para 32,4 % dos pixels válidos em 2025, enquanto a classe < 0,5 cai de 67,0 % para 46,8 %. Parte disso
   é o piso de ruído do S-NPP (seção 3), não luz nova; esses números não separam as duas causas.
-- **Zoom máximo 12** (um pixel de ≈ 460 m ocupa ≈ 13 px); sem mapa-base de terceiros, por causa da política de segurança (CSP) e dos termos de uso.
+- **Zoom máximo 12** (um pixel de ≈ 460 m ocupa ≈ 13 px); mapa-base de terceiros só como opção desligada por padrão (seção 12).
 - **Limitações.** Classes, não valores; vizinhança mais próxima na tela; herda o ruído do S-NPP; não é brilho do céu.
 
 ## 11. Interface: link permanente, busca, contexto próprio e legenda em linguagem comum
@@ -289,11 +295,38 @@ Implementado:
 3. **Legenda em linguagem comum.** Nomes simples das faixas (“sem luz detectada” a “muitíssima luz”) **ao lado** das faixas numéricas, mais um bloco “O que isto significa”.
    Os nomes são rótulos de leitura: não são classes oficiais nem equivalem à escala Bortle.
 4. **Contexto geográfico próprio.** Limites municipais e **nomes dos municípios** a partir de zoom 9,5 (desligável), posicionados no centro do retângulo envolvente
-   (aproximado em formas irregulares). **Sem mapa-base de terceiros:** tiles externos exigiriam relaxar a política de segurança (CSP), expõem o IP do visitante a terceiros
+   (aproximado em formas irregulares). **Sem mapa-base de terceiros por padrão (ver seção 12 para a opção):** tiles externos exigiriam relaxar a política de segurança (CSP), expõem o IP do visitante a terceiros
    e têm termos de uso que não foram verificados. Hidrografia e vias do IBGE seriam o próximo passo e exigem verificar licença e peso dos arquivos.
 
 **Não implementado (decisão registrada): escala Bortle/SQM, contagem de estrelas visíveis e “estimativa” do mês corrente.** Todas supõem um modelo de brilho do céu que o OpenLux não
 tem nem validou: a relação entre radiância orbital e brilho do céu depende de atmosfera, espectro e luz de fontes distantes (`docs/FIELD_VALIDATION.md`). Mostrar “Bortle 9,0” ou
 “< 200 estrelas” passaria precisão que os dados não sustentam. O composto anual do satélite para o ano corrente também não existe, então não há o que mostrar como “estimativa” do mês.
 Caminho: executar a validação em campo; só então avaliar uma relação calibrada, apresentada com incerteza.
+
+## 12. Interface: sensor, mudança por pixel, tema escuro e mapa-base opcional
+
+Pedido do autor: aproximar o visual de um mapa de brilho do céu modelado (lightpollutionmap.app), mantendo o rigor.
+
+**Implementado**
+- **Sensor.** A camada de pixel passa a ter Suomi NPP (2012-2025) e NOAA-20 (2018-2025). O NOAA-20 tem piso de ruído bem menor desde 2022, o que permite comparar os dois no próprio mapa.
+  Ao trocar para o NOAA-20, o ano é levado a 2018 se estiver antes.
+- **Mudança por pixel como camada.** Mann-Kendall + Sen + FDR 5 % (seção 9.3), com legenda que mostra o percentual de aumentos e reduções, avisa o ruído quando a janela inclui 2022-2025
+  e avisa a série curta do NOAA-20. Só os códigos (1 não testado, 2 sem mudança significativa, 3 aumento, 4 redução) são publicados.
+- **Tema escuro** (automático, claro ou escuro) com paleta inferno para a radiância, feita para fundo escuro; opacidade ajustável; controles reunidos num painel lateral para o mapa ocupar a primeira tela
+  no computador (no celular o mapa vem logo após o aviso).
+- **Mapa-base do OpenStreetMap, OPCIONAL e desligado por padrão.** Ao ligar, o navegador baixa imagens de `tile.openstreetmap.org`, cujo servidor recebe o IP do visitante; a interface avisa isso, mostra a atribuição
+  e **nunca** requisita o host antes do opt-in (há teste). A política de segurança (CSP) ganhou **uma única exceção**: `img-src https://tile.openstreetmap.org`. O estado do mapa-base não vai para o link permanente,
+  para que abrir um link compartilhado não dispare requisições a terceiros sem consentimento.
+  Termos do OSM consultados em 2026-11-24: servidores mantidos por doações, uso pesado proibido sem permissão, sem limite numérico oficial, acesso pode ser bloqueado sem aviso, exige `Referer`
+  (a política `strict-origin-when-cross-origin` o envia). Risco assumido: um site de pesquisa de tráfego modesto; se o uso crescer, trocar por tiles próprios ou de um provedor contratado.
+  O CARTO foi descartado: o acesso direto exige chave de API (cadastro do autor), e uma chave no JavaScript público contraria a regra de credenciais só em variável de ambiente.
+
+**Não implementado, de propósito**
+- **Hidrografia e vias do IBGE como contexto próprio.** A base contínua BC250 é um arquivo único de ≈ 864 MB para o Brasil, na escala 1:250.000 (grosseira para zoom 10-12), e o texto de
+  licença do IBGE não é legível por ferramenta. O mapa-base opcional cobre a necessidade; o IBGE fica como alternativa se o autor quiser contexto 100 % sem terceiros.
+- **Suavização/"halo" estilo brilho do céu.** Interpolar as classes criaria detalhe que o dado não tem, e imitar a propagação da luz seria um modelo de brilho do céu que o projeto não tem nem validou.
+  A camada continua em pixels.
+- **Escala Bortle/SQM, contagem de estrelas e estimativa do mês corrente:** mantido o que está na seção 11.
+
+**Limitações.** Com o mapa-base ligado, a classe "sem luz" fica quase transparente para mostrar o mapa por baixo; o filtro de cor que escurece o mapa-base é um efeito de exibição e não altera o dado.
 
