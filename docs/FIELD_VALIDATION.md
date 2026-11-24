@@ -127,6 +127,24 @@ Desenho aprovado em `docs/superpowers/specs/2026-11-24-field-pilot-design.md`.
   em `outputs/field/` (não versionado). É **só planejamento**: o satélite não informa acesso, segurança nem permissão, e as coordenadas são do centro do pixel (≈ 460 m). Estratificar pelo
   preditor garante o gradiente sem enviesar a associação testada. A malha de SP vem de `scripts/fetch_mesh.py --uf SP`.
 
+### Instrumento de código aberto como segundo aparelho: o FreeDSM (avaliação em 2026-11-24)
+
+O Gaia4Sustainability (universidades da Catalunha e da Galiza) publica o **FreeDSM**, um fotômetro de baixo custo, de construção doméstica, com plataforma de dados aberta.
+O que as fontes lidas dizem: usa um microcontrolador ESP32 com um sensor de luz e sensores de temperatura e umidade, recarga por USB-C ou painel solar; foi **calibrado com instrumentos comerciais**
+(a foto mostra vários TESS) por redes neurais e descida de gradiente para calcular a magnitude por segundo de arco quadrado; os dados vão para uma plataforma central e são comparados com
+um modelo de brilho natural do céu (Gambons, a partir de dados do satélite Gaia).
+
+**O que não consegui verificar:** o artigo é uma comunicação de 3 páginas **sem nenhum número**. Não declara exatidão, incerteza, desvio em relação ao SQM ou ao TESS, repetibilidade, dependência de temperatura,
+campo de visão nem banda espectral; o sensor de luz não é nomeado; o custo e a licença do hardware e do software não aparecem nas páginas lidas (o wiki de montagem não carregou em ferramenta automática).
+
+**O que isso implica para o piloto (proposta):**
+- O FreeDSM **não está caracterizado o bastante** para ser tratado como instrumento de validação. Se for usado, entra pelo caminho da calibração cruzada contra o SQM do autor (seção 10) e, enquanto não passar,
+  como dado **exploratório**. Seria preciso um tipo de instrumento próprio (fotômetro calibrado de saída em mag/arcsec²), que o código ainda não tem.
+- Aparelho de construção doméstica varia **de unidade para unidade**: cada exemplar precisaria da própria calibração, e a banda espectral e o campo de visão diferentes dos do SQM fazem o desvio **depender do tipo de
+  iluminação do local**, o que o critério de variação do desvio entre locais (≤ 0,15 mag) tenta detectar.
+- Construir e calibrar um aparelho é um subprojeto; para duas pessoas, um segundo SQM é o caminho mais simples. O FreeDSM é uma boa opção **extra**, e o projeto poderia ser procurado para colaboração, com os termos de dados deles lidos antes.
+- O modelo Gambons (brilho natural do céu a partir do Gaia) é uma referência possível para o piso natural nos locais escuros; **não foi avaliado** aqui.
+
 ## 11. O que depende do autor
 
 1. Aprovar (ou alterar) os limiares e as regras marcados como proposta, preencher `instruments.reference_device_id` e **congelar** a pré-especificação antes da coleta.
@@ -145,3 +163,7 @@ Não estão em `docs/references.json` (não passaram pela verificação de DOI d
 - Bará, S. et al. (2020). Magnitude to luminance conversions and visual brightness of the night sky. *MNRAS*, 493, 2429. https://ui.adsabs.harvard.edu/abs/2020MNRAS.493.2429B/abstract
 - Medição de brilho do céu, métodos e desafios (revisão): https://arxiv.org/pdf/1709.09558
 - Comparação entre radiância de satélite e SQM em Madri (log × log): https://arxiv.org/pdf/1908.05482
+- Casado Diez, M. (2024). FreeDSM and the Gaia4Sustainability project: a light pollution meter based on IoT technologies. arXiv:2409.10298 (comunicação de 3 páginas): https://arxiv.org/abs/2409.10298
+- Gaia4Sustainability, página do dispositivo: https://gaia4sustainability.eu/en/device/ (wiki e repositório: https://gitlab.citic.udc.es/lia2-publico/g4s)
+- Masana, E.; Carrasco, J. M.; Bará, S.; Ribas, S. J. (2021). A multi-band map of the natural night sky brightness including Gaia and Hipparcos integrated starlight. *MNRAS*, 501, 5443 (citado pelo artigo acima): https://arxiv.org/abs/2101.01500
+
