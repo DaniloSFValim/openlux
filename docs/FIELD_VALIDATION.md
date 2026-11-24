@@ -134,8 +134,13 @@ O que as fontes lidas dizem: usa um microcontrolador ESP32 com um sensor de luz 
 (a foto mostra vários TESS) por redes neurais e descida de gradiente para calcular a magnitude por segundo de arco quadrado; os dados vão para uma plataforma central e são comparados com
 um modelo de brilho natural do céu (Gambons, a partir de dados do satélite Gaia).
 
-**O que não consegui verificar:** o artigo é uma comunicação de 3 páginas **sem nenhum número**. Não declara exatidão, incerteza, desvio em relação ao SQM ou ao TESS, repetibilidade, dependência de temperatura,
-campo de visão nem banda espectral; o sensor de luz não é nomeado; o custo e a licença do hardware e do software não aparecem nas páginas lidas (o wiki de montagem não carregou em ferramenta automática).
+**O que a página do projeto no GitLab acrescenta** (lida depois do artigo; corrige a versão anterior deste texto, que dizia que o sensor não era nomeado): sensor de luz **Osram TSL2591**,
+sensor AHT2x de temperatura e umidade, cálculo da magnitude por segundo de arco quadrado **a cada minuto**, faixa declarada de **12 a 23 mag/arcsec²**; o firmware é baseado no Tasmota sob **GPL 3.0**, com
+processamento adicional em Berry; a plataforma de dados é aberta e o aparelho se registra em `dsm.citic.udc.es`.
+
+**O que continua sem verificação:** o artigo (comunicação de 3 páginas) **não traz nenhum número**: exatidão, incerteza, desvio em relação ao SQM ou ao TESS, repetibilidade, dependência de temperatura,
+campo de visão e banda espectral não são declarados nas páginas lidas. Também não vi: custo; a licença do **hardware** e a do script em Berry (não declaradas); a **licença dos dados** da plataforma
+(não consta no aviso legal nem na política de privacidade); as instruções de montagem (as subpáginas do wiki não carregaram em ferramenta automática); o mapa de dados e o site do modelo GAMBONS (não legíveis aqui).
 
 **O que isso implica para o piloto (proposta):**
 - O FreeDSM **não está caracterizado o bastante** para ser tratado como instrumento de validação. Se for usado, entra pelo caminho da calibração cruzada contra o SQM do autor (seção 10) e, enquanto não passar,
@@ -143,7 +148,16 @@ campo de visão nem banda espectral; o sensor de luz não é nomeado; o custo e 
 - Aparelho de construção doméstica varia **de unidade para unidade**: cada exemplar precisaria da própria calibração, e a banda espectral e o campo de visão diferentes dos do SQM fazem o desvio **depender do tipo de
   iluminação do local**, o que o critério de variação do desvio entre locais (≤ 0,15 mag) tenta detectar.
 - Construir e calibrar um aparelho é um subprojeto; para duas pessoas, um segundo SQM é o caminho mais simples. O FreeDSM é uma boa opção **extra**, e o projeto poderia ser procurado para colaboração, com os termos de dados deles lidos antes.
-- O modelo Gambons (brilho natural do céu a partir do Gaia) é uma referência possível para o piso natural nos locais escuros; **não foi avaliado** aqui.
+- O modelo GAMBONS (Masana et al., 2021) estima o brilho natural do céu em noites sem nuvens e sem Lua, nas bandas V (Johnson), fotópica e escotópica, e diz poder ser estendido a outras bandas. É uma referência
+  possível para o **piso natural** nos locais escuros (o limite que comprime a relação com o satélite, seção 9), mas **a banda do SQM não é a V**, a disponibilidade e a licença do modelo não foram confirmadas
+  (o artigo indica `gambons.fqa.ub.edu`, que não consegui ler) e o uso seria uma análise exploratória secundária, nunca o veredito.
+
+**O que dá para aproveitar do projeto deles (proposta, em ordem de valor):**
+1. **GAMBONS como referência do piso natural**, depois de confirmar acesso e licença e de tratar a diferença de banda.
+2. **FreeDSM como instrumento extra**, só pela calibração cruzada e como dado exploratório até passar (seção 10); registrar `temp_c` e a umidade, que o aparelho já mede.
+3. **Contato com a equipe** para perguntar a licença do hardware e dos dados, e se aceitam compartilhar medições no Brasil; sem licença declarada, os dados deles **não** podem ser reutilizados.
+4. **Cuidado de licença:** o firmware do FreeDSM é **GPL 3.0** e o OpenLux é **MIT**. Não copiar código ou firmware deles para este repositório; usar e citar, mantendo-os separados.
+5. **Não aproveitar:** a calibração por redes neurais como caixa-preta; ela não tem exatidão declarada e não é reprodutível por nós.
 
 ## 11. O que depende do autor
 
@@ -164,6 +178,7 @@ Não estão em `docs/references.json` (não passaram pela verificação de DOI d
 - Medição de brilho do céu, métodos e desafios (revisão): https://arxiv.org/pdf/1709.09558
 - Comparação entre radiância de satélite e SQM em Madri (log × log): https://arxiv.org/pdf/1908.05482
 - Casado Diez, M. (2024). FreeDSM and the Gaia4Sustainability project: a light pollution meter based on IoT technologies. arXiv:2409.10298 (comunicação de 3 páginas): https://arxiv.org/abs/2409.10298
+- Projeto FreeDSM no GitLab (página inicial do wiki, com sensor, faixa e licença do firmware): https://gitlab.citic.udc.es/lia2-publico/g4s
 - Gaia4Sustainability, página do dispositivo: https://gaia4sustainability.eu/en/device/ (wiki e repositório: https://gitlab.citic.udc.es/lia2-publico/g4s)
 - Masana, E.; Carrasco, J. M.; Bará, S.; Ribas, S. J. (2021). A multi-band map of the natural night sky brightness including Gaia and Hipparcos integrated starlight. *MNRAS*, 501, 5443 (citado pelo artigo acima): https://arxiv.org/abs/2101.01500
 
