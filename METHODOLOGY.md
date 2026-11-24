@@ -202,7 +202,7 @@ a partir de 2022 (seção 13).
 ### 7.3 Interface
 
 A vista é compartilhável por URL (`lat`, `lng`, `z`, `y`, `l`, `i`, `m`, `s` sensor, `v` visão; valores inválidos são ignorados; o mapa-base opcional não entra na URL). A busca de município usa só os dados do projeto. Os nomes das faixas da
-legenda (“sem luz detectada” a “muitíssima luz”) são rótulos de leitura, sem equivalência com a escala Bortle ou com o brilho do céu. O mapa-base do OpenStreetMap é opcional e vem desligado (ao ligar, o servidor deles recebe o IP do visitante); não há escala de brilho
+legenda (“sem luz detectada” a “muitíssima luz”) são rótulos de leitura, sem equivalência com a escala Bortle ou com o brilho do céu. A animação ano a ano nunca inicia sozinha, mostra o ano e, para o S-NPP desde 2022, um aviso do piso de ruído (`docs/DECISIONS.md` §13). O painel "Camadas" liga e desliga a camada de pixel, os limites e os nomes. O mapa-base do OpenStreetMap é opcional e vem desligado (ao ligar, o servidor deles recebe o IP do visitante); não há escala de brilho
 do céu antes da validação em campo (`docs/DECISIONS.md` §11 e §12).
 
 ## 8. Análise temporal
@@ -262,7 +262,7 @@ aprovação definido a priori**.
 
 | Verificação | Resultado |
 |---|---|
-| Testes unitários e de integração (dados sintéticos rotulados) | 171 testes (148 sem os testes de navegador): funções matemáticas, agregação zonal com valores calculados à mão, dados ausentes, CRS, integridade de arquivos, reprodutibilidade, dados e interface |
+| Testes unitários e de integração (dados sintéticos rotulados) | 175 testes (148 sem os testes de navegador): funções matemáticas, agregação zonal com valores calculados à mão, dados ausentes, CRS, integridade de arquivos, reprodutibilidade, dados e interface |
 | Consistência raster × vetor: área dos pixels ponderada vs `AREA_KM2` do IBGE | Diferença máxima por município de 0,0015 %; soma 43.750,425 km² vs 43.750,427 km² |
 | Critério de agregação: centro do pixel vs cobertura fracionária | Spearman ≥ 0,9998; diferença relativa da média: mediana 0,3–0,4 %, p95 1,2–1,9 %, máxima 3,4–6,6 % |
 | Resolução: agregação 2 × 2 | Spearman ≥ 0,9996; mediana 0,4–0,5 %, p95 2,4–3,0 %, máxima 6,6–11,5 % |

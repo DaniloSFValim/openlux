@@ -380,7 +380,7 @@ def test_municipality_names_appear_only_when_zoomed_in_and_can_be_turned_off(pag
     pg = _fresh(page, server, "?lat=-22.9&lng=-43.3&z=10.5&l=pixel")
     pg.wait_for_selector(".mlabel span")
     assert pg.locator(".mlabel span").count() > 0
-    pg.click("#display-opts summary")
+    pg.click("#layers-btn")
     pg.uncheck("#labels-chk")
     assert pg.locator(".mlabel span").count() == 0
     pg.context.close()
@@ -475,8 +475,8 @@ def test_basemap_is_off_by_default_and_only_requests_openstreetmap_after_opt_in(
     pg.wait_for_timeout(600)
     assert seen == []                                                                    # nada de terceiros sem opt-in
     assert not pg.is_checked("#base-chk")                                                 # desligado por padrao
-    pg.click("#display-opts summary")
-    assert "endereço IP" in pg.inner_text("#display-opts")                              # o aviso de privacidade esta visivel
+    pg.click("#layers-btn")
+    assert "endereço IP" in pg.inner_text("#layers-panel")                              # o aviso de privacidade esta visivel
     pg.check("#base-chk")
     pg.wait_for_function("() => document.querySelectorAll('.osm-tiles img.leaflet-tile').length > 0")
     assert seen and all(u.startswith("https://tile.openstreetmap.org/") for u in seen)
@@ -491,7 +491,7 @@ def test_dark_theme_switches_palette_and_opacity_changes_alpha(page, server):
     meta = _meta()
     pg = _fresh(page, server, "?lat=-22.9&lng=-43.3&z=10&l=pixel&y=2025")
     pg.locator("#mapa").scroll_into_view_if_needed()
-    pg.click("#display-opts summary")
+    pg.click("#layers-btn")
     light, _ = _canvas_rgb(pg, 0.5, 0.6)
     pg.select_option("#theme-sel", "dark")
     assert pg.evaluate("() => document.documentElement.getAttribute('data-theme')") == "dark"
@@ -506,4 +506,91 @@ def test_dark_theme_switches_palette_and_opacity_changes_alpha(page, server):
     assert abs(half[3] - round(0.5 * 255)) <= 1
     pg.select_option("#theme-sel", "light")
     assert _relevant_errors(pg.errors, _cloudflare_injected(pg.content())) == []
+    pg.context.close()
+
+
+def test_layers_button_toggles_layers_and_keeps_third_parties_off_by_default(page, server):
+    pg = _fresh(page, server, "?lat=-22.9&lng=-43.3&z=9&l=pixel")
+    assert pg.is_hidden("#layers-panel")                                               # painel fechado
+    pg.click("#layers-btn")
+    assert pg.is_visible("#layers-panel") and pg.get_attribute("#layers-btn", "aria-expanded") == "true"
+    assert not pg.is_checked("#base-chk")                                              # OpenStreetMap desligado por padrao
+    assert pg.is_checked("#px-chk") and pg.is_checked("#outline-chk") and pg.is_checked("#labels-chk")
+    pg.uncheck("#outline-chk")
+    assert pg.evaluate("() => [...document.querySelectorAll('#mapa path.leaflet-interactive')].every(p => p.getAttribute('stroke-opacity') === '0')")
+    pg.check("#outline-chk")
+    assert pg.evaluate("() => [...document.querySelectorAll('#mapa path.leaflet-interactive')].some(p => p.getAttribute('stroke-opacity') !== '0')")
+    pg.uncheck("#px-chk")
+    assert pg.locator("canvas.openlux-pixels").count() == 0
+    pg.check("#px-chk")
+    pg.wait_for_selector("canvas.openlux-pixels", state="attached")
+    pg.click("#layers-btn")
+    assert pg.is_hidden("#layers-panel") and pg.get_attribute("#layers-btn", "aria-expanded") == "false"
+    assert _relevant_errors(pg.errors, _cloudflare_injected(pg.content())) == []
+    pg.context.close()
+
+
+def _years_seen(pg, until_text, timeout_ms=30000):
+    """Amostra #year-out a cada 80 ms (sem repetir) ate o botao voltar a 'Animar' e o status indicar o fim."""
+    seen, waited = [], 0
+    while waited < timeout_ms:
+        y = pg.inner_text("#year-out")
+        if not seen or seen[-1] != y:
+            seen.append(y)
+        if until_text in pg.inner_text("#anim-status") and pg.inner_text("#play-btn") == "▶ Animar":
+            return seen
+        pg.wait_for_timeout(80)
+        waited += 80
+    raise AssertionError(f"animacao nao terminou: {seen}")
+
+
+def test_animation_never_autoplays_and_runs_the_years_in_order_then_stops(page, server):
+    pg = _fresh(page, server, "?l=pixel&s=noaa20&y=2018")
+    pg.wait_for_timeout(1500)
+    assert pg.inner_text("#play-btn") == "▶ Animar" and pg.inner_text("#year-out") == "2018"   # nada anima sozinho
+    pg.select_option("#speed-sel", "400")
+    pg.uncheck("#loop-chk")
+    pg.click("#play-btn")
+    assert pg.get_attribute("#play-btn", "aria-pressed") == "true"
+    seen = _years_seen(pg, "Fim da série")
+    assert seen == [str(y) for y in range(2018, 2026)], seen                           # em ordem, sem pular ano, so os do sensor
+    assert pg.inner_text("#hud-year") == "2025" and pg.get_attribute("#play-btn", "aria-pressed") == "false"
+    assert pg.evaluate("() => new URLSearchParams(location.search).get('y')") == "2025"
+    assert _relevant_errors(pg.errors, _cloudflare_injected(pg.content())) == []
+    pg.context.close()
+
+
+def test_animation_pause_resume_loop_and_stops_when_the_visitor_touches_controls(page, server):
+    pg = _fresh(page, server, "?l=pixel&s=snpp&y=2025")                                  # ultimo ano: ao animar, recomeca no primeiro
+    pg.select_option("#speed-sel", "400")
+    pg.click("#play-btn")
+    pg.wait_for_function("() => document.getElementById('year-out').textContent === '2012'")
+    pg.click("#play-btn")                                                                # pausa
+    frozen = pg.inner_text("#year-out")
+    pg.wait_for_timeout(1000)
+    assert pg.inner_text("#year-out") == frozen and pg.inner_text("#play-btn") == "▶ Animar"
+    pg.click("#play-btn")                                                                # retoma de onde parou
+    pg.wait_for_function("(y) => document.getElementById('year-out').textContent !== y", arg=frozen)
+    pg.fill("#year", "5"); pg.dispatch_event("#year", "input")                          # mexer no controle para a animacao
+    assert pg.inner_text("#play-btn") == "▶ Animar" and pg.inner_text("#year-out") == "2017"
+    pg.click("#play-btn")
+    pg.select_option("#px-sensor", "noaa20")                                             # trocar de sensor tambem para
+    assert pg.inner_text("#play-btn") == "▶ Animar"
+    pg.select_option("#px-view", "2018_2025")                                            # mudanca por pixel nao tem anos: nao ha o que animar
+    assert pg.is_disabled("#play-btn")
+    pg.select_option("#px-view", "rad")
+    assert pg.is_enabled("#play-btn")
+    assert _relevant_errors(pg.errors, _cloudflare_injected(pg.content())) == []
+    pg.context.close()
+
+
+def test_hud_shows_year_and_the_snpp_noise_warning_only_for_snpp_from_2022(page, server):
+    pg = _fresh(page, server, "?l=pixel&s=snpp&y=2021")
+    assert pg.inner_text("#hud-year") == "2021" and pg.is_hidden("#hud-warn")
+    pg.fill("#year", "11"); pg.dispatch_event("#year", "input")                         # 2023
+    assert pg.inner_text("#hud-year") == "2023" and pg.is_visible("#hud-warn") and "não leia como luz nova" in pg.inner_text("#hud-warn")
+    pg.select_option("#px-sensor", "noaa20")
+    assert pg.is_hidden("#hud-warn")                                                      # o aviso e do S-NPP
+    pg.select_option("#px-sensor", "snpp"); pg.select_option("#px-view", "2012_2021")
+    assert pg.inner_text("#hud-year") == "mudança 2012–2021"
     pg.context.close()

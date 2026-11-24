@@ -22,7 +22,7 @@ reprodutível e testado, mas os **resultados científicos não foram validados**
   https://openlux.labdados.org/ (ver `docs/DEPLOYMENT.md`). Camada de radiância **por pixel** (≈ 460 m, 6 classes fixas, iguais em
   todos os anos) e camada por município; link permanente (URL com vista, ano, camada, indicador e município), busca de município,
   nomes dos municípios e legenda em linguagem comum. A interface publica só a **classe** de cada pixel, não o valor da radiância.
-  Nenhum município é tratado como estudo de caso. Seletor de sensor (Suomi NPP 2012–2025 e NOAA-20 2018–2025), camada de **mudança por pixel**, tema claro/escuro e opacidade ajustável. O mapa-base do OpenStreetMap é **opcional e vem desligado**: só ao ligá-lo o navegador contata o servidor deles (que recebe o IP do visitante).
+  Nenhum município é tratado como estudo de caso. Seletor de sensor (Suomi NPP 2012–2025 e NOAA-20 2018–2025), camada de **mudança por pixel**, tema claro/escuro e opacidade ajustável. Botão **Camadas** dentro do mapa e **animação** ano a ano, que só roda a pedido, mostra o ano e avisa o ruído do S-NPP desde 2022. O mapa-base do OpenStreetMap é **opcional e vem desligado**: só ao ligá-lo o navegador contata o servidor deles (que recebe o IP do visitante).
 - Protocolo **proposto** de validação em campo com SQM (`docs/FIELD_VALIDATION.md`), pré-especificação em rascunho
   (`docs/field/preregistration.json`) e código de análise (`openlux.field`), testado só com dados sintéticos. **Nenhuma medição foi feita.**
 - Documentação: `README.md`, `METHODOLOGY.md`, `docs/DECISIONS.md`, `docs/LICENSING.md`, `CITATION.cff`.
