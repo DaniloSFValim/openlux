@@ -262,7 +262,7 @@ aprovação definido a priori**.
 
 | Verificação | Resultado |
 |---|---|
-| Testes unitários e de integração (dados sintéticos rotulados) | 175 testes (148 sem os testes de navegador): funções matemáticas, agregação zonal com valores calculados à mão, dados ausentes, CRS, integridade de arquivos, reprodutibilidade, dados e interface |
+| Testes unitários e de integração (dados sintéticos rotulados) | 193 testes (166 sem os testes de navegador): funções matemáticas, agregação zonal com valores calculados à mão, dados ausentes, CRS, integridade de arquivos, reprodutibilidade, dados e interface |
 | Consistência raster × vetor: área dos pixels ponderada vs `AREA_KM2` do IBGE | Diferença máxima por município de 0,0015 %; soma 43.750,425 km² vs 43.750,427 km² |
 | Critério de agregação: centro do pixel vs cobertura fracionária | Spearman ≥ 0,9998; diferença relativa da média: mediana 0,3–0,4 %, p95 1,2–1,9 %, máxima 3,4–6,6 % |
 | Resolução: agregação 2 × 2 | Spearman ≥ 0,9996; mediana 0,4–0,5 %, p95 2,4–3,0 %, máxima 6,6–11,5 % |
@@ -276,7 +276,7 @@ Verificações **não realizadas**: comparação com valores publicados; investi
 casos de maior diferença na estabilidade; teste com dados reais em integração contínua (os dados
 não são redistribuídos).
 
-Validação em campo: o protocolo com SQM, a pré-especificação (`docs/field/preregistration.json`, em rascunho) e o código de análise
+Validação em campo (piloto com duas pessoas, instrumentos em níveis e calibração cruzada, conferência do CSV e locais candidatos, seção 10 de `docs/FIELD_VALIDATION.md`): o protocolo com SQM, a pré-especificação (`docs/field/preregistration.json`, em rascunho) e o código de análise
 (`openlux.field`, `scripts/run_field_validation.py`, testado só com dados sintéticos) estão descritos em `docs/FIELD_VALIDATION.md`. Não há medições.
 
 ## 12. Reprodução passo a passo
@@ -492,6 +492,12 @@ Arquivo no mesmo estado em que foi usado por `scripts/run_sectors.py`; `scripts/
 | name | size_bytes | sha256 |
 |---|---|---|
 | RJ_setores_CD2022.gpkg | 75198464 | ec6cecdc0297d1b79e25e2772f531cad5c99ac57bc3ac1b30fb08418dc513222 |
+
+### A.7 IBGE, Malha Municipal Digital 2024 (SP), usada só no planejamento de locais de campo
+
+| name | size_bytes | sha256 |
+|---|---|---|
+| SP_Municipios_2024.zip | 10501486 | 92a54d06e6f5a9749368e522861b785eae8c797329c9fa09cbb1a0696319d8e3 |
 
 ## Apêndice B. Ambiente de referência
 

@@ -1,15 +1,35 @@
 {
   "status": "draft",
-  "status_note": "RASCUNHO proposto pelo projeto. Os limiares abaixo NAO vem da literatura: sao propostas a aprovar pelo autor. So depois de aprovado, mude status para \"frozen\" e faca o commit ANTES da primeira medicao.",
+  "status_note": "RASCUNHO proposto pelo projeto. Os limiares abaixo NAO vem da literatura: sao propostas a aprovar pelo autor. Antes de congelar, preencher instruments.reference_device_id. So depois de aprovado, mude status para \"frozen\" e faca o commit ANTES da primeira medicao.",
   "hypothesis": "O brilho zenital medido com SQM (convertido em luminancia) cresce, em ordem de postos, com a radiancia noturna do satelite no entorno do local.",
   "not_tested": "Calibracao absoluta; relacao de causa fisica; estabilidade temporal da serie.",
-  "primary_sensor": {"name": "NOAA-20 (VJ146A4)", "reason": "piso de ruido bem menor que o S-NPP a partir de 2022 (docs/DECISIONS.md, secoes 3 e 7); locais escuros sao justamente onde o ruido pesa"},
-  "secondary_sensor": {"name": "Suomi NPP (VNP46A4)"},
-  "radii_km": [1, 2, 5, 10, 20, 50],
+  "primary_sensor": {
+    "name": "NOAA-20 (VJ146A4)",
+    "reason": "piso de ruido bem menor que o S-NPP a partir de 2022 (docs/DECISIONS.md, secoes 3 e 7); locais escuros sao justamente onde o ruido pesa"
+  },
+  "secondary_sensor": {
+    "name": "Suomi NPP (VNP46A4)"
+  },
+  "radii_km": [
+    1,
+    2,
+    5,
+    10,
+    20,
+    50
+  ],
   "min_sites": 20,
   "min_valid_visits_per_site": 2,
-  "qc": {"max_sun_alt_deg": -18.0, "max_moon_alt_deg": 0.0, "max_reading_range_mag": 0.2, "min_readings": 5},
-  "permutation": {"n_perm": 10000, "seed": 20261123},
+  "qc": {
+    "max_sun_alt_deg": -18.0,
+    "max_moon_alt_deg": 0.0,
+    "max_reading_range_mag": 0.2,
+    "min_readings": 5
+  },
+  "permutation": {
+    "n_perm": 10000,
+    "seed": 20261123
+  },
   "criteria": {
     "min_observed_max_rho": 0.7,
     "max_permutation_p": 0.05,
@@ -20,5 +40,23 @@
     "inconsistent": "algum criterio nao atendido com min_sites atingido",
     "insufficient_data": "menos de min_sites locais com visitas validas suficientes"
   },
-  "language_rule": "O resultado e relatado como 'consistente' ou 'inconsistente' com a hipotese, nunca como 'validado'."
+  "language_rule": "O resultado e relatado como 'consistente' ou 'inconsistente' com a hipotese, nunca como 'validado'.",
+  "tile": "h13v11",
+  "instruments": {
+    "reference_device_id": "",
+    "reference_type": "sqm",
+    "allowed_types": [
+      "sqm",
+      "camera_calibrated",
+      "camera_uncalibrated",
+      "phone"
+    ],
+    "rule": "Apenas o aparelho de referencia (SQM do autor) e aparelhos calibrados contra ele em visitas lado a lado entram na estatistica confirmatoria; celular e camera sem calibracao sao sempre exploratorios."
+  },
+  "cross_calibration": {
+    "min_sites": 2,
+    "min_pairs": 2,
+    "max_abs_offset_mag": 0.3,
+    "max_offset_spread_mag": 0.15
+  }
 }

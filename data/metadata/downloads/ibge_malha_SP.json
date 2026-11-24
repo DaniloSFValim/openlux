@@ -1,0 +1,17 @@
+{
+  "acquired_utc": "2026-11-24T01:28:02Z",
+  "code": {
+    "commit": "685f31de01b365046576b7d357769065fee68e00",
+    "dirty": true
+  },
+  "files": [
+    {
+      "description": "Malha Municipal Digital 2024, SP (EPSG:4674, SIRGAS 2000)",
+      "name": "SP_Municipios_2024.zip",
+      "sha256": "92a54d06e6f5a9749368e522861b785eae8c797329c9fa09cbb1a0696319d8e3",
+      "size_bytes": 10501486,
+      "url": "https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2024/UFs/SP/SP_Municipios_2024.zip"
+    }
+  ],
+  "institution": "IBGE"
+}

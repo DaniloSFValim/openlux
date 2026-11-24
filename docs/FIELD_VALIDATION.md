@@ -22,7 +22,7 @@ pós-2021 mais pesa (`docs/DECISIONS.md`, seções 3 e 7), por isso o sensor pri
 
 ## 3. Instrumento
 
-Recomendação: **SQM-L** (com lente). Fatos conferidos nas fontes do fabricante e na literatura (seção 11):
+Recomendação: **SQM-L** (com lente). Fatos conferidos nas fontes do fabricante e na literatura (seção 12):
 
 - Campo de visão do SQM-L: cerca de 20° de largura a meia altura (≈ 10° de meia largura); o modelo sem lente é bem mais amplo.
 - Incerteza de calibração informada pelo fabricante: ±0,1 mag/arcsec² (≈ ±10 %).
@@ -105,14 +105,36 @@ Enquanto for `draft`, só roda com `--exploratory`, e o relatório se declara ex
 - Um aparelho único traz um erro de calibração comum; o desvio de temperatura é registrado, mas não corrigido.
 - Resultados favoráveis valem para o estado do Rio e para o intervalo de radiância amostrado, não são generalizáveis sem mais dados.
 
-## 10. O que depende do autor
+## 10. Dois observadores, níveis de instrumento e calibração cruzada
 
-1. Aprovar (ou alterar) os limiares e as regras marcados como proposta e **congelar** a pré-especificação antes da coleta.
-2. Adquirir o SQM-L e escolher os locais seguindo a seção 4.
+Estado: o piloto terá **duas pessoas** (o autor no RJ e uma pessoa em SP), com o instrumento da segunda ainda não definido (SQM, câmera ou celular).
+Desenho aprovado em `docs/superpowers/specs/2026-11-24-field-pilot-design.md`.
+
+- **Risco:** com um aparelho por região, a diferença entre RJ e SP se confunde com a diferença entre aparelhos.
+- **Regra:** o **SQM do autor é a referência**. Um segundo aparelho só entra na estatística confirmatória se for calibrado contra ele em **visitas lado a lado** (mesmo
+  local e mesma noite, ambas aprovadas no controle de qualidade). O desvio é a mediana de (magnitude do aparelho − magnitude da referência) e a leitura corrigida é `bruta − desvio`.
+- **Critérios de aceite da calibração (proposta, a congelar):** pelo menos 2 locais e 2 visitas lado a lado (de preferência um claro e um escuro); desvio médio de no máximo 0,3 mag;
+  variação do desvio entre locais de no máximo 0,15 mag (um desvio que muda com o brilho não é constante e não pode ser corrigido por uma soma).
+- **Níveis** (`instrument_type` no CSV): `sqm` e `camera_calibrated` chegam ao nível de **validação** se forem a referência ou passarem na calibração; `phone` e `camera_uncalibrated`
+  são **sempre exploratórios**. Dado exploratório é relatado em separado e nunca entra no veredito.
+- **Câmera ou celular como segundo instrumento:** só contam depois de calibrados contra o SQM; a fotometria de câmera exige redução própria (bias, dark, flat, ponto-zero, extinção) e
+  não faz parte do piloto.
+- **Conferir o arquivo antes de analisar:** `python scripts/check_measurements.py campo.csv` (esquema, faixas, coordenadas, visitas, duplicatas e proximidade da borda do tile; os limites de
+  sanidade são verificações do projeto, não propriedades do SQM). `scripts/run_field_validation.py` recusa arquivos com erros.
+- **Cobertura de satélite:** o tile `h13v11` (lon −50 a −40, lat −30 a −20) cobre o RJ e o leste de SP. Locais a menos de 50 km da borda do tile têm contexto incompleto e são recusados
+  (antes o corte era silencioso). SP a oeste de −50° ficaria para a expansão.
+- **Escolher locais:** `python scripts/suggest_sites.py --ufs RJ SP` sorteia candidatos estratificados pela radiância de satélite do entorno (nas mesmas classes fixas do mapa), com município,
+  em `outputs/field/` (não versionado). É **só planejamento**: o satélite não informa acesso, segurança nem permissão, e as coordenadas são do centro do pixel (≈ 460 m). Estratificar pelo
+  preditor garante o gradiente sem enviesar a associação testada. A malha de SP vem de `scripts/fetch_mesh.py --uf SP`.
+
+## 11. O que depende do autor
+
+1. Aprovar (ou alterar) os limiares e as regras marcados como proposta, preencher `instruments.reference_device_id` e **congelar** a pré-especificação antes da coleta.
+2. Adquirir o SQM-L, definir o instrumento da segunda pessoa (seção 10) e escolher os locais seguindo a seção 4.
 3. Decidir onde publicar os dados de campo e sob qual licença (são dados originais do autor).
 4. Informar a data da campanha, para escolher o ano do produto de satélite.
 
-## 11. Fontes consultadas (2026-11-23)
+## 12. Fontes consultadas (2026-11-23)
 
 Não estão em `docs/references.json` (não passaram pela verificação de DOI do projeto); são URLs consultadas nesta data.
 

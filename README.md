@@ -173,7 +173,7 @@ testes automatizados com dados sintéticos rotulados; consistência da área ras
 máxima de 0,0015 % por município); estabilidade frente ao critério de agregação e à resolução;
 sensibilidade à máscara e à camada; comparação entre sensores; determinismo (duas execuções
 completas com hashes idênticos); clone limpo da branch com testes aprovados. **Não há comparação com
-valores publicados** e não foi definido limite de aprovação a priori. Há um protocolo **proposto** de validação em campo com SQM, com critérios a congelar antes da coleta (`docs/FIELD_VALIDATION.md`); **nenhuma medição foi feita**.
+valores publicados** e não foi definido limite de aprovação a priori. Há um protocolo **proposto** de validação em campo com SQM, com critérios a congelar antes da coleta (`docs/FIELD_VALIDATION.md`); **nenhuma medição foi feita**. O piloto previsto tem duas pessoas (RJ e leste de SP), com o SQM do autor como referência e calibração cruzada para outros aparelhos; há conferência do CSV de medições e sugestão de locais candidatos (`docs/FIELD_VALIDATION.md`, seção 10).
 
 ## 13. Limitações
 
