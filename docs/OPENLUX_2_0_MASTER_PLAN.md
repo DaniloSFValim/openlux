@@ -112,7 +112,7 @@ Estados: NÃO INICIADO · EM ANDAMENTO · CONCLUÍDO · BLOQUEADO · VALIDAR CIE
 | Explorador geográfico: navegação alinhada às seis áreas | CONCLUÍDO (só navegação). |
 | Explorador geográfico: identidade visual do protótipo (tema escuro) | NÃO INICIADO. Exige trabalho de tema, porque os testes de navegador cobrem o tema claro e escuro |
 | Lente de comparação entre dois anos (9.6), municipal: `web/comparar.html` | CONCLUÍDO (versão municipal). Lado a lado, controle deslizante, mapa de diferença absoluta, variação percentual com piso e URL. Testes: `tests/test_web_comparar.py`. **Pendente:** versão por pixel, que exige comparar os arquivos de pixels |
-| Laboratório de análises | NÃO INICIADO |
+| Laboratório de análises (municipal): `web/laboratorio.html` | CONCLUÍDO (primeira versão). Até três municípios, tabela com posição e percentil entre municípios, evolução anual, distribuição estadual com histograma e caixa, tendências Theil–Sen com p-valor. Testes: `tests/test_web_laboratorio.py`. **Pendente:** comparação entre municípios com mapa de diferenças, percentis de pixels (P75, P90, P95), área acima de limiares e tendências por pixel |
 | Observatório ambiental | NÃO INICIADO |
 | Dados abertos (renovação) | NÃO INICIADO |
 | Metodologia (renovação) | NÃO INICIADO |

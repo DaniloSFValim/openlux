@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratório de análises — OpenLux</title>
+<meta name="description" content="Compare até três municípios do Rio de Janeiro, veja a distribuição estadual e as tendências de luz noturna estimada por sensoriamento remoto. Estatísticas calculadas a partir dos dados publicados.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/observatorio.css">
+</head>
+<body class="observatorio">
+<a class="skip" href="#conteudo">Ir para o conteúdo</a>
+
+<header class="topo">
+  <div class="wrap topo-linha">
+    <a class="marca" href="index.html" aria-label="OpenLux, página inicial">OpenLux</a>
+    <nav aria-label="Áreas do site">
+      <a href="index.html">Observatório</a>
+      <a href="explorar.html">Explorador</a>
+      <a href="laboratorio.html" aria-current="page">Laboratório</a>
+      <a href="dados.html">Dados abertos</a>
+      <a href="sobre.html">Metodologia</a>
+    </nav>
+  </div>
+</header>
+
+<main id="conteudo">
+  <section class="abertura wrap" aria-labelledby="titulo">
+    <p class="kicker">Laboratório de análises</p>
+    <h1 id="titulo">Compare municípios e acompanhe tendências</h1>
+    <p class="lede">Escolha até três municípios e um ano. Os cálculos usam os mesmos arquivos publicados no observatório. <strong>É uma estimativa de poluição luminosa baseada em sensoriamento remoto, não uma medição do brilho do céu.</strong> Os resultados são exploratórios e não estão validados.</p>
+  </section>
+
+  <section class="wrap bloco" aria-labelledby="escolha-titulo">
+    <h2 id="escolha-titulo">Escolha</h2>
+    <div class="controles">
+      <label>Sensor
+        <select id="sensor">
+          <option value="noaa20">NOAA-20 (2018–2025)</option>
+          <option value="snpp">S-NPP (2012–2025)</option>
+        </select>
+      </label>
+      <label>Ano
+        <select id="ano"></select>
+      </label>
+      <label>Município 1
+        <select class="mun" id="mun-1"></select>
+      </label>
+      <label>Município 2 <span class="opcional">(opcional)</span>
+        <select class="mun" id="mun-2"></select>
+      </label>
+      <label>Município 3 <span class="opcional">(opcional)</span>
+        <select class="mun" id="mun-3"></select>
+      </label>
+    </div>
+    <p id="aviso-sensor" class="nota" hidden></p>
+  </section>
+
+  <section class="wrap bloco" aria-labelledby="comp-titulo">
+    <h2 id="comp-titulo">Comparação com o estado, <span id="ano-comp"></span></h2>
+    <p class="muted">Estatísticas do estado são calculadas sobre os 92 municípios (cada município pesa igual). Percentis são percentis entre municípios, não percentis de pixels: os percentis de pixels (P75, P90, P95) ainda não foram calculados.</p>
+    <div class="tabela-apoio" id="tabela-comp"></div>
+  </section>
+
+  <section class="wrap bloco" aria-labelledby="evo-titulo">
+    <h2 id="evo-titulo">Evolução anual</h2>
+    <p class="muted">Linhas: municípios escolhidos. Tracejado: média estadual. Os anos a partir de 2022 têm piso de ruído do S-NPP; com o NOAA-20 o aviso não se aplica, mas a comparação entre sensores não é feita aqui.</p>
+    <div id="grafico-evolucao" class="grafico" role="img" aria-label="Gráfico de evolução anual dos municípios escolhidos"></div>
+  </section>
+
+  <section class="wrap bloco" aria-labelledby="dist-titulo">
+    <h2 id="dist-titulo">Distribuição estadual, <span id="ano-dist"></span></h2>
+    <p class="muted">Histograma e caixa dos valores médios dos 92 municípios. Os pontos dourados marcam os municípios escolhidos. Caixa: 25º, 50º (mediana) e 75º percentis; traços: mínimo e máximo.</p>
+    <div id="grafico-distribuicao" class="grafico" role="img" aria-label="Histograma e caixa da distribuição municipal"></div>
+  </section>
+
+  <section class="wrap bloco" aria-labelledby="tend-titulo">
+    <h2 id="tend-titulo">Tendências, 2018–2025</h2>
+    <p class="muted">Inclinação de Theil–Sen (nW·cm⁻²·sr⁻¹ por ano) e p-valor de Kendall, do pipeline. Só são destacadas tendências com p &lt; 0,05. Não são causas, e a série curta (8 anos) tem pouco poder.</p>
+    <div class="duas-colunas">
+      <div>
+        <h3>Aumentos significativos</h3>
+        <ol class="ranking" id="tend-subidas"></ol>
+      </div>
+      <div>
+        <h3>Reduções significativas</h3>
+        <ol class="ranking" id="tend-quedas"></ol>
+      </div>
+    </div>
+    <p class="nota" id="tend-resumo"></p>
+  </section>
+</main>
+
+<footer class="rodape">
+  <div class="wrap">
+    <p class="small">Autor: Danilo Valim · ORCID <a href="https://orcid.org/0009-0009-7250-6151" rel="noopener">0009-0009-7250-6151</a> · DOI <a href="https://doi.org/10.5281/zenodo.24510755" rel="noopener">10.5281/zenodo.24510755</a></p>
+  </div>
+</footer>
+
+<script src="js/graficos-svg.js"></script>
+<script src="js/laboratorio.js"></script>
+</body>
+</html>

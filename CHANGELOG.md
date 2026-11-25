@@ -12,6 +12,11 @@ Formato: versões em ordem cronológica inversa. Datas no formato AAAA-MM-DD.
 - `web/comparar.html`: compara dois anos municipais do NOAA-20 ou do S-NPP, com mapas lado a lado, controle deslizante, diferença absoluta B − A (classes simétricas), variação percentual com piso declarado e URL compartilhável. Módulo comum de mapa em `web/js/mapa-svg.js`, usado também pelo Observatório.
 - Testes `tests/test_web_comparar.py`.
 
+### Adicionado (Fase D, laboratório)
+- `web/laboratorio.html`: até três municípios, tabela comparativa (média, mediana dos pixels, fração ≥ 0,5, posição e percentil entre municípios, tendência e p-valor, variação do pipeline), evolução anual, distribuição estadual com histograma e caixa, e tendências significativas (p < 0,05).
+- `web/js/graficos-svg.js`: gráficos SVG próprios compartilhados pelo Observatório e pelo laboratório.
+- Testes `tests/test_web_laboratorio.py`.
+
 ### Removido (Fase D)
 - `web/js/inicio.js` e `tests/test_web_inicio.py`: substituídos pelo Observatório.
 
