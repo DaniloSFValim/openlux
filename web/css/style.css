@@ -299,3 +299,12 @@ body.inicio .muted,body.pagina .muted,.resultado .muted,.vazio .muted,.quiz .mut
 .faixa-svg .eixo{fill:#55606e;font-size:12px}
 .faixa-svg .rotulo-sel{fill:#15191f;font-weight:700;font-size:14px}
 @media (prefers-reduced-motion: reduce){.faixa-svg circle{transition:none}}
+
+/* Desenhe uma área (experimento) */
+.desenhar{margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.desenhar h2{font-size:1.02rem;margin:0 0 4px}
+.desenhar-botoes{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+#desenhar-resultado{margin-top:10px}
+#desenhar-resultado td .barra{display:inline-block;height:10px;border-radius:5px;background:var(--accent);vertical-align:middle;max-width:60%}
+#desenhar-resultado td .pct{margin-left:8px;font-variant-numeric:tabular-nums}
+#desenhar-resultado th[scope=row]{font-weight:600;white-space:nowrap}
