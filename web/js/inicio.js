@@ -1,5 +1,5 @@
 /* OpenLux — página inicial: "Quanta luz tem o seu município?".
-   Lê data/indicators.json. Usa 2021 como ano de referência: é o último antes do ruído do S-NPP em áreas escuras. */
+   Lê data/indicators_noaa20.json (sensor primário para análise: NOAA-20, VJ146A4, 2018–2025). Usa 2021 como ano de referência. */
 (async function () {
   'use strict';
   const $ = (id) => document.getElementById(id);
@@ -12,7 +12,7 @@
 
   let data;
   try {
-    data = await fetch('data/indicators.json').then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
+    data = await fetch('data/indicators_noaa20.json').then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
   } catch (e) {
     $('vazio').innerHTML = '<p>Não foi possível carregar os dados. Sirva a pasta web/ por HTTP (por exemplo, python -m http.server).</p>';
     return;
@@ -120,9 +120,9 @@
     $('num-area').textContent = `${fmt(t.area)} ${UNIT}`;
     $('txt-area').textContent = t.txtArea;
     OpenLuxCharts.lineChart($('grafico-mun'), {
-      title: `Radiância média anual, ${t.nome}`, years, yLabel: UNIT, digits: 1, shadeFrom: 2022, shadeLabel: 'ruído S-NPP',
+      title: `Radiância média anual, ${t.nome}`, years, yLabel: UNIT, digits: 1,
       series: [{ name: t.nome, values: m.mean, color: '#0072B2' }, { name: 'Estado (média ponderada)', values: data.state.mean, color: '#7a828c', dash: '5 4', width: 1.6 }],
-      exportName: 'grafico-' + safe(t.nome), exportNotes: ['Fonte: OpenLux, doi:' + DOI + ' · NASA Black Marble (VNP46A4, S-NPP).', 'Resultados não validados. Após 2021, o S-NPP tem mais ruído em áreas escuras.'],
+      exportName: 'grafico-' + safe(t.nome), exportNotes: ['Fonte: OpenLux, doi:' + DOI + ' · NASA Black Marble (VJ146A4, NOAA-20).', 'Resultados não validados. Diferenças entre anos não são mudança real de iluminação sem essa ressalva.'],
     });
     drawRanking(cod);
     const u = urlMun(cod);
@@ -160,7 +160,7 @@
     ctx.fillStyle = '#9fb3c8'; ctx.font = '400 24px system-ui, Arial, sans-serif';
     quebra(ctx, `Média na área do município: ${fmt(t.area)} ${UNIT}. ${t.txtArea}`, 64, 480, W - 128, 34);
     ctx.font = '400 20px system-ui, Arial, sans-serif';
-    quebra(ctx, `Estimativa por satélite (NASA Black Marble, S-NPP; IBGE). Não é medição do céu. Não validado em campo. doi:${DOI}`, 64, 575, W - 128, 28);
+    quebra(ctx, `Estimativa por satélite (NASA Black Marble, NOAA-20; IBGE). Não é medição do céu. Não validado em campo. doi:${DOI}`, 64, 575, W - 128, 28);
     c.toBlob((blob) => {
       if (!blob) return;
       const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'cartao-' + safe(t.nome) + '.png';

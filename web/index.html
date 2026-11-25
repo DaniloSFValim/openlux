@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quanta luz tem o seu município? — OpenLux</title>
-<meta name="description" content="Veja quanta luz noturna, vista pelo satélite, o seu município tem, comparada com o estado e com os outros 91 municípios do Rio de Janeiro. Dados de 2012 a 2025.">
+<meta name="description" content="Veja quanta luz noturna, vista pelo satélite, o seu município tem, comparada com o estado e com os outros 91 municípios do Rio de Janeiro. Dados de 2018 a 2025, do sensor NOAA-20.">
 <meta property="og:title" content="Quanta luz tem o seu município?">
 <meta property="og:description" content="Luz noturna vista pelo satélite, nos 92 municípios do Rio de Janeiro. Estimativa, não medição do céu.">
 <meta property="og:type" content="website">
@@ -62,10 +62,10 @@
     </div>
 
     <div class="grafico-bloco">
-      <h3>Como mudou, de 2012 a 2025</h3>
+      <h3>Como mudou, de 2018 a 2025</h3>
       <div id="grafico-mun"></div>
       <p class="aviso">
-        A partir de 2022, o sensor Suomi NPP tem mais ruído em áreas escuras. A faixa sombreada marca esse período:
+        Os dois sensores mostram o mesmo comportamento em áreas escuras a partir de 2022, ainda não separado de um artefato do algoritmo:
         não leia a diferença entre os anos como mudança real de iluminação sem essa ressalva.
       </p>
     </div>
@@ -74,7 +74,7 @@
       <h3>Como entender estes números</h3>
       <ul>
         <li><strong>É luz vista do espaço</strong>, medida pelo satélite NASA em cada quadrado de cerca de 460 m. Não é o brilho do céu que você vê do quintal.</li>
-        <li><strong>Usamos 2021</strong> como referência porque é o último ano antes do ruído do sensor em áreas escuras.</li>
+        <li><strong>Usamos 2021</strong> como referência: é um ano da série do NOAA-20 anterior ao período de 2022 em diante, quando os dois sensores passam a mostrar o mesmo aumento em áreas escuras.</li>
         <li><strong>Luz onde as pessoas vivem</strong> pondera cada quadrado pela população do Censo 2022. Um município pode ter muita área escura e ainda assim muita luz onde mora gente, ou o contrário.</li>
       </ul>
     </div>
@@ -111,7 +111,7 @@
   <section class="sobre-dado" aria-labelledby="sobre-titulo">
     <h2 id="sobre-titulo">O que é este dado</h2>
     <div class="cartoes tres">
-      <article class="cartao"><p class="rotulo">De onde vem</p><p>Do satélite NASA Black Marble (sensor VIIRS), com malha municipal e população do IBGE.</p></article>
+      <article class="cartao"><p class="rotulo">De onde vem</p><p>Do satélite NASA Black Marble (sensor VIIRS, NOAA-20; série de 2018 a 2025), com malha municipal e população do IBGE.</p></article>
       <article class="cartao"><p class="rotulo">O que não é</p><p>Não é medição do céu, nem qualidade do céu para observação. Não está validado em campo.</p></article>
       <article class="cartao"><p class="rotulo">Por que confiar (com cuidado)</p><p>Os métodos, as limitações e os dados estão abertos. Cada número tem fonte e data.</p></article>
     </div>
