@@ -62,7 +62,7 @@ def test_license_is_declared_as_a_proposal_and_caveats_are_present():
 
 def test_citation_on_the_page_matches_metadata():
     html = (ROOT / "web" / "dados.html").read_text(encoding="utf-8")
-    m = re.search(r'<p class="cite">(.*?)</p>', html, re.S)
+    m = re.search(r'<p class="cite"[^>]*>(.*?)</p>', html, re.S)
     assert m, "bloco de citação ausente na página"
     import html as h
     assert _norm(h.unescape(m.group(1))) == _norm(_meta()["citacao"])
