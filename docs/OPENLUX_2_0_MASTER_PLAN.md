@@ -107,8 +107,13 @@ Estados: NÃO INICIADO · EM ANDAMENTO · CONCLUÍDO · BLOQUEADO · VALIDAR CIE
 
 | Tarefa | Estado |
 |---|---|
-| Identidade visual (tema escuro, dourado) | NÃO INICIADO (o protótipo `openlux-prototipo.html` é referência, não está no repositório) |
-| Homepage, explorador, laboratório, ambiental, dados abertos, metodologia | PARCIAL (ver seção 2) |
+| Identidade visual (tema escuro, dourado, base do protótipo) | EM ANDAMENTO. Aplicada ao Observatório (`web/css/observatorio.css`) |
+| Observatório (página inicial): KPIs estaduais, evolução NOAA-20 com S-NPP tracejado, mapa de 92 municípios com classes fixas, maiores e menores, distribuição, variação 2018→2025, busca | CONCLUÍDO (primeira versão). Testes: `tests/test_web_observatorio.py`. Capturas reais em `docs/screenshots/openlux-2.0/` |
+| Explorador geográfico (renovação visual) | NÃO INICIADO |
+| Laboratório de análises | NÃO INICIADO |
+| Observatório ambiental | NÃO INICIADO |
+| Dados abertos (renovação) | NÃO INICIADO |
+| Metodologia (renovação) | NÃO INICIADO |
 
 ### Fase E — Recursos avançados
 
