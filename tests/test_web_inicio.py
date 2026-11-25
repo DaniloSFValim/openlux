@@ -48,3 +48,17 @@ def test_every_municipality_has_a_population_weighted_value_for_the_reference_ye
 def test_front_page_links_to_the_explorer_and_the_other_pages():
     for alvo in ("explorar.html", "roteiros.html", "dados.html", "sobre.html"):
         assert f'href="{alvo}"' in HTML, alvo
+
+
+def test_ranking_strip_is_in_the_front_page_and_drawn_by_the_script():
+    assert 'id="faixa-ranking"' in HTML and 'id="ranking-resumo"' in HTML
+    assert "function drawRanking" in JS
+    assert "drawRanking(cod)" in JS  # redesenha ao trocar de município
+
+
+def test_every_page_that_uses_reveal_loads_the_reveal_script():
+    """Sem reveal.js, o conteúdo com a classe reveal fica invisível (opacidade 0)."""
+    for pagina in sorted(WEB.glob("*.html")):
+        texto = pagina.read_text(encoding="utf-8")
+        if 'class="' in texto and "reveal" in texto:
+            assert 'src="js/reveal.js"' in texto, pagina.name

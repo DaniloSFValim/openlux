@@ -287,3 +287,15 @@ body.inicio .muted,body.pagina .muted,.resultado .muted,.vazio .muted,.quiz .mut
 .vazio .btn.secundario,.compartilhar .btn.secundario{color:#0b1020;border-color:#0b1020}
 .faixa,.hero{color:#fff}
 .faixa .lede,.hero .lede{color:#dbe4f0}
+
+/* Experimento: onde o município está entre os 92 (cada ponto é um município) */
+.faixa-ranking{background:#fff;border-radius:18px;padding:22px;box-shadow:0 8px 24px rgba(11,16,32,.07);margin:0 0 28px;color:#15191f}
+.faixa-ranking h2{font-size:1.35rem;margin:0 0 6px}
+.faixa-svg{width:100%;margin-top:12px}
+.faixa-svg svg{width:100%;height:auto;display:block}
+.faixa-svg circle{fill:#8e7dff;opacity:.75;cursor:pointer;transition:r .2s ease,opacity .2s ease}
+.faixa-svg circle:hover{opacity:1}
+.faixa-svg circle.sel{fill:#ffb703;opacity:1;stroke:#0b1020;stroke-width:2}
+.faixa-svg .eixo{fill:#55606e;font-size:12px}
+.faixa-svg .rotulo-sel{fill:#15191f;font-weight:700;font-size:14px}
+@media (prefers-reduced-motion: reduce){.faixa-svg circle{transition:none}}
