@@ -117,6 +117,21 @@ Estados: NÃO INICIADO · EM ANDAMENTO · CONCLUÍDO · BLOQUEADO · VALIDAR CIE
 | Dados abertos (renovação) | NÃO INICIADO |
 | Metodologia (renovação) | NÃO INICIADO |
 
+### Fase 7 (prompt) — Observatório ambiental
+
+| Tarefa | Estado | Evidência / bloqueio |
+|---|---|---|
+| Áreas urbanizadas (IBGE 2019) para radiância urbana × rural | BLOQUEADO | Arquivo acessível (`AreasUrbanizadas2019_Brasil.zip`, 38 MB, `geoftp.ibge.gov.br`). Licença **não verificada**: a busca não achou termo de uso para os dados; o portal do IBGE recusa acesso automatizado (403). Precisa de conferência pelo responsável no portal, como foi feito para o SIDRA |
+| Unidades de conservação (ICMBio / CNUC) | BLOQUEADO | ICMBio: licença CC BY-ND 3.0, que proíbe derivados (DECISIONS §2). CNUC: caminho de download não localizado |
+| Uso e cobertura do solo (MapBiomas) | BLOQUEADO | Termos inconsistentes entre páginas: CC BY-SA em umas e CC BY em outras. Se CC BY-SA, os derivados teriam licença de compartilhamento igual, em conflito com a CC BY 4.0 dos dados derivados do projeto. Decisão do responsável |
+| Hidrografia, corpos d'água, áreas costeiras | NÃO INICIADO | Sem fonte verificada |
+| INEA (unidades estaduais) | BLOQUEADO | Três hosts sem conexão (HTTP 000); nova tentativa agendada |
+| Módulo na página (exploratório, sem atribuição de efeitos) | NÃO INICIADO | Depende das camadas acima |
+
+Decisões do responsável necessárias: (1) confirmar a licença das áreas urbanizadas do IBGE no portal;
+(2) decidir se o MapBiomas entra, sabendo que a versão CC BY-SA pode exigir mudar a licença dos dados derivados;
+(3) indicar outra fonte oficial de unidades de conservação com licença que permita derivados.
+
 ### Fase E — Recursos avançados
 
 Comparação temporal, comparação municipal (até três), relatórios PDF, URLs compartilháveis (parcial:
