@@ -5,5 +5,7 @@
   "compatibility_date": "2026-11-19",
   "assets": {
     "directory": "./web"
-  }
+  },
+  // Exigido por `npx wrangler preview` (comando de build de preview da Cloudflare). Bloco vazio: sem configuração extra de preview.
+  "previews": {}
 }
