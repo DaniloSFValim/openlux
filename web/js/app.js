@@ -603,4 +603,16 @@
   render(); renderCmp();
   if (st.sel) renderDetail();
   syncLabels(); writeUrl();
+  /* Ponte para o módulo "Desenhe uma área" (js/desenhar.js): só leitura da grade e do estado atual. */
+  window.OpenLuxMapApi = {
+    map: map,
+    years: years,
+    pxMeta: pxMeta,
+    viewIsRadiance: () => st.view === 'rad',
+    currentPath: () => (pxMeta ? pxPath() : null),
+    currentSensor: () => (pxMeta ? st.sensor : null),
+    currentYear: () => years[st.iy],
+    getGrid: (path) => pxGrid(path),
+  };
+  document.dispatchEvent(new Event('openlux:mapa-pronto'));
 })();

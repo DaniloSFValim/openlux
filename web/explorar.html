@@ -33,6 +33,18 @@
         <div id="mapa" role="region" aria-label="Mapa da radiância noturna no Estado do Rio de Janeiro, por pixel de cerca de 460 metros ou agregada por município. Use o seletor de município ou a tabela de ranking para navegar pelo teclado."></div>
         <div id="pixel-readout" class="readout muted small" aria-live="polite" hidden></div>
         <div id="legend" class="legend" aria-live="polite"></div>
+        <section class="desenhar" aria-labelledby="desenhar-titulo">
+          <h2 id="desenhar-titulo">Desenhe uma área</h2>
+          <p class="ajuda">Clique no mapa para marcar os vértices (pelo menos três). Depois, toque em "Concluir área" ou tecle Enter. Escape cancela. O site conta quantos pixels caem em cada faixa de luz dentro dela.</p>
+          <div class="desenhar-botoes">
+            <button type="button" class="btn" id="desenhar-iniciar">Desenhar uma área</button>
+            <button type="button" class="btn secundario" id="desenhar-desfazer" hidden>Desfazer ponto</button>
+            <button type="button" class="btn" id="desenhar-concluir" hidden disabled>Concluir área</button>
+            <button type="button" class="btn secundario" id="desenhar-limpar" hidden>Limpar</button>
+          </div>
+          <p id="desenhar-status" class="ajuda" role="status"></p>
+          <div id="desenhar-resultado" hidden></div>
+        </section>
       </div>
 
       <aside class="panel-col">
@@ -116,6 +128,8 @@
 
 <script src="vendor/leaflet/leaflet.js"></script>
 <script src="js/charts.js"></script>
+<script src="vendor/openlux-draw/openlux-turf.min.js"></script>
 <script src="js/app.js"></script>
+<script src="js/desenhar.js"></script>
 </body>
 </html>
