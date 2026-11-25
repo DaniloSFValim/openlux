@@ -1,4 +1,4 @@
-cod_municipio,municipio,ano,radiancia_media_nW_cm-2_sr-1,radiancia_mediana_nW_cm-2_sr-1,fracao_area_valida,fracao_area_iluminada_limiar_0.5_nW_cm-2_sr-1,intensidade_radiante_aparente_nW_sr-1
+﻿cod_municipio,municipio,ano,radiancia_media_nW_cm-2_sr-1,radiancia_mediana_nW_cm-2_sr-1,fracao_area_valida,fracao_area_iluminada_limiar_0.5_nW_cm-2_sr-1,intensidade_radiante_aparente_nW_sr-1
 3300100,Angra dos Reis,2012,1.58087,0.0,0.9939,0.2901,12780148840000.0
 3300100,Angra dos Reis,2013,1.501131,0.0,0.9957,0.2831,12157326320000.0
 3300100,Angra dos Reis,2014,1.533494,0.0,0.9939,0.2901,12397251230000.0

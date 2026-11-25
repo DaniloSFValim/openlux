@@ -123,3 +123,22 @@ details.display summary{cursor:pointer;font-size:.88rem;font-weight:600}
 .hud .y{font-size:1.6rem;font-weight:700;line-height:1.1;color:var(--ink)}
 .hud .w{font-size:.72rem;color:var(--ink);max-width:14rem;border-left:3px solid #e69f00;padding-left:6px;margin-top:2px}
 a{color:var(--accent)}   /* links legiveis no tema escuro */
+
+/* Roteiros, exportação e perfil imprimível */
+.roteiro{margin:28px 0}
+.roteiro h2{margin-bottom:4px}
+.roteiro-list{padding-left:1.2rem}
+.roteiro-list li{margin:10px 0}
+.roteiro-list span{display:block;color:var(--muted,#5a6470);font-size:.92rem;margin-top:2px}
+.export-btn{display:block;margin:4px 0 6px;font-size:.85rem}
+.profile-tools{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.btn-sm{font-size:.85rem;padding:4px 8px}
+.print-only{display:none}
+@media print{
+  .no-print{display:none!important}
+  .print-only{display:block!important}
+  body.print-profile *{visibility:hidden}
+  body.print-profile #p-mun,body.print-profile #p-mun *{visibility:visible}
+  body.print-profile #p-mun{position:absolute;left:0;top:0;width:100%}
+  body.print-profile .panel[hidden]{display:none}
+}

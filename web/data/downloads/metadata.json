@@ -35,12 +35,12 @@
   ],
   "arquivos": {
     "openlux_municipios_snpp_serie.csv": {
-      "sha256": "94e3767cb3de6269e0fe5463be37a541c1d9a055b63a7503d121853ea800252f",
-      "bytes": 90628
+      "sha256": "fda426add6a69b80d20d1b72e2b3080f751f1e5a13c70fcff7b04e3a4c734a52",
+      "bytes": 90631
     },
     "openlux_municipios_snpp_resumo.csv": {
-      "sha256": "f0d5d109d4cc4a2f0e185045d62f380b3aaa7a252529b1d1dcdb2672b6ba431e",
-      "bytes": 7937
+      "sha256": "f689018b2f68aa93490edde65a025b280336de4c06a5acfb2004102777d0e2f7",
+      "bytes": 7940
     }
   }
 }

@@ -22,7 +22,7 @@ def _norm(s):
 
 
 def test_serie_has_one_row_per_municipality_and_year():
-    rows = list(csv.DictReader((DL / "openlux_municipios_snpp_serie.csv").open(encoding="utf-8")))
+    rows = list(csv.DictReader((DL / "openlux_municipios_snpp_serie.csv").open(encoding="utf-8-sig")))
     cods = {r["cod_municipio"] for r in rows}
     anos = sorted({int(r["ano"]) for r in rows})
     assert len(cods) == 92
@@ -32,7 +32,7 @@ def test_serie_has_one_row_per_municipality_and_year():
 
 
 def test_resumo_has_one_row_per_municipality_and_units_in_headers():
-    rows = list(csv.DictReader((DL / "openlux_municipios_snpp_resumo.csv").open(encoding="utf-8")))
+    rows = list(csv.DictReader((DL / "openlux_municipios_snpp_resumo.csv").open(encoding="utf-8-sig")))
     assert len(rows) == 92
     header = rows[0].keys()
     assert "populacao_2022" in header

@@ -76,7 +76,7 @@
           <button role="tab" id="tab-state" aria-controls="p-state" aria-selected="false" tabindex="-1">Estado</button>
         </div>
         <div role="tabpanel" id="p-mun" aria-labelledby="tab-mun" class="panel">
-          <label class="block">Município
+          <label class="block no-print">Município
             <select id="mun-select"></select>
           </label>
           <div id="mun-detail"><p class="muted">Selecione um município no mapa ou na lista.</p></div>
@@ -100,6 +100,25 @@
       </aside>
     </section>
   </main>
+
+  <section class="roteiro" id="roteiro" aria-labelledby="roteiro-title">
+    <h2 id="roteiro-title">Roteiros para explorar</h2>
+    <p class="muted">Cada item abre o mapa numa vista pronta. Ao mudar qualquer controle, o endereço da barra se atualiza e pode ser copiado.</p>
+    <ol class="roteiro-list">
+      <li><a href="?l=mun&amp;i=mean&amp;y=2012&amp;s=snpp"><strong>Como era a radiância média por município em 2012?</strong></a>
+        <span>Observe o contraste entre a faixa litorânea, a Região Metropolitana e o interior.</span></li>
+      <li><a href="?l=pixel&amp;v=2012_2021&amp;s=snpp"><strong>Onde há mudança significativa por pixel entre 2012 e 2021?</strong></a>
+        <span>Aumentos e reduções são testados por pixel. A assimetria entre eles coincide com o ruído do S-NPP: não leia isso como mudança real sem a ressalva da página.</span></li>
+      <li><a href="?l=mun&amp;i=percap"><strong>Quais municípios têm mais luz por habitante em 2022?</strong></a>
+        <span>É um índice relativo, da intensidade aparente dividida pela população do Censo 2022. Não é exposição individual.</span></li>
+      <li><a href="?l=mun&amp;i=mean&amp;y=2021"><strong>O que muda de 2021 para 2022?</strong></a>
+        <span>Troque o ano no controle e compare. A partir de 2022 o S-NPP lê mais alto em áreas escuras: o aviso no topo da página se aplica.</span></li>
+      <li><a href="?l=mun&amp;i=lit&amp;y=2025"><strong>Qual fração da área de cada município tem radiância acima do limiar em 2025?</strong></a>
+        <span>O limiar é o valor documentado na metodologia. A fração depende do piso de ruído do sensor.</span></li>
+      <li><a href="?l=pixel&amp;v=2018_2025&amp;s=noaa20"><strong>O que a mudança por pixel mostra no NOAA-20 (2018–2025)?</strong></a>
+        <span>O NOAA-20 é o sensor primário do projeto. Compare com o S-NPP na janela 2012–2021 e veja o que se repete e o que não se repete.</span></li>
+    </ol>
+  </section>
 
   <section class="info" id="info" aria-label="Informações científicas">
     <h2>Informações científicas</h2>

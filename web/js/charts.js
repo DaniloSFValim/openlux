@@ -96,6 +96,74 @@
     t.innerHTML = `<thead>${head}</thead><tbody>${body}</tbody>`;
     det.appendChild(t);
     container.appendChild(det);
+    if (o.exportName) addExport(container, svg, o);
+  }
+
+  /* Exporta o gráfico como PNG com título, fonte e ressalvas no próprio arquivo.
+     Usa data: (permitido pela política de imagens do site; blob: não é). */
+  function addExport(container, svg, o) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'export-btn no-print';
+    btn.textContent = 'Baixar gráfico (PNG)';
+    btn.addEventListener('click', () => exportPng(svg, o, btn));
+    container.insertBefore(btn, container.firstChild);
+  }
+
+  function wrapText(text, maxChars) {
+    const words = String(text).split(/\s+/), out = [];
+    let line = '';
+    words.forEach((w) => {
+      if ((line + ' ' + w).trim().length > maxChars && line) { out.push(line); line = w; }
+      else line = (line + ' ' + w).trim();
+    });
+    if (line) out.push(line);
+    return out;
+  }
+
+  function exportPng(svg, o, btn) {
+    const vb = svg.getAttribute('viewBox').split(' ').map(Number), W = vb[2], H = vb[3];
+    const maxChars = Math.floor((W - 24) / 6.4);
+    const notes = (o.exportNotes || []).flatMap((t) => wrapText(t, maxChars));
+    const legendH = 24, lh = 15, pad = 14;
+    const capH = legendH + pad + (1 + notes.length) * lh + pad;
+    const TH = H + capH;
+    const root = el('svg', { xmlns: NS, width: W, height: TH, viewBox: `0 0 ${W} ${TH}` });
+    root.setAttribute('xmlns', NS);
+    root.appendChild(el('rect', { x: 0, y: 0, width: W, height: TH, fill: '#ffffff' }));
+    const g = svg.cloneNode(true);
+    g.removeAttribute('class'); g.setAttribute('x', 0); g.setAttribute('y', 0);
+    g.setAttribute('width', W); g.setAttribute('height', H); g.setAttribute('style', 'color:#1f2933');
+    root.appendChild(g);
+    const fontAttrs = { 'font-family': 'system-ui, Arial, sans-serif', fill: '#1f2933' };
+    // legenda: uma amostra de linha por série, na mesma ordem do gráfico
+    let lx = 12; const ly = H + legendH - 6;
+    (o.series || []).forEach((s) => {
+      root.appendChild(el('line', { x1: lx, x2: lx + 22, y1: ly - 4, y2: ly - 4, stroke: s.color, 'stroke-width': 3, 'stroke-dasharray': s.dash || '' }));
+      const t = el('text', Object.assign({ x: lx + 28, y: ly, 'font-size': 11 }, fontAttrs), s.name);
+      root.appendChild(t);
+      lx += 28 + Math.min(260, 7 * String(s.name).length) + 18;
+    });
+    let ty = H + legendH + pad + 4;
+    root.appendChild(el('text', Object.assign({ x: 12, y: ty, 'font-size': 14, 'font-weight': 600 }, fontAttrs), o.title));
+    notes.forEach((t) => { ty += lh; root.appendChild(el('text', Object.assign({ x: 12, y: ty, 'font-size': 11 }, fontAttrs), t)); });
+    const xml = new XMLSerializer().serializeToString(root);
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas'), k = 2;
+      c.width = W * k; c.height = TH * k;
+      const ctx = c.getContext('2d'); ctx.scale(k, k); ctx.drawImage(img, 0, 0, W, TH);
+      c.toBlob((blob) => {
+        if (!blob) return;
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = o.exportName + '.png';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      }, 'image/png');
+    };
+    img.onerror = () => { btn.textContent = 'Não foi possível gerar o PNG'; };
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
   }
 
   window.OpenLuxCharts = { lineChart };
