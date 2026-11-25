@@ -11,7 +11,10 @@ Formato: versões em ordem cronológica inversa. Datas no formato AAAA-MM-DD.
 - Página inicial: textos atualizados; o sombreado do S-NPP saiu do gráfico.
 - Página Sobre: bloco de contexto ambiental com link oficial do ICMBio, sem hospedar dados derivados.
 - Roteiros: quiz removido.
-- Mapa do S-NPP e camada municipal: a camada municipal continua com dados do S-NPP (2012–2025), com nota explícita.
+- Camada municipal: passa a usar o NOAA-20 (2018–2025) por padrão. O S-NPP (2012–2025) fica disponível pelo
+  seletor de sensor (`?s=snpp`), com aviso de ruído a partir de 2022 e os indicadores só do S-NPP.
+  Trocar de sensor recarrega a página, pois cada sensor tem seu próprio conjunto municipal.
+- Link com ano fora da série do sensor (ex.: `y=2013` com NOAA-20) vai para o ano disponível mais próximo.
 - Licença dos dados derivados (CC BY 4.0): status confirmado pelo autor em 2026-11-25.
 
 ### Adicionado
