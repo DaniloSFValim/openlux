@@ -337,6 +337,9 @@ def _fresh(page, server, query=""):
     pg.on("pageerror", lambda e: pg.errors.append(str(e)))
     pg.goto(server + "/explorar.html" + query)
     pg.wait_for_selector("#mapa path.leaflet-interactive")
+    # Os controles ficam na gaveta (igual ao fixture `page`): abre antes de usar camadas, ano e animação.
+    pg.click("#abrir-painel")
+    pg.wait_for_function("document.getElementById('painel').classList.contains('aberta')")
     return pg
 
 

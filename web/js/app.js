@@ -371,7 +371,7 @@
   $('mun-select').innerHTML = '<option value="">Selecione…</option>' + optionsHtml(false);
   $('mun-select').addEventListener('change', (e) => select(e.target.value || null));
   if (!pxLayer) $('layer-wrap').hidden = true;
-  document.querySelectorAll('input[name="layer"]').forEach((r) => { r.checked = r.value === st.layer; r.addEventListener('change', (e) => { if (e.target.checked) { stopAnim(); st.layer = e.target.value; render(); } }); });
+  document.querySelectorAll('input[name="layer"]').forEach((r) => { r.checked = r.value === st.layer; r.addEventListener('change', (e) => { if (e.target.checked) { stopAnim(); st.layer = e.target.value; if (st.layer === 'pixel' && st.view === 'rad') clampYear(); render(); } }); });
   $('reset-btn').addEventListener('click', () => map.fitBounds(gl.getBounds(), { padding: [8, 8] }));
   if (pxMeta) {
     $('px-sensor').innerHTML = Object.entries(pxMeta.sensors).map(([k, v]) => `<option value="${k}">${esc(v.name)}</option>`).join('');
