@@ -361,3 +361,11 @@ Equipe: o autor (RJ) e no máximo uma pessoa em SP. Detalhes em `docs/FIELD_VALI
 - **Sudeste, depois:** 4 tiles (`h12v10`, `h12v11`, `h13v10`, `h13v11`), 3 novos, ≈ 6 GB para os dois sensores (estimativa a partir de ≈ 90 MB por tile-ano). O trabalho real é generalizar os scripts, hoje fixos no RJ,
   e juntar tiles nos municípios que cruzam a divisa; a grade do Sudeste teria ≈ 9 milhões de pixels por ano (≈ 15 vezes a do RJ), exigindo tiles de classes no site.
 
+## 15. Sensor primário para análise e sensor do mapa padrão (decisão do responsável, 2026-11-25)
+
+Decidido pelo responsável do projeto, em resposta à auditoria `docs/AUDITORIA_2_0.md` (item C1):
+
+- **Análise científica e metodologia:** o **NOAA-20 (VJ146A4)** é o sensor primário. As comparações, os indicadores de referência e a validação em campo usam este sensor. O S-NPP (VNP46A4) é o sensor de continuidade e de comparação.
+- **Mapa padrão e animação:** o **S-NPP (VNP46A4)** continua sendo o mapa padrão, para manter a série de 2012 a 2025. Por isso o aviso de ruído do S-NPP a partir de 2022 deve permanecer visível sempre que essa camada estiver ativa.
+- **Consequência:** os indicadores municipais de referência (como a luz ponderada pela população, usada na página inicial) precisam ser recalculados também para o NOAA-20, no período 2018–2025, antes de serem apresentados como primários. Até essa etapa, os números publicados continuam sendo do S-NPP e estão rotulados como tal.
+
