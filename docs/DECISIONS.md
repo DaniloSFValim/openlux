@@ -361,3 +361,13 @@ Equipe: o autor (RJ) e no máximo uma pessoa em SP. Detalhes em `docs/FIELD_VALI
 - **Sudeste, depois:** 4 tiles (`h12v10`, `h12v11`, `h13v10`, `h13v11`), 3 novos, ≈ 6 GB para os dois sensores (estimativa a partir de ≈ 90 MB por tile-ano). O trabalho real é generalizar os scripts, hoje fixos no RJ,
   e juntar tiles nos municípios que cruzam a divisa; a grade do Sudeste teria ≈ 9 milhões de pixels por ano (≈ 15 vezes a do RJ), exigindo tiles de classes no site.
 
+## 15. Sensor primário para análise e sensor do mapa padrão (decisão do responsável, 2026-11-25)
+
+Decidido pelo responsável do projeto, em resposta à auditoria `docs/AUDITORIA_2_0.md` (item C1):
+
+- **Análise científica e metodologia:** o **NOAA-20 (VJ146A4)** é o sensor primário. As comparações, os indicadores de referência e a validação em campo usam este sensor. O S-NPP (VNP46A4) é o sensor de continuidade e de comparação.
+- **Mapa padrão e animação:** o **S-NPP (VNP46A4)** continua sendo o mapa padrão, para manter a série de 2012 a 2025. Por isso o aviso de ruído do S-NPP a partir de 2022 deve permanecer visível sempre que essa camada estiver ativa.
+- **Consequência:** os indicadores municipais de referência (como a luz ponderada pela população, usada na página inicial) precisam ser recalculados também para o NOAA-20, no período 2018–2025, antes de serem apresentados como primários. Até essa etapa, os números publicados continuam sendo do S-NPP e estão rotulados como tal.
+
+**Recalculado (2026-11-25):** `scripts/build_web_data_noaa20.py` gera `web/data/indicators_noaa20.json` (92 municípios, 2018–2025) com a mesma função de cálculo do S-NPP, a partir de `outputs/noaa20/`, `outputs/sectors/sector_indicators_noaa20.csv` e `outputs/sectors/pixel_trend_noaa20_2018_2025.csv`. O arquivo do S-NPP não foi alterado. Validação: razão mediana NOAA-20/S-NPP em 2018–2021 = 0,988; no nível estadual de 2021 a diferença é de cerca de 4% (NOAA-20 3,275; S-NPP 3,418 nW·cm⁻²·sr⁻¹), registrada como observação. A página inicial ainda usa o S-NPP e não foi alterada.
+

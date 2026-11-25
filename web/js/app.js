@@ -11,10 +11,15 @@
   };
   const norm = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
+  // Sensor único para as duas camadas, vindo da URL (?s=). Padrão: NOAA-20 (sensor primário da análise).
+  // Trocar de sensor recarrega a página com o novo ?s=, pois cada sensor tem seu próprio conjunto municipal.
+  const sk0 = new URLSearchParams(location.search).get('s') === 'snpp' ? 'snpp' : 'noaa20';
+  const irParaSensor = (k) => { const u = new URL(location.href); u.searchParams.set('s', k); location.assign(u.href); };
+
   let data, geo, pxMeta = null;
   try {
     [data, geo, pxMeta] = await Promise.all([
-      fetch('data/indicators.json').then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }),
+      fetch(sk0 === 'noaa20' ? 'data/indicators_noaa20.json' : 'data/indicators.json').then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }),
       fetch('data/municipios.geojson').then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }),
       fetch('data/pixels/meta.json').then((r) => (r.ok ? r.json() : null)).catch(() => null),  // camada de pixel é opcional
     ]);
@@ -82,7 +87,8 @@
       get: (m) => m.sensors[key], pval: (m) => m.sensors[pkey], breaks: sbr,
       scheme: 'Classificação analítica: limites em ± mediana e ± percentil 90 de |inclinação| (agrupando os dois sensores, para comparar os mapas). Contorno espesso: p < 0,05 (Kendall).',
       period: () => '2018–2025', source: `Derivado da série anual de radiância média do ${sensor} (${sensor === 'NOAA-20' ? 'VJ146A4' : 'VNP46A4'}); mínimo de 8 anos válidos.` });
-    IND.slope_snpp_1825 = mk('S-NPP', 'slope_snpp', 'p_snpp');
+    // Decisão 2: indicador só do S-NPP aparece apenas com o S-NPP selecionado (com aviso de ruído a partir de 2022).
+    if (sk0 === 'snpp') IND.slope_snpp_1825 = mk('S-NPP', 'slope_snpp', 'p_snpp');
     IND.slope_noaa20_1825 = mk('NOAA-20', 'slope_noaa20', 'p_noaa20');
   }
   IND.percap = { label: 'Intensidade radiante aparente por habitante, 2022', unit: 'mW·sr⁻¹ por habitante', kind: 'der', type: 'seq', d: 1,
@@ -122,7 +128,7 @@
   }
   const KIND = { obs: ['obs', 'Observado (agregado)'], der: ['der', 'Derivado'], qa: ['qa', 'Controle de qualidade'] };
 
-  const st = { ind: 'mean', iy: years.length - 1, sel: null, layer: pxMeta ? 'pixel' : 'mun', sensor: 'snpp', view: 'rad', alpha: 0.9, basemap: false, outlines: true, pxOn: true, playing: false };
+  const st = { ind: 'mean', iy: years.length - 1, sel: null, layer: pxMeta ? 'pixel' : 'mun', sensor: sk0, view: 'rad', alpha: 0.9, basemap: false, outlines: true, pxOn: true, playing: false };
   const val = (cd, key = st.ind, iy = st.iy) => { const v = IND[key].get(M[cd], iy); return v == null || !isFinite(v) ? null : v; };
 
   /* ---------- aviso metodológico (dados) ---------- */
@@ -312,14 +318,15 @@
     const showYear = px ? st.view === 'rad' : ind.yearly;
     $('year-wrap').hidden = !showYear;
     $('year-note').hidden = !showYear;
-    $('px-wrap').hidden = !px;
+    $('px-wrap').hidden = !pxMeta;               // o seletor de sensor vale para as duas camadas
+    $('px-view').closest('label').hidden = !px;  // "Mostrar" (ano ou mudança) é só da camada de pixel
     $('indicator').disabled = px;
     document.documentElement.classList.toggle('is-dark', isDark());
     if (pxLayer) { if (px && st.pxOn) { if (!map.hasLayer(pxLayer)) pxLayer.addTo(map); pxShow(); } else if (map.hasLayer(pxLayer)) map.removeLayer(pxLayer); }
     const yearly = px ? st.view === 'rad' : !!ind.yearly;
     const hudText = px && st.view !== 'rad' ? `mudança ${st.view.replace('_', '–')}` : (yearly ? String(years[st.iy]) : '');
     $('hud-year').textContent = hudText; $('hud-year').parentElement.hidden = !hudText;
-    $('hud-warn').hidden = !(yearly && years[st.iy] >= 2022 && (!px || st.sensor === 'snpp'));
+    $('hud-warn').hidden = !(yearly && years[st.iy] >= 2022 && st.sensor === 'snpp');
     $('play-btn').disabled = !yearly;
     $('pixel-readout').hidden = !px;
     if (px) $('pixel-readout').textContent = 'Passe o cursor sobre o mapa (ou toque) para ver a classe do pixel.';
@@ -371,14 +378,18 @@
   $('mun-select').innerHTML = '<option value="">Selecione…</option>' + optionsHtml(false);
   $('mun-select').addEventListener('change', (e) => select(e.target.value || null));
   if (!pxLayer) $('layer-wrap').hidden = true;
-  document.querySelectorAll('input[name="layer"]').forEach((r) => { r.checked = r.value === st.layer; r.addEventListener('change', (e) => { if (e.target.checked) { stopAnim(); st.layer = e.target.value; render(); } }); });
+  document.querySelectorAll('input[name="layer"]').forEach((r) => { r.checked = r.value === st.layer; r.addEventListener('change', (e) => { if (e.target.checked) { stopAnim(); st.layer = e.target.value; if (st.layer === 'pixel' && st.view === 'rad') clampYear(); render(); } }); });
   $('reset-btn').addEventListener('click', () => map.fitBounds(gl.getBounds(), { padding: [8, 8] }));
   if (pxMeta) {
     $('px-sensor').innerHTML = Object.entries(pxMeta.sensors).map(([k, v]) => `<option value="${k}">${esc(v.name)}</option>`).join('');
     const fixView = () => { if (st.view !== 'rad' && !pxMeta.sensors[st.sensor].change[st.view]) st.view = 'rad'; };
     const fillView = () => { fixView(); $('px-view').innerHTML = '<option value="rad">Radiância por ano</option>' + Object.entries(pxMeta.sensors[st.sensor].change).map(([w, v]) => `<option value="${w}">Mudança ${v.years[0]}–${v.years[1]}</option>`).join(''); $('px-view').value = st.view; $('px-sensor').value = st.sensor; };
     fillView();
-    $('px-sensor').addEventListener('change', (e) => { stopAnim(); st.sensor = e.target.value; fillView(); clampYear(); render(); });
+    $('px-sensor').value = st.sensor;
+    $('nota-municipal').textContent = sk0 === 'noaa20'
+      ? 'Camada municipal: dados do NOAA-20, de 2018 a 2025 (sensor primário da análise).'
+      : 'Camada municipal: dados do S-NPP, de 2012 a 2025 (sensor de continuidade). Anos a partir de 2022 têm piso de ruído em áreas escuras.';
+    $('px-sensor').addEventListener('change', (e) => irParaSensor(e.target.value));
     $('px-view').addEventListener('change', (e) => { stopAnim(); st.view = e.target.value; clampYear(); render(); });
     window.openluxFillView = fillView;   // usado ao restaurar o estado da URL
   } else { $('px-wrap').hidden = true; }
@@ -600,7 +611,9 @@
   const mapBounds = gl.getBounds().pad(0.5);
   function readUrl() {
     const P = new URLSearchParams(location.search), num = (k) => { const v = P.get(k); return v !== null && v.trim() !== '' && isFinite(+v) ? +v : null; };
-    const y = num('y'); if (y != null && years.includes(y)) { st.iy = years.indexOf(y); yr.value = st.iy; yrOut(); }
+    // Ano fora da série deste sensor (ex.: y=2013 vindo do S-NPP) vai para o ano disponível mais próximo.
+    const y = num('y');
+    if (y != null && years.length) { const near = years.reduce((b, v) => (Math.abs(v - y) < Math.abs(b - y) ? v : b), years[0]); st.iy = years.indexOf(near); yr.value = st.iy; yrOut(); }
     const l = P.get('l'); if ((l === 'pixel' && pxLayer) || l === 'mun') st.layer = l;
     const i = P.get('i'); if (i && Object.prototype.hasOwnProperty.call(IND, i)) { st.ind = i; $('indicator').value = i; }
     const m = P.get('m'); if (m && Object.prototype.hasOwnProperty.call(M, m)) { st.sel = m; $('mun-select').value = m; }

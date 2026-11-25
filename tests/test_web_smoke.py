@@ -91,6 +91,8 @@ def page(server):
         pg.on("pageerror", lambda e: pg.errors.append(str(e)))
         pg.goto(server + "/explorar.html")
         pg.wait_for_selector("#mapa path.leaflet-interactive")
+        pg.click("#abrir-painel")  # os controles ficam na gaveta; os testes precisam deles visíveis
+        pg.wait_for_function("document.getElementById('painel').classList.contains('aberta')")
         pg.injected = _cloudflare_injected(pg.content())
         yield pg
         b.close()
@@ -109,13 +111,22 @@ def _layer(page, value):
     page.wait_for_function("(v) => document.querySelector('input[name=layer]:checked').value === v", arg=value)
 
 
+def _trocar_sensor(pg, k):
+    """Trocar de sensor recarrega a pagina (cada sensor tem seu proprio conjunto municipal) e reabre a gaveta."""
+    with pg.expect_navigation():
+        pg.select_option("#px-sensor", k)
+    pg.wait_for_selector("#mapa path.leaflet-interactive")
+    pg.click("#abrir-painel")
+    pg.wait_for_function("document.getElementById('painel').classList.contains('aberta')")
+
+
 def test_renders_92_municipalities_without_errors(page):
     assert page.locator("#mapa path.leaflet-interactive").count() == 92
     assert _relevant_errors(page.errors, page.injected) == []
 
 
 def test_rendered_colors_match_independent_classification(page):
-    data = json.loads((WEB / "data" / "indicators.json").read_text())
+    data = json.loads((WEB / "data" / "indicators_noaa20.json").read_text())   # padrão municipal: NOAA-20
     last = len(data["meta"]["years"]) - 1
     by_name = {m["name"]: cd for cd, m in data["municipios"].items()}
     _layer(page, "mun")
@@ -157,7 +168,7 @@ def test_indicator_switch_updates_legend_and_hides_year(page):
     page.select_option("#indicator", "percap")
     assert "mW·sr⁻¹ por habitante" in page.inner_text("#legend")
     assert page.locator("#year-wrap").is_hidden()
-    page.select_option("#indicator", "slope_2012_2021")
+    page.select_option("#indicator", "slope_2018_2025")   # o padrão é NOAA-20: a janela é 2018–2025
     assert "p < 0,05" in page.inner_text("#legend")
     page.select_option("#indicator", "mean")
     assert page.locator("#year-wrap").is_visible()
@@ -178,12 +189,18 @@ def test_sobre_page_has_the_municipal_sensor_comparison(page, server):
     outra.context.close()
 
 
-def test_sensor_comparison_indicators_and_panels(page):
+def test_sensor_comparison_indicators_and_panels(page, server):
+    _layer(page, "mun")
     page.select_option("#indicator", "slope_noaa20_1825")
     leg = page.inner_text("#legend")
     assert "NOAA-20" in leg and "2018–2025" in leg and "p < 0,05" in leg
-    page.select_option("#indicator", "slope_snpp_1825")
-    assert "S-NPP" in page.inner_text("#legend")
+    # Decisão 2: a tendência só do S-NPP não é oferecida com o NOAA-20 e aparece com ?s=snpp (com aviso de ruído).
+    assert page.locator("#indicator option[value='slope_snpp_1825']").count() == 0
+    pg = _fresh(page, server, "?s=snpp")
+    _layer(pg, "mun")
+    pg.select_option("#indicator", "slope_snpp_1825")
+    assert "S-NPP" in pg.inner_text("#legend")
+    pg.context.close()
     page.select_option("#indicator", "mean")
     page.select_option("#mun-select", next(c for c, m in json.loads((WEB / "data" / "indicators.json").read_text())["municipios"].items() if m["name"] == "Rio de Janeiro"))
     detail = page.inner_text("#mun-detail")
@@ -212,18 +229,21 @@ def _px_expected(code, meta):
     return pal[code - meta["classes"]["first_code"]]
 
 
-def test_pixel_layer_is_default_and_matches_the_class_grid(page):
+def test_pixel_layer_is_default_noaa20_and_matches_the_class_grid(page):
+    """Camada de pixel: o padrão é o NOAA-20 (sensor primário da análise). Legenda com unidade e fonte,
+    canvas desenhado, e o pixel sob o cursor tem a cor e a classe do arquivo data/pixels/<sensor>/<ano>.bin
+    (conferidos de forma independente em Python)."""
     page.evaluate("() => document.documentElement.removeAttribute('data-theme')")
-    """Camada de pixel: legenda com unidade e fonte, canvas desenhado, e o pixel sob o cursor tem a cor
-    e a classe do arquivo data/pixels/<ano>.bin (conferidos de forma independente em Python)."""
     meta = json.loads((WEB / "data" / "pixels" / "meta.json").read_text())
     _layer(page, "pixel")
     assert page.locator("#indicator").is_disabled()
     page.wait_for_function("() => document.querySelector('#pixel-readout') && !document.querySelector('#pixel-readout').hidden")
+    sensor = page.evaluate("() => window.OpenLuxMapApi.currentSensor()")
+    assert sensor == "noaa20", f"padrão deveria ser NOAA-20, veio {sensor!r}"
     leg = page.inner_text("#legend")
     assert "nW·cm⁻²·sr⁻¹" in leg and "Fonte:" in leg and "não é o brilho do céu" in leg and "sem dado válido" in leg
     year = page.evaluate("() => document.getElementById('year-out').textContent")
-    grid = np.fromfile(WEB / "data" / "pixels" / "snpp" / f"{year}.bin", dtype="uint8").reshape(meta["grid"]["rows"], meta["grid"]["cols"])
+    grid = np.fromfile(WEB / "data" / "pixels" / sensor / f"{year}.bin", dtype="uint8").reshape(meta["grid"]["rows"], meta["grid"]["cols"])
     g = meta["grid"]
     page.locator("#mapa").scroll_into_view_if_needed()
     box = page.locator("#mapa").bounding_box()
@@ -258,18 +278,20 @@ def test_pixel_layer_is_default_and_matches_the_class_grid(page):
 
 def test_pixel_layer_warns_about_noise_from_2022_and_switches_back_to_municipal(page):
     _layer(page, "pixel")
-    page.fill("#year", str(len(json.loads((WEB / "data" / "indicators.json").read_text())["meta"]["years"]) - 1))
+    page.fill("#year", str(len(json.loads((WEB / "data" / "indicators_noaa20.json").read_text())["meta"]["years"]) - 1))
     page.dispatch_event("#year", "input")
     page.wait_for_selector("#pxnote .pxnote")
     assert "piso de ruído" in page.inner_text("#pxnote")
+    # Padrão NOAA-20: primeiro ano disponível é 2018 (os anos 2012-2017 são do S-NPP).
     page.fill("#year", "0")
     page.dispatch_event("#year", "input")
-    page.wait_for_function("() => document.getElementById('year-out').textContent === '2012'")
+    page.wait_for_function("() => document.getElementById('year-out').textContent === '2018'")
     assert page.locator("#pxnote .pxnote").count() == 0
     _layer(page, "mun")
     assert page.locator("canvas.openlux-pixels").count() == 0
     assert page.locator("#indicator").is_enabled()
-    page.fill("#year", str(13)); page.dispatch_event("#year", "input")
+    page.select_option("#indicator", "mean")   # indicador anual: o controle de ano só aparece para ele
+    page.fill("#year", str(len(json.loads((WEB / "data" / "indicators_noaa20.json").read_text())["meta"]["years"]) - 1)); page.dispatch_event("#year", "input")
     assert _relevant_errors(page.errors, page.injected) == []
 
 
@@ -300,7 +322,7 @@ def test_deployed_files_are_identical_to_the_repository(server):
 def test_exposure_and_pixel_trend_indicators_render_and_match_data(page):
     """Cada indicador novo (setores/pixel) aparece no seletor, pinta o mapa sem erros e o painel do
     municipio mostra os valores do JSON (conferidos de forma independente)."""
-    data = json.loads((WEB / "data" / "indicators.json").read_text())
+    data = json.loads((WEB / "data" / "indicators_noaa20.json").read_text())   # padrão municipal: NOAA-20
     m = next(iter(data["municipios"].values()))
     if "exposure" not in m:
         pytest.skip("dados sem indicadores de setores")
@@ -314,6 +336,8 @@ def test_exposure_and_pixel_trend_indicators_render_and_match_data(page):
         assert page.locator("#mapa path.leaflet-interactive").count() == 92
         assert page.locator("#legend").inner_text().strip() != ""
     last = len(data["meta"]["years"]) - 1
+    page.select_option("#indicator", "mean")                              # o loop acima deixa um indicador não anual
+    page.fill("#year", str(last)); page.dispatch_event("#year", "input")   # o painel mostra o ano do slider: último ano
     cd = next(c for c, mm in data["municipios"].items() if mm["name"] == "Rio de Janeiro")
     page.select_option("#mun-select", cd)
     txt = page.locator("#mun-detail").inner_text().replace(" ", " ")
@@ -331,6 +355,9 @@ def _fresh(page, server, query=""):
     pg.on("pageerror", lambda e: pg.errors.append(str(e)))
     pg.goto(server + "/explorar.html" + query)
     pg.wait_for_selector("#mapa path.leaflet-interactive")
+    # Os controles ficam na gaveta (igual ao fixture `page`): abre antes de usar camadas, ano e animação.
+    pg.click("#abrir-painel")
+    pg.wait_for_function("document.getElementById('painel').classList.contains('aberta')")
     return pg
 
 
@@ -349,7 +376,7 @@ def test_permalink_restores_the_view_and_follows_the_controls(page, server):
     q = pg.evaluate("() => Object.fromEntries(new URLSearchParams(location.search))")
     assert q["y"] == "2018" and q["l"] == "mun" and q["m"] == rio and float(q["z"]) >= 6
     pg.fill("#year", "0"); pg.dispatch_event("#year", "input")
-    assert pg.evaluate("() => new URLSearchParams(location.search).get('y')") == "2012"
+    assert pg.evaluate("() => new URLSearchParams(location.search).get('y')") == "2018"   # primeiro ano do NOAA-20 (padrao)
     pg.check('input[name="layer"][value="pixel"]')
     assert pg.evaluate("() => new URLSearchParams(location.search).get('l')") == "pixel"
     assert _relevant_errors(pg.errors, _cloudflare_injected(pg.content())) == []
@@ -358,7 +385,7 @@ def test_permalink_restores_the_view_and_follows_the_controls(page, server):
 
 def test_permalink_ignores_invalid_parameters_without_errors(page, server):
     pg = _fresh(page, server, "?lat=abc&lng=&z=99&y=1999&l=zzz&i=__proto__&m=0000000")
-    assert pg.inner_text("#year-out") == "2025"                       # ano padrao
+    assert pg.inner_text("#year-out") == "2018"                       # ano fora da série (1999) vai ao mais próximo do NOAA-20
     assert pg.eval_on_selector("input[name=layer]:checked", "e => e.value") == "pixel"
     assert pg.eval_on_selector("#indicator", "e => e.value") == "mean"
     assert pg.locator("#mapa path.leaflet-interactive").count() == 92
@@ -418,8 +445,8 @@ def _canvas_rgb(pg, fx, fy):
 
 def test_noaa20_sensor_clamps_the_year_and_matches_its_own_grid(page, server):
     meta = _meta()
-    pg = _fresh(page, server, "?l=pixel&y=2013")
-    pg.select_option("#px-sensor", "noaa20")
+    pg = _fresh(page, server, "?l=pixel&s=snpp&y=2013")
+    _trocar_sensor(pg, "noaa20")
     assert pg.inner_text("#year-out") == "2018"                          # NOAA-20 so existe de 2018 a 2025
     assert pg.evaluate("() => new URLSearchParams(location.search).get('s')") == "noaa20"
     assert "NOAA-20" in pg.inner_text("#legend") and "VJ146A4" in pg.inner_text("#legend")
@@ -464,7 +491,7 @@ def test_change_layer_legend_counts_and_colors_match_the_grid(page, server):
     pg.select_option("#px-view", "2012_2025")
     leg2 = pg.inner_text("#legend")
     assert "inclui 2022–2025" in leg2 and "não leia como luz nova" in leg2             # aviso do ruido do S-NPP nesta janela
-    pg.select_option("#px-sensor", "noaa20")
+    _trocar_sensor(pg, "noaa20")
     assert pg.eval_on_selector("#px-view", "e => e.value") == "rad"                    # janelas de um sensor nao valem para o outro
     pg.select_option("#px-view", "2018_2025")
     assert "série curta" in pg.inner_text("#legend")
@@ -583,7 +610,7 @@ def test_animation_pause_resume_loop_and_stops_when_the_visitor_touches_controls
     pg.fill("#year", "5"); pg.dispatch_event("#year", "input")                          # mexer no controle para a animacao
     assert pg.inner_text("#play-btn") == "▶ Animar" and pg.inner_text("#year-out") == "2017"
     pg.click("#play-btn")
-    pg.select_option("#px-sensor", "noaa20")                                             # trocar de sensor tambem para
+    _trocar_sensor(pg, "noaa20")                                                         # trocar de sensor tambem para
     assert pg.inner_text("#play-btn") == "▶ Animar"
     pg.select_option("#px-view", "2018_2025")                                            # mudanca por pixel nao tem anos: nao ha o que animar
     assert pg.is_disabled("#play-btn")
@@ -598,8 +625,8 @@ def test_hud_shows_year_and_the_snpp_noise_warning_only_for_snpp_from_2022(page,
     assert pg.inner_text("#hud-year") == "2021" and pg.is_hidden("#hud-warn")
     pg.fill("#year", "11"); pg.dispatch_event("#year", "input")                         # 2023
     assert pg.inner_text("#hud-year") == "2023" and pg.is_visible("#hud-warn") and "não leia como luz nova" in pg.inner_text("#hud-warn")
-    pg.select_option("#px-sensor", "noaa20")
+    _trocar_sensor(pg, "noaa20")
     assert pg.is_hidden("#hud-warn")                                                      # o aviso e do S-NPP
-    pg.select_option("#px-sensor", "snpp"); pg.select_option("#px-view", "2012_2021")
+    _trocar_sensor(pg, "snpp"); pg.select_option("#px-view", "2012_2021")
     assert pg.inner_text("#hud-year") == "mudança 2012–2021"
     pg.context.close()

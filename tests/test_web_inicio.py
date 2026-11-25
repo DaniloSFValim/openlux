@@ -7,7 +7,7 @@ from helpers import WEB
 
 HTML = (WEB / "index.html").read_text(encoding="utf-8")
 JS = (WEB / "js" / "inicio.js").read_text(encoding="utf-8")
-DATA = json.loads((WEB / "data" / "indicators.json").read_text(encoding="utf-8"))
+DATA = json.loads((WEB / "data" / "indicators_noaa20.json").read_text(encoding="utf-8"))  # sensor primário: NOAA-20
 
 
 def test_front_page_loads_the_municipality_picker_and_the_scripts():
@@ -27,11 +27,12 @@ def test_front_page_states_it_is_an_estimate_from_remote_sensing():
     assert "estimativa de poluição luminosa baseada em sensoriamento remoto" in HTML.lower()
 
 
-def test_reference_year_is_before_the_snpp_noise_and_present_in_the_data():
+def test_reference_year_is_present_in_the_noaa20_series():
     m = re.search(r"const REF = (\d{4});", JS)
     assert m, "ano de referência ausente em inicio.js"
     ano = int(m.group(1))
     assert ano == 2021 and ano in DATA["meta"]["years"]
+    assert "indicators_noaa20.json" in JS and "shadeFrom" not in JS  # sem sombreado do S-NPP
 
 
 def test_population_weighted_indicator_is_used_and_not_the_saturated_lit_share():
@@ -62,3 +63,8 @@ def test_every_page_that_uses_reveal_loads_the_reveal_script():
         texto = pagina.read_text(encoding="utf-8")
         if 'class="' in texto and "reveal" in texto:
             assert 'src="js/reveal.js"' in texto, pagina.name
+
+
+def test_front_page_is_about_noaa20_and_the_2018_2025_period():
+    assert "2018 a 2025" in HTML and "NOAA-20" in HTML
+    assert "Como mudou, de 2012 a 2025" not in HTML

@@ -15,7 +15,7 @@
   "licenca": {
     "id": "CC-BY-4.0",
     "url": "https://creativecommons.org/licenses/by/4.0/",
-    "status": "proposta: a confirmar pelo autor antes da publicação",
+    "status": "confirmada pelo autor em 2026-11-25",
     "nota": "Dados derivados de NASA (política ESDIS, sem restrição) e IBGE (reuso com citação). CC BY 4.0 exige apenas a atribuição indicada em 'citacao'."
   },
   "citacao": "Valim, D. (2026). OpenLux: versão 0.1.0 [Software]. Zenodo. https://doi.org/10.5281/zenodo.24510755. Dados de radiância: VIIRS Land SIPS Processing Group, VIIRS/NPP Lunar BRDF-Adjusted Nighttime Lights Yearly L3 Global 15 arc second Linear Lat Lon Grid [Dataset], NASA LAADS DAAC, https://doi.org/10.5067/VIIRS/VNP46A4.002. Malha municipal: IBGE, Malha Municipal Digital 2024 (UF RJ). População: IBGE, Censo Demográfico 2022, SIDRA tabela 4709, variável 93.",

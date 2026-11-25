@@ -52,10 +52,10 @@ def test_generated_files_are_deterministic(tmp_path):
         assert (tmp_path / nome).read_bytes() == (DL / nome).read_bytes()
 
 
-def test_license_is_declared_as_a_proposal_and_caveats_are_present():
+def test_license_is_confirmed_and_caveats_are_present():
     m = _meta()
     assert m["licenca"]["id"] == "CC-BY-4.0"
-    assert "proposta" in m["licenca"]["status"]
+    assert "confirmada" in m["licenca"]["status"]
     texto = " ".join(m["ressalvas"])
     assert "ruído" in texto and "Resultados não validados" in texto
 

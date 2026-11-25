@@ -21,7 +21,7 @@ OUT = ROOT / "web" / "data" / "downloads"
 LICENSE_DATA = {
     "id": "CC-BY-4.0",
     "url": "https://creativecommons.org/licenses/by/4.0/",
-    "status": "proposta: a confirmar pelo autor antes da publicação",
+    "status": "confirmada pelo autor em 2026-11-25",
     "nota": "Dados derivados de NASA (política ESDIS, sem restrição) e IBGE (reuso com citação). "
             "CC BY 4.0 exige apenas a atribuição indicada em 'citacao'.",
 }
@@ -130,6 +130,51 @@ def build(src: Path = SRC, out: Path = OUT) -> dict:
     return meta
 
 
+def build_noaa20(src: Path = Path("web/data/indicators_noaa20.json"), out: Path = Path("web/data/downloads/revisao_noaa20")) -> dict:
+    """Arquivos de REVISAO do NOAA-20 (2018-2025). Nao substituem os arquivos publicados do S-NPP.
+    Gerados a partir de web/data/indicators_noaa20.json (saida de scripts/build_web_data_noaa20.py)."""
+    data = json.loads(src.read_text(encoding="utf-8"))
+    years = data["meta"]["years"]
+    munis = data["municipios"]
+    out.mkdir(parents=True, exist_ok=True)
+    serie = out / "openlux_municipios_noaa20_serie.csv"
+    with serie.open("w", encoding="utf-8-sig", newline="") as f:
+        w = csv.writer(f)
+        w.writerow([h for h, _ in SERIE_COLS])
+        for cod in sorted(munis):
+            m = munis[cod]
+            for i, ano in enumerate(years):
+                row = []
+                for _, key in SERIE_COLS:
+                    if key == "cod_municipio":
+                        row.append(cod)
+                    elif key == "municipio":
+                        row.append(m["name"])
+                    elif key == "ano":
+                        row.append(ano)
+                    else:
+                        vals = m.get(key)
+                        row.append(_num(vals[i]) if vals else "")
+                w.writerow(row)
+    resumo = out / "openlux_municipios_noaa20_resumo.csv"
+    windows = ["2018_2025"]
+    cols = ["cod_municipio", "municipio", "populacao_2022", "intensidade_por_habitante_mW_sr-1_hab-1"]
+    for win in windows:
+        cols += [f"tendencia_{win}_inclinacao_nW_cm-2_sr-1_por_ano", f"tendencia_{win}_p_valor_kendall", f"tendencia_{win}_mudanca_pct"]
+    with resumo.open("w", encoding="utf-8-sig", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(cols)
+        for cod in sorted(munis):
+            m = munis[cod]
+            row = [cod, m["name"], _num(m.get("population")), _num(m.get("per_capita_mw_sr_hab"))]
+            for win in windows:
+                t = (m.get("trends") or {}).get(win) or {}
+                row += [_num(t.get("slope")), _num(t.get("p_value")), _num(t.get("change_pct"))]
+            w.writerow(row)
+    return {p.name: {"sha256": _sha256(p), "bytes": p.stat().st_size} for p in (serie, resumo)}
+
+
 if __name__ == "__main__":
     m = build()
     print(json.dumps(m["arquivos"], ensure_ascii=False, indent=2))
+    print(json.dumps(build_noaa20(), ensure_ascii=False, indent=2))
