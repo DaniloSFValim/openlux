@@ -14,7 +14,7 @@ INDICATORS = {"mean", "valid", "lit", "percap", "urban", "rural"}  # chaves fixa
 
 
 def _links():
-    return re.findall(r'<a href="index\.html\?([^"]+)">', HTML.replace("&amp;", "&"))
+    return re.findall(r'<a href="explorar\.html\?([^"]+)">', HTML.replace("&amp;", "&"))
 
 
 def test_there_are_six_guided_views():

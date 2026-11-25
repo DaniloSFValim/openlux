@@ -89,7 +89,7 @@ def page(server):
         pg.errors = []
         pg.on("console", lambda m: pg.errors.append(m.text) if m.type == "error" else None)
         pg.on("pageerror", lambda e: pg.errors.append(str(e)))
-        pg.goto(server)
+        pg.goto(server + "/explorar.html")
         pg.wait_for_selector("#mapa path.leaflet-interactive")
         pg.injected = _cloudflare_injected(pg.content())
         yield pg
@@ -290,7 +290,7 @@ def test_deployed_files_are_identical_to_the_repository(server):
     for f in sorted(p for p in WEB.rglob("*") if p.is_file() and p.name != "_headers"):
         rel = f.relative_to(WEB).as_posix()
         body, _ = _fetch(f"{server}/{rel}")
-        if rel == "index.html":  # remove so os trechos conhecidos que a Cloudflare injeta
+        if rel in ("index.html", "explorar.html"):  # remove so os trechos conhecidos que a Cloudflare injeta
             body = strip_cloudflare_injections(body.decode("utf-8")).encode("utf-8")
         if hashlib.sha256(body).digest() != hashlib.sha256(f.read_bytes()).digest():
             mismatches.append(rel)
@@ -329,7 +329,7 @@ def _fresh(page, server, query=""):
     pg.errors = []
     pg.on("console", lambda m: pg.errors.append(m.text) if m.type == "error" else None)
     pg.on("pageerror", lambda e: pg.errors.append(str(e)))
-    pg.goto(server + "/" + query)
+    pg.goto(server + "/explorar.html" + query)
     pg.wait_for_selector("#mapa path.leaflet-interactive")
     return pg
 
@@ -397,7 +397,7 @@ def test_plain_language_legend_keeps_numeric_classes_and_does_not_claim_a_sky_sc
     assert "Sem luz detectada" in leg and "Muitíssima luz" in leg
     assert "0,5 a < 2" in leg and "≥ 100" in leg                       # as classes numericas continuam ao lado
     assert "nem equivalem à escala Bortle" in leg and "não foram validados em campo" in leg
-    ui = (WEB / "index.html").read_text(encoding="utf-8") + (WEB / "js" / "app.js").read_text(encoding="utf-8")
+    ui = (WEB / "explorar.html").read_text(encoding="utf-8") + (WEB / "js" / "app.js").read_text(encoding="utf-8")
     assert "mag/arcsec" not in ui and "SQM" not in ui                  # sem escala de brilho do ceu antes da validacao em campo
     pg.context.close()
 
@@ -479,7 +479,7 @@ def test_basemap_is_off_by_default_and_only_requests_openstreetmap_after_opt_in(
     seen = []
     png = bytes.fromhex("89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000d4944415478da63f8cfc0f01f0005000201a52f6f2b0000000049454e44ae426082")
     pg.route("https://tile.openstreetmap.org/**", lambda route: (seen.append(route.request.url), route.fulfill(status=200, content_type="image/png", body=png)))
-    pg.goto(server + "/?lat=-22.9&lng=-43.3&z=9")
+    pg.goto(server + "/explorar.html?lat=-22.9&lng=-43.3&z=9")
     pg.wait_for_selector("#mapa path.leaflet-interactive")
     pg.wait_for_timeout(600)
     assert seen == []                                                                    # nada de terceiros sem opt-in

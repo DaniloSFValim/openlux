@@ -3,119 +3,122 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>OpenLux — luz noturna no Estado do Rio de Janeiro</title>
-<meta name="description" content="OpenLux: estimativa de poluição luminosa baseada em sensoriamento remoto (NASA Black Marble) para os 92 municípios do Estado do Rio de Janeiro.">
+<title>Quanta luz tem o seu município? — OpenLux</title>
+<meta name="description" content="Veja quanta luz noturna, vista pelo satélite, o seu município tem, comparada com o estado e com os outros 91 municípios do Rio de Janeiro. Dados de 2012 a 2025.">
+<meta property="og:title" content="Quanta luz tem o seu município?">
+<meta property="og:description" content="Luz noturna vista pelo satélite, nos 92 municípios do Rio de Janeiro. Estimativa, não medição do céu.">
+<meta property="og:type" content="website">
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
 <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-<a class="skip" href="#mapa">Ir para o mapa</a>
+<body class="inicio">
+<a class="skip" href="#conteudo">Ir para o conteúdo</a>
 
-<header class="site">
+<header class="hero">
   <div class="wrap">
-    <h1><a href="index.html">OpenLux</a></h1>
-    <p class="subtitle">Estimativa de poluição luminosa por satélite — Estado do Rio de Janeiro</p>
-    <p class="lede">A <strong>luz noturna vista do espaço</strong>, nos 92 municípios do estado. É uma <strong>estimativa baseada em sensoriamento remoto</strong>, <strong>não uma medição do brilho do céu</strong>.</p>
+    <nav class="pages" aria-label="Páginas">
+      <a href="index.html" aria-current="page">Início</a>
+      <a href="explorar.html">Explorar o mapa</a>
+      <a href="roteiros.html">Roteiros</a>
+      <a href="dados.html">Baixar dados</a>
+      <a href="sobre.html">Sobre e métodos</a>
+    </nav>
+    <p class="kicker">OpenLux · Rio de Janeiro · 92 municípios</p>
+    <h1>Quanta luz tem o seu município?</h1>
+    <p class="lede">A luz noturna vista do espaço, em números simples. Escolha o seu município e compare com o estado e com os outros 91. É uma <strong>estimativa de poluição luminosa baseada em sensoriamento remoto</strong>.</p>
+
+    <form class="busca" id="busca" role="search" onsubmit="return false">
+      <label for="mun-escolha">Município</label>
+      <div class="busca-linha">
+        <select id="mun-escolha" aria-describedby="busca-ajuda">
+          <option value="">Escolha um município…</option>
+        </select>
+        <button type="button" id="copiar-escolha" class="btn secundario" hidden>Copiar link</button>
+      </div>
+      <p id="busca-ajuda" class="ajuda">Os dados são estimativas por satélite, não medições do brilho do céu.</p>
+    </form>
   </div>
 </header>
-<div class="wrap"><nav class="pages" aria-label="Páginas"><a href="index.html" aria-current="page">Explorar o mapa</a><a href="roteiros.html">Roteiros</a><a href="dados.html">Baixar dados</a><a href="sobre.html">Sobre e métodos</a></nav></div>
-<div class="wrap">
-  <section class="alert" role="note" aria-labelledby="alert-title" id="alert">
-    <p><strong id="alert-title">Resultados não validados.</strong> O sensor Suomi NPP tem mais ruído em áreas escuras desde 2022; não interprete os valores como mudança real de iluminação sem essa ressalva.</p>
-    <details><summary>Números e detalhes do aviso</summary><p id="alert-text">Carregando…</p></details>
+
+<main id="conteudo" class="wrap">
+
+  <section id="resultado" class="resultado" aria-live="polite" hidden>
+    <div class="cabecalho-mun">
+      <h2 id="nome-mun"></h2>
+      <p id="pop-mun" class="muted"></p>
+    </div>
+
+    <div class="cartoes">
+      <article class="cartao destaque">
+        <p class="rotulo">Luz onde as pessoas vivem · 2021</p>
+        <p class="numero" id="num-pop"></p>
+        <p id="txt-pop" class="legenda"></p>
+      </article>
+      <article class="cartao">
+        <p class="rotulo">Luz média na área do município · 2021</p>
+        <p class="numero" id="num-area"></p>
+        <p id="txt-area" class="legenda"></p>
+      </article>
+    </div>
+
+    <div class="grafico-bloco">
+      <h3>Como mudou, de 2012 a 2025</h3>
+      <div id="grafico-mun"></div>
+      <p class="aviso">
+        A partir de 2022, o sensor Suomi NPP tem mais ruído em áreas escuras. A faixa sombreada marca esse período:
+        não leia a diferença entre os anos como mudança real de iluminação sem essa ressalva.
+      </p>
+    </div>
+
+    <div class="entenda">
+      <h3>Como entender estes números</h3>
+      <ul>
+        <li><strong>É luz vista do espaço</strong>, medida pelo satélite NASA em cada quadrado de cerca de 460 m. Não é o brilho do céu que você vê do quintal.</li>
+        <li><strong>Usamos 2021</strong> como referência porque é o último ano antes do ruído do sensor em áreas escuras.</li>
+        <li><strong>Luz onde as pessoas vivem</strong> pondera cada quadrado pela população do Censo 2022. Um município pode ter muita área escura e ainda assim muita luz onde mora gente, ou o contrário.</li>
+      </ul>
+    </div>
+
+    <div class="compartilhar">
+      <h3>Leve para o seu grupo</h3>
+      <div class="botoes">
+        <button type="button" class="btn" id="baixar-cartao">Baixar cartão (imagem)</button>
+        <a class="btn secundario" id="whatsapp" target="_blank" rel="noopener">Enviar no WhatsApp</a>
+        <button type="button" class="btn secundario" id="copiar-link">Copiar link</button>
+      </div>
+      <p id="status-compartilhar" class="ajuda" role="status"></p>
+    </div>
+
+    <div class="proximos">
+      <a class="cartao-link" href="explorar.html" id="ver-mapa">Ver no mapa <span aria-hidden="true">→</span></a>
+      <a class="cartao-link" href="sobre.html">Como foi calculado <span aria-hidden="true">→</span></a>
+      <a class="cartao-link" href="dados.html">Baixar os dados <span aria-hidden="true">→</span></a>
+    </div>
   </section>
 
+  <section id="vazio" class="vazio">
+    <p>Escolha um município acima para ver os números. Ou comece por um dos destaques:</p>
+    <div class="botoes" id="destaques"></div>
+  </section>
 
-  <main>
-    <section class="explorer" aria-label="Mapa e painéis de análise">
-      <div class="map-col">
-        <div id="mapa" role="region" aria-label="Mapa da radiância noturna no Estado do Rio de Janeiro, por pixel de cerca de 460 metros ou agregada por município. Use o seletor de município ou a tabela de ranking para navegar pelo teclado."></div>
-        <div id="pixel-readout" class="readout muted small" aria-live="polite" hidden></div>
-        <div id="legend" class="legend" aria-live="polite"></div>
-      </div>
-
-      <aside class="panel-col">
-      <div class="ctrl-panel">
-          <div class="controls" role="group" aria-label="Controles do mapa">
-            <fieldset id="layer-wrap" class="layer-sel">
-              <legend>Camada</legend>
-              <label><input type="radio" name="layer" value="pixel" checked> Pixel (≈ 460 m)</label>
-              <label><input type="radio" name="layer" value="mun"> Município (agregado)</label>
-            </fieldset>
-            <span id="px-wrap" class="px-wrap">
-              <label>Sensor <select id="px-sensor"></select></label>
-              <label>Mostrar <select id="px-view"></select></label>
-            </span>
-            <label>Indicador (camada município)
-              <select id="indicator"></select>
-            </label>
-            <label id="year-wrap">Ano: <output id="year-out"></output>
-              <input type="range" id="year" step="1" aria-describedby="year-note">
-            </label>
-            <span id="anim-wrap" class="anim-wrap">
-            <button type="button" id="play-btn" aria-pressed="false">▶ Animar</button>
-            <label>Velocidade <select id="speed-sel"><option value="400">Rápida</option><option value="1000" selected>Normal</option><option value="2000">Lenta</option></select></label>
-            <label class="chk"><input type="checkbox" id="loop-chk" checked> Repetir</label>
-            <span id="anim-status" class="muted small" role="status" aria-live="polite"></span>
-          </span>
-          <label class="search">Buscar município
-              <input type="search" id="mun-search" list="mun-list" placeholder="nome do município" autocomplete="off">
-            </label>
-            <datalist id="mun-list"></datalist>
-            <button type="button" id="reset-btn">Ver o estado inteiro</button>
-            <button type="button" id="link-btn">Copiar link desta vista</button>
-            <span id="link-status" class="muted small" role="status" aria-live="polite"></span>
-          </div>
-          <p id="year-note" class="muted small">As classes de cor são fixas para todos os anos, para que os mapas de anos diferentes sejam comparáveis.</p>
-      </div>
-        <div class="tabs" role="tablist" aria-label="Painéis">
-          <button role="tab" id="tab-mun" aria-controls="p-mun" aria-selected="true">Município</button>
-          <button role="tab" id="tab-rank" aria-controls="p-rank" aria-selected="false" tabindex="-1">Ranking</button>
-          <button role="tab" id="tab-cmp" aria-controls="p-cmp" aria-selected="false" tabindex="-1">Comparar</button>
-        </div>
-        <div role="tabpanel" id="p-mun" aria-labelledby="tab-mun" class="panel">
-          <label class="block no-print">Município
-            <select id="mun-select"></select>
-          </label>
-          <div id="mun-detail"><p class="muted">Selecione um município no mapa ou na lista.</p></div>
-        </div>
-        <div role="tabpanel" id="p-rank" aria-labelledby="tab-rank" class="panel" hidden>
-          <div class="row">
-            <label>Filtrar <input type="search" id="rank-filter" placeholder="nome do município"></label>
-            <button type="button" id="rank-dir" aria-label="Inverter ordem">Ordem: decrescente</button>
-          </div>
-          <div id="rank-note" class="muted small"></div>
-          <div class="table-wrap"><table id="rank-table"><thead></thead><tbody></tbody></table></div>
-        </div>
-        <div role="tabpanel" id="p-cmp" aria-labelledby="tab-cmp" class="panel" hidden>
-          <p class="muted small">Compare até três municípios (radiância média anual).</p>
-          <div class="row"><select id="cmp1" aria-label="Município 1"></select><select id="cmp2" aria-label="Município 2"></select><select id="cmp3" aria-label="Município 3"></select></div>
-          <div id="cmp-chart"></div>
-        </div>
-      </aside>
-    </section>
-  </main>
-    <section class="como-ler" aria-labelledby="como-ler-title">
-      <h2 id="como-ler-title">Como ler o mapa</h2>
-      <ul>
-        <li>As cores são faixas de luz <strong>fixas em todos os anos</strong>, para comparar anos diferentes.</li>
-        <li>São <strong>estimativas por satélite</strong>, não medições do brilho do céu.</li>
-        <li>A partir de 2022, o sensor Suomi NPP lê mais alto em áreas escuras: leia o aviso no topo antes de interpretar uma mudança.</li>
-      </ul>
-      <p><a href="roteiros.html">Roteiros com perguntas prontas</a> · <a href="sobre.html">Métodos e limitações</a></p>
-    </section>
-</div>
+  <section class="sobre-dado" aria-labelledby="sobre-titulo">
+    <h2 id="sobre-titulo">O que é este dado</h2>
+    <div class="cartoes tres">
+      <article class="cartao"><p class="rotulo">De onde vem</p><p>Do satélite NASA Black Marble (sensor VIIRS), com malha municipal e população do IBGE.</p></article>
+      <article class="cartao"><p class="rotulo">O que não é</p><p>Não é medição do céu, nem qualidade do céu para observação. Não está validado em campo.</p></article>
+      <article class="cartao"><p class="rotulo">Por que confiar (com cuidado)</p><p>Os métodos, as limitações e os dados estão abertos. Cada número tem fonte e data.</p></article>
+    </div>
+  </section>
+</main>
 
 <footer class="site">
   <div class="wrap">
     <p id="updated"></p>
-    <p class="small">Autor: Danilo Valim · ORCID <a href="https://orcid.org/0009-0009-7250-6151" rel="noopener">0009-0009-7250-6151</a> · Código MIT · Dados: NASA Black Marble e IBGE (ver <a href="dados.html">Baixar dados</a> e <a href="sobre.html">Sobre e métodos</a>).</p>
+    <p class="small">Autor: Danilo Valim · ORCID <a href="https://orcid.org/0009-0009-7250-6151" rel="noopener">0009-0009-7250-6151</a> · Código MIT · DOI <a href="https://doi.org/10.5281/zenodo.24510755" rel="noopener">10.5281/zenodo.24510755</a></p>
   </div>
 </footer>
 
-<script src="vendor/leaflet/leaflet.js"></script>
 <script src="js/charts.js"></script>
-<script src="js/app.js"></script>
+<script src="js/inicio.js"></script>
 </body>
 </html>
