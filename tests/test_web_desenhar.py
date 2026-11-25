@@ -39,3 +39,17 @@ def test_bridge_exposes_only_read_only_state():
     bloco = app.split("window.OpenLuxMapApi = {", 1)[1].split("};", 1)[0]
     assert "getGrid: (path) => pxGrid(path)" in bloco
     assert "currentPath" in bloco and "viewIsRadiance" in bloco
+
+
+def test_time_travel_bar_is_loaded_after_the_map_and_reuses_the_existing_controls():
+    viagem = (WEB / "js" / "viagem.js").read_text(encoding="utf-8")
+    assert "openlux:mapa-pronto" in viagem and "play-btn" in viagem and "year-wrap" in viagem
+    assert 'src="js/viagem.js"' in EXPLORAR
+    assert EXPLORAR.index('js/app.js') < EXPLORAR.index('js/viagem.js')
+
+
+def test_municipality_click_opens_the_anchored_card_without_external_requests():
+    app = (WEB / "js" / "app.js").read_text(encoding="utf-8")
+    assert "function abrirCartao(cd, latlng)" in app
+    assert "abrirCartao(cd, e.latlng)" in app
+    assert "Entre os menos iluminados do estado." in app
