@@ -269,3 +269,21 @@ main.wrap.pag{padding-top:28px;padding-bottom:40px}
 }
 .ficha.luz a.ir{color:#8a5f00}
 .ficha.luz .num{color:#0b1020}
+.ficha.luz a.ir{color:#8a5f00}
+.ficha.luz .num{color:#0b1020}
+
+/* Páginas novas: paleta clara fixa, independente do modo escuro do sistema.
+   Os cartões têm fundo claro fixo; sem isso o texto herdado do modo escuro some. */
+body.inicio,body.pagina{color:#15191f;background:#f4f6fa}
+body.inicio .muted,body.pagina .muted,.resultado .muted,.vazio .muted,.quiz .muted{color:#55606e}
+.resultado,.vazio,.quiz,.ficha,.cartao,.dados-tabela,.acordeao details,.aviso,.como-ler,.cite{color:#15191f}
+.cartao.destaque,.cartao.destaque .legenda{color:#fff}
+.cartao.destaque .rotulo{color:#ffd166}
+.cite{background:#0b1020;color:#e8ecf1;border-color:#0b1020}
+.dados-tabela th{color:#15191f;background:#f4f6fa}
+.dados-tabela td{color:#15191f}
+.quiz .opcao{color:#15191f;background:#f4f6fa}
+.quiz .explica{color:#15191f}
+.vazio .btn.secundario,.compartilhar .btn.secundario{color:#0b1020;border-color:#0b1020}
+.faixa,.hero{color:#fff}
+.faixa .lede,.hero .lede{color:#dbe4f0}
