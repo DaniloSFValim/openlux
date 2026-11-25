@@ -142,3 +142,18 @@ a{color:var(--accent)}   /* links legiveis no tema escuro */
   body.print-profile #p-mun{position:absolute;left:0;top:0;width:100%}
   body.print-profile .panel[hidden]{display:none}
 }
+
+/* Navegação entre páginas, leitura guiada e páginas de conteúdo */
+nav.pages{display:flex;flex-wrap:wrap;gap:4px 16px;margin:12px 0 4px;padding:0 0 8px;border-bottom:1px solid var(--line)}
+nav.pages a{text-decoration:none;color:var(--muted);padding:4px 0;border-bottom:2px solid transparent}
+nav.pages a[aria-current=page]{color:var(--ink);font-weight:600;border-bottom-color:var(--accent)}
+.como-ler{margin:16px 0;padding:12px 16px;background:var(--surface);border:1px solid var(--line);border-radius:8px}
+.como-ler h2{font-size:1.05rem;margin:0 0 6px}
+.como-ler ul{margin:0 0 6px;padding-left:1.2rem}
+.page{padding-top:16px;padding-bottom:24px}
+.page h2{margin:12px 0 6px}
+.page h3{margin:18px 0 4px}
+.downloads li{margin:8px 0}
+.cite{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+
+header.site h1 a{color:inherit;text-decoration:none}

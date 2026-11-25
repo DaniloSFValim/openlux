@@ -6,7 +6,7 @@ from urllib.parse import parse_qs, urlsplit
 
 from helpers import WEB
 
-HTML = (WEB / "index.html").read_text(encoding="utf-8")
+HTML = (WEB / "roteiros.html").read_text(encoding="utf-8")
 DATA = json.loads((WEB / "data" / "indicators.json").read_text(encoding="utf-8"))
 PIX = json.loads((WEB / "data" / "pixels" / "meta.json").read_text(encoding="utf-8"))
 YEARS = {str(y) for y in DATA["meta"]["years"]}
@@ -14,8 +14,7 @@ INDICATORS = {"mean", "valid", "lit", "percap", "urban", "rural"}  # chaves fixa
 
 
 def _links():
-    secao = HTML.split('id="roteiro"', 1)[1].split("</section>", 1)[0]
-    return re.findall(r'<a href="\?([^"]+)">', secao.replace("&amp;", "&"))
+    return re.findall(r'<a href="index\.html\?([^"]+)">', HTML.replace("&amp;", "&"))
 
 
 def test_there_are_six_guided_views():
@@ -44,5 +43,4 @@ def test_pixel_views_only_use_sensors_with_that_window():
 
 
 def test_notes_about_noise_are_on_the_page_next_to_the_roteiro():
-    secao = HTML.split('id="roteiro"', 1)[1].split("</section>", 1)[0]
-    assert "ruído" in secao
+    assert "ruído" in HTML

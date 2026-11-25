@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenLux — baixar dados e citar</title>
+<meta name="description" content="Arquivos de download dos indicadores municipais de radiância noturna (S-NPP, 2012–2025), com licença e citação.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<a class="skip" href="#conteudo">Ir para o conteúdo</a>
+
+<header class="site">
+  <div class="wrap">
+    <h1><a href="index.html">OpenLux</a></h1>
+    <p class="subtitle">Estimativa de poluição luminosa por satélite — Estado do Rio de Janeiro</p>
+    <p class="lede">A <strong>luz noturna vista do espaço</strong>, nos 92 municípios do estado. É uma <strong>estimativa baseada em sensoriamento remoto</strong>, <strong>não uma medição do brilho do céu</strong>.</p>
+  </div>
+</header>
+<div class="wrap"><nav class="pages" aria-label="Páginas"><a href="index.html">Explorar o mapa</a><a href="roteiros.html">Roteiros</a><a href="dados.html" aria-current="page">Baixar dados</a><a href="sobre.html">Sobre e métodos</a></nav></div>
+<main class="wrap page" id="conteudo">
+  <h2>Baixar dados</h2>
+  <p>Agregados municipais derivados das imagens de satélite: 92 municípios, Suomi NPP (VNP46A4), 2012–2025. Não são os dados brutos de radiância por pixel.</p>
+  <ul class="downloads">
+    <li><a href="data/downloads/openlux_municipios_snpp_serie.csv" download>Série anual por município (CSV)</a> <span class="small muted">uma linha por município e ano, 1.288 linhas</span></li>
+    <li><a href="data/downloads/openlux_municipios_snpp_resumo.csv" download>Resumo por município (CSV)</a> <span class="small muted">população de 2022, intensidade por habitante e tendências</span></li>
+    <li><a href="data/downloads/metadata.json" download>Metadados (JSON)</a> <span class="small muted">licença, unidades, ressalvas e somas SHA-256</span></li>
+  </ul>
+  <h3>Licença</h3>
+  <p><strong>CC-BY-4.0</strong> <span class="small">(proposta: a confirmar pelo autor antes da publicação)</span>. Os arquivos reúnem dados da NASA e do IBGE; a licença exige a atribuição indicada abaixo.</p>
+  <h3>Como citar</h3>
+  <p class="cite">Valim, D. (2026). OpenLux: versão 0.1.0 [Software]. Zenodo. https://doi.org/10.5281/zenodo.24510755. Dados de radiância: VIIRS Land SIPS Processing Group, VIIRS/NPP Lunar BRDF-Adjusted Nighttime Lights Yearly L3 Global 15 arc second Linear Lat Lon Grid [Dataset], NASA LAADS DAAC, https://doi.org/10.5067/VIIRS/VNP46A4.002. Malha municipal: IBGE, Malha Municipal Digital 2024 (UF RJ). População: IBGE, Censo Demográfico 2022, SIDRA tabela 4709, variável 93.</p>
+  <h3>Ressalvas</h3>
+  <ul><li>Resultados não validados em campo. Estimativas baseadas em sensoriamento remoto; não são medições do brilho do céu.</li><li>O sensor Suomi NPP (VNP46A4) tem mais ruído em áreas escuras desde 2022. Não interpretar as diferenças entre 2021 e 2022 como mudança real de iluminação sem essa ressalva. A causa não foi separada de um possível artefato do algoritmo.</li><li>A população é a do Censo 2022 em todos os anos (repartição simples). Não é exposição individual.</li><li>Os valores são agregados municipais; não há dados brutos de radiância por pixel neste arquivo.</li></ul>
+  <p><a href="index.html">Voltar ao mapa</a> · <a href="sobre.html">Métodos e limitações</a></p>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <p id="updated"></p>
+    <p class="small">Autor: Danilo Valim · ORCID <a href="https://orcid.org/0009-0009-7250-6151" rel="noopener">0009-0009-7250-6151</a> · Código MIT · Dados: NASA Black Marble e IBGE (ver <a href="dados.html">Baixar dados</a> e <a href="sobre.html">Sobre e métodos</a>).</p>
+  </div>
+</footer>
+</body>
+</html>

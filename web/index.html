@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>OpenLux — estimativa de poluição luminosa no Estado do Rio de Janeiro</title>
+<title>OpenLux — luz noturna no Estado do Rio de Janeiro</title>
 <meta name="description" content="OpenLux: estimativa de poluição luminosa baseada em sensoriamento remoto (NASA Black Marble) para os 92 municípios do Estado do Rio de Janeiro.">
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
@@ -14,18 +14,18 @@
 
 <header class="site">
   <div class="wrap">
-    <h1>OpenLux</h1>
-    <p class="subtitle">Estimativa de poluição luminosa baseada em sensoriamento remoto — Estado do Rio de Janeiro</p>
-    <p class="byline">Autor: Danilo Valim · ORCID: <a href="https://orcid.org/0009-0009-7250-6151" rel="noopener">0009-0009-7250-6151</a> · Software científico independente, em desenvolvimento</p>
-    <p class="lede">O OpenLux mostra a radiância noturna vista por satélite (NASA Black Marble, sensor VIIRS) nos 92 municípios do estado. É uma <strong>estimativa baseada em sensoriamento remoto</strong>, <strong>não uma medição do brilho do céu</strong>.</p>
+    <h1><a href="index.html">OpenLux</a></h1>
+    <p class="subtitle">Estimativa de poluição luminosa por satélite — Estado do Rio de Janeiro</p>
+    <p class="lede">A <strong>luz noturna vista do espaço</strong>, nos 92 municípios do estado. É uma <strong>estimativa baseada em sensoriamento remoto</strong>, <strong>não uma medição do brilho do céu</strong>.</p>
   </div>
 </header>
-
+<div class="wrap"><nav class="pages" aria-label="Páginas"><a href="index.html" aria-current="page">Explorar o mapa</a><a href="roteiros.html">Roteiros</a><a href="dados.html">Baixar dados</a><a href="sobre.html">Sobre e métodos</a></nav></div>
 <div class="wrap">
   <section class="alert" role="note" aria-labelledby="alert-title" id="alert">
     <p><strong id="alert-title">Resultados não validados.</strong> O sensor Suomi NPP tem mais ruído em áreas escuras desde 2022; não interprete os valores como mudança real de iluminação sem essa ressalva.</p>
     <details><summary>Números e detalhes do aviso</summary><p id="alert-text">Carregando…</p></details>
   </section>
+
 
   <main>
     <section class="explorer" aria-label="Mapa e painéis de análise">
@@ -73,7 +73,6 @@
           <button role="tab" id="tab-mun" aria-controls="p-mun" aria-selected="true">Município</button>
           <button role="tab" id="tab-rank" aria-controls="p-rank" aria-selected="false" tabindex="-1">Ranking</button>
           <button role="tab" id="tab-cmp" aria-controls="p-cmp" aria-selected="false" tabindex="-1">Comparar</button>
-          <button role="tab" id="tab-state" aria-controls="p-state" aria-selected="false" tabindex="-1">Estado</button>
         </div>
         <div role="tabpanel" id="p-mun" aria-labelledby="tab-mun" class="panel">
           <label class="block no-print">Município
@@ -94,53 +93,24 @@
           <div class="row"><select id="cmp1" aria-label="Município 1"></select><select id="cmp2" aria-label="Município 2"></select><select id="cmp3" aria-label="Município 3"></select></div>
           <div id="cmp-chart"></div>
         </div>
-        <div role="tabpanel" id="p-state" aria-labelledby="tab-state" class="panel" hidden>
-          <div id="state-content"></div>
-        </div>
       </aside>
     </section>
   </main>
-
-  <section class="roteiro" id="roteiro" aria-labelledby="roteiro-title">
-    <h2 id="roteiro-title">Roteiros para explorar</h2>
-    <p class="muted">Cada item abre o mapa numa vista pronta. Ao mudar qualquer controle, o endereço da barra se atualiza e pode ser copiado.</p>
-    <ol class="roteiro-list">
-      <li><a href="?l=mun&amp;i=mean&amp;y=2012&amp;s=snpp"><strong>Como era a radiância média por município em 2012?</strong></a>
-        <span>Observe o contraste entre a faixa litorânea, a Região Metropolitana e o interior.</span></li>
-      <li><a href="?l=pixel&amp;v=2012_2021&amp;s=snpp"><strong>Onde há mudança significativa por pixel entre 2012 e 2021?</strong></a>
-        <span>Aumentos e reduções são testados por pixel. A assimetria entre eles coincide com o ruído do S-NPP: não leia isso como mudança real sem a ressalva da página.</span></li>
-      <li><a href="?l=mun&amp;i=percap"><strong>Quais municípios têm mais luz por habitante em 2022?</strong></a>
-        <span>É um índice relativo, da intensidade aparente dividida pela população do Censo 2022. Não é exposição individual.</span></li>
-      <li><a href="?l=mun&amp;i=mean&amp;y=2021"><strong>O que muda de 2021 para 2022?</strong></a>
-        <span>Troque o ano no controle e compare. A partir de 2022 o S-NPP lê mais alto em áreas escuras: o aviso no topo da página se aplica.</span></li>
-      <li><a href="?l=mun&amp;i=lit&amp;y=2025"><strong>Qual fração da área de cada município tem radiância acima do limiar em 2025?</strong></a>
-        <span>O limiar é o valor documentado na metodologia. A fração depende do piso de ruído do sensor.</span></li>
-      <li><a href="?l=pixel&amp;v=2018_2025&amp;s=noaa20"><strong>O que a mudança por pixel mostra no NOAA-20 (2018–2025)?</strong></a>
-        <span>O NOAA-20 é o sensor primário do projeto. Compare com o S-NPP na janela 2012–2021 e veja o que se repete e o que não se repete.</span></li>
-    </ol>
-  </section>
-
-  <section class="info" id="info" aria-label="Informações científicas">
-    <h2>Informações científicas</h2>
-    <div id="info-content"></div>
-    <div class="downloads" id="downloads">
-      <h3>Baixar dados e citar</h3>
-      <p>Agregados municipais derivados dos dados do satélite (92 municípios, S-NPP, 2012–2025). Não são os dados brutos de radiância.</p>
+    <section class="como-ler" aria-labelledby="como-ler-title">
+      <h2 id="como-ler-title">Como ler o mapa</h2>
       <ul>
-        <li><a href="data/downloads/openlux_municipios_snpp_serie.csv" download>Série anual por município (CSV)</a></li>
-        <li><a href="data/downloads/openlux_municipios_snpp_resumo.csv" download>Resumo por município, com população e tendências (CSV)</a></li>
-        <li><a href="data/downloads/metadata.json" download>Metadados: licença, unidades, ressalvas e somas SHA-256 (JSON)</a></li>
+        <li>As cores são faixas de luz <strong>fixas em todos os anos</strong>, para comparar anos diferentes.</li>
+        <li>São <strong>estimativas por satélite</strong>, não medições do brilho do céu.</li>
+        <li>A partir de 2022, o sensor Suomi NPP lê mais alto em áreas escuras: leia o aviso no topo antes de interpretar uma mudança.</li>
       </ul>
-      <p><strong>Licença:</strong> CC-BY-4.0 (<span class="small">proposta: a confirmar pelo autor antes da publicação</span>).</p>
-      <p><strong>Como citar:</strong> <span class="cite">Valim, D. (2026). OpenLux: versão 0.1.0 [Software]. Zenodo. https://doi.org/10.5281/zenodo.24510755. Dados de radiância: VIIRS Land SIPS Processing Group, VIIRS/NPP Lunar BRDF-Adjusted Nighttime Lights Yearly L3 Global 15 arc second Linear Lat Lon Grid [Dataset], NASA LAADS DAAC, https://doi.org/10.5067/VIIRS/VNP46A4.002. Malha municipal: IBGE, Malha Municipal Digital 2024 (UF RJ). População: IBGE, Censo Demográfico 2022, SIDRA tabela 4709, variável 93.</span></p>
-    </div>
-  </section>
+      <p><a href="roteiros.html">Roteiros com perguntas prontas</a> · <a href="sobre.html">Métodos e limitações</a></p>
+    </section>
 </div>
 
 <footer class="site">
   <div class="wrap">
     <p id="updated"></p>
-    <p class="small">Mapa desenhado com <a href="vendor/leaflet/LICENSE">Leaflet 1.9.4 (BSD-2-Clause)</a>, mapa-base opcional do OpenStreetMap (desligado por padrão). Licença do código-fonte: MIT. Malha municipal: IBGE (licença compatível com CC BY 4.0). Dados NASA: ver fontes e status de verificação de licença.</p>
+    <p class="small">Autor: Danilo Valim · ORCID <a href="https://orcid.org/0009-0009-7250-6151" rel="noopener">0009-0009-7250-6151</a> · Código MIT · Dados: NASA Black Marble e IBGE (ver <a href="dados.html">Baixar dados</a> e <a href="sobre.html">Sobre e métodos</a>).</p>
   </div>
 </footer>
 
