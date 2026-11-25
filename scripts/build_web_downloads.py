@@ -130,7 +130,7 @@ def build(src: Path = SRC, out: Path = OUT) -> dict:
     return meta
 
 
-def build_noaa20(src: Path = Path("web/data/indicators_noaa20.json"), out: Path = Path("web/data/downloads/revisao_noaa20")) -> dict:
+def build_noaa20(src: Path = Path("web/data/indicators_noaa20.json"), out: Path = Path("data/revisao/noaa20")) -> dict:
     """Arquivos de REVISAO do NOAA-20 (2018-2025). Nao substituem os arquivos publicados do S-NPP.
     Gerados a partir de web/data/indicators_noaa20.json (saida de scripts/build_web_data_noaa20.py)."""
     data = json.loads(src.read_text(encoding="utf-8"))

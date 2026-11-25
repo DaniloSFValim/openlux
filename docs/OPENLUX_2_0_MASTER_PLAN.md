@@ -83,12 +83,12 @@ Estados: NÃO INICIADO · EM ANDAMENTO · CONCLUÍDO · BLOQUEADO · VALIDAR CIE
 
 | Tarefa | Estado |
 |---|---|
-| Remover `web/data/downloads/revisao_noaa20/` da pasta pública (violação de Fase 8 e Regra 9) | NÃO INICIADO |
-| Atualizar `docs/DECISIONS.md` §15 com addendum: mapa padrão e camada municipal no NOAA-20 desde 2026-11-25 | NÃO INICIADO |
-| Atualizar `docs/AUDITORIA_2_0.md`: A2 (CHANGELOG existe), A7 (gaveta mergeada, suíte passa) | NÃO INICIADO |
-| Verificar o build de produção a partir de `main` | BLOQUEADO (sem acesso ao log do Cloudflare nesta sessão) |
-| Gerar lock file de dependências Python | NÃO INICIADO |
-| Fixar versões mínimas em `pyproject.toml` | NÃO INICIADO |
+| Remover `web/data/downloads/revisao_noaa20/` da pasta pública (P1) | CONCLUÍDO. Movido para `data/revisao/noaa20/` com `git mv`. Teste de guarda em `tests/test_web_noaa20.py` |
+| Atualizar `docs/DECISIONS.md` §15 com addendum (K1) | CONCLUÍDO. Addendum §15.1 |
+| Atualizar `docs/AUDITORIA_2_0.md`: A2 e A7 (K2, K3) | CONCLUÍDO |
+| Verificar o build de produção a partir de `main` (P2) | BLOQUEADO. Sem acesso ao log do Cloudflare nesta sessão; pendência 3 do responsável |
+| Gerar lock file de dependências Python (P5) | CONCLUÍDO. `requirements-lock.txt` (104 pacotes, ambiente de referência, Python 3.13.18) |
+| Fixar versões mínimas em `pyproject.toml` (P5) | CONCLUÍDO. Mínimos = versões aprovadas na suíte |
 
 ### Fase C — Núcleo científico
 
@@ -191,6 +191,7 @@ Nenhum script ou dado foi descartado nesta fase.
 |---|---|---|
 | 2026-11-25 | `OPENLUX_CHROMIUM=/opt/pw-browsers/chromium python3 -m pytest -q tests` (branch com o PR #26 mergeado) | 226 passam, 1 pulado (teste remoto, exige `OPENLUX_URL`) |
 | 2026-11-25 | Sonda de produção `curl https://openlux.labdados.org/...` | `/data/indicators_noaa20.json`: 404 (ver P2) |
+| 2026-11-25 | Fase B: `pytest -q tests` após mover a pasta de revisão, atualizar pyproject e criar o lock | 227 passam, 1 pulado (o pulado é o teste remoto) |
 | 2026-11-25 | Prévia Cloudflare do commit `19afcc7` | Build e deploy com sucesso; `/explorar` 200, `indicators_noaa20.json` 200, `pixels/noaa20/2025.bin` 200 |
 | 2026-11-25 | Capturas do navegador (desktop, 2x) da prévia local | Sem erros de console nas três visões; ver a sessão de verificação visual |
 
@@ -216,6 +217,7 @@ Nenhum script ou dado foi descartado nesta fase.
 
 ## 10. Próximas ações
 
-1. Commit e push deste plano (Fase A).
-2. Fase B, na ordem: remover `revisao_noaa20/` de `web/` (P1); addendum em DECISIONS §15 (K1); atualizar a auditoria (K2, K3); lock file e versões mínimas (P5). Cada passo com teste.
-3. Fase C só continua depois do guia da NASA (pendência 1).
+Fase A: concluída e mergeada (PR #27). Fase B: concluída, com a exceção do build de produção (P2), bloqueado pelo responsável.
+
+1. Fase C: bloqueada no guia oficial da NASA (pendência 1) e na fonte INEA (nova tentativa agendada para 2026-11-26 01:58 UTC).
+2. Enquanto isso, itens de Fase C que não dependem do guia: confirmar SIRGAS 2000 e medir a diferença para WGS84; revisar a agregação municipal; reproduzir o pipeline a partir de `data/raw/` e comparar com os hashes do Apêndice C de METHODOLOGY.

@@ -11,19 +11,23 @@ requires-python = ">=3.10"
 authors = [{ name = "Danilo Valim" }]
 license = { text = "MIT" }
 classifiers = ["License :: OSI Approved :: MIT License"]
+# Versões mínimas = as que foram executadas e aprovadas na suíte (ambiente de referência, Python 3.13.18).
+# Ambiente completo e fixado: requirements-lock.txt.
 dependencies = [
-    "numpy",
-    "pandas",
-    "h5py",
-    "rasterio",
-    "geopandas",
-    "exactextract",
-    "scipy",
+    "numpy>=2.5.3",
+    "pandas>=3.0.5",
+    "h5py>=3.16.0",
+    "rasterio>=1.5.2",
+    "geopandas>=1.2.0",
+    "shapely>=2.2.0",
+    "pyproj>=3.8.0",
+    "exactextract>=0.3.0",
+    "scipy>=1.18.1",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "pyyaml"]
-web-tests = ["playwright"]  # teste da interface em navegador (opcional)
+dev = ["pytest>=9.1.1", "pyyaml>=6.0.1"]
+web-tests = ["playwright>=1.65.2"]  # teste da interface em navegador (opcional)
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -371,3 +371,17 @@ Decidido pelo responsável do projeto, em resposta à auditoria `docs/AUDITORIA_
 
 **Recalculado (2026-11-25):** `scripts/build_web_data_noaa20.py` gera `web/data/indicators_noaa20.json` (92 municípios, 2018–2025) com a mesma função de cálculo do S-NPP, a partir de `outputs/noaa20/`, `outputs/sectors/sector_indicators_noaa20.csv` e `outputs/sectors/pixel_trend_noaa20_2018_2025.csv`. O arquivo do S-NPP não foi alterado. Validação: razão mediana NOAA-20/S-NPP em 2018–2021 = 0,988; no nível estadual de 2021 a diferença é de cerca de 4% (NOAA-20 3,275; S-NPP 3,418 nW·cm⁻²·sr⁻¹), registrada como observação. A página inicial ainda usa o S-NPP e não foi alterada.
 
+
+### 15.1 Addendum (Fase B, 2026-11-25): mapa padrão e camada municipal no NOAA-20
+
+O texto de §15 acima registrava o S-NPP como mapa padrão. Por pedido do responsável, no mesmo dia,
+o **mapa de pixels** e a **camada municipal** passaram a usar o **NOAA-20 (VJ146A4, 2018–2025)** como
+padrão. O S-NPP (VNP46A4, 2012–2025) continua disponível pelo seletor de sensor (`?s=snpp`).
+
+- Implementação: `web/js/app.js` (`sk0`, padrão `noaa20`); trocar de sensor recarrega a página, porque
+  cada sensor tem seu próprio conjunto municipal (`indicators_noaa20.json` ou `indicators.json`).
+- Com o S-NPP selecionado, o aviso de ruído de fundo a partir de 2022 continua visível e a tendência
+  só do S-NPP é oferecida apenas nesse caso.
+- Consequência: a série padrão da interface passa a ser 2018–2025. A série 2012–2025 do S-NPP não foi
+  alterada e continua acessível.
+- Registrado como conflito K1 em `docs/OPENLUX_2_0_MASTER_PLAN.md`, seção 5.1.

@@ -40,10 +40,18 @@ def test_noaa20_file_is_not_the_snpp_file():
 
 def test_noaa20_review_downloads_have_the_expected_rows_and_years():
     import csv
-    pasta = WEB / "data" / "downloads" / "revisao_noaa20"
+    # Revisão fica fora de web/ (pasta pública): data/revisao/noaa20 (Fase B, regra 9).
+    pasta = Path(__file__).resolve().parents[1] / "data" / "revisao" / "noaa20"
     serie = list(csv.DictReader((pasta / "openlux_municipios_noaa20_serie.csv").open(encoding="utf-8-sig")))
     assert len(serie) == 92 * 8
     assert sorted({r["ano"] for r in serie}) == [str(y) for y in range(2018, 2026)]
     resumo = list(csv.DictReader((pasta / "openlux_municipios_noaa20_resumo.csv").open(encoding="utf-8-sig")))
     assert len(resumo) == 92
     assert any("2018_2025" in h for h in resumo[0].keys())
+
+
+def test_public_web_folder_has_no_review_or_internal_files():
+    """Regra 9 (Fase B): web/ é a pasta pública; arquivos de revisão, provisórios ou internos não entram nela."""
+    proibidos = [p.relative_to(WEB).as_posix() for p in WEB.rglob("*")
+                 if p.is_file() and any(t in p.as_posix().lower() for t in ("revisao", "revisão", "provisorio", "interno", "draft"))]
+    assert proibidos == []

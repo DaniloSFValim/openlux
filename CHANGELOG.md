@@ -4,7 +4,11 @@ Formato: versões em ordem cronológica inversa. Datas no formato AAAA-MM-DD.
 
 ## Não lançado (preparação para a 2.0)
 
-### Alterado
+### Alterado (Fase B, OpenLux 2.0)
+- Arquivos de revisão do NOAA-20 saem da pasta pública `web/` e vão para `data/revisao/noaa20/` (histórico preservado com `git mv`). `scripts/build_web_downloads.py` e `tests/test_web_noaa20.py` atualizados. Novo teste impede arquivos de revisão em `web/`.
+- `pyproject.toml`: versões mínimas das dependências = versões aprovadas na suíte. `requirements-lock.txt` registra o ambiente de referência.
+- `docs/DECISIONS.md` §15.1: addendum com o NOAA-20 como mapa padrão, conforme a decisão do responsável em 2026-11-25.
+- `docs/AUDITORIA_2_0.md`: itens A2 (CHANGELOG) e A7 (gaveta) atualizados para a situação atual.
 - Mapa de pixels: o sensor padrão passa a ser o NOAA-20 (VJ146A4, 2018–2025), conforme `docs/DECISIONS.md` §15.
   O S-NPP continua disponível no seletor, com aviso de ruído a partir de 2022.
 - Página inicial: indicadores do NOAA-20 (`web/data/indicators_noaa20.json`), 2018–2025.
