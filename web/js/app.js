@@ -122,7 +122,7 @@
   }
   const KIND = { obs: ['obs', 'Observado (agregado)'], der: ['der', 'Derivado'], qa: ['qa', 'Controle de qualidade'] };
 
-  const st = { ind: 'mean', iy: years.length - 1, sel: null, layer: pxMeta ? 'pixel' : 'mun', sensor: 'snpp', view: 'rad', alpha: 0.9, basemap: false, outlines: true, pxOn: true, playing: false };
+  const st = { ind: 'mean', iy: years.length - 1, sel: null, layer: pxMeta ? 'pixel' : 'mun', sensor: (pxMeta && pxMeta.sensors.noaa20) ? 'noaa20' : 'snpp', view: 'rad', alpha: 0.9, basemap: false, outlines: true, pxOn: true, playing: false };
   const val = (cd, key = st.ind, iy = st.iy) => { const v = IND[key].get(M[cd], iy); return v == null || !isFinite(v) ? null : v; };
 
   /* ---------- aviso metodológico (dados) ---------- */

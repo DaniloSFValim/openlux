@@ -179,7 +179,7 @@
   $('baixar-cartao').addEventListener('click', () => { if (sel.value) baixarCartao(sel.value); });
   $('copiar-link').addEventListener('click', () => { if (sel.value) copiarLink(sel.value, $('status-compartilhar')); });
   $('copiar-escolha').addEventListener('click', () => { if (sel.value) copiarLink(sel.value, $('busca-ajuda')); });
-  $('ver-mapa').addEventListener('click', (e) => { e.currentTarget.href = `explorar.html?l=mun&i=mean&y=${REF}&s=snpp${sel.value ? '&m=' + sel.value : ''}`; });
+  $('ver-mapa').addEventListener('click', (e) => { e.currentTarget.href = `explorar.html?l=pixel&y=${REF}&s=noaa20${sel.value ? '&m=' + sel.value : ''}`; });
 
   drawRanking('');
   const q = new URLSearchParams(location.search).get('m');
