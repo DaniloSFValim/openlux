@@ -94,6 +94,42 @@
       "execucao": null
     },
     {
+      "arquivo": "data/downloads/openlux_municipios_noaa20_serie.csv",
+      "bytes": 51704,
+      "sha256": "e137c5c6ab933bcfeaef893a9f69cb37e13c94ff05c66dddb1584900f3d4f16b",
+      "licenca": "CC-BY-4.0",
+      "titulo": "Série anual por município (NOAA-20, sensor primário)",
+      "tipo": "CSV",
+      "fonte": "NASA Black Marble VJ146A4 v2.0 (DOI 10.5067/VIIRS/VJ146A4.002)",
+      "unidade": "nW·cm⁻²·sr⁻¹ (radiância média); fração adimensional",
+      "periodo": "2018–2025",
+      "sistema_de_referencia": "não se aplica (tabela)",
+      "situacao": "publicado",
+      "execucao": {
+        "processado_utc": "2026-11-23T18:58:02Z",
+        "commit": "aa0fdc45baedd8fd95056cef53edb97d22371bb5",
+        "codigo_com_alteracoes_nao_commitadas": true
+      }
+    },
+    {
+      "arquivo": "data/downloads/openlux_municipios_noaa20_resumo.csv",
+      "bytes": 5625,
+      "sha256": "766045be6ab24a3b36820250ad631dcfa095dffa5bcd3c02eea7ebeac0c2bda9",
+      "licenca": "CC-BY-4.0",
+      "titulo": "Resumo por município (NOAA-20): tendência 2018–2025 e variação",
+      "tipo": "CSV",
+      "fonte": "NASA Black Marble VJ146A4 v2.0; IBGE",
+      "unidade": "nW·cm⁻²·sr⁻¹ por ano; p-valor adimensional; variação em %",
+      "periodo": "2018–2025",
+      "sistema_de_referencia": "não se aplica (tabela)",
+      "situacao": "publicado",
+      "execucao": {
+        "processado_utc": "2026-11-23T18:58:02Z",
+        "commit": "aa0fdc45baedd8fd95056cef53edb97d22371bb5",
+        "codigo_com_alteracoes_nao_commitadas": true
+      }
+    },
+    {
       "arquivo": "data/downloads/openlux_limites_municipais_rj.gpkg",
       "bytes": 466944,
       "sha256": "9e873c607103f06b10f0d0fc9001d8c6eb6ce8c124f89157d6fa3abc0facec83",
