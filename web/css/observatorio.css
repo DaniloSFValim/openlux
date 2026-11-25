@@ -80,6 +80,17 @@ a:hover > .municipio { opacity: .8; }
 .campo { display: block; color: var(--obs-muted); font-size: 14px; margin-bottom: 6px; }
 #mun-escolha { background: var(--obs-bg2); color: var(--obs-texto); border: 1px solid var(--obs-linha); border-radius: 8px; padding: 10px 12px; font: inherit; min-width: min(100%, 360px); }
 
+/* lente de comparação */
+.controles { display: flex; flex-wrap: wrap; gap: 14px; }
+.controles label { display: flex; flex-direction: column; gap: 6px; color: var(--obs-muted); font-size: 14px; }
+.controles select { background: var(--obs-bg2); color: var(--obs-texto); border: 1px solid var(--obs-linha); border-radius: 8px; padding: 9px 12px; font: inherit; min-width: 180px; }
+.lente-caixa { position: relative; max-width: 640px; margin-top: 12px; }
+.lente-base svg, .lente-topo svg { display: block; width: 100%; height: auto; }
+.lente-topo { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; }
+.lente-controle { margin-top: 12px; max-width: 640px; }
+.lente-controle label { display: block; color: var(--obs-muted); font-size: 14px; margin-bottom: 6px; }
+.lente-controle input[type="range"] { width: 100%; accent-color: var(--obs-ouro); }
+.legendas { display: flex; justify-content: space-between; color: var(--obs-muted); font-size: 14px; margin-top: 4px; }
 .sobre-dado ul { color: var(--obs-muted); padding-left: 20px; }
 .sobre-dado li { margin: 6px 0; }
 

@@ -111,7 +111,7 @@ Estados: NÃO INICIADO · EM ANDAMENTO · CONCLUÍDO · BLOQUEADO · VALIDAR CIE
 | Observatório (página inicial): KPIs estaduais, evolução NOAA-20 com S-NPP tracejado, mapa de 92 municípios com classes fixas, maiores e menores, distribuição, variação 2018→2025, busca | CONCLUÍDO (primeira versão). Testes: `tests/test_web_observatorio.py`. Capturas reais em `docs/screenshots/openlux-2.0/` |
 | Explorador geográfico: navegação alinhada às seis áreas | CONCLUÍDO (só navegação). |
 | Explorador geográfico: identidade visual do protótipo (tema escuro) | NÃO INICIADO. Exige trabalho de tema, porque os testes de navegador cobrem o tema claro e escuro |
-| Explorador geográfico: lente de comparação entre dois anos (9.6) | NÃO INICIADO |
+| Lente de comparação entre dois anos (9.6), municipal: `web/comparar.html` | CONCLUÍDO (versão municipal). Lado a lado, controle deslizante, mapa de diferença absoluta, variação percentual com piso e URL. Testes: `tests/test_web_comparar.py`. **Pendente:** versão por pixel, que exige comparar os arquivos de pixels |
 | Laboratório de análises | NÃO INICIADO |
 | Observatório ambiental | NÃO INICIADO |
 | Dados abertos (renovação) | NÃO INICIADO |

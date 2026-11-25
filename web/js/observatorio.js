@@ -61,7 +61,7 @@
     const classe = (v) => { if (v == null) return -1; let k = 0; while (k < q.length && v > q[k]) k++; return k; };
     const bordas = [pool[0], ...q, pool[pool.length - 1]];
     $('legenda-classes').innerHTML = CORES.map((c, k) => `<li><span class="swatch" style="background:${c}"></span>${fmt(bordas[k], 2)} a ${fmt(bordas[k + 1], 2)}</li>`).join('');
-    mapa(geo, (cd) => valor(N, cd, last), (cd) => classe(valor(N, cd, last)), CORES, N.municipios);
+    mapa(geo, (cd) => valor(N, cd, last), (cd) => classe(valor(N, cd, last)), CORES);
     $('mapa-ano').textContent = last;
 
     // ---- rankings do último ano
@@ -125,33 +125,13 @@
     linha(serieN, 'serie-noaa');
   }
 
-  function mapa(geo, valorCd, classeCd, CORES, N) {
-    const box = $('mapa-destaque');
-    // projeção equirretangular com escala cos(lat) constante: forma honesta o bastante para o estado
-    const feats = geo.features;
-    let minx = 1e9, maxx = -1e9, miny = 1e9, maxy = -1e9;
-    feats.forEach((f) => walk(f.geometry.coordinates, (p) => { minx = Math.min(minx, p[0]); maxx = Math.max(maxx, p[0]); miny = Math.min(miny, p[1]); maxy = Math.max(maxy, p[1]); }));
-    const k = Math.cos(((miny + maxy) / 2) * Math.PI / 180);
-    const W = 640;
-    const escala = W / ((maxx - minx) * k);            // unidades SVG por grau de longitude corrigido
-    const H = Math.ceil((maxy - miny) * escala);
-    const sx = (lon) => (lon - minx) * k * escala;
-    const sy = (lat) => (maxy - lat) * escala;
-    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', role: 'group', 'aria-label': 'Mapa dos 92 municípios' });
-    box.innerHTML = ''; box.appendChild(svg);
-    feats.forEach((f) => {
-      const cd = f.properties.CD_MUN, nome = f.properties.NM_MUN;
-      const a = el('a', { href: exploreUrl(cd, 2025), 'aria-label': `${nome}: ${fmt(valorCd(cd), 3)} nW·cm⁻²·sr⁻¹` }, svg);
-      const c = classeCd(cd);
-      const path = el('path', { d: caminho(f.geometry, sx, sy), class: 'municipio', fill: c >= 0 ? CORES[c] : '#3b3f4a' }, a);
-      const t = el('title', {}, path); t.textContent = `${nome}: ${fmt(valorCd(cd), 3)}`;
+  function mapa(geo, valorCd, classeCd, CORES) {
+    window.OpenLuxSvg.desenhaMapa($('mapa-destaque'), geo, {
+      rotulo: 'Mapa dos 92 municípios',
+      link: (cd) => exploreUrl(cd, 2025),
+      cor: (cd) => { const c = classeCd(cd); return c >= 0 ? CORES[c] : '#3b3f4a'; },
+      titulo: (cd) => { const v = valorCd(cd); return `${geo.features.find((f) => f.properties.CD_MUN === cd).properties.NM_MUN}: ${fmt(v, 3)}`; },
     });
-  }
-
-  function walk(coords, fn) { if (typeof coords[0] === 'number') return fn(coords); coords.forEach((c) => walk(c, fn)); }
-  function caminho(g, sx, sy) {
-    const polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
-    return polys.map((rings) => rings.map((ring) => ring.map((p, i) => (i ? 'L' : 'M') + sx(p[0]).toFixed(1) + ',' + sy(p[1]).toFixed(1)).join('') + 'Z').join('')).join('');
   }
 
   function histograma(vals, lo, hi) {
