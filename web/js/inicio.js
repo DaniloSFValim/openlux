@@ -53,6 +53,59 @@
     };
   }
 
+  /* Faixa com os 92 municípios: cada ponto é um município, pela luz onde as pessoas vivem em 2021. */
+  function drawRanking(sel) {
+    const box = $('faixa-ranking'), resumo = $('ranking-resumo');
+    if (!box) return;
+    const W = 1000, H = 150, L = 30, R = 30, base = H - 34;
+    const vals = codes.map((c) => ({ c, v: M[c].exposure.pop_radiance[ref] })).filter((r) => r.v != null);
+    const max = Math.max(...vals.map((r) => r.v)) * 1.03;
+    const x = (v) => L + (v / max) * (W - L - R);
+    const ns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', `Pontos dos ${vals.length} municípios pela luz onde as pessoas vivem em 2021. ${sel && M[sel] ? 'Destacado: ' + M[sel].name + '.' : ''}`);
+    [0, 20, 40, 60, 80].filter((t) => t <= max).forEach((t) => {
+      const tx = document.createElementNS(ns, 'text');
+      tx.setAttribute('x', x(t)); tx.setAttribute('y', base + 18); tx.setAttribute('text-anchor', 'middle');
+      tx.setAttribute('class', 'eixo'); tx.textContent = String(t);
+      svg.appendChild(tx);
+      const ln = document.createElementNS(ns, 'line');
+      ln.setAttribute('x1', x(t)); ln.setAttribute('x2', x(t)); ln.setAttribute('y1', 16); ln.setAttribute('y2', base);
+      ln.setAttribute('stroke', '#d5dae1'); svg.appendChild(ln);
+    });
+    vals.forEach((r, i) => {
+      const cc = document.createElementNS(ns, 'circle');
+      const isSel = r.c === sel;
+      cc.setAttribute('cx', x(r.v)); cc.setAttribute('cy', 22 + (i % 5) * 24);
+      cc.setAttribute('r', isSel ? 9 : 5);
+      cc.setAttribute('tabindex', '-1');
+      if (isSel) cc.setAttribute('class', 'sel');
+      const t = document.createElementNS(ns, 'title'); t.textContent = `${M[r.c].name}: ${fmt(r.v)} ${UNIT}`;
+      cc.appendChild(t);
+      cc.addEventListener('click', () => render(r.c));
+      svg.appendChild(cc);
+    });
+    if (sel && M[sel] && M[sel].exposure.pop_radiance[ref] != null) {
+      const v = M[sel].exposure.pop_radiance[ref], xs = x(v);
+      const tl = document.createElementNS(ns, 'text');
+      tl.setAttribute('class', 'rotulo-sel');
+      tl.setAttribute('x', xs); tl.setAttribute('y', 8);
+      tl.setAttribute('text-anchor', xs > W * 0.7 ? 'end' : 'start');
+      tl.textContent = M[sel].name;
+      svg.appendChild(tl);
+    }
+    box.textContent = ''; box.appendChild(svg);
+    if (resumo) {
+      if (sel && M[sel] && M[sel].exposure.pop_radiance[ref] != null) {
+        const v = M[sel].exposure.pop_radiance[ref];
+        const abaixo = vals.filter((r) => r.v < v).length, acima = vals.filter((r) => r.v > v).length;
+        resumo.textContent = `${M[sel].name}: ${abaixo} municípios têm menos luz onde as pessoas vivem e ${acima} têm mais (2021).`;
+      } else resumo.textContent = '';
+    }
+  }
+
   function urlMun(cod) { return `${location.origin}${location.pathname}?m=${cod}`; }
 
   function render(cod) {
@@ -71,6 +124,7 @@
       series: [{ name: t.nome, values: m.mean, color: '#0072B2' }, { name: 'Estado (média ponderada)', values: data.state.mean, color: '#7a828c', dash: '5 4', width: 1.6 }],
       exportName: 'grafico-' + safe(t.nome), exportNotes: ['Fonte: OpenLux, doi:' + DOI + ' · NASA Black Marble (VNP46A4, S-NPP).', 'Resultados não validados. Após 2021, o S-NPP tem mais ruído em áreas escuras.'],
     });
+    drawRanking(cod);
     const u = urlMun(cod);
     history.replaceState(null, '', `?m=${cod}`);
     $('whatsapp').href = 'https://wa.me/?text=' + encodeURIComponent(
@@ -127,6 +181,7 @@
   $('copiar-escolha').addEventListener('click', () => { if (sel.value) copiarLink(sel.value, $('busca-ajuda')); });
   $('ver-mapa').addEventListener('click', (e) => { e.currentTarget.href = `explorar.html?l=mun&i=mean&y=${REF}&s=snpp${sel.value ? '&m=' + sel.value : ''}`; });
 
+  drawRanking('');
   const q = new URLSearchParams(location.search).get('m');
   render(q && M[q] ? q : '');
   if ($('updated')) $('updated').textContent = `Última atualização dos dados: ${new Date(data.meta.run.processed_utc).toLocaleDateString('pt-BR', { timeZone: 'UTC', day: '2-digit', month: 'long', year: 'numeric' })} (UTC). Dados não validados.`;
