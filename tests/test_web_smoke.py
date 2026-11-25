@@ -214,18 +214,21 @@ def _px_expected(code, meta):
     return pal[code - meta["classes"]["first_code"]]
 
 
-def test_pixel_layer_is_default_and_matches_the_class_grid(page):
+def test_pixel_layer_is_default_noaa20_and_matches_the_class_grid(page):
+    """Camada de pixel: o padrão é o NOAA-20 (sensor primário da análise). Legenda com unidade e fonte,
+    canvas desenhado, e o pixel sob o cursor tem a cor e a classe do arquivo data/pixels/<sensor>/<ano>.bin
+    (conferidos de forma independente em Python)."""
     page.evaluate("() => document.documentElement.removeAttribute('data-theme')")
-    """Camada de pixel: legenda com unidade e fonte, canvas desenhado, e o pixel sob o cursor tem a cor
-    e a classe do arquivo data/pixels/<ano>.bin (conferidos de forma independente em Python)."""
     meta = json.loads((WEB / "data" / "pixels" / "meta.json").read_text())
     _layer(page, "pixel")
     assert page.locator("#indicator").is_disabled()
     page.wait_for_function("() => document.querySelector('#pixel-readout') && !document.querySelector('#pixel-readout').hidden")
+    sensor = page.evaluate("() => window.OpenLuxMapApi.currentSensor()")
+    assert sensor == "noaa20", f"padrão deveria ser NOAA-20, veio {sensor!r}"
     leg = page.inner_text("#legend")
     assert "nW·cm⁻²·sr⁻¹" in leg and "Fonte:" in leg and "não é o brilho do céu" in leg and "sem dado válido" in leg
     year = page.evaluate("() => document.getElementById('year-out').textContent")
-    grid = np.fromfile(WEB / "data" / "pixels" / "snpp" / f"{year}.bin", dtype="uint8").reshape(meta["grid"]["rows"], meta["grid"]["cols"])
+    grid = np.fromfile(WEB / "data" / "pixels" / sensor / f"{year}.bin", dtype="uint8").reshape(meta["grid"]["rows"], meta["grid"]["cols"])
     g = meta["grid"]
     page.locator("#mapa").scroll_into_view_if_needed()
     box = page.locator("#mapa").bounding_box()
@@ -264,9 +267,10 @@ def test_pixel_layer_warns_about_noise_from_2022_and_switches_back_to_municipal(
     page.dispatch_event("#year", "input")
     page.wait_for_selector("#pxnote .pxnote")
     assert "piso de ruído" in page.inner_text("#pxnote")
+    # Padrão NOAA-20: primeiro ano disponível é 2018 (os anos 2012-2017 são do S-NPP).
     page.fill("#year", "0")
     page.dispatch_event("#year", "input")
-    page.wait_for_function("() => document.getElementById('year-out').textContent === '2012'")
+    page.wait_for_function("() => document.getElementById('year-out').textContent === '2018'")
     assert page.locator("#pxnote .pxnote").count() == 0
     _layer(page, "mun")
     assert page.locator("canvas.openlux-pixels").count() == 0
