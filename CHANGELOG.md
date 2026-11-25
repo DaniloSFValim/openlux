@@ -4,6 +4,13 @@ Formato: versões em ordem cronológica inversa. Datas no formato AAAA-MM-DD.
 
 ## Não lançado (preparação para a 2.0)
 
+### Adicionado (Fase D, OpenLux 2.0)
+- Observatório como página inicial (`web/index.html`, `web/js/observatorio.js`, `web/css/observatorio.css`): indicadores estaduais, evolução anual NOAA-20 com S-NPP, mapa de 92 municípios, ranking, distribuição e variação 2018→2025. Todos os números são calculados a partir de `data/indicators_noaa20.json`, `data/indicators.json` e `data/municipios.geojson`.
+- Testes `tests/test_web_observatorio.py`, incluindo conferência independente da média estadual e da variação.
+
+### Removido (Fase D)
+- `web/js/inicio.js` e `tests/test_web_inicio.py`: substituídos pelo Observatório.
+
 ### Alterado (Fase B, OpenLux 2.0)
 - Arquivos de revisão do NOAA-20 saem da pasta pública `web/` e vão para `data/revisao/noaa20/` (histórico preservado com `git mv`). `scripts/build_web_downloads.py` e `tests/test_web_noaa20.py` atualizados. Novo teste impede arquivos de revisão em `web/`.
 - `pyproject.toml`: versões mínimas das dependências = versões aprovadas na suíte. `requirements-lock.txt` registra o ambiente de referência.
