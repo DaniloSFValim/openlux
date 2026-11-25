@@ -331,3 +331,16 @@ body.inicio .muted,body.pagina .muted,.resultado .muted,.vazio .muted,.quiz .mut
 .cartao-mapa .cm-linha span{color:#dbe4f0}
 .cartao-mapa .cm-linha strong{color:#ffd166;font-size:1.05rem;font-variant-numeric:tabular-nums;white-space:nowrap}
 .cartao-mapa .cm-btn{margin-top:8px;background:#ffd166;color:#0b1020;border:0;border-radius:999px;padding:7px 14px;font-weight:700;cursor:pointer}
+
+/* Viagem no tempo, visual do protótipo (opção 1: mapa de pixels mantido) */
+#mapa.com-viagem .hud .y{display:none}
+#mapa .viagem-grande{position:absolute;left:18px;bottom:138px;z-index:900;pointer-events:none;max-width:60%;display:flex;flex-direction:column;align-items:flex-start}
+#mapa .viagem-grande .vg-ano{display:block;font-size:clamp(3.2rem,9vw,6.5rem);font-weight:800;line-height:.9;color:#ffd166;font-variant-numeric:tabular-nums;text-shadow:0 0 28px rgba(255,209,102,.35),0 2px 8px rgba(0,0,0,.45);transition:transform .25s ease}
+#mapa .viagem-grande .vg-aviso{display:none;order:-1;margin-bottom:8px;font-size:.8rem;line-height:1.35;color:#fff;background:rgba(11,16,32,.8);border-left:3px solid #ffd166;border-radius:6px;padding:6px 10px;max-width:30ch}
+#mapa .viagem-grande.animando .vg-ano{animation:pulsar 1.8s ease-in-out infinite}
+@keyframes pulsar{0%,100%{text-shadow:0 0 22px rgba(255,209,102,.3)}50%{text-shadow:0 0 44px rgba(255,209,102,.7)}}
+#mapa .viagem.animando{box-shadow:0 0 0 2px rgba(255,209,102,.55),0 10px 28px rgba(0,0,0,.35)}
+#mapa .viagem{padding:12px 18px;gap:14px}
+#mapa .viagem #play-btn{font-size:1.02rem;padding:11px 20px}
+@media (max-width:640px){#mapa .viagem-grande{bottom:160px;left:12px}#mapa .viagem-grande .vg-aviso{display:none}}
+@media (prefers-reduced-motion: reduce){#mapa .viagem-grande.animando .vg-ano{animation:none}}
