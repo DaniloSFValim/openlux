@@ -16,10 +16,9 @@
   <div class="wrap">
     <nav class="pages" aria-label="Páginas"><a href="index.html">Início</a><a href="explorar.html" aria-current="page">Explorar o mapa</a><a href="roteiros.html">Roteiros</a><a href="dados.html">Baixar dados</a><a href="sobre.html">Sobre e métodos</a></nav>
     <h1>Explore a luz noturna no mapa</h1>
-    <p class="lede">Troque o ano, a camada e o município. É uma <strong>estimativa baseada em sensoriamento remoto</strong>, <strong>não uma medição do brilho do céu</strong>.</p>
+    <p class="lede lede-curta">É uma <strong>estimativa baseada em sensoriamento remoto</strong>, <strong>não uma medição do brilho do céu</strong>.</p>
   </div>
 </header>
-<div class="wrap"><nav class="pages" aria-label="Páginas"><a href="index.html">Início</a><a href="explorar.html" aria-current="page">Explorar o mapa</a><a href="roteiros.html">Roteiros</a><a href="dados.html">Baixar dados</a><a href="sobre.html">Sobre e métodos</a></nav></div>
 <div class="wrap">
   <section class="alert" role="note" aria-labelledby="alert-title" id="alert">
     <p><strong id="alert-title">Resultados não validados.</strong> O sensor Suomi NPP tem mais ruído em áreas escuras desde 2022; não interprete os valores como mudança real de iluminação sem essa ressalva.</p>
@@ -30,9 +29,15 @@
   <main>
     <section class="explorer" aria-label="Mapa e painéis de análise">
       <div class="map-col">
+        <button type="button" class="btn btn-painel" id="abrir-painel" aria-expanded="false" aria-controls="painel">Dados e camadas</button>
         <div id="mapa" role="region" aria-label="Mapa da radiância noturna no Estado do Rio de Janeiro, por pixel de cerca de 460 metros ou agregada por município. Use o seletor de município ou a tabela de ranking para navegar pelo teclado."></div>
         <div id="pixel-readout" class="readout muted small" aria-live="polite" hidden></div>
         <div id="legend" class="legend" aria-live="polite"></div>
+      </div>
+
+      <aside class="panel-col painel-gaveta" id="painel" aria-label="Dados e camadas">
+        <div class="gaveta-topo"><strong>Dados e camadas</strong><button type="button" class="btn secundario" id="fechar-painel" aria-label="Fechar painel">Fechar ×</button></div>
+
         <section class="desenhar" aria-labelledby="desenhar-titulo">
           <h2 id="desenhar-titulo">Desenhe uma área</h2>
           <p class="ajuda">Clique no mapa para marcar os vértices (pelo menos três). Depois, toque em "Concluir área" ou tecle Enter. Escape cancela. O site conta quantos pixels caem em cada faixa de luz dentro dela.</p>
@@ -45,9 +50,6 @@
           <p id="desenhar-status" class="ajuda" role="status"></p>
           <div id="desenhar-resultado" hidden></div>
         </section>
-      </div>
-
-      <aside class="panel-col">
       <div class="ctrl-panel">
           <div class="controls" role="group" aria-label="Controles do mapa">
             <fieldset id="layer-wrap" class="layer-sel">
@@ -131,6 +133,7 @@
 <script src="vendor/openlux-draw/openlux-turf.min.js"></script>
 <script src="js/app.js"></script>
 <script src="js/viagem.js"></script>
+<script src="js/painel.js"></script>
 <script src="js/desenhar.js"></script>
 </body>
 </html>

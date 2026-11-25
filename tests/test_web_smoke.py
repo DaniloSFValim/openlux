@@ -91,6 +91,8 @@ def page(server):
         pg.on("pageerror", lambda e: pg.errors.append(str(e)))
         pg.goto(server + "/explorar.html")
         pg.wait_for_selector("#mapa path.leaflet-interactive")
+        pg.click("#abrir-painel")  # os controles ficam na gaveta; os testes precisam deles visíveis
+        pg.wait_for_function("document.getElementById('painel').classList.contains('aberta')")
         pg.injected = _cloudflare_injected(pg.content())
         yield pg
         b.close()

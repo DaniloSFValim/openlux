@@ -344,3 +344,19 @@ body.inicio .muted,body.pagina .muted,.resultado .muted,.vazio .muted,.quiz .mut
 #mapa .viagem #play-btn{font-size:1.02rem;padding:11px 20px}
 @media (max-width:640px){#mapa .viagem-grande{bottom:160px;left:12px}#mapa .viagem-grande .vg-aviso{display:none}}
 @media (prefers-reduced-motion: reduce){#mapa .viagem-grande.animando .vg-ano{animation:none}}
+
+/* Página do mapa: mapa em tela cheia e painel de controles em gaveta recolhível */
+.explorer{display:block}
+.map-col{position:relative}
+.map-col .btn-painel{position:absolute;top:12px;left:60px;z-index:1000;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+#mapa{height:calc(100vh - 170px);min-height:460px;border-radius:12px}
+.painel-gaveta{position:fixed;top:0;right:0;bottom:0;width:min(400px,94vw);z-index:1100;overflow:auto;border-radius:0;border-left:1px solid var(--line);box-shadow:-12px 0 32px rgba(0,0,0,.25);padding:0 0 12px;transform:translateX(105%);transition:transform .35s ease}
+.painel-gaveta.aberta{transform:none}
+.painel-gaveta .gaveta-topo{position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:var(--surface);border-bottom:1px solid var(--line)}
+.painel-gaveta .gaveta-topo button{padding:6px 10px}
+.painel-gaveta .desenhar{margin:12px 14px 0}
+@media (max-width:900px){#mapa{height:calc(100vh - 150px)}}
+@media (prefers-reduced-motion: reduce){.painel-gaveta{transition:none}}
+
+/* Cabeçalho do mapa: uma linha de ressalva, sem o parágrafo longo */
+.faixa .lede.lede-curta{margin:6px 0 14px;font-size:.95rem}
