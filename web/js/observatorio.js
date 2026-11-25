@@ -4,16 +4,9 @@
 (function () {
   'use strict';
   const $ = (id) => document.getElementById(id);
-  const NS = 'http://www.w3.org/2000/svg';
   const nf = (d) => new Intl.NumberFormat('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
   const fmt = (v, d = 2) => (v == null || !isFinite(v) ? '—' : nf(d).format(v));
   const fmtPct = (v) => (v == null || !isFinite(v) ? '—' : (v > 0 ? '+' : '') + nf(1).format(v) + ' %');
-  const el = (tag, attrs = {}, parent) => {
-    const n = document.createElementNS(NS, tag);
-    for (const k in attrs) n.setAttribute(k, attrs[k]);
-    if (parent) parent.appendChild(n);
-    return n;
-  };
   const exploreUrl = (cd, y) => `explorar.html?m=${encodeURIComponent(cd)}&s=noaa20&l=mun&y=${y}`;
   const getJSON = (u) => fetch(u).then((r) => { if (!r.ok) throw new Error(u + ' ' + r.status); return r.json(); });
 
@@ -101,28 +94,14 @@
   }
 
   function grafico(serieN, serieS, years) {
-    const box = $('grafico-evolucao');
-    const W = 760, H = 300, pad = { l: 56, r: 16, t: 16, b: 34 };
-    const all = serieN.concat(serieS).filter((v) => v != null);
-    const lo = Math.min(...all), hi = Math.max(...all), pad_y = (hi - lo) * 0.1 || 0.1;
-    const y0 = lo - pad_y, y1 = hi + pad_y;
-    const x = (i) => pad.l + (i * (W - pad.l - pad.r)) / (years.length - 1);
-    const yv = (v) => pad.t + (1 - (v - y0) / (y1 - y0)) * (H - pad.t - pad.b);
-    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', preserveAspectRatio: 'xMidYMid meet' });
-    box.innerHTML = ''; box.appendChild(svg);
-    for (let k = 0; k <= 4; k++) {
-      const v = y0 + ((y1 - y0) * k) / 4, yy = yv(v);
-      el('line', { x1: pad.l, x2: W - pad.r, y1: yy, y2: yy, class: 'grade' }, svg);
-      const t = el('text', { x: pad.l - 8, y: yy + 4, 'text-anchor': 'end', class: 'eixo' }, svg); t.textContent = fmt(v, 2);
-    }
-    years.forEach((y, i) => { const t = el('text', { x: x(i), y: H - 10, 'text-anchor': 'middle', class: 'eixo' }, svg); t.textContent = y; });
-    const linha = (serie, cls) => {
-      const pts = serie.map((v, i) => (v == null ? null : `${x(i)},${yv(v)}`)).filter(Boolean).join(' ');
-      el('polyline', { points: pts, class: cls, fill: 'none' }, svg);
-      serie.forEach((v, i) => { if (v != null) el('circle', { cx: x(i), cy: yv(v), r: 3.5, class: cls + '-p' }, svg); });
-    };
-    linha(serieS, 'serie-snpp');
-    linha(serieN, 'serie-noaa');
+    window.OpenLuxGraficos.linhas($('grafico-evolucao'), years, [
+      { valores: serieS, classe: 'serie-snpp', tracejado: true },
+      { valores: serieN, classe: 'serie-noaa' },
+    ], { rotulo: 'Gráfico da evolução anual da radiância média estadual' });
+  }
+
+  function histograma(vals, lo, hi) {
+    window.OpenLuxGraficos.histograma($('grafico-distribuicao'), vals, lo, hi, { rotulo: 'Histograma da distribuição municipal' });
   }
 
   function mapa(geo, valorCd, classeCd, CORES) {
@@ -134,21 +113,4 @@
     });
   }
 
-  function histograma(vals, lo, hi) {
-    const box = $('grafico-distribuicao');
-    const W = 760, H = 240, pad = { l: 40, r: 12, t: 12, b: 34 }, B = 12;
-    const cont = new Array(B).fill(0);
-    vals.forEach((v) => { let i = Math.floor(((v - lo) / (hi - lo)) * B); if (i >= B) i = B - 1; if (i < 0) i = 0; cont[i]++; });
-    const max = Math.max(...cont, 1);
-    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%' });
-    box.innerHTML = ''; box.appendChild(svg);
-    const bw = (W - pad.l - pad.r) / B;
-    cont.forEach((n, i) => {
-      const h = ((H - pad.t - pad.b) * n) / max;
-      el('rect', { x: pad.l + i * bw + 2, y: H - pad.b - h, width: bw - 4, height: h, class: 'barra' }, svg);
-      const t = el('text', { x: pad.l + i * bw + bw / 2, y: H - pad.b + 14, 'text-anchor': 'middle', class: 'eixo' }, svg);
-      t.textContent = fmt(lo + ((hi - lo) * i) / B, 1);
-      if (n) { const c = el('text', { x: pad.l + i * bw + bw / 2, y: H - pad.b - h - 4, 'text-anchor': 'middle', class: 'eixo' }, svg); c.textContent = n; }
-    });
-  }
 })();
