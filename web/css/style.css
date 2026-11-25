@@ -308,3 +308,26 @@ body.inicio .muted,body.pagina .muted,.resultado .muted,.vazio .muted,.quiz .mut
 #desenhar-resultado td .barra{display:inline-block;height:10px;border-radius:5px;background:var(--accent);vertical-align:middle;max-width:60%}
 #desenhar-resultado td .pct{margin-left:8px;font-variant-numeric:tabular-nums}
 #desenhar-resultado th[scope=row]{font-weight:600;white-space:nowrap}
+
+/* Viagem no tempo: barra sobre o mapa com ano, Animar e aviso do sensor */
+#mapa .viagem{position:absolute;left:50%;bottom:34px;transform:translateX(-50%);z-index:1000;display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;gap:12px;background:rgba(11,16,32,.88);color:#fff;border-radius:16px;padding:10px 16px;box-shadow:0 10px 28px rgba(0,0,0,.35);max-width:calc(100% - 24px)}
+#mapa .viagem #play-btn{border-radius:999px;background:#ffd166;color:#0b1020;border:0;font-size:1rem;font-weight:800;padding:10px 18px;white-space:nowrap;min-width:120px}
+#mapa .viagem #play-btn:hover{filter:brightness(1.07)}
+#mapa .viagem #play-btn:disabled{opacity:.4}
+#mapa .viagem #year-wrap{display:flex;flex-direction:column;align-items:flex-start;font-size:.9rem;color:#dbe4f0;min-width:230px}
+#mapa .viagem #year-out{font-size:1.6rem;font-weight:800;color:#ffd166;font-variant-numeric:tabular-nums;line-height:1}
+#mapa .viagem #year{width:230px;accent-color:#ffd166}
+#mapa .viagem #anim-status{color:#dbe4f0}
+#mapa .viagem .muted{color:#b7c6d9}
+@media (max-width:640px){#mapa .viagem{flex-wrap:wrap;bottom:30px;padding:8px 10px;gap:8px 10px}#mapa .viagem #year{width:170px}}
+
+/* Cartão ancorado no mapa (clique num município) */
+.popup-cartao .leaflet-popup-content-wrapper{border-radius:14px;background:#0b1020;color:#e8ecf1;box-shadow:0 10px 28px rgba(0,0,0,.4)}
+.popup-cartao .leaflet-popup-tip{background:#0b1020}
+.popup-cartao .leaflet-popup-content{margin:14px 16px;font-size:.92rem;line-height:1.4}
+.cartao-mapa .cm-nome{font-size:1.1rem;font-weight:800;margin:0 0 2px;color:#fff}
+.cartao-mapa .cm-sub{margin:0 0 8px;color:#b7c6d9;font-size:.85rem}
+.cartao-mapa .cm-linha{display:flex;justify-content:space-between;gap:12px;margin:4px 0;align-items:baseline}
+.cartao-mapa .cm-linha span{color:#dbe4f0}
+.cartao-mapa .cm-linha strong{color:#ffd166;font-size:1.05rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cartao-mapa .cm-btn{margin-top:8px;background:#ffd166;color:#0b1020;border:0;border-radius:999px;padding:7px 14px;font-weight:700;cursor:pointer}

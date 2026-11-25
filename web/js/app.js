@@ -164,7 +164,7 @@
     style: () => ({ weight: 0.6, color: '#555', fillOpacity: 0.92 }),
     onEachFeature: (f, layer) => {
       const cd = f.properties.CD_MUN; layerByCode[cd] = layer;
-      layer.on('click', () => select(cd));
+      layer.on('click', (e) => { select(cd); abrirCartao(cd, e.latlng); });
       layer.on('mouseover', () => layer.openTooltip());
     },
   }).addTo(map);
@@ -411,6 +411,32 @@
     render(); renderDetail();
     if (cd && layerByCode[cd]) map.fitBounds(layerByCode[cd].getBounds(), { maxZoom: 10, padding: [30, 30] });
   }
+  /* Cartão ancorado no mapa: número-chave do município clicado, sem sair da tela. */
+  function abrirCartao(cd, latlng) {
+    var m = M[cd], ref = years.indexOf(2021);
+    var pop = m.exposure.pop_radiance[ref], area = m.mean[ref];
+    var n = 0, total = 0;
+    if (pop != null) {
+      codes.forEach(function (c) { var v = M[c].exposure.pop_radiance[ref]; if (v != null) { total++; if (v < pop) n++; } });
+    }
+    var box = document.createElement('div');
+    box.className = 'cartao-mapa';
+    var h = document.createElement('p'); h.className = 'cm-nome'; h.textContent = m.name; box.appendChild(h);
+    var hab = document.createElement('p'); hab.className = 'cm-sub'; hab.textContent = m.population == null ? '' : fmt(m.population, 0) + ' habitantes (Censo 2022)'; box.appendChild(hab);
+    var l1 = document.createElement('p'); l1.className = 'cm-linha';
+    l1.innerHTML = '<span>Luz onde as pessoas vivem, 2021</span><strong>' + (pop == null ? '—' : fmt(pop, 1)) + '</strong>';
+    box.appendChild(l1);
+    var l2 = document.createElement('p'); l2.className = 'cm-linha';
+    l2.innerHTML = '<span>Luz média na área, 2021</span><strong>' + (area == null ? '—' : fmt(area, 1)) + '</strong>';
+    box.appendChild(l2);
+    if (total) { var pct = Math.round(100 * n / total), r = document.createElement('p'); r.className = 'cm-sub'; r.textContent = pct === 0 ? 'Entre os menos iluminados do estado.' : 'Mais iluminado que ' + pct + '% dos municípios do estado.'; box.appendChild(r); }
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'cm-btn'; b.textContent = 'Ver perfil completo';
+    b.addEventListener('click', function () { map.closePopup(); showTab('mun'); });
+    box.appendChild(b);
+    L.popup({ className: 'popup-cartao', maxWidth: 280, closeButton: true, autoPan: true })
+      .setLatLng(latlng).setContent(box).openOn(map);
+  }
+
   const COL = ['#0072B2', '#E69F00', '#009E73', '#CC79A7'];
   const EXPORT_NOTES = ['Fonte: OpenLux 0.1.0, doi:10.5281/zenodo.24510755 · NASA Black Marble (VNP46A4, S-NPP) · malha e população: IBGE.',
     'Resultados não validados. O S-NPP tem mais ruído em áreas escuras desde 2022; não é mudança real de iluminação sem essa ressalva.'];
