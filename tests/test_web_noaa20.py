@@ -36,3 +36,14 @@ def test_noaa20_and_snpp_agree_in_level_before_2022_as_documented():
 
 def test_noaa20_file_is_not_the_snpp_file():
     assert NOA["municipios"]["3304557"]["mean"][-1] != SNPP["municipios"]["3304557"]["mean"][-1]
+
+
+def test_noaa20_review_downloads_have_the_expected_rows_and_years():
+    import csv
+    pasta = WEB / "data" / "downloads" / "revisao_noaa20"
+    serie = list(csv.DictReader((pasta / "openlux_municipios_noaa20_serie.csv").open(encoding="utf-8-sig")))
+    assert len(serie) == 92 * 8
+    assert sorted({r["ano"] for r in serie}) == [str(y) for y in range(2018, 2026)]
+    resumo = list(csv.DictReader((pasta / "openlux_municipios_noaa20_resumo.csv").open(encoding="utf-8-sig")))
+    assert len(resumo) == 92
+    assert any("2018_2025" in h for h in resumo[0].keys())
