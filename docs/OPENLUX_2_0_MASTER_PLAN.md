@@ -132,6 +132,19 @@ Decisões do responsável necessárias: (1) confirmar a licença das áreas urba
 (2) decidir se o MapBiomas entra, sabendo que a versão CC BY-SA pode exigir mudar a licença dos dados derivados;
 (3) indicar outra fonte oficial de unidades de conservação com licença que permita derivados.
 
+### Fase 8 (prompt) — Dados abertos
+
+| Tarefa | Estado | Evidência |
+|---|---|---|
+| Catálogo de arquivos com SHA-256, tamanho, unidade, período, sistema de referência e licença | CONCLUÍDO (7 arquivos) | `scripts/build_catalogo.py` → `web/data/downloads/catalogo.json`; testes em `tests/test_catalogo.py` (hashes recalculados sobre os arquivos) |
+| GeoPackage dos 92 limites municipais | CONCLUÍDO | `web/data/downloads/openlux_limites_municipais_rj.gpkg` (92 feições, EPSG:4326 declarado) |
+| Página de dados lista o catálogo | CONCLUÍDO | `web/dados.html` + `web/js/dados.js` |
+| Licença corrigida na página de dados (estava "proposta") | CONCLUÍDO | confirmada pelo autor em 2026-11-25 |
+| CSV e JSON do NOAA-20 | NÃO PUBLICADO | Ficam em `data/revisao/noaa20/`. Aguardam aprovação do responsável para publicação |
+| Reprodutibilidade do NOAA-20 | PENDENTE | `indicators_noaa20.json` foi gerado com `code_dirty: true`. Rerodar a partir de commit limpo |
+| SIRGAS 2000 nos produtos geográficos | PENDENTE | O GeoJSON não declara CRS; o GeoPackage usa EPSG:4326. SIRGAS 2000 (EPSG:4674) difere por poucos metros e ainda não foi medido nem transformado |
+| Dicionário de dados e relatórios de qualidade publicados | NÃO INICIADO | `docs/DICIONARIO_DE_DADOS.md` existe e não está linkado na página |
+
 ### Fase E — Recursos avançados
 
 Comparação temporal, comparação municipal (até três), relatórios PDF, URLs compartilháveis (parcial:

@@ -17,6 +17,12 @@ Formato: versões em ordem cronológica inversa. Datas no formato AAAA-MM-DD.
 - `web/js/graficos-svg.js`: gráficos SVG próprios compartilhados pelo Observatório e pelo laboratório.
 - Testes `tests/test_web_laboratorio.py`.
 
+### Adicionado (Fase 8, dados abertos)
+- `web/data/downloads/catalogo.json` (gerado por `scripts/build_catalogo.py`): inventário dos 7 arquivos publicados, com SHA-256, tamanho, unidade, período, sistema de referência, licença e registro de execução.
+- `web/data/downloads/openlux_limites_municipais_rj.gpkg`: limites dos 92 municípios em GeoPackage (EPSG:4326 declarado).
+- Página de dados mostra o catálogo; licença corrigida (confirmada em 2026-11-25).
+- Testes `tests/test_catalogo.py`.
+
 ### Removido (Fase D)
 - `web/js/inicio.js` e `tests/test_web_inicio.py`: substituídos pelo Observatório.
 

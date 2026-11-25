@@ -27,3 +27,25 @@
     });
   }
 })();
+
+/* Catálogo dos arquivos publicados (lido de data/downloads/catalogo.json, gerado por scripts/build_catalogo.py). */
+(function () {
+  'use strict';
+  var alvo = document.getElementById('catalogo');
+  if (!alvo) return;
+  function esc(s) { return String(s == null ? '—' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  fetch('data/downloads/catalogo.json').then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (d) {
+    var linhas = d.arquivos.map(function (a) {
+      var exec = a.execucao
+        ? (esc(a.execucao.processado_utc) + (a.execucao.codigo_com_alteracoes_nao_commitadas ? ' <strong>(código com alterações não commitadas)</strong>' : ''))
+        : '—';
+      return '<tr><th scope="row"><a href="' + esc(a.arquivo) + '" download>' + esc(a.titulo) + '</a><br><span class="small">' + esc(a.tipo) + ' · ' + (a.bytes / 1024).toFixed(0) + ' KB</span></th>' +
+        '<td>' + esc(a.unidade) + '</td><td>' + esc(a.periodo) + '</td><td>' + esc(a.sistema_de_referencia) + '</td>' +
+        '<td>' + esc(a.licenca) + '</td><td>' + exec + '</td>' +
+        '<td><code title="' + esc(a.sha256) + '">' + esc(a.sha256.slice(0, 16)) + '…</code></td></tr>';
+    }).join('');
+    alvo.innerHTML = '<table><thead><tr><th scope="col">Arquivo</th><th scope="col">Unidade</th><th scope="col">Período</th><th scope="col">Sistema de referência</th><th scope="col">Licença</th><th scope="col">Processado em</th><th scope="col">SHA-256</th></tr></thead><tbody>' + linhas + '</tbody></table>';
+  }).catch(function () {
+    alvo.innerHTML = '<p class="muted" style="padding:12px">Não foi possível carregar o catálogo.</p>';
+  });
+})();
