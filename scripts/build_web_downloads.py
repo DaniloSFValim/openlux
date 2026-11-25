@@ -21,7 +21,7 @@ OUT = ROOT / "web" / "data" / "downloads"
 LICENSE_DATA = {
     "id": "CC-BY-4.0",
     "url": "https://creativecommons.org/licenses/by/4.0/",
-    "status": "proposta: a confirmar pelo autor antes da publicação",
+    "status": "confirmada pelo autor em 2026-11-25",
     "nota": "Dados derivados de NASA (política ESDIS, sem restrição) e IBGE (reuso com citação). "
             "CC BY 4.0 exige apenas a atribuição indicada em 'citacao'.",
 }

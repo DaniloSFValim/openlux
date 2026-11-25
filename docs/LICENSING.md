@@ -66,7 +66,7 @@ do código e ainda não foi decidida; os termos de NASA (CC0 com ressalva) e SID
 
 ## 5. Pontos ainda abertos
 
-1. Licença de conteúdo para a documentação e os produtos derivados, se desejada (por exemplo, CC BY 4.0). Não foi decidida; o `LICENSE` MIT cobre o código.
+1. Licença dos produtos derivados (agregados em `web/data/downloads/`): **CC BY 4.0, confirmada pelo autor em 2026-11-25.** O `LICENSE` MIT cobre o código.
 2. Titular dos direitos: se alguma parte do trabalho foi feita com recursos ou sob regras de propriedade intelectual de uma instituição, confirme que o autor pode licenciá-la.
 
 ## 6. Efeitos da decisão MIT
