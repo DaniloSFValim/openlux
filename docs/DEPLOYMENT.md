@@ -100,3 +100,18 @@ O teste remoto ignora **apenas** o aviso de CSP causado por essas duas injeçõe
 ## 6. Se a URL mudar
 
 Atualize `README.md`, `CITATION.cff` (`url`) e este documento; um teste confere que a URL é a mesma nos três.
+
+## 7. Processo de deploy reproduzível (OpenLux 2.0)
+
+A publicação é feita pela Cloudflare a partir da branch `main`. Antes de mergear, o processo exige:
+
+1. **Testes:** o workflow `.github/workflows/testes.yml` roda `pytest` em cada push e em cada PR para `main`. Localmente, o mesmo comando é `pytest -q tests`.
+2. **Build de prévia:** o check `Workers Builds: openlux` precisa estar verde no PR. A prévia aparece como comentário do bot da Cloudflare, com URL própria do commit.
+3. **Verificação de arquivos:** `python scripts/build_catalogo.py` regenera `web/data/downloads/catalogo.json`, e `pytest tests/test_catalogo.py` confere os hashes e tamanhos contra os arquivos publicados.
+4. **Verificação dos dados:** o NOAA-20 precisa ter `code_dirty: false` em `web/data/indicators_noaa20.json` (rodar a partir de commit limpo).
+5. **Testes de navegação e responsividade:** `tests/test_web_smoke.py`, `test_web_observatorio.py`, `test_web_comparar.py`, `test_web_laboratorio.py` e `test_web_ambiental.py` abrem as páginas no Chromium, conferem erros de console, contagens e ausência de rolagem horizontal em 390 px.
+6. **Merge:** só depois de os checks passarem no head do PR. O merge usa o `expectedHeadSha` para não mergear um commit que não foi verificado.
+
+**Verificação depois do deploy:** a Cloudflare pode servir uma cópia em cache. Para confirmar a publicação de `main`, conferir `https://openlux.labdados.org/index.html` em janela anônima e comparar o título da página com o do commit.
+
+**Não verificado daqui:** o log do build de produção de `main` (o painel da Cloudflare não é acessível pela sessão). Quando esse log estiver disponível, anotar aqui o commit publicado.
