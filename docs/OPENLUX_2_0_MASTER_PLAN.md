@@ -105,17 +105,19 @@ Estados: NÃO INICIADO · EM ANDAMENTO · CONCLUÍDO · BLOQUEADO · VALIDAR CIE
 
 ### Fase D — Nova interface
 
+Atualizado em 2026-11-26. A interface anterior foi removida (commit `7d31fb0`) e reconstruída a partir do protótipo aprovado (`docs/referencia/`). Testes de navegador: `tests/test_web_explorador.py`, `tests/test_web_paginas.py`, `tests/test_web_municipios.py` (224 testes no total, todos passando).
+
 | Tarefa | Estado |
 |---|---|
-| Identidade visual (tema escuro, dourado, base do protótipo) | EM ANDAMENTO. Aplicada ao Observatório (`web/css/observatorio.css`) |
-| Observatório (página inicial): KPIs estaduais, evolução NOAA-20 com S-NPP tracejado, mapa de 92 municípios com classes fixas, maiores e menores, distribuição, variação 2018→2025, busca | CONCLUÍDO (primeira versão). Testes: `tests/test_web_observatorio.py`. Capturas reais em `docs/screenshots/openlux-2.0/` |
-| Explorador geográfico: navegação alinhada às seis áreas | CONCLUÍDO (só navegação). |
-| Explorador geográfico: identidade visual do protótipo (tema escuro) | CONCLUÍDO (aviso, gaveta e base escura). Mapa de pixels mantém o tema claro por padrão |
-| Lente de comparação entre dois anos (9.6), municipal: `web/comparar.html` | CONCLUÍDO (versão municipal). Lado a lado, controle deslizante, mapa de diferença absoluta, variação percentual com piso e URL. Testes: `tests/test_web_comparar.py`. **Pendente:** versão por pixel, que exige comparar os arquivos de pixels |
-| Laboratório de análises (municipal): `web/laboratorio.html` | CONCLUÍDO (primeira versão). Até três municípios, tabela com posição e percentil entre municípios, evolução anual, distribuição estadual com histograma e caixa, tendências Theil–Sen com p-valor. Testes: `tests/test_web_laboratorio.py`. **Pendente:** comparação entre municípios com mapa de diferenças, percentis de pixels (P75, P90, P95), área acima de limiares e tendências por pixel |
-| Observatório ambiental | NÃO INICIADO |
-| Dados abertos (renovação) | NÃO INICIADO |
-| Metodologia (renovação) | NÃO INICIADO |
+| Identidade visual (tema escuro, dourado, base do protótipo) | CONCLUÍDO nas páginas atuais (`web/css/prototipo.css`, `web/css/paginas.css`). |
+| Observatório (página inicial): indicadores estaduais, evolução NOAA-20 com S-NPP tracejado, maiores e menores, distribuição, variação 2018→2025, pixels iluminados, ranking com busca, mapa dos 92 municípios com acesso ao explorador | CONCLUÍDO. `web/index.html`, `web/js/observatorio.js`. Testes: `tests/test_web_paginas.py`. |
+| Explorador geográfico: mapa estadual, coroplético por ano, mapa de pixels por classe, gaveta de camadas, cartão municipal, link compartilhável | CONCLUÍDO. `web/explorar.html`, `web/js/explorador.js`. Testes: `tests/test_web_explorador.py`. |
+| Lente de comparação entre dois anos (9.6) | CONCLUÍDO no explorador (`explorar.html`, parâmetros `lente` e `lx`). Troca de sensor mantém a lente. A página `comparar.html` foi removida. **Pendente:** versão de comparação por pixel. |
+| Laboratório de análises (10.1 e 10.3, municipal): até três municípios, médias, medianas, percentis dos pixels, posição, evolução, distribuição, caixa, tendência com definição de cada indicador | CONCLUÍDO (`web/laboratorio.html`). Testes: `tests/test_web_paginas.py`. **Pendente:** mapa de diferenças e tendências por pixel (10.2). |
+| Observatório ambiental (Fase 7) | PARCIAL. `web/ambiental.html` mostra o estado de cada camada e licença. Nenhum resultado é publicado. Camadas bloqueadas (ver Fase 7). |
+| Dados abertos (Fase 8) | CONCLUÍDO nesta parte: catálogo com SHA-256, licença, citação, níveis de dados (`web/dados.html`). Relatórios de qualidade: NÃO INICIADO. |
+| Metodologia (Fase 10) | CONCLUÍDO nesta parte (`web/metodologia.html`): produtos, máscaras, agregação, limitações, o que não mede. Validação em campo: NÃO REALIZADA (protocolo proposto). |
+| Páginas municipais (Fase 9) | CONCLUÍDO para os 92 municípios (`web/municipio/`, `web/municipios.html`), gerado por `scripts/build_web_municipios.py`. |
 
 ### Fase 7 (prompt) — Observatório ambiental
 
@@ -183,14 +185,11 @@ Fase 7: MapBiomas Brasil autorizado pelo responsável (CC BY 4.0) e UCs do CNUC 
 
 ### Fase E — Recursos avançados
 
-Comparação temporal, comparação municipal (até três), relatórios PDF, URLs compartilháveis (parcial:
-parâmetros existem), camadas GIS, galeria de screenshots: todos NÃO INICIADOS, exceto URLs parciais.
+Atualizado em 2026-11-26. Comparação entre dois anos: concluída no explorador (lente). Comparação municipal até três: concluída no laboratório. Relatórios PDF municipais: concluídos (92). URLs compartilháveis: concluídas no explorador e no laboratório (parâmetros de município, ano, sensor e lente). Galeria de capturas: concluída (13 capturas reais). Camadas GIS para download: NÃO INICIADO.
 
 ### Fase F — Qualidade e publicação
 
-Testes automatizados existem (226). GitHub Actions: NÃO INICIADO (não há `.github/workflows`).
-Proteção de branch: NÃO INICIADO (requer administrador). Screenshots reais: NÃO INICIADO.
-Zenodo e nova versão: pendentes de decisão e de publicação manual pelo responsável.
+Atualizado em 2026-11-26. Testes automatizados: 224 (inclui navegação). GitHub Actions: `.github/workflows/testes.yml` existe e roda a suíte. Proteção de branch: NÃO INICIADO (requer administrador). Capturas reais: CONCLUÍDO (`docs/screenshots/openlux-2.0/`). Zenodo e nova versão: pendentes de decisão e de publicação manual pelo responsável. PR #36 permanece em draft; merge depende de decisão explícita do responsável.
 
 ## 5. Conflitos entre documentação e código, e problemas
 

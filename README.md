@@ -61,9 +61,10 @@ As capturas antigas, de uma versão anterior da interface, foram removidas.
 
 - **Observatório:** indicadores estaduais, evolução anual NOAA-20 com S-NPP, mapa dos 92 municípios, rankings e variação 2018→2025.
 - **Explorador:** mapa de pixels, camadas, cartão municipal e animação, com o sensor escolhido pela URL.
-- **Comparação:** dois anos lado a lado, controle deslizante, diferença absoluta e variação percentual.
+- **Lente de comparação (explorador):** dois anos lado a lado, com controle deslizante e parâmetros na URL.
 - **Laboratório:** até três municípios, percentis entre municípios, distribuição estadual e tendências com p-valor.
-- **Observatório ambiental:** análise exploratória de áreas protegidas (CNUC) com a radiância NOAA-20 de 2025. É associação espacial, não causa, e não controla a urbanização.
+- **Observatório ambiental:** mostra o estado de cada camada e licença. A análise exploratória de áreas protegidas foi feita, mas **não está publicada**: aguarda revisão, e é associação espacial, não causa.
+- **Municípios:** página individual dos 92 municípios e relatório em PDF, gerados a partir dos dados publicados.
 - **Dados abertos:** catálogo com SHA-256 de cada arquivo, GeoPackage dos limites municipais e percentis P75, P90 e P95.
 
 ## 3. Pergunta de pesquisa

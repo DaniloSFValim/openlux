@@ -4,43 +4,36 @@ Formato: versões em ordem cronológica inversa. Datas no formato AAAA-MM-DD.
 
 ## Não lançado (preparação para a 2.0)
 
-### Adicionado (Fase D, OpenLux 2.0)
-- Observatório como página inicial (`web/index.html`, `web/js/observatorio.js`, `web/css/observatorio.css`): indicadores estaduais, evolução anual NOAA-20 com S-NPP, mapa de 92 municípios, ranking, distribuição e variação 2018→2025. Todos os números são calculados a partir de `data/indicators_noaa20.json`, `data/indicators.json` e `data/municipios.geojson`.
-- Testes `tests/test_web_observatorio.py`, incluindo conferência independente da média estadual e da variação.
+Reconstrução do front-end a partir do protótipo aprovado (`docs/referencia/`). A versão anterior do front-end foi removida no commit `7d31fb0`; as entradas abaixo descrevem o estado atual.
 
-### Adicionado (Fase D, lente de comparação)
-- `web/comparar.html`: compara dois anos municipais do NOAA-20 ou do S-NPP, com mapas lado a lado, controle deslizante, diferença absoluta B − A (classes simétricas), variação percentual com piso declarado e URL compartilhável. Módulo comum de mapa em `web/js/mapa-svg.js`, usado também pelo Observatório.
-- Testes `tests/test_web_comparar.py`.
+### Adicionado
+- Página inicial (Observatório): mapa dos 92 municípios em tela cheia e, abaixo, indicadores estaduais, evolução NOAA-20 com S-NPP tracejado, maiores e menores médias, distribuição municipal, variação 2018→2025, pixels iluminados, ranking com busca (`web/index.html`, `web/js/observatorio.js`).
+- Explorador geográfico (`web/explorar.html`, `web/js/explorador.js`, `web/css/explorador.css`): mapa por município e por pixel (classes de luz, sem radiância por pixel), gaveta de camadas, cartão municipal, lente de comparação entre dois anos e link compartilhável.
+- Laboratório de análises (`web/laboratorio.html`): até três municípios comparados com o estado; médias, medianas, percentis dos pixels, posição, evolução, distribuição, caixa e tendência de Theil–Sen, com a definição de cada indicador.
+- Observatório ambiental (`web/ambiental.html`): estado de cada camada e de cada licença. Nenhum resultado ambiental é publicado.
+- Dados abertos (`web/dados.html`): catálogo com SHA-256, licença, sistema de referência, unidade e período; citação.
+- Metodologia (`web/metodologia.html`): o que o OpenLux mede e não mede, processamento, limitações; validação em campo marcada como não realizada.
+- Páginas municipais e relatórios em PDF para os 92 municípios (`web/municipio/`, `web/municipios.html`), gerados por `scripts/build_web_municipios.py`.
+- Capturas reais das páginas em `docs/screenshots/openlux-2.0/`.
+- Testes de navegador em `tests/test_web_explorador.py`, `tests/test_web_paginas.py` e `tests/test_web_municipios.py`.
 
-### Adicionado (Fase D, laboratório)
-- `web/laboratorio.html`: até três municípios, tabela comparativa (média, mediana dos pixels, fração ≥ 0,5, posição e percentil entre municípios, tendência e p-valor, variação do pipeline), evolução anual, distribuição estadual com histograma e caixa, e tendências significativas (p < 0,05).
-- `web/js/graficos-svg.js`: gráficos SVG próprios compartilhados pelo Observatório e pelo laboratório.
-- Testes `tests/test_web_laboratorio.py`.
+### Alterado
+- Pixels regerados a partir de commit limpo (`db2676b`): os 25 arquivos `.bin` têm SHA-256 idêntico ao anterior; só os metadados mudaram.
+- Explorador: a área do cartão usa a área oficial do IBGE (`AREA_KM2`), e não a área geodésica calculada.
+- Troca de sensor no explorador mantém ano e lente.
 
-### Adicionado (Fase 8, dados abertos)
-- `web/data/downloads/catalogo.json` (gerado por `scripts/build_catalogo.py`): inventário dos 7 arquivos publicados, com SHA-256, tamanho, unidade, período, sistema de referência, licença e registro de execução.
-- `web/data/downloads/openlux_limites_municipais_rj.gpkg`: limites dos 92 municípios em GeoPackage (EPSG:4326 declarado).
-- Página de dados mostra o catálogo; licença corrigida (confirmada em 2026-11-25).
-- Testes `tests/test_catalogo.py`.
+### Removido
+- Páginas e funções fora do plano: `comparar.html` (a lente passou ao explorador), `roteiros.html`, `desenhar` (área desenhada), `observatorio.js` antigo, `laboratorio` antigo e o smoke test do mapa antigo.
+- `web/data/ambiental/uc_municipios.json`: análise exploratória não revisada, que estava em pasta pública. Permanece no histórico do git.
+- Capturas da interface anterior.
 
-### Adicionado (pendências aprovadas, 2026-11-26)
-- CSV do NOAA-20 publicados em `web/data/downloads/` e listados no catálogo.
-- Quantis P75, P90 e P95 dos pixels válidos por município e ano (`percentile_table`, `scripts/run_percentiles.py`), calculados e aguardando revisão antes de publicação.
-- Dicionário de dados linkado na página de dados.
-- Reprodução do NOAA-20 a partir de commit limpo: saídas anuais idênticas byte a byte; registro com `code_dirty: false`.
-
-### Alterado (aprovações de 2026-11-26)
-- Quantis P75, P90 e P95 dos pixels publicados em `web/data/downloads/` e listados no catálogo.
-- Turf carregado sob demanda pela ferramenta "Desenhar uma área": a visita comum ao mapa não baixa mais o bundle de ~530 KB.
-
-### Adicionado (Fases 7, 11 e 12)
-- Observatório ambiental (`web/ambiental.html`): análise exploratória de áreas protegidas (CNUC 2025_08, CC BY 4.0) com a radiância NOAA-20 de 2025. Associação, não causa.
-- Explorador com a identidade escura do Observatório; menu com Laboratório e Ambiental em todas as páginas.
-- 13 capturas reais em `docs/screenshots/openlux-2.0/` e galeria no README.
-- Workflow `.github/workflows/testes.yml` (pytest + Chromium) e processo de deploy documentado em `docs/DEPLOYMENT.md`.
-
-### Removido (Fase D)
-- `web/js/inicio.js` e `tests/test_web_inicio.py`: substituídos pelo Observatório.
+### Pendente
+- Observatório ambiental: camadas bloqueadas por licença não verificada (áreas urbanizadas do IBGE, MapBiomas) ou por fonte inacessível (INEA). ICMBio tem licença que proíbe derivados.
+- Lente de comparação por pixel.
+- Relatório de qualidade dos dados (Fase 8).
+- Validação em campo com SQM: protocolo proposto, nenhuma medição feita.
+- Build de produção do Cloudflare sem confirmação.
+- Decisão de publicação (Zenodo, nova versão).
 
 ### Alterado (Fase B, OpenLux 2.0)
 - Arquivos de revisão do NOAA-20 saem da pasta pública `web/` e vão para `data/revisao/noaa20/` (histórico preservado com `git mv`). `scripts/build_web_downloads.py` e `tests/test_web_noaa20.py` atualizados. Novo teste impede arquivos de revisão em `web/`.
