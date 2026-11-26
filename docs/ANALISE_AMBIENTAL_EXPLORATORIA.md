@@ -39,7 +39,7 @@ Script: `scripts/analise_areas_protegidas.py`. Saídas em `outputs/ambiental/` (
 
 ## Atualização: controle de urbanização (municipal)
 
-Feito com `scripts/analise_controle_urbanizacao.py` (saída em `outputs/ambiental/controle_urbanizacao.json`).
+Feito com `scripts/analise_controle_urbanizacao.py` (resultado publicado em `web/data/downloads/openlux_uc_controle_urbanizacao_2025.json`).
 
 - Sem controle: ρ = 0.32 (p = 0.002).
 - Fração urbana (2019) x radiância (2025): ρ = 0.97. Fração em UC x fração urbana: ρ = 0.39.

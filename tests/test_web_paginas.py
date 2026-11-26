@@ -276,8 +276,8 @@ def test_urbanized_areas_derivatives_are_consistent(server, pg):
 
 
 def test_uc_analysis_page_matches_urbanization_controlled_result(server, pg):
-    """Números publicados da análise de UCs conferem com outputs/ambiental/controle_urbanizacao.json."""
-    r = json.loads((ROOT / "outputs/ambiental/controle_urbanizacao.json").read_text(encoding="utf-8"))
+    """Números publicados da análise de UCs conferem com o resultado publicado do controle de urbanização."""
+    r = json.loads((WEB / "data/downloads/openlux_uc_controle_urbanizacao_2025.json").read_text(encoding="utf-8"))
     pt = lambda v: f"{v:.2f}".replace(".", ",").replace("-", "−")
     pg.goto(server + "/ambiental.html")
     texto = pg.inner_text("main")

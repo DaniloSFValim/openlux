@@ -21,7 +21,7 @@ from scipy.stats import rankdata, spearmanr
 
 ROOT = Path(__file__).resolve().parent.parent
 DL = ROOT / "web/data/downloads"
-OUT = ROOT / "outputs/ambiental/controle_urbanizacao.json"
+OUT = ROOT / "web/data/downloads/openlux_uc_controle_urbanizacao_2025.json"
 
 
 def residuo(v, controles):
