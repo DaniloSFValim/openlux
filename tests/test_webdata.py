@@ -128,9 +128,8 @@ def test_exposure_and_pixel_trend_are_aligned_and_strict_json():
            "parameters": {"trend_windows": {"w1": [2012, 2013]}, "change_floor_nw_cm2_sr": {"w1": 0.4}}, "outputs": {}}
     d = build_indicators(annual=_annual(), trends=_trends(), qa=pd.DataFrame({"year": [2012]}), sensitivity={},
                          sensor_comparison={}, run_record=rec, sectors=sec, pixel_shares=px)
-    e1, e2 = d["municipios"]["1"]["exposure"], d["municipios"]["2"]["exposure"]
-    assert e1["pop_radiance"] == [10.0, 11.0, 12.0] and e1["pop_valid"] == 0.97
-    assert e2["pop_radiance"] == [5.0, None, 6.0] and e2["urban"] == [None, None, None]   # ano ausente -> null
+    # o bloco exposure nao e publicado (licencas pendentes): nenhum municipio o contem
+    assert all("exposure" not in m for m in d["municipios"].values())
     assert d["municipios"]["1"]["pixel_trend"]["w1"] == {"up": 0.3, "down": 0.1, "n_px": 50.0}
     assert d["municipios"]["2"]["pixel_trend"]["w1"]["up"] is None
     json.dumps(d, allow_nan=False)

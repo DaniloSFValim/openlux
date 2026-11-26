@@ -125,17 +125,9 @@ def build_indicators(*, annual, trends, qa, sensitivity, sensor_comparison, run_
                 slope_snpp=_clean(r["slope_a"]), p_snpp=_clean(r["p_a"]), slope_noaa20=_clean(r["slope_b"]),
                 p_noaa20=_clean(r["p_b"]), change_snpp=_clean(r.get("change_a")),
                 change_noaa20=_clean(r.get("change_b")), ratio_noaa20_over_snpp=_clean(r["mean_ratio_b_over_a"], 4))
-    if sectors is not None:  # indicadores por setor censitario (S-NPP), populacao FIXA do Censo 2022
-        for cd, g in sectors.groupby("CD_MUN", sort=True):
-            g = g.sort_values("year").set_index("year").reindex(years)
-            muni[str(cd)]["exposure"] = dict(
-                pop_radiance=[_clean(v, 3) for v in g["pop_weighted_radiance"]],
-                pop_lit=[_clean(v, 4) for v in g["pop_lit_fraction"]],
-                urban=[_clean(v, 3) for v in g["mean_urban"]],
-                rural=[_clean(v, 3) for v in g["mean_rural"]],
-                lit_urban=[_clean(v, 4) for v in g["frac_lit_urban"]],
-                lit_rural=[_clean(v, 4) for v in g["frac_lit_rural"]],
-                pop_valid=_clean(g["pop_valid_fraction"].min(), 4))
+    # Bloco 'exposure' (setores censitarios e classificacao urbano/rural) NAO e publicado: a licenca da malha
+    # de setores e a classificacao urbano/rural do IBGE nao estao verificadas (ver docs/LICENSING.md). O argumento
+    # 'sectors' e aceito por compatibilidade e ignorado.
     if pixel_shares is not None:  # participacao de pixels iluminados com mudanca significativa (FDR)
         for wname, df in pixel_shares.items():
             for _, r in df.iterrows():
