@@ -152,12 +152,12 @@ Decisões do responsável necessárias: (1) confirmar a licença das áreas urba
 | Fonte | Evidência | Situação |
 |---|---|---|
 | MapBiomas, coleção Brasil | Print de [brasil.mapbiomas.org](https://brasil.mapbiomas.org/) (rodapé): "Os dados do MapBiomas são de uso público, aberto e gratuito mediante referência. CC BY 4.0" | VERIFICADA para a coleção do Brasil (CC BY 4.0, compatível com a licença dos derivados). Ressalva: [MapBiomas Amazônia](https://amazonia.mapbiomas.org/terms-of-use/) diz CC BY-SA. Não usar a coleção Amazônia sem nova verificação |
-| IBGE, áreas urbanizadas 2019 | [Termo de Uso do Portal do IBGE](https://www.ibge.gov.br/) (versão 1, 11/03/2024): trata de privacidade, cookies e sigilo estatístico. Não define a licença dos dados geocientíficos | NÃO VERIFICADA. Precisa de texto de licença do produto ou da política de dados do IBGE |
-| CNUC (MMA) | [CNUC, dados geoespaciais](https://cnuc.mma.gov.br/) (shp e kml). Busca não achou termo de uso | NÃO VERIFICADA |
+| IBGE, áreas urbanizadas 2019 | [Termo de Uso do Portal do IBGE](https://www.ibge.gov.br/) (versão 1, 11/03/2024): trata de privacidade, cookies e sigilo estatístico, sem licença de dados geocientíficos. [Nota técnica (liv101973)](https://biblioteca.ibge.gov.br/visualizacao/livros/liv101973_notas_tecnicas.pdf) lida localmente: única menção é "© IBGE. 2022", sem licença | NÃO VERIFICADA. Só copyright. Precisa de licença do produto na página do IBGE ou permissão escrita |
+| CNUC (MMA) | [Conjunto Unidades de Conservação, dados.mma.gov.br](https://dados.mma.gov.br/dataset/unidadesdeconservacao): seção "Licença" = "Creative Commons Atribuição" (link para opendefinition cc-by). Lido em 2026-11-26 | VERIFICADA (CC BY). Metadados do SNIRH retornaram 403 e não foram lidos |
 | INDE / visualizador | [visualizador.inde.gov.br](https://visualizador.inde.gov.br/). Busca não achou termo de uso dos dados | NÃO VERIFICADA. Visualizador não serve como fonte de dados |
 | ICMBio | CC BY-ND 3.0 (DECISIONS §2) | Proíbe derivados |
 
-Fase 7 segue BLOQUEADA até a verificação das áreas urbanizadas do IBGE e de uma fonte de unidades de conservação com licença que permita derivados.
+Fase 7: MapBiomas Brasil autorizado pelo responsável (CC BY 4.0) e UCs do CNUC verificadas (CC BY). Áreas urbanizadas do IBGE seguem bloqueadas por falta de licença. Próximo passo: baixar o polígono mais recente do CNUC e a cobertura do MapBiomas Brasil para o RJ.
 
 ### Pendências aprovadas (2026-11-26)
 
