@@ -63,3 +63,5 @@ html:has(#cartao), body:has(#cartao) { overflow-x: hidden; }
 
 .mapa-dif svg { width: min(100%, 460px); height: auto; display: block; margin: 0 auto; }
 .mapa-dif path { stroke: rgba(255,255,255,.15); stroke-width: .5; }
+
+.mapa-urb svg { width: min(100%, 640px); height: auto; display: block; margin: 0 auto; }

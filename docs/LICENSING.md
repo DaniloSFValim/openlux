@@ -76,7 +76,7 @@ do código e ainda não foi decidida; os termos de NASA (CC0 com ressalva) e SID
 
 ## 7. Áreas urbanizadas do IBGE (2019): verificação de licença
 
-Status: **licença não declarada; camada fora do site.** Verificação feita em 2026-11-26.
+Status: **publicada como derivados, sob CC BY 4.0, com atribuição ao IBGE.** Decisão do responsável em 2026-11-26, com base legal abaixo. A licença não foi declarada pelo IBGE para este produto específico.
 
 | Verificação | Resultado |
 |---|---|
@@ -86,4 +86,15 @@ Status: **licença não declarada; camada fora do site.** Verificação feita em
 | dados.gov.br | Busca pelo produto: **não encontrado**. Sem licença declarada na fonte. |
 | Manual GGIBPM 2.0 (IBGE, 2025) | Manual metodológico; sem termo de licença de dados. |
 
-**Decisão:** a camada de áreas urbanizadas não é publicada e não é usada para gerar derivados públicos. Derivados só voltam a ser publicados com (a) licença declarada na fonte, ou (b) autorização escrita do IBGE, ambas registradas nesta seção. Os cálculos que dependem dessa camada (controle de urbanização na análise ambiental) permanecem documentados como bloqueados.
+**Base legal adotada (confirmada pelo responsável):** Instrução Normativa nº 47, de 23/04/2025 (INDA), publicada no DOU.
+- Art. 4º, III e VII: dados abertos são os acessíveis ao público, disponibilizados sob **licença aberta**, que permite utilizar, reutilizar e redistribuir, exigindo **no máximo** a atribuição de autoria ou fonte.
+- Art. 3º, III e IV: os órgãos federais devem franquear ao público, em formato aberto, os dados que produzem, respeitadas a LAI e a LGPD.
+- Art. 5º, II e art. 6º, IX: o IBGE, autarquia federal, integra a INDA e o seu Comitê Gestor.
+
+**Aplicação:** a licença CC BY 4.0 cumpre o mínimo exigido pela norma. O produto é acessível ao público e não está sob sigilo. Por isso os derivados são publicados com atribuição: "IBGE, Diretoria de Geociências, Coordenação de Meio Ambiente, Áreas Urbanizadas do Brasil 2019".
+
+**Limite:** a norma define a licença aberta, mas não declara uma licença específica para este produto. O produto também não está catalogado no dados.gov.br, o que o art. 3º, IV exige. Se o IBGE declarar outra licença, este registro deve ser revisto.
+
+**Publicado:** `openlux_area_urbana_municipio_2019.csv` (fração urbana por município) e `openlux_areas_urbanizadas_rj_2019.geojson` (camada simplificada para mapa). Ambos gerados por `scripts/build_areas_urbanizadas_rj.py`.
+
+**Não publicado:** os polígonos originais do Brasil inteiro (o shapefile completo). Os derivados não reproduzem o conjunto original.
