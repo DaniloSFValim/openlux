@@ -147,6 +147,18 @@ Decisões do responsável necessárias: (1) confirmar a licença das áreas urba
 | Turf (~530 KB) carregado só quando o leitor usa "Desenhar uma área" (auditoria A9) | CONCLUÍDO. Visita comum ao mapa: zero requisições ao Turf; verificado no Chromium |
 | Saturação de `pop_lit` (0,96–1,00) (auditoria A5) | DOCUMENTADO. Não usar como manchete (já registrado na auditoria) | Link em `web/dados.html`. Relatórios de qualidade publicados: NÃO INICIADO |
 
+### Verificação de licenças para a Fase 7 (2026-11-26)
+
+| Fonte | Evidência | Situação |
+|---|---|---|
+| MapBiomas, coleção Brasil | Print de [brasil.mapbiomas.org](https://brasil.mapbiomas.org/) (rodapé): "Os dados do MapBiomas são de uso público, aberto e gratuito mediante referência. CC BY 4.0" | VERIFICADA para a coleção do Brasil (CC BY 4.0, compatível com a licença dos derivados). Ressalva: [MapBiomas Amazônia](https://amazonia.mapbiomas.org/terms-of-use/) diz CC BY-SA. Não usar a coleção Amazônia sem nova verificação |
+| IBGE, áreas urbanizadas 2019 | [Termo de Uso do Portal do IBGE](https://www.ibge.gov.br/) (versão 1, 11/03/2024): trata de privacidade, cookies e sigilo estatístico. Não define a licença dos dados geocientíficos | NÃO VERIFICADA. Precisa de texto de licença do produto ou da política de dados do IBGE |
+| CNUC (MMA) | [CNUC, dados geoespaciais](https://cnuc.mma.gov.br/) (shp e kml). Busca não achou termo de uso | NÃO VERIFICADA |
+| INDE / visualizador | [visualizador.inde.gov.br](https://visualizador.inde.gov.br/). Busca não achou termo de uso dos dados | NÃO VERIFICADA. Visualizador não serve como fonte de dados |
+| ICMBio | CC BY-ND 3.0 (DECISIONS §2) | Proíbe derivados |
+
+Fase 7 segue BLOQUEADA até a verificação das áreas urbanizadas do IBGE e de uma fonte de unidades de conservação com licença que permita derivados.
+
 ### Pendências aprovadas (2026-11-26)
 
 | Tarefa | Estado | Evidência |
