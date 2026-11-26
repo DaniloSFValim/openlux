@@ -342,3 +342,22 @@ Consequências para o projeto:
 4. Alertas de NOAA-20 (VJ146) **não verificados** nesta revisão.
 
 Pendências deste item: confirmar o horário nas atualizações #3 e #4 da NOAA; ler o alerta 199913 diretamente; verificar alertas do NOAA-20; decidir sobre o NOAA-21.
+
+## 13. Alertas LAADS do NOAA-20 (VJ146), verificados em 2026-11-26
+
+Lista de alertas do LAADS (397 entradas) lida sem filtro, porque a busca por JavaScript não rodou na leitura automatizada. Páginas individuais lidas (texto relatado por subagente de leitura web; não conferido linha a linha pelo responsável):
+
+| Alerta | Tema | Efeito declarado sobre VJ146A4 / dados locais |
+|---|---|---|
+| 199977 (2024-04-11) | Manobra de rephasing do NOAA-20, 20/03 a 06/04/2024 | Dados L1 do período ficam em arquivo de teste não público; processamento de produtos de terra suspenso no período; NRT interrompido de 20/03 a 04/04; reprocessamento a partir de 25/03/2024 com aviso de que os dados podem ainda ser afetados. **Afeta o ano de 2024 da série NOAA-20; efeito não quantificado** |
+| 199940 (2025-04-29) | Soft release da v2.0 das composições lunares BRDF anuais e mensais (SNPP e NOAA-20) | Inclui VJ146A3 e VJ146A4 como soft release: download só por URL direta, sem busca no LAADS nem no Earthdata. A página diz "Yearly" no título, mas descreve VJ146A4 como "Daily Moonlight-adjusted". **Inconsistência na própria página; confirmar o identificador antes de citar** |
+| 199948 (2025-01-09) | Soft release de produtos de luz noturna (SNPP e NOAA-20) | VJ146A1 e VJ146A2 em soft release. Confirma a mudança do DNB para ponto flutuante na v2.0 (já usada no plano). Diz que o DNB do SNPP degradou e que NOAA-20 e NOAA-21 são estáveis |
+| 199944 (2025-02-27) | Produtos de terra v2.0 (ponteiro para o LP DAAC) | Não cita VJ146 |
+| 200110 (2020-11-09) | Exclusão acidental de L1 C2 do JPSS-1 no arquivo 5200 | Dados recuperados ou reprocessados segundo a página. Não cita VJ146 |
+
+Consequências:
+1. **Ano de 2024 (NOAA-20):** o período do rephasing (20/03 a 06/04/2024) precisa de avaliação científica antes de a série anual ser tratada como definitiva. Sugestão: comparar a contagem de observações válidas e a radiância por município nesse período com os meses vizinhos. **Não publicar conclusão sem essa análise.**
+2. **Soft release:** o VJ146A4 e os demais produtos v2.0 usados não aparecem na busca do LAADS. Isso afeta a citação e a verificação de proveniência. Os hashes locais e os metadados de download continuam sendo a prova de origem.
+3. **Discrepância do identificador:** antes de citar o VJ146A4 como "anual", confirmar com o LP DAAC ou com a documentação do produto.
+
+**Não consegui confirmar:** as atualizações #3 e #4 da NOAA (HTTP 404 e 403) e a página da Earthdata (HTTP 403). O horário de cessação do S-NPP continua não confirmado.
