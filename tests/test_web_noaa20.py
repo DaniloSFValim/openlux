@@ -1,6 +1,5 @@
 """indicators_noaa20.json: recalculo com o NOAA-20 (VJ146A4, 2018-2025), separado do S-NPP."""
 import json
-from pathlib import Path
 
 from helpers import WEB
 

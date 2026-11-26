@@ -172,7 +172,6 @@ def _analytic_thresholds(path, polygons, quantiles) -> dict:
 
 def _qa(files, polygons, baseline_years) -> pd.DataFrame:
     """Controles de ruido de fundo na caixa dos poligonos (inclui terra e mar vizinhos)."""
-    from openlux.geo import tile_transform  # noqa: F401  (transformacao vem do leitor)
     arrays, lw = {}, None
     window = None
     for y in sorted(files):

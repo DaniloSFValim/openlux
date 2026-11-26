@@ -1,7 +1,6 @@
 """Setores censitarios: sobreposicao com a grade e indicadores. Dados SINTETICOS (so para teste)."""
 import geopandas as gpd
 import numpy as np
-import pandas as pd
 import pytest
 from rasterio.transform import from_origin
 from shapely.geometry import box
@@ -31,7 +30,6 @@ def test_dedupe_keeps_one_population_per_sector_and_unions_geometry():
 
 
 def test_dedupe_repairs_invalid_geometries():
-    bow = box(0, 0, 1, 1).union(box(0, 0, 1, 1))
     from shapely.geometry import Polygon
     invalid = Polygon([(0, 0), (1, 1), (1, 0), (0, 1)])           # gravata (invalido)
     g = gpd.GeoDataFrame({"CD_SETOR": ["1"], "CD_MUN": ["10"], "SITUACAO": ["Urbana"], "CD_SIT": ["1"],

@@ -39,7 +39,7 @@ def main():
         sys.exit(f"Sem {PRODUCTS[a.sensor]} de {a.year} em data/raw/ (anos: {sorted(files)}).")
     meshes = []
     for uf in a.ufs:
-        shp = glob.glob(str(RAW / f"ibge/{uf}_Municipios_2024/*.shp")) or glob.glob(str(RAW / f"ibge/RJ_Municipios_2024/*.shp") if uf == "RJ" else "")
+        shp = glob.glob(str(RAW / f"ibge/{uf}_Municipios_2024/*.shp")) or glob.glob(str(RAW / "ibge/RJ_Municipios_2024/*.shp") if uf == "RJ" else "")
         if not shp:
             sys.exit(f"Malha de {uf} ausente: rode scripts/fetch_mesh.py --uf {uf}.")
         m = gpd.read_file(shp[0]).set_crs("EPSG:4326", allow_override=True)[["NM_MUN", "SIGLA_UF", "geometry"]] if "SIGLA_UF" in gpd.read_file(shp[0]).columns \

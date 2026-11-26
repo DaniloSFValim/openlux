@@ -8,8 +8,6 @@ Os arquivos NAO sao publicados por este script. Publicacao exige revisao previa 
 Pre-requisitos: scripts/fetch_blackmarble.py e scripts/fetch_ibge.py (data/raw/).
 """
 import glob
-import hashlib
-import json
 import re
 import sys
 from pathlib import Path
@@ -18,18 +16,13 @@ import geopandas as gpd
 
 from openlux.pipeline import percentile_table
 from openlux.provenance import code_version, write_json
+from openlux.io import sha256_file as sha256
 
 RAW = Path("data/raw")
 OUT = Path("outputs/percentiles")
 QUANTIS = (0.75, 0.9, 0.95)
 
 
-def sha256(path: Path) -> str:
-    h = hashlib.sha256()
-    with path.open("rb") as f:
-        for bloco in iter(lambda: f.read(1 << 20), b""):
-            h.update(bloco)
-    return h.hexdigest()
 
 
 def serie(produto: str) -> dict:

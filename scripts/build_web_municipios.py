@@ -196,11 +196,10 @@ def fontes_html(N):
     return "".join(itens)
 
 
-def pagina_html(d, N, perc_ok, malha, geo_svg):
+def pagina_html(d, N, malha, geo_svg):
     cd, nome, ano = d["cd"], d["nome"], d["ano"]
     mal = malha.set_index(malha["CD_MUN"].astype(str)).loc[cd]
     area = float(mal["AREA_KM2"])
-    rel = [f'{float(v):.0f}' for v in []]
     anos_n, vals_n = d["serie_n"]
     anos_s, vals_s = d["serie_s"]
     grafico = serie_svg(vals_n, anos_n, vals_s, anos_s)
@@ -409,7 +408,7 @@ def main():
         s = slug(d["nome"])
         nomes.append((d["nome"], s))
         geo = mapa_svg(malha_desenho, cd)
-        (OUT / f"{s}.html").write_text(pagina_html(d, N, True, malha, geo), encoding="utf-8")
+        (OUT / f"{s}.html").write_text(pagina_html(d, N, malha, geo), encoding="utf-8")
         pdf(d, N, malha_desenho, OUT / f"{s}.pdf")
     (WEB / "municipios.html").write_text(indice_html(sorted(nomes)), encoding="utf-8")
     print(f"OK: {len(nomes)} páginas e relatórios em {OUT}")
