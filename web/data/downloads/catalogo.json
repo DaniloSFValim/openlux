@@ -63,8 +63,8 @@
     },
     {
       "arquivo": "data/indicators_noaa20.json",
-      "bytes": 124704,
-      "sha256": "3889acd9a40101c01ad69e762c171f846f1c3ecbae806ab620f04a69cf0dee56",
+      "bytes": 124705,
+      "sha256": "cdeac9e558dfb38ce989a6abd52f48882b4c3ff34c6eb929a4dd07e7263fd460",
       "licenca": "CC-BY-4.0",
       "titulo": "Indicadores municipais, NOAA-20 (JSON)",
       "tipo": "JSON",
@@ -74,9 +74,9 @@
       "sistema_de_referencia": "não se aplica (JSON)",
       "situacao": "publicado",
       "execucao": {
-        "processado_utc": "2026-11-23T18:58:02Z",
-        "commit": "aa0fdc45baedd8fd95056cef53edb97d22371bb5",
-        "codigo_com_alteracoes_nao_commitadas": true
+        "processado_utc": "2026-11-25T23:57:53Z",
+        "commit": "73800641547155f890075137ede5abdf523e59b2",
+        "codigo_com_alteracoes_nao_commitadas": false
       }
     },
     {
@@ -106,9 +106,9 @@
       "sistema_de_referencia": "não se aplica (tabela)",
       "situacao": "publicado",
       "execucao": {
-        "processado_utc": "2026-11-23T18:58:02Z",
-        "commit": "aa0fdc45baedd8fd95056cef53edb97d22371bb5",
-        "codigo_com_alteracoes_nao_commitadas": true
+        "processado_utc": "2026-11-25T23:57:53Z",
+        "commit": "73800641547155f890075137ede5abdf523e59b2",
+        "codigo_com_alteracoes_nao_commitadas": false
       }
     },
     {
@@ -124,9 +124,9 @@
       "sistema_de_referencia": "não se aplica (tabela)",
       "situacao": "publicado",
       "execucao": {
-        "processado_utc": "2026-11-23T18:58:02Z",
-        "commit": "aa0fdc45baedd8fd95056cef53edb97d22371bb5",
-        "codigo_com_alteracoes_nao_commitadas": true
+        "processado_utc": "2026-11-25T23:57:53Z",
+        "commit": "73800641547155f890075137ede5abdf523e59b2",
+        "codigo_com_alteracoes_nao_commitadas": false
       }
     },
     {

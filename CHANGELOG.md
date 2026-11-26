@@ -23,6 +23,12 @@ Formato: versões em ordem cronológica inversa. Datas no formato AAAA-MM-DD.
 - Página de dados mostra o catálogo; licença corrigida (confirmada em 2026-11-25).
 - Testes `tests/test_catalogo.py`.
 
+### Adicionado (pendências aprovadas, 2026-11-26)
+- CSV do NOAA-20 publicados em `web/data/downloads/` e listados no catálogo.
+- Quantis P75, P90 e P95 dos pixels válidos por município e ano (`percentile_table`, `scripts/run_percentiles.py`), calculados e aguardando revisão antes de publicação.
+- Dicionário de dados linkado na página de dados.
+- Reprodução do NOAA-20 a partir de commit limpo: saídas anuais idênticas byte a byte; registro com `code_dirty: false`.
+
 ### Removido (Fase D)
 - `web/js/inicio.js` e `tests/test_web_inicio.py`: substituídos pelo Observatório.
 

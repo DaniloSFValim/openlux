@@ -28,21 +28,28 @@ from openlux.geo import pixel_row_areas_m2
 M2_TO_CM2 = 1e4
 
 
-def _weighted_lower_median(values: np.ndarray, weights: np.ndarray) -> float:
+def _weighted_lower_quantile(values: np.ndarray, weights: np.ndarray, p: float) -> float:
+    """Menor valor cujo peso acumulado atinge a fração ``p`` do peso total (quantil inferior)."""
     order = np.argsort(values, kind="stable")
     v, w = values[order], weights[order]
     cum = np.cumsum(w)
-    idx = int(np.searchsorted(cum, 0.5 * cum[-1], side="left"))
+    idx = int(np.searchsorted(cum, p * cum[-1], side="left"))
     return float(v[min(idx, len(v) - 1)])
 
 
+def _weighted_lower_median(values: np.ndarray, weights: np.ndarray) -> float:
+    return _weighted_lower_quantile(values, weights, 0.5)
+
+
 def zonal_indicators(array: np.ndarray, transform: Affine, polygons, crs: str = "EPSG:4326",
-                     thresholds: dict | None = None) -> pd.DataFrame:
+                     thresholds: dict | None = None, quantiles: tuple = ()) -> pd.DataFrame:
     """Calcula indicadores zonais. ``array`` usa NaN para pixels invalidos.
 
     ``polygons`` e um GeoDataFrame no mesmo CRS do raster. Retorna um DataFrame com o
     mesmo indice de ``polygons``. ``thresholds`` ({nome: L} em nW cm^-2 sr^-1) acrescenta a
     coluna ``frac_above_<nome>`` = sum(w * [L >= limiar]) / sum(w) sobre pixels validos.
+    ``quantiles`` (ex.: (0.75, 0.9)) acrescenta ``q75_radiance``, ``q90_radiance``, ... com o quantil
+    inferior ponderado pela cobertura (mesma regra da mediana). Padrao vazio: saidas inalteradas.
     """
     thresholds = thresholds or {}
     if array.ndim != 2:
@@ -91,6 +98,8 @@ def zonal_indicators(array: np.ndarray, transform: Affine, polygons, crs: str = 
             median_radiance=_weighted_lower_median(v, w),
             apparent_radiant_intensity_nw_sr=float((w * v * a_cm2).sum()),
         )
+        for p in quantiles:
+            row[f"q{round(p * 100)}_radiance"] = _weighted_lower_quantile(v, w, p)
         for k, tau in thresholds.items():
             row[f"frac_above_{k}"] = float((w * (v >= tau)).sum() / wsum)
         rows.append(row)

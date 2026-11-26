@@ -23,10 +23,12 @@ def test_every_entry_states_unit_period_reference_system_and_licence():
     assert CAT["licenca_dos_dados_derivados"]["id"] == "CC-BY-4.0"
 
 
-def test_noaa20_entry_keeps_the_unreproducible_run_flag():
-    # Não esconder: o JSON do NOAA-20 foi gerado com alterações não commitadas no código.
+def test_noaa20_entry_reflects_the_recorded_run_state():
+    # O catálogo deve refletir o registro real do JSON publicado (não um valor fixo).
     noaa = next(a for a in CAT["arquivos"] if a["arquivo"] == "data/indicators_noaa20.json")
-    assert noaa["execucao"]["codigo_com_alteracoes_nao_commitadas"] is True
+    publicado = json.loads((WEB / "data" / "indicators_noaa20.json").read_text(encoding="utf-8"))["meta"]["run"]
+    assert noaa["execucao"]["codigo_com_alteracoes_nao_commitadas"] == publicado["code_dirty"]
+    assert noaa["execucao"]["commit"] == publicado["code_commit"]
 
 
 def test_geopackage_has_the_92_municipalities_with_unique_codes():

@@ -134,3 +134,28 @@ def test_no_threshold_columns_by_default():
     arr = np.full((4, 4), 3.0, dtype="float32")
     res = zonal_indicators(arr, T, _gdf(box(0, 2, 2, 4)))
     assert not [c for c in res.columns if c.startswith("frac_above")]
+
+
+def test_weighted_lower_quantile_hand_computed():
+    from openlux.zonal import _weighted_lower_quantile, _weighted_lower_median
+    v = np.array([1.0, 2.0, 3.0, 4.0]); w = np.ones(4)
+    assert _weighted_lower_quantile(v, w, 0.75) == 3.0      # alvo 3 -> primeiro acumulado >= 3
+    assert _weighted_lower_quantile(v, w, 0.9) == 4.0       # alvo 3,6 -> 4
+    assert _weighted_lower_median(v, w) == 2.0               # mediana inferior, como antes
+    v2 = np.array([10.0, 20.0]); w2 = np.array([1.0, 3.0])   # peso total 4
+    assert _weighted_lower_quantile(v2, w2, 0.25) == 10.0    # alvo 1
+    assert _weighted_lower_quantile(v2, w2, 0.5) == 20.0     # alvo 2 -> cumulado 4
+
+
+def test_zonal_quantiles_are_opt_in_and_do_not_change_default_columns():
+    import geopandas as gpd
+    from shapely.geometry import box
+    from affine import Affine
+    from openlux.zonal import zonal_indicators
+    arr = np.arange(16, dtype="float32").reshape(4, 4)
+    t = Affine(1.0, 0, 0, 0, -1.0, 4)
+    polys = gpd.GeoDataFrame({"id": [1]}, geometry=[box(0, 0, 4, 4)], crs="EPSG:4326")
+    base = zonal_indicators(arr, t, polys)
+    assert not any(c.startswith("q") and c.endswith("_radiance") for c in base.columns)
+    com = zonal_indicators(arr, t, polys, quantiles=(0.75,))
+    assert "q75_radiance" in com.columns and np.isfinite(com["q75_radiance"].iloc[0])
