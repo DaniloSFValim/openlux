@@ -202,3 +202,20 @@ def test_observatorio_states_limits_of_the_indicators(server, pg):
     texto = pg.inner_text("main")
     assert "Não mede consumo de energia" in texto
     assert "não sustentam tendência" in texto or "tendência" in texto
+
+
+def test_laboratorio_difference_map_counts_match_published_trends(server, pg):
+    """Mapa de diferenças: 92 polígonos; classes e contornos conferem com trends['2018_2025'] do JSON."""
+    N = _indicadores()
+    pulso = [m for m in N["municipios"].values()]
+    calc = [m for m in pulso if m["trends"].get("2018_2025") and m["trends"]["2018_2025"].get("change_pct") is not None]
+    # contorno = tendência sustentada, independente de haver variação percentual calculada
+    sig = [m for m in pulso if m["trends"].get("2018_2025") and m["trends"]["2018_2025"]["p_value"] < 0.05]
+    pg.goto(server + "/laboratorio.html")
+    pg.wait_for_selector("#mapaDif path", state="attached")
+    pg.wait_for_timeout(500)
+    assert pg.locator("#mapaDif path").count() == 92
+    assert pg.locator("#mapaDif path[stroke='#fff']").count() == len(sig)
+    texto = pg.inner_text("#resumoDif")
+    assert f"Municípios com cálculo: {len(calc)} de 92" in texto
+    assert pg.errors == []

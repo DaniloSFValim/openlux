@@ -35,9 +35,51 @@
     return out;
   }
 
-  Promise.all([C.indicadores(sensor), C.texto('data/downloads/openlux_percentis_pixels_' + sensor + '.csv')])
-    .then(([D, csv]) => iniciar(D, parseCsv(csv)))
+  Promise.all([C.indicadores(sensor), C.texto('data/downloads/openlux_percentis_pixels_' + sensor + '.csv'), C.json('data/municipios.geojson')])
+    .then(([D, csv, geo]) => { iniciar(D, parseCsv(csv)); desenhaDiferencas(D, geo); })
     .catch((e) => { console.error(e); C.erro($('erro'), 'Não foi possível carregar os dados publicados. Recarregue a página.'); });
+
+
+  // Mapa de diferenças 2018→2025 (variação percentual da média municipal, já publicada em trends)
+  function desenhaDiferencas(D, geo) {
+    const cores = ['#b5483f', '#e0604f', '#8a7fd6', '#4f86c6', '#9fd3ff'];
+    const rotulos = ['queda acima de 20 %', 'queda de 0 a 20 %', 'alta de 0 a 20 %', 'alta de 20 a 50 %', 'alta acima de 50 %'];
+    const cinza = '#3c4660';
+    let minx = 1e9, maxx = -1e9, miny = 1e9, maxy = -1e9;
+    const walk = (c, fn) => (typeof c[0] === 'number' ? fn(c) : c.forEach((x) => walk(x, fn)));
+    geo.features.forEach((f) => walk(f.geometry.coordinates, (p) => { minx = Math.min(minx, p[0]); maxx = Math.max(maxx, p[0]); miny = Math.min(miny, p[1]); maxy = Math.max(maxy, p[1]); }));
+    const k = Math.cos(((miny + maxy) / 2) * Math.PI / 180), W = 460, esc = (W - 10) / ((maxx - minx) * k), H = Math.ceil((maxy - miny) * esc) + 10;
+    const X = (lon) => 5 + (lon - minx) * k * esc, Y = (lat) => 5 + (maxy - lat) * esc;
+    const caminho = (g) => {
+      const polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
+      return polys.map((rings) => rings.map((ring) => ring.map((p, i) => (i ? 'L' : 'M') + X(p[0]).toFixed(1) + ',' + Y(p[1]).toFixed(1)).join('') + 'Z').join('')).join('');
+    };
+    const box = $('mapaDif'); box.innerHTML = '';
+    const svgEl = document.createElementNS(NS, 'svg');
+    svgEl.setAttribute('viewBox', `0 0 ${W} ${H}`); svgEl.setAttribute('role', 'img');
+    svgEl.setAttribute('aria-label', 'Mapa dos municípios colorido pela variação percentual da média entre 2018 e 2025');
+    box.appendChild(svgEl);
+    const contagem = [0, 0, 0, 0, 0];
+    geo.features.forEach((f) => {
+      const cd = f.properties.CD_MUN, t = D.municipios[cd] && D.municipios[cd].trends['2018_2025'];
+      const pct = t && t.change_pct;
+      let cor = cinza, cls = -1;
+      if (pct != null && isFinite(pct)) {
+        cls = pct < -20 ? 0 : pct < 0 ? 1 : pct < 20 ? 2 : pct < 50 ? 3 : 4;
+        cor = cores[cls]; contagem[cls]++;
+      }
+      const p = document.createElementNS(NS, 'path');
+      p.setAttribute('d', caminho(f.geometry)); p.setAttribute('fill', cor);
+      if (t && t.p_value < 0.05) p.setAttribute('stroke', '#fff');
+      const tt = document.createElementNS(NS, 'title');
+      tt.textContent = f.properties.NM_MUN + (pct != null ? ': ' + C.fmt(pct, 1) + ' %' : ': não calculado');
+      p.appendChild(tt); svgEl.appendChild(p);
+    });
+    const leg = $('legDif'); leg.innerHTML = '';
+    rotulos.forEach((r, i) => { const sp = document.createElement('span'); sp.textContent = r + ' (' + contagem[i] + ')'; sp.style.setProperty('--c', cores[i]); leg.appendChild(sp); });
+    const sn = document.createElement('span'); sn.textContent = 'sem cálculo (' + (92 - contagem.reduce((a, c) => a + c, 0)) + ')'; sn.style.setProperty('--c', cinza); leg.appendChild(sn);
+    $('resumoDif').textContent = 'Municípios com cálculo: ' + contagem.reduce((a, c) => a + c, 0) + ' de 92. Com p < 0,05 (contorno branco): ' + geo.features.filter((f) => { const t = D.municipios[f.properties.CD_MUN] && D.municipios[f.properties.CD_MUN].trends['2018_2025']; return t && t.p_value < 0.05; }).length + '.';
+  }
 
   function iniciar(D, PERC) {
     const anos = D.meta.years;

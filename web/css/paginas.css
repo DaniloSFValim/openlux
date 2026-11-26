@@ -60,3 +60,6 @@ html:has(#cartao), body:has(#cartao) { overflow-x: hidden; }
 .acoes { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
 .acoes a, .acoes button { background: var(--luz); color: #151a26; border: 0; border-radius: 10px; padding: 8px 12px; font: inherit; font-weight: 700; cursor: pointer; text-decoration: none; }
 @media (max-width: 640px) { .duas-colunas { grid-template-columns: 1fr; } .heroi { min-height: 600px; } }
+
+.mapa-dif svg { width: min(100%, 460px); height: auto; display: block; margin: 0 auto; }
+.mapa-dif path { stroke: rgba(255,255,255,.15); stroke-width: .5; }
