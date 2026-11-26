@@ -137,7 +137,6 @@ def permutation_max_spearman(y, x_by_radius, *, n_perm: int = 10000, seed: int =
     obs_all = _rho(X, yr[None, :])
     obs = float(obs_all.max())
     rng = np.random.default_rng(seed)
-    n = yr.size
     perms = np.stack([rng.permutation(yr) for _ in range(n_perm)])                              # (P, n)
     null = np.stack([_rho(X[i][None, :], perms) for i in range(len(radii))]).max(axis=0)         # (P,)
     p = float((1 + (null >= obs - 1e-12).sum()) / (n_perm + 1))

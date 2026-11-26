@@ -5,21 +5,15 @@ Uso: python scripts/build_catalogo.py
 """
 from __future__ import annotations
 
-import hashlib
 import json
 from pathlib import Path
+from openlux.io import sha256_file as sha256
 
 ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "web"
 LICENCA = {"id": "CC-BY-4.0", "url": "https://creativecommons.org/licenses/by/4.0/", "status": "confirmada pelo autor em 2026-11-25"}
 
 
-def sha256(path: Path) -> str:
-    h = hashlib.sha256()
-    with path.open("rb") as f:
-        for bloco in iter(lambda: f.read(1 << 20), b""):
-            h.update(bloco)
-    return h.hexdigest()
 
 
 def registro(caminho: Path, **campos) -> dict:

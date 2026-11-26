@@ -106,7 +106,7 @@ def test_explorer_lens_from_url_shows_both_years(server, browser_page):
     pg.wait_for_selector(".lente-divisor")
     pg.wait_for_timeout(800)
     assert pg.evaluate("document.querySelector('.lente-divisor').style.display") == "block"
-    nota = pg.inner_text("#notaLente") if pg.query_selector("#notaLente") else ""
+
     _abre_gaveta(pg)
     pg.wait_for_timeout(300)
     assert "2018" in pg.inner_text("#notaLente") and "2025" in pg.inner_text("#notaLente")

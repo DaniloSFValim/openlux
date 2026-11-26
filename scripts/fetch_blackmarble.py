@@ -11,7 +11,7 @@ from pathlib import Path
 
 import h5py
 
-from openlux.download import (DownloadFailed, download_verified, laads_find_file, laads_list_days,
+from openlux.download import (download_verified, laads_find_file, laads_list_days,
                               token_from_env)
 from openlux.provenance import code_version, write_json
 

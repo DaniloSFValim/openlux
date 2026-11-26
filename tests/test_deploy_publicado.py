@@ -6,7 +6,6 @@ com o que o servidor entrega. Em HTML, remove as injeções da Cloudflare (scrip
 import hashlib
 import os
 import urllib.request
-from pathlib import Path
 
 import pytest
 

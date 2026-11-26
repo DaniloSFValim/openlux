@@ -7,7 +7,6 @@ from pathlib import Path
 import geopandas as gpd
 import pandas as pd
 
-from openlux.provenance import write_json
 from openlux.webdata import build_indicators, simplify_geojson
 
 OUT = Path("outputs/annual")

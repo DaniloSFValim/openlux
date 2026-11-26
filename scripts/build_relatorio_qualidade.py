@@ -6,7 +6,6 @@ Não copia números antigos: cada linha é uma verificação feita agora.
 Verificações: hashes do catálogo, contagem de municípios e anos dos JSONs, grades de pixels, hashes de
 pixels, páginas e PDFs municipais, geometrias válidas e área total da malha do IBGE.
 """
-import hashlib
 import html
 import json
 import subprocess
@@ -14,15 +13,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import geopandas as gpd
-import numpy as np
+from openlux.io import sha256_file as sha
 
 ROOT = Path(__file__).resolve().parent.parent
 WEB = ROOT / "web"
 AREA_TOTAL_DOCUMENTADA = 43750.425  # km², METHODOLOGY.md §11 (soma das áreas do IBGE)
 
 
-def sha(p):
-    return hashlib.sha256(p.read_bytes()).hexdigest()
 
 
 def verificacoes():

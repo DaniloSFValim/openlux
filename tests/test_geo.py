@@ -1,7 +1,6 @@
 """Testes de geometria. Rasters aqui sao SINTETICOS (apenas para teste)."""
 import math
 
-import numpy as np
 import pytest
 from rasterio.transform import from_origin
 
