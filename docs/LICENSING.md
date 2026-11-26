@@ -73,3 +73,17 @@ do código e ainda não foi decidida; os termos de NASA (CC0 com ressalva) e SID
 
 - O Zenodo usa, para a licença do registro, nesta ordem, o `.zenodo.json`, o `CITATION.cff` e a licença detectada no GitHub. Como os três declaram MIT, não há conflito. O identificador do `.zenodo.json` seguiu o exemplo da ajuda do Zenodo (`mit`, minúsculas); outros repositórios usam `MIT`. **Não foi validado contra o Zenodo**: confira no formulário do rascunho.
 - O teste `tests/test_docs_consistency.py` falha se a licença for declarada em um arquivo e não nos outros, e confere o texto do `LICENSE`.
+
+## 7. Áreas urbanizadas do IBGE (2019): verificação de licença
+
+Status: **licença não declarada; camada fora do site.** Verificação feita em 2026-11-26.
+
+| Verificação | Resultado |
+|---|---|
+| Produto "Áreas Urbanizadas do Brasil 2019" (`AreasUrbanizadas2019_Brasil.zip`, `geoftp.ibge.gov.br`) | Acessível. Pastas `Mapas/`, `Shapefile/` e `Tabelas/`. Nenhum arquivo de leia-me ou metadados com licença. O PDF do mapa e os arquivos `.qml` e `.xlsx` não trazem termo de licença. |
+| Termo de Uso e Política de Privacidade do Portal do IBGE (versão 1, 11/03/2024) | Trata de uso do portal, dados pessoais e cookies. Não trata de licença de reuso de produtos geoespaciais. |
+| Plano de Dados Abertos do IBGE (julho/2020–julho/2022) | Define "licença aberta" como a que permite utilizar, reutilizar e redistribuir, exigindo no máximo crédito de autoria e compartilhamento pela mesma licença. O produto "Áreas Urbanizadas" não aparece na lista de conjuntos a publicar. |
+| dados.gov.br | Busca pelo produto: **não encontrado**. Sem licença declarada na fonte. |
+| Manual GGIBPM 2.0 (IBGE, 2025) | Manual metodológico; sem termo de licença de dados. |
+
+**Decisão:** a camada de áreas urbanizadas não é publicada e não é usada para gerar derivados públicos. Derivados só voltam a ser publicados com (a) licença declarada na fonte, ou (b) autorização escrita do IBGE, ambas registradas nesta seção. Os cálculos que dependem dessa camada (controle de urbanização na análise ambiental) permanecem documentados como bloqueados.
