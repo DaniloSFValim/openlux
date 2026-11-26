@@ -147,6 +147,21 @@ Decisões do responsável necessárias: (1) confirmar a licença das áreas urba
 | Turf (~530 KB) carregado só quando o leitor usa "Desenhar uma área" (auditoria A9) | CONCLUÍDO. Visita comum ao mapa: zero requisições ao Turf; verificado no Chromium |
 | Saturação de `pop_lit` (0,96–1,00) (auditoria A5) | DOCUMENTADO. Não usar como manchete (já registrado na auditoria) | Link em `web/dados.html`. Relatórios de qualidade publicados: NÃO INICIADO |
 
+### Fase 7: análise exploratória de áreas protegidas (2026-11-26)
+
+| Item | Resultado |
+|---|---|
+| Fonte | CNUC (MMA), `shp_cnuc_2025_08.zip`, CC BY (licença lida na página do conjunto); 3122 feições, 508 UCs tocam o estado |
+| Script | `scripts/analise_areas_protegidas.py` → `outputs/ambiental/` (NÃO publicado, aguarda revisão) |
+| Fração da área municipal em UC x radiância média 2025 (NOAA-20, 92 municípios) | rho de Spearman = 0,32 (p = 0,002). Associação exploratória, não causal |
+| Área do município x radiância | rho = -0,43. Área do município não explica a fração em UC (rho = 0,02) |
+| Radiância dos pixels dentro x fora das UCs (2025, qualidade 0, dentro do estado) | média 2,14 dentro e 4,56 fora (nW·cm⁻²·sr⁻¹). Mediana 0 nos dois casos: a maioria dos pixels é escura |
+| Limitação principal | Urbanização não controlada: a camada de áreas urbanizadas do IBGE está bloqueada por licença. A associação pode refletir urbanização |
+| Revisão necessária | Paracambi tem 99,9 % da área em UC. Conferir sobreposição de polígonos do CNUC |
+| Qualidade dos dados | Nomes das UCs no `.dbf` têm codificação dupla (ex.: "ÃREA" no lugar de "ÁREA"). Só geometria e códigos foram usados |
+
+Para publicar, é preciso revisão do responsável e controle da urbanização (depende da licença do IBGE).
+
 ### Verificação de licenças para a Fase 7 (2026-11-26)
 
 | Fonte | Evidência | Situação |
