@@ -250,6 +250,20 @@
       "execucao": null
     },
     {
+      "arquivo": "data/downloads/openlux_uc_controle_urbanizacao_pixels_2025.json",
+      "bytes": 849,
+      "sha256": "bffee380ea1eae4e3828be6b29b02f05f35c83a0fa990cdae87ae905b3949cbc",
+      "licenca": "CC-BY-4.0",
+      "titulo": "Radiância de pixels dentro e fora de UCs, estratificada por urbanização (NOAA-20, 2025)",
+      "tipo": "JSON",
+      "fonte": "NASA Black Marble VJ146A4; MMA, CNUC 2025-08 (CC BY 4.0); IBGE, Áreas Urbanizadas 2019. Gerado por scripts/analise_controle_urbanizacao_pixels.py",
+      "unidade": "nW·cm⁻²·sr⁻¹ (medianas e médias); contagens de pixels",
+      "periodo": "2025",
+      "sistema_de_referencia": "SIRGAS 2000 (EPSG:4674)",
+      "situacao": "publicado",
+      "execucao": null
+    },
+    {
       "arquivo": "data/downloads/openlux_limites_municipais_rj.gpkg",
       "bytes": 466944,
       "sha256": "9e873c607103f06b10f0d0fc9001d8c6eb6ce8c124f89157d6fa3abc0facec83",

@@ -1,0 +1,38 @@
+{
+  "ano": 2025,
+  "sensor": "NOAA-20 (VJ146A4)",
+  "qualidade": 0,
+  "estratos": {
+    "urbano_dentro_uc": {
+      "n": 1883,
+      "mediana": 19.1777,
+      "media": 25.253
+    },
+    "urbano_fora_uc": {
+      "n": 12699,
+      "mediana": 38.8912,
+      "media": 43.7447
+    },
+    "nao_urbano_dentro_uc": {
+      "n": 55596,
+      "mediana": 0.0,
+      "media": 1.3616
+    },
+    "nao_urbano_fora_uc": {
+      "n": 152561,
+      "mediana": 0.0,
+      "media": 1.3199
+    }
+  },
+  "comparacoes": {
+    "urbano": {
+      "diferenca_medianas_dentro_menos_fora": -19.7135,
+      "diferenca_medias_dentro_menos_fora": -18.4917
+    },
+    "nao_urbano": {
+      "diferenca_medianas_dentro_menos_fora": 0.0,
+      "diferenca_medias_dentro_menos_fora": 0.0416
+    }
+  },
+  "nota": "exploratório; sem p-valores (pixels autocorrelacionados); não causal"
+}
