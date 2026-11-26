@@ -28,12 +28,14 @@ Reconstrução do front-end a partir do protótipo aprovado (`docs/referencia/`)
 - Páginas e funções fora do plano: `comparar.html` (a lente passou ao explorador), `roteiros.html`, `desenhar` (área desenhada), `observatorio.js` antigo, `laboratorio` antigo e o smoke test do mapa antigo.
 - `web/data/ambiental/uc_municipios.json`: análise exploratória não revisada, que estava em pasta pública. Permanece no histórico do git.
 - Capturas da interface anterior.
+- Bloco `exposure` (população e radiância por setor censitário, classificação urbano/rural) dos JSONs publicados: a licença da malha de setores e o critério urbano/rural do IBGE não estão verificados. Nenhuma página o usava.
 
 ### Pendente
 - Observatório ambiental: camadas bloqueadas por licença não verificada (áreas urbanizadas do IBGE, MapBiomas) ou por fonte inacessível (INEA). ICMBio tem licença que proíbe derivados.
 - Relatório de qualidade dos dados (Fase 8).
 - Validação em campo com SQM: protocolo proposto, nenhuma medição feita.
 - Build de produção do Cloudflare sem confirmação.
+- Republicar o bloco `exposure` só depois de verificar a licença da malha de setores censitários e o critério urbano/rural do IBGE.
 - Decisão de publicação (Zenodo, nova versão).
 
 ### Alterado (Fase B, OpenLux 2.0)

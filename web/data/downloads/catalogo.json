@@ -45,8 +45,8 @@
     },
     {
       "arquivo": "data/indicators.json",
-      "bytes": 187046,
-      "sha256": "514b885693dbb96e0a1e5827d64a6d8072162c6f65e6d1d1684ae49cc0be1ae9",
+      "bytes": 128959,
+      "sha256": "d18840aab45fd117c55e4f84009dbafe2d4207e1b590611e82acf6a4f5819821",
       "licenca": "CC-BY-4.0",
       "titulo": "Indicadores municipais, S-NPP (JSON)",
       "tipo": "JSON",
@@ -63,8 +63,8 @@
     },
     {
       "arquivo": "data/indicators_noaa20.json",
-      "bytes": 124705,
-      "sha256": "cdeac9e558dfb38ce989a6abd52f48882b4c3ff34c6eb929a4dd07e7263fd460",
+      "bytes": 87100,
+      "sha256": "0ab2dd92face5f17da80db249b7c571e786d35210a134e789b0ab11465f704f4",
       "licenca": "CC-BY-4.0",
       "titulo": "Indicadores municipais, NOAA-20 (JSON)",
       "tipo": "JSON",

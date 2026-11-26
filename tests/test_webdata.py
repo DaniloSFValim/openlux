@@ -92,12 +92,14 @@ def test_sources_have_required_fields_and_no_unknown_license_is_hidden():
         assert s["url"].startswith("https://")
 
 
-def test_simplified_geojson_keeps_only_code_and_name():
+def test_simplified_geojson_keeps_code_name_and_official_area():
     g = gpd.GeoDataFrame({"CD_MUN": ["1"], "NM_MUN": ["A"], "AREA_KM2": [1.0]},
                          geometry=[box(0, 0, 1, 1)], crs="EPSG:4674")
     fc = simplify_geojson(g, tolerance=0.001, ndigits=4)
     assert fc["type"] == "FeatureCollection" and len(fc["features"]) == 1
-    assert fc["features"][0]["properties"] == {"CD_MUN": "1", "NM_MUN": "A"}
+    assert fc["features"][0]["properties"] == {"CD_MUN": "1", "NM_MUN": "A", "AREA_KM2": 1.0}
+    sem_area = simplify_geojson(g.drop(columns="AREA_KM2"), tolerance=0.001, ndigits=4)
+    assert sem_area["features"][0]["properties"] == {"CD_MUN": "1", "NM_MUN": "A"}
 
 
 def test_sensor_comparison_is_attached_per_municipality_and_summary_is_strict_json():

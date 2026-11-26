@@ -79,7 +79,7 @@ def _clean(x, nd=6):
 
 
 def simplify_geojson(gdf, *, tolerance=0.001, ndigits=4) -> dict:
-    """GeoJSON simplificado (so para exibicao) com apenas CD_MUN e NM_MUN."""
+    """GeoJSON simplificado (so para exibicao): CD_MUN, NM_MUN e, quando existir, AREA_KM2 (IBGE)."""
     feats = []
     for _, r in gdf.iterrows():
         geom = r.geometry.simplify(tolerance, preserve_topology=True)
@@ -89,8 +89,10 @@ def simplify_geojson(gdf, *, tolerance=0.001, ndigits=4) -> dict:
             return [rnd(i) for i in c] if isinstance(c[0], (list, tuple)) else \
                 [round(v, ndigits) for v in c]
         m = {"type": m["type"], "coordinates": rnd(m["coordinates"])}
-        feats.append({"type": "Feature", "properties": {"CD_MUN": str(r.CD_MUN), "NM_MUN": r.NM_MUN},
-                      "geometry": m})
+        props = {"CD_MUN": str(r.CD_MUN), "NM_MUN": r.NM_MUN}
+        if "AREA_KM2" in gdf.columns:  # area oficial do IBGE (malha 2024), usada no explorador e nas paginas municipais
+            props["AREA_KM2"] = float(r.AREA_KM2)
+        feats.append({"type": "Feature", "properties": props, "geometry": m})
     return {"type": "FeatureCollection", "features": feats}
 
 
