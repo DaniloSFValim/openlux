@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Observatório ambiental — OpenLux</title>
+<meta name="description" content="Estado do módulo de cruzamento espacial com dados ambientais públicos: camadas, fontes, licenças e o que ainda não foi publicado.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/prototipo.css">
+<link rel="stylesheet" href="css/paginas.css">
+</head>
+<body class="pagina">
+<header class="cabec">
+  <div class="marca">OpenLux · Observatório ambiental</div>
+  <nav class="menu-paginas" aria-label="Áreas do OpenLux">
+    <a href="index.html">Observatório</a>
+    <a href="explorar.html">Explorador</a>
+    <a href="laboratorio.html">Laboratório</a>
+    <a href="ambiental.html" aria-current="page">Observatório ambiental</a>
+    <a href="dados.html">Dados abertos</a>
+    <a href="metodologia.html">Metodologia</a>
+  </nav>
+</header>
+
+<main>
+  <h1>Observatório ambiental</h1>
+  <p>Este módulo vai cruzar a radiância noturna com dados ambientais públicos. <strong>Ainda não há resultados publicados.</strong> As camadas abaixo mostram o que está verificado, o que está bloqueado e por quê.</p>
+
+  <div class="aviso">Análise espacial exploratória. A radiância é estimada por satélite. Nenhuma relação entre luz e fauna, flora ou saúde humana é afirmada aqui: não há estudo específico que sustente essa conclusão.</div>
+
+  <h2>Camadas</h2>
+  <div class="bloco tabela-wrap">
+    <table class="tab">
+      <thead><tr><th>Camada</th><th>Situação</th><th>Fonte e licença</th><th>Bloqueio ou observação</th></tr></thead>
+      <tbody>
+        <tr><td>Unidades de conservação (CNUC)</td><td><span class="status bloqueado">não publicada</span></td><td>MMA, CNUC 2025-08. CC BY 4.0, conferida na página do conjunto.</td><td>Análise exploratória feita, mas não publicada: aguarda revisão do autor antes de qualquer divulgação.</td></tr>
+        <tr><td>Áreas urbanizadas (IBGE, 2019)</td><td><span class="status bloqueado">bloqueada</span></td><td>IBGE. Licença não verificada.</td><td>O termo de uso não foi localizado; o portal recusou acesso automatizado. Precisa de conferência no portal do IBGE.</td></tr>
+        <tr><td>Uso e cobertura do solo (MapBiomas)</td><td><span class="status bloqueado">bloqueada</span></td><td>MapBiomas. Termos inconsistentes entre páginas: CC BY-SA em algumas e CC BY em outras.</td><td>Se for CC BY-SA, os derivados teriam licença de compartilhamento igual, em conflito com a licença dos dados do projeto. Decisão do autor.</td></tr>
+        <tr><td>Unidades de conservação (ICMBio)</td><td><span class="status bloqueado">bloqueada</span></td><td>ICMBio. CC BY-ND 3.0.</td><td>A licença proíbe derivados. Por isso não é usada.</td></tr>
+        <tr><td>Unidades estaduais (INEA)</td><td><span class="status bloqueado">bloqueada</span></td><td>INEA.</td><td>Os endereços testados não tiveram conexão. Nova tentativa agendada.</td></tr>
+        <tr><td>Hidrografia e corpos d'água</td><td><span class="status nao-iniciado">não iniciada</span></td><td>Sem fonte verificada.</td><td>—</td></tr>
+        <tr><td>Áreas costeiras</td><td><span class="status nao-iniciado">não iniciada</span></td><td>Sem fonte verificada.</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>O que falta para publicar</h2>
+  <div class="bloco">
+    <ol>
+      <li>Conferir no portal do IBGE a licença das áreas urbanizadas.</li>
+      <li>Decidir sobre o MapBiomas, sabendo que a versão CC BY-SA exige licença de compartilhamento igual para os derivados.</li>
+      <li>Indicar outra fonte oficial de unidades de conservação com licença que permita derivados.</li>
+      <li>Revisar a análise exploratória de áreas protegidas antes de publicar qualquer resultado.</li>
+    </ol>
+    <p class="suave">Cada camada publicada terá fonte, ano, escala e licença registrados, conforme o catálogo em <a href="dados.html">Dados abertos</a>.</p>
+  </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dados abertos — OpenLux</title>
+<meta name="description" content="Arquivos publicados do OpenLux com SHA-256, sistema de referência, unidade, período e licença. Download direto.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/prototipo.css">
+<link rel="stylesheet" href="css/paginas.css">
+</head>
+<body class="pagina">
+<header class="cabec">
+  <div class="marca">OpenLux · Dados abertos</div>
+  <nav class="menu-paginas" aria-label="Áreas do OpenLux">
+    <a href="index.html">Observatório</a>
+    <a href="explorar.html">Explorador</a>
+    <a href="laboratorio.html">Laboratório</a>
+    <a href="ambiental.html">Observatório ambiental</a>
+    <a href="dados.html" aria-current="page">Dados abertos</a>
+    <a href="metodologia.html">Metodologia</a>
+  </nav>
+</header>
+
+<main>
+  <h1>Dados abertos</h1>
+  <p>Estes são os arquivos publicados. Cada um tem o hash SHA-256 calculado sobre o arquivo entregue; para conferir, compare com o valor listado. Arquivos de revisão, intermediários e não aprovados não são publicados aqui.</p>
+  <p class="aviso" id="erro" hidden></p>
+
+  <h2>Licença</h2>
+  <div class="bloco">
+    <p id="licenca"></p>
+    <p class="suave" id="nota"></p>
+  </div>
+
+  <h2>Arquivos</h2>
+  <div class="tabela-wrap bloco" id="catalogo">
+    <p class="suave">Carregando catálogo…</p>
+  </div>
+
+  <h2>Níveis de dados</h2>
+  <div class="bloco">
+    <dl class="def">
+      <dt>Brutos</dt><dd>Arquivos originais do NASA LAADS DAAC e do IBGE. Não são redistribuídos aqui; a origem e o hash de cada um estão em <code>METHODOLOGY.md</code>, apêndice A.</dd>
+      <dt>Intermediários</dt><dd>Saídas de processamento que ainda não passaram por revisão. Não são publicados.</dd>
+      <dt>Processados</dt><dd>Indicadores calculados pelo pipeline, com o código e o commit registrados em cada arquivo.</dd>
+      <dt>Validados</dt><dd>Processados que passaram pelas verificações de estabilidade e consistência descritas na metodologia.</dd>
+      <dt>Publicados</dt><dd>Os arquivos desta página. Todos têm licença e hash registrados.</dd>
+    </dl>
+  </div>
+</main>
+<script src="js/comum.js"></script>
+<script src="js/dados.js"></script>
+</body>
+</html>

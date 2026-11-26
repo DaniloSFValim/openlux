@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Metodologia — OpenLux</title>
+<meta name="description" content="Produtos VIIRS, máscaras, agregação, limitações e o que o OpenLux não mede. A radiância do sensor orbital não é o brilho do céu.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/prototipo.css">
+<link rel="stylesheet" href="css/paginas.css">
+</head>
+<body class="pagina">
+<header class="cabec">
+  <div class="marca">OpenLux · Metodologia</div>
+  <nav class="menu-paginas" aria-label="Áreas do OpenLux">
+    <a href="index.html">Observatório</a>
+    <a href="explorar.html">Explorador</a>
+    <a href="laboratorio.html">Laboratório</a>
+    <a href="ambiental.html">Observatório ambiental</a>
+    <a href="dados.html">Dados abertos</a>
+    <a href="metodologia.html" aria-current="page">Metodologia</a>
+  </nav>
+</header>
+
+<main>
+  <h1>Metodologia e transparência</h1>
+  <p>Resumo para leitura. A versão completa, com fórmulas, parâmetros e reprodução passo a passo, está em <code>METHODOLOGY.md</code> no repositório.</p>
+
+  <h2>O que o OpenLux mede e o que não mede</h2>
+  <div class="bloco">
+    <p><strong>Mede</strong> a radiância registrada pelo sensor orbital (VIIRS, NASA Black Marble) sobre cada pixel de cerca de 460 m, agregada por município e ano.</p>
+    <p><strong>Não mede</strong> o brilho do céu observado da superfície. A radiância do sensor é a luz emitida para cima e medida do espaço, por uma coluna de atmosfera; o brilho do céu, percebido do chão, depende de dezenas de quilômetros de atmosfera e de muitas fontes de luz.</p>
+    <p><strong>Também não mede</strong> consumo de energia, eficiência de iluminação, nem impacto sobre pessoas, animais ou plantas.</p>
+    <dl class="def">
+      <dt>Radiância</dt><dd>Grandeza física do sensor, em nW·cm⁻²·sr⁻¹.</dd>
+      <dt>Emissão luminosa</dt><dd>Luz total emitida por uma fonte ou área, em lúmens. Não se obtém diretamente da radiância sem modelo de iluminação.</dd>
+      <dt>Poluição luminosa</dt><dd>Luz artificial emitida em excesso, com efeitos sobre o ambiente e as pessoas. Um conceito mais amplo que a medida de satélite.</dd>
+      <dt>Skyglow</dt><dd>Brilho do céu noturno causado pela luz artificial espalhada pela atmosfera. É o que um medidor no chão observa, e não é o que o satélite mede.</dd>
+    </dl>
+  </div>
+
+  <h2>Produtos e sensores</h2>
+  <div class="bloco">
+    <dl class="def">
+      <dt>Produtos</dt><dd>VNP46A4 v2.0 (Suomi NPP, anual, 2012–2025) e VJ146A4 v2.0 (NOAA-20, anual, 2018–2025), tile h13v11.</dd>
+      <dt>Sensor primário</dt><dd>NOAA-20 (VJ146A4). O S-NPP (VNP46A4) é mostrado como continuidade da série.</dd>
+      <dt>Resolução</dt><dd>Grade de 15 segundos de arco (0,004167°, cerca de 460 m), 945 × 626 pixels no recorte do estado.</dd>
+      <dt>Sistema de referência</dt><dd>WGS84 (EPSG:4326) no raster. A malha municipal do IBGE está em SIRGAS 2000; a diferença é de poucos metros, menor que um pixel. Essa equivalência é uma premissa, não uma medição feita aqui.</dd>
+      <dt>Unidades</dt><dd>nW·cm⁻²·sr⁻¹ (radiância). Frações são adimensionais.</dd>
+      <dt>Fontes</dt><dd>NASA LAADS DAAC, DOI <a href="https://doi.org/10.5067/VIIRS/VNP46A4.002" rel="noopener">10.5067/VIIRS/VNP46A4.002</a> e <a href="https://doi.org/10.5067/VIIRS/VJ146A4.002" rel="noopener">10.5067/VIIRS/VJ146A4.002</a>. Malhas e população: IBGE (Censo 2022 e malha municipal 2024).</dd>
+    </dl>
+  </div>
+
+  <h2>Processamento</h2>
+  <div class="bloco">
+    <h3>Aquisição</h3>
+    <p>Cada arquivo é baixado para um arquivo temporário, tem a assinatura HDF5 conferida e o SHA-256 calculado antes de ser aceito. Páginas de erro nunca são gravadas como dados.</p>
+    <h3>Máscara de validade</h3>
+    <p>Um pixel é válido quando a radiância não está marcada como ausente e é não negativa, a qualidade é 0 (principal; a sensibilidade usa 0 e 1), o número de observações atende ao mínimo, e a máscara de terra e água é terra ou água interior. Pixels inválidos saem do numerador e do denominador de todo indicador.</p>
+    <h3>Agregação por município</h3>
+    <p>Cada pixel entra com peso igual à fração de sua área coberta pelo município. A média, a mediana e os percentis usam esses pesos. A área de cada pixel é calculada no elipsoide WGS84, não na esfera.</p>
+    <h3>Reamostragem</h3>
+    <p>Não há reamostragem: os indicadores usam a grade nativa. Agregações 2 × 2 e 4 × 4 aparecem só como teste de estabilidade.</p>
+    <h3>Piso de ruído</h3>
+    <p>O S-NPP mostra aumento de radiância em pixels que deveriam ser escuros a partir de 2022. O pipeline calcula esse piso a cada execução e o sinaliza nas páginas. A série do S-NPP não deve ser usada para tendência que cruze 2021 sem confronto com o NOAA-20.</p>
+  </div>
+
+  <h2>Estatísticas</h2>
+  <div class="bloco">
+    <p>Tendências usam a inclinação de Theil–Sen, com teste de Kendall para o p-valor, e exigem pelo menos 8 anos válidos. Um p-valor ≥ 0,05 significa que a série não sustenta tendência. A variação percentual 2018 → 2025 é calculada somente quando a média de 2018 for ≥ 0,401 nW·cm⁻²·sr⁻¹, o piso do pipeline.</p>
+    <p>O IMLN (Índice Municipal de Luminosidade Noturna) é uma proposta metodológica futura. Não é indicador oficial: faltam fundamentação, normalização, justificativa de pesos, análise de sensibilidade e validação.</p>
+  </div>
+
+  <h2>Limitações</h2>
+  <div class="bloco">
+    <ol>
+      <li>Estimativa de radiância orbital, sem medições fotométricas de campo.</li>
+      <li>Resolução de cerca de 460 m: municípios pequenos têm poucas centenas de pixels.</li>
+      <li>A banda usada é pouco sensível à emissão azul de LEDs.</li>
+      <li>Piso de ruído do S-NPP a partir de 2022; a causa não foi identificada. Ambos os sensores usam o mesmo algoritmo, então a concordância entre eles não prova ausência de artefato comum.</li>
+      <li>O sinal da tendência depende da janela de anos escolhida.</li>
+      <li>Saturação em áreas muito iluminadas não foi avaliada.</li>
+      <li>Municípios com lagoa ou mar perdem área válida; em alguns casos a perda passa de 10%.</li>
+      <li>População residente não é população exposta. Radiância por habitante é um índice relativo e não mede eficiência energética.</li>
+      <li>Na camada de pixels, a classe é mostrada, não o valor. Ao afastar o zoom, o mapa pode pular pixels.</li>
+    </ol>
+  </div>
+
+  <h2>Validação</h2>
+  <div class="bloco">
+    <p><strong>Validação com medições de campo: não realizada.</strong> Não há medições com SQM ou outro instrumento terrestre que sustentem o produto.</p>
+    <p>Verificações de estabilidade foram feitas (agregação, máscaras, sensor, determinismo), descritas na seção 11 de <code>METHODOLOGY.md</code>. Elas não são validação externa: nenhum resultado foi comparado a valores publicados.</p>
+    <p>O protocolo de campo está descrito em <code>docs/FIELD_VALIDATION.md</code> como proposta. Ele inclui um gradiente do escuro ao claro, instrumento SQM-L, temperatura registrada em cada visita e a hipótese de associação monotônica, não de calibração absoluta. Não será considerado validado enquanto as medições não forem feitas e analisadas.</p>
+  </div>
+
+  <h2>Referências</h2>
+  <div class="bloco">
+    <ul>
+      <li>Roman, M. O. et al. (2018). NASA's Black Marble nighttime lights product suite. <em>Remote Sensing of Environment</em>, 210, 113–143. DOI <a href="https://doi.org/10.1016/j.rse.2018.03.017" rel="noopener">10.1016/j.rse.2018.03.017</a>.</li>
+      <li>Wang, Z.; Shrestha, R. M.; Roman, M. O.; Kalb, V. L. (2022). NASA's Black Marble multiangle nighttime lights temporal composites. <em>IEEE Geoscience and Remote Sensing Letters</em>. DOI <a href="https://doi.org/10.1109/LGRS.2022.3176616" rel="noopener">10.1109/LGRS.2022.3176616</a>.</li>
+    </ul>
+    <p class="suave">Lista completa e conferências de DOI em <code>docs/REFERENCES.md</code>.</p>
+  </div>
+</main>
+</body>
+</html>

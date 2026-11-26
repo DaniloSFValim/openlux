@@ -1,0 +1,44 @@
+/* fundo cobre a página inteira (prototipo.css fixa altura em 100%) */
+html:has(body.pagina) { height: auto; background: var(--noite); }
+/* Páginas de análise (Laboratório, Observatório ambiental, Dados abertos, Metodologia). */
+body.pagina { margin: 0; height: auto; min-height: 100vh; background: radial-gradient(120% 90% at 60% 0%, var(--azul), var(--noite) 60%); color: var(--texto); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.5; }
+.pagina main { max-width: 1080px; margin: 0 auto; padding: 24px 16px 64px; }
+.pagina h1 { font-size: clamp(1.5rem, 4vw, 2.2rem); margin: 4px 0 6px; letter-spacing: -.01em; }
+.pagina h2 { font-size: 1.15rem; margin: 32px 0 10px; color: var(--luz); }
+.pagina h3 { font-size: 1rem; margin: 18px 0 6px; color: var(--luz2); }
+.pagina p, .pagina li { color: var(--texto); max-width: 74ch; }
+.pagina .suave { color: var(--suave); font-size: .92rem; }
+.pagina a { color: var(--luz); }
+.cabec { border-bottom: 1px solid rgba(255,255,255,.1); padding: 14px 16px; }
+.cabec .marca { color: var(--suave); font-size: .85rem; letter-spacing: .08em; text-transform: uppercase; }
+.menu-paginas { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; font-size: .9rem; }
+.menu-paginas a { color: var(--suave); text-decoration: none; padding: 4px 0; border-bottom: 2px solid transparent; }
+.menu-paginas a[aria-current="page"], .menu-paginas a:hover { color: var(--texto); border-bottom-color: var(--luz); }
+.bloco { background: var(--vidro); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 16px 18px; margin: 12px 0; }
+.controles { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; align-items: end; }
+.controles label { display: grid; gap: 4px; font-size: .9rem; color: var(--suave); }
+.pagina select, .pagina input[type=text] { background: #0b1220; color: var(--texto); border: 1px solid rgba(255,255,255,.2); border-radius: 8px; padding: 8px; font: inherit; }
+.tabela-wrap { overflow-x: auto; }
+table.tab { width: 100%; border-collapse: collapse; font-size: .92rem; font-variant-numeric: tabular-nums; }
+table.tab th, table.tab td { padding: 8px 10px; text-align: right; border-bottom: 1px solid rgba(255,255,255,.08); vertical-align: top; }
+table.tab td:last-child { text-align: left; }
+table.tab th:first-child, table.tab td:first-child { text-align: left; white-space: normal; }
+table.tab th { color: var(--suave); font-weight: 600; }
+.nota-metodo { font-size: .85rem; color: var(--suave); max-width: 74ch; }
+.grafico { width: 100%; height: auto; display: block; }
+.grafico text { fill: var(--suave); font-size: 11px; }
+.legenda-linha { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .88rem; margin: 6px 0 0; }
+.legenda-linha span::before { content: ""; display: inline-block; width: 12px; height: 4px; margin-right: 6px; vertical-align: middle; background: var(--c, var(--luz)); border-radius: 2px; }
+dl.def { display: grid; grid-template-columns: minmax(120px, 200px) 1fr; gap: 6px 14px; font-size: .92rem; }
+dl.def dt { color: var(--suave); }
+dl.def dd { margin: 0; }
+.aviso { background: rgba(255,209,102,.1); border: 1px solid rgba(255,209,102,.35); border-radius: 12px; padding: 10px 14px; font-size: .92rem; }
+.status { font-weight: 700; font-size: .82rem; padding: 2px 8px; border-radius: 999px; background: rgba(255,255,255,.08); white-space: nowrap; }
+.status.bloqueado { color: #ffb4a8; }
+.status.nao-iniciado { color: var(--suave); }
+.status.publicado { color: #9be3b0; }
+.erro-pag { color: #ffb4a8; font-weight: 600; }
+@media (max-width: 640px) { dl.def { grid-template-columns: 1fr; } .pagina main { padding: 18px 16px 48px; } }
+
+/* cartão municipal fica fora da tela quando fechado (translateX); não pode gerar rolagem horizontal */
+html:has(#cartao), body:has(#cartao) { overflow-x: hidden; }
