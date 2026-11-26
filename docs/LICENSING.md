@@ -73,3 +73,28 @@ do código e ainda não foi decidida; os termos de NASA (CC0 com ressalva) e SID
 
 - O Zenodo usa, para a licença do registro, nesta ordem, o `.zenodo.json`, o `CITATION.cff` e a licença detectada no GitHub. Como os três declaram MIT, não há conflito. O identificador do `.zenodo.json` seguiu o exemplo da ajuda do Zenodo (`mit`, minúsculas); outros repositórios usam `MIT`. **Não foi validado contra o Zenodo**: confira no formulário do rascunho.
 - O teste `tests/test_docs_consistency.py` falha se a licença for declarada em um arquivo e não nos outros, e confere o texto do `LICENSE`.
+
+## 7. Áreas urbanizadas do IBGE (2019): verificação de licença
+
+Status: **publicada como derivados, sob CC BY 4.0, com atribuição ao IBGE.** Decisão do responsável em 2026-11-26, com base legal abaixo. A licença não foi declarada pelo IBGE para este produto específico.
+
+| Verificação | Resultado |
+|---|---|
+| Produto "Áreas Urbanizadas do Brasil 2019" (`AreasUrbanizadas2019_Brasil.zip`, `geoftp.ibge.gov.br`) | Acessível. Pastas `Mapas/`, `Shapefile/` e `Tabelas/`. Nenhum arquivo de leia-me ou metadados com licença. O PDF do mapa e os arquivos `.qml` e `.xlsx` não trazem termo de licença. |
+| Termo de Uso e Política de Privacidade do Portal do IBGE (versão 1, 11/03/2024) | Trata de uso do portal, dados pessoais e cookies. Não trata de licença de reuso de produtos geoespaciais. |
+| Plano de Dados Abertos do IBGE (julho/2020–julho/2022) | Define "licença aberta" como a que permite utilizar, reutilizar e redistribuir, exigindo no máximo crédito de autoria e compartilhamento pela mesma licença. O produto "Áreas Urbanizadas" não aparece na lista de conjuntos a publicar. |
+| dados.gov.br | Busca pelo produto: **não encontrado**. Sem licença declarada na fonte. |
+| Manual GGIBPM 2.0 (IBGE, 2025) | Manual metodológico; sem termo de licença de dados. |
+
+**Base legal adotada (confirmada pelo responsável):** Instrução Normativa nº 47, de 23/04/2025 (INDA), publicada no DOU.
+- Art. 4º, III e VII: dados abertos são os acessíveis ao público, disponibilizados sob **licença aberta**, que permite utilizar, reutilizar e redistribuir, exigindo **no máximo** a atribuição de autoria ou fonte.
+- Art. 3º, III e IV: os órgãos federais devem franquear ao público, em formato aberto, os dados que produzem, respeitadas a LAI e a LGPD.
+- Art. 5º, II e art. 6º, IX: o IBGE, autarquia federal, integra a INDA e o seu Comitê Gestor.
+
+**Aplicação:** a licença CC BY 4.0 cumpre o mínimo exigido pela norma. O produto é acessível ao público e não está sob sigilo. Por isso os derivados são publicados com atribuição: "IBGE, Diretoria de Geociências, Coordenação de Meio Ambiente, Áreas Urbanizadas do Brasil 2019".
+
+**Limite:** a norma define a licença aberta, mas não declara uma licença específica para este produto. O produto também não está catalogado no dados.gov.br, o que o art. 3º, IV exige. Se o IBGE declarar outra licença, este registro deve ser revisto.
+
+**Publicado:** `openlux_area_urbana_municipio_2019.csv` (fração urbana por município) e `openlux_areas_urbanizadas_rj_2019.geojson` (camada simplificada para mapa). Ambos gerados por `scripts/build_areas_urbanizadas_rj.py`.
+
+**Não publicado:** os polígonos originais do Brasil inteiro (o shapefile completo). Os derivados não reproduzem o conjunto original.

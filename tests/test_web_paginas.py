@@ -120,7 +120,8 @@ def test_dados_download_link_serves_the_file(server, pg):
 def test_ambiental_publishes_no_results_and_no_unreviewed_file(server, pg):
     pg.goto(server + "/ambiental.html")
     texto = pg.inner_text("main")
-    assert "Ainda não há resultados publicados" in texto
+    assert "Publicada agora: a camada de áreas urbanizadas" in texto
+    assert "Análise exploratória" in texto and "não publicada" in texto
     assert "não publicada" in texto
     assert not (WEB / "data/ambiental/uc_municipios.json").exists()
     assert "uc_municipios" not in pg.content()
@@ -251,4 +252,23 @@ def test_quality_report_has_no_failed_check(server, pg):
     assert "falhou" not in conteudo
     assert "verificações passaram" in conteudo
     pg.goto(server + "/qualidade.html")
+    assert pg.errors == []
+
+
+def test_urbanized_areas_derivatives_are_consistent(server, pg):
+    """Áreas urbanizadas (IBGE 2019): tabela com 92 municípios, frações em [0, 1], camada válida, catálogo CC BY 4.0."""
+    import csv
+    linhas = list(csv.DictReader((WEB / "data/downloads/openlux_area_urbana_municipio_2019.csv").open(encoding="utf-8")))
+    assert len(linhas) == 92
+    fracoes = [float(r["fracao_urbana"]) for r in linhas]
+    assert all(0 <= f <= 1 for f in fracoes)
+    geo = json.loads((WEB / "data/downloads/openlux_areas_urbanizadas_rj_2019.geojson").read_text(encoding="utf-8"))
+    assert geo["type"] == "FeatureCollection" and len(geo["features"]) == 1
+    cat = json.loads((WEB / "data/downloads/catalogo.json").read_text(encoding="utf-8"))
+    itens = {a["arquivo"]: a for a in cat["arquivos"]}
+    for arq in ["data/downloads/openlux_area_urbana_municipio_2019.csv", "data/downloads/openlux_areas_urbanizadas_rj_2019.geojson"]:
+        assert itens[arq]["licenca"] == "CC-BY-4.0"
+        assert "IBGE" in itens[arq]["fonte"]
+    pg.goto(server + "/ambiental.html")
+    pg.wait_for_selector("#mapaUrb svg path", state="attached")
     assert pg.errors == []

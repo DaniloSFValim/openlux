@@ -24,7 +24,7 @@
 
 <main>
   <h1>Observatório ambiental</h1>
-  <p>Este módulo vai cruzar a radiância noturna com dados ambientais públicos. <strong>Ainda não há resultados publicados.</strong> As camadas abaixo mostram o que está verificado, o que está bloqueado e por quê.</p>
+  <p>Este módulo vai cruzar a radiância noturna com dados ambientais públicos. <strong>Publicada agora: a camada de áreas urbanizadas de 2019 (derivados, CC BY 4.0).</strong> As camadas abaixo mostram o que está verificado, o que está bloqueado e por quê.</p>
 
   <div class="aviso">Análise espacial exploratória. A radiância é estimada por satélite. Nenhuma relação entre luz e fauna, flora ou saúde humana é afirmada aqui: não há estudo específico que sustente essa conclusão.</div>
 
@@ -34,7 +34,7 @@
       <thead><tr><th>Camada</th><th>Situação</th><th>Fonte e licença</th><th>Bloqueio ou observação</th></tr></thead>
       <tbody>
         <tr><td>Unidades de conservação (CNUC)</td><td><span class="status bloqueado">não publicada</span></td><td>MMA, CNUC 2025-08. CC BY 4.0, conferida na página do conjunto.</td><td>Análise exploratória feita, mas não publicada: aguarda revisão do autor antes de qualquer divulgação.</td></tr>
-        <tr><td>Áreas urbanizadas (IBGE, 2019)</td><td><span class="status bloqueado">bloqueada</span></td><td>IBGE. Licença não verificada.</td><td>O termo de uso não foi localizado; o portal recusou acesso automatizado. Precisa de conferência no portal do IBGE.</td></tr>
+        <tr><td>Áreas urbanizadas (IBGE, 2019)</td><td><span class="status publicado">publicada (derivados)</span></td><td>IBGE, Áreas Urbanizadas do Brasil 2019. CC BY 4.0 com atribuição ao IBGE, pela base legal da IN nº 47/2025 (INDA). Registro em <code>docs/LICENSING.md</code>.</td><td>Publicados: fração urbana por município e camada simplificada para mapa. Os polígonos originais não são publicados.</td></tr>
         <tr><td>Uso e cobertura do solo (MapBiomas)</td><td><span class="status bloqueado">bloqueada</span></td><td>MapBiomas. Termos inconsistentes entre páginas: CC BY-SA em algumas e CC BY em outras.</td><td>Se for CC BY-SA, os derivados teriam licença de compartilhamento igual, em conflito com a licença dos dados do projeto. Decisão do autor.</td></tr>
         <tr><td>Unidades de conservação (ICMBio)</td><td><span class="status bloqueado">bloqueada</span></td><td>ICMBio. CC BY-ND 3.0.</td><td>A licença proíbe derivados. Por isso não é usada.</td></tr>
         <tr><td>Unidades estaduais (INEA)</td><td><span class="status bloqueado">bloqueada</span></td><td>INEA.</td><td>Os endereços testados não tiveram conexão. Nova tentativa agendada.</td></tr>
@@ -43,6 +43,15 @@
       </tbody>
     </table>
   </div>
+
+  <h2>Áreas urbanizadas no estado (2019)</h2>
+  <div class="bloco">
+    <div id="mapaUrb" class="mapa-urb" aria-label="Mapa das áreas urbanizadas do estado do Rio de Janeiro em 2019"></div>
+    <p class="suave">Em amarelo, áreas urbanizadas do IBGE (2019), simplificadas para visualização. Contorno do estado em cinza. Fonte: IBGE, Áreas Urbanizadas do Brasil 2019.</p>
+    <p><a href="data/downloads/openlux_area_urbana_municipio_2019.csv" download>Tabela por município (CSV)</a> · <a href="data/downloads/openlux_areas_urbanizadas_rj_2019.geojson" download>Camada (GeoJSON)</a> · <a href="dados.html">Catálogo com SHA-256 e licença</a></p>
+    <p class="suave">Área urbana por município: maior fração em São João de Meriti, Belford Roxo e Rio de Janeiro. Os números completos estão na tabela.</p>
+  </div>
+  <script src="js/ambiental.js"></script>
 
   <h2>O que falta para publicar</h2>
   <div class="bloco">
