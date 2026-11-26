@@ -159,3 +159,13 @@ def test_card_area_is_the_official_ibge_value(server, browser_page):
     pg.wait_for_function("document.getElementById('cPopArea').textContent.includes('km²')")
     assert "1.200,3 km²" in pg.inner_text("#cPopArea")
     assert pg.errors == []
+
+
+def test_pixel_lens_shows_second_year_pixels(server, browser_page):
+    """Lente com camada de pixels: duas imagens de pixel (ano atual e ano da lente), fontes diferentes."""
+    pg = browser_page
+    pg.goto(server + "/explorar.html?l=pix,mun,rad&y=2025&lente=2018&lx=0.5&lat=-22.9&lng=-43.3&z=10")
+    pg.wait_for_function("document.querySelectorAll('img.pixel-canvas').length >= 2", timeout=20000)
+    srcs = pg.eval_on_selector_all("img.pixel-canvas", "els => els.map(e => e.src)")
+    assert len(set(srcs)) == 2, "ano da lente deve ter pixels diferentes do ano atual"
+    assert pg.errors == []

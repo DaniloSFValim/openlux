@@ -68,6 +68,7 @@
     const pInfo = $('pixelInfo');
     map.createPane('lentePane'); map.getPane('lentePane').style.zIndex = 450; map.getPane('lentePane').style.pointerEvents = 'none';
     map.createPane('pixelPane'); map.getPane('pixelPane').style.zIndex = 380;
+    map.createPane('lentePixPane'); map.getPane('lentePixPane').style.zIndex = 451; map.getPane('lentePixPane').style.pointerEvents = 'none';
     const cenarioLimites = L.geoJSON(geo, { style: { color: 'rgba(255,255,255,.22)', weight: .6, fillOpacity: 0 }, pane: 'overlayPane' });
     const municipios = {};
     const camadaMun = L.geoJSON(geo, {
@@ -118,6 +119,7 @@
       if (selecionado) atualizarCartao(selecionado);
       atualizarLente();
       atualizarPixels();
+      atualizarLentePixels();
       atualizarLink();
     }
 
@@ -155,6 +157,32 @@
       if (!cachePix[k]) cachePix[k] = fetch(`data/pixels/${s}/${y}.bin`).then((r) => { if (!r.ok) throw new Error('bin ' + r.status); return r.arrayBuffer(); }).then((b) => new Uint8Array(b));
       return cachePix[k];
     }
+    function urlPixels(bin) {
+      const cv = document.createElement('canvas'); cv.width = grade.cols; cv.height = grade.rows;
+      const ctx = cv.getContext('2d'); const img = ctx.createImageData(grade.cols, grade.rows);
+      for (let i = 0; i < bin.length; i++) {
+          const c = bin[i]; const j = i * 4;
+          if (c < 2 || c > 7) { img.data[j + 3] = 0; continue; }
+          const rgb = COR_PIX[c - 2]; const n = parseInt(rgb.slice(1), 16);
+          img.data[j] = n >> 16; img.data[j + 1] = (n >> 8) & 255; img.data[j + 2] = n & 255; img.data[j + 3] = 225;
+        }
+      ctx.putImageData(img, 0, 0);
+      return cv.toDataURL('image/png');
+    }
+    let camadaLentePix = null, lentePixToken = 0;
+    function atualizarLentePixels() {
+      const ligada = lenteOn && anoL != null && camadas.has('pix');
+      if (!ligada) { if (camadaLentePix) { map.removeLayer(camadaLentePix); camadaLentePix = null; } return; }
+      const token = ++lentePixToken, y = anoL;
+      binDoAno(sk, y).then((bin) => {
+        if (token !== lentePixToken || !lenteOn || !camadas.has('pix')) return;
+        const sul = grade.lat_north - grade.rows * grade.pixel_deg, leste = grade.lon_west + grade.cols * grade.pixel_deg;
+        if (camadaLentePix) map.removeLayer(camadaLentePix);
+        camadaLentePix = L.imageOverlay(urlPixels(bin), [[sul, grade.lon_west], [grade.lat_north, leste]], { pane: 'lentePixPane', className: 'pixel-canvas', interactive: false });
+        camadaLentePix.addTo(map);
+        atualizarLente();
+      }).catch((e) => console.error(e));
+    }
     let pixToken = 0;
     function atualizarPixels() {
       const on = camadas.has('pix');
@@ -162,18 +190,10 @@
       const token = ++pixToken, y = anos[ano];
       binDoAno(sk, y).then((bin) => {
         if (token !== pixToken || !camadas.has('pix')) return;
-        const cv = document.createElement('canvas'); cv.width = grade.cols; cv.height = grade.rows;
-        const ctx = cv.getContext('2d'); const img = ctx.createImageData(grade.cols, grade.rows);
-        for (let i = 0; i < bin.length; i++) {
-          const c = bin[i]; const j = i * 4;
-          if (c < 2 || c > 7) { img.data[j + 3] = 0; continue; }
-          const rgb = COR_PIX[c - 2]; const n = parseInt(rgb.slice(1), 16);
-          img.data[j] = n >> 16; img.data[j + 1] = (n >> 8) & 255; img.data[j + 2] = n & 255; img.data[j + 3] = 225;
-        }
-        ctx.putImageData(img, 0, 0);
+        const urlPng = urlPixels(bin);
         const sul = grade.lat_north - grade.rows * grade.pixel_deg, leste = grade.lon_west + grade.cols * grade.pixel_deg;
         if (camadaPix) map.removeLayer(camadaPix);
-        camadaPix = L.imageOverlay(cv.toDataURL('image/png'), [[sul, grade.lon_west], [grade.lat_north, leste]], { pane: 'pixelPane', className: 'pixel-canvas', interactive: false });
+        camadaPix = L.imageOverlay(urlPng, [[sul, grade.lon_west], [grade.lat_north, leste]], { pane: 'pixelPane', className: 'pixel-canvas', interactive: false });
         camadaPix.addTo(map);
         camadaPixMeta = { bin, y };
         atualizarLegenda();
@@ -203,13 +223,14 @@
     document.body.append(divisor, alca, rotuloL);
     function atualizarLente() {
       const on = lenteOn && anoL != null;
-      camadaLente.setStyle(() => ({ fillOpacity: on ? .95 : 0 }));
+      camadaLente.setStyle(() => ({ fillOpacity: on && !camadas.has('pix') ? .95 : 0 }));
       if (!on) { if (map.hasLayer(camadaLente)) map.removeLayer(camadaLente); divisor.style.display = alca.style.display = rotuloL.style.display = 'none'; return; }
       if (!map.hasLayer(camadaLente)) camadaLente.addTo(map);
       const w = map.getSize().x, h = map.getSize().y, x = cursorX * w;
       const off = map._getMapPanePos();
       const pane = map.getPane('lentePane');
       pane.style.clipPath = `polygon(${-off.x}px ${-off.y - 5000}px, ${x - off.x}px ${-off.y - 5000}px, ${x - off.x}px ${-off.y + 5000}px, ${-off.x}px ${-off.y + 5000}px)`;
+      map.getPane('lentePixPane').style.clipPath = pane.style.clipPath;
       divisor.style.display = 'block'; divisor.style.left = x + 'px';
       alca.style.display = 'block'; alca.style.left = x + 'px'; alca.style.top = (h / 2) + 'px';
       rotuloL.style.display = 'block'; rotuloL.style.left = Math.max(8, x - 130) + 'px'; rotuloL.textContent = `Ano ${anoL}`;

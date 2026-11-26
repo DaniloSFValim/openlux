@@ -8,6 +8,7 @@ Reconstrução do front-end a partir do protótipo aprovado (`docs/referencia/`)
 
 ### Adicionado
 - Página inicial (Observatório): mapa dos 92 municípios em tela cheia e, abaixo, indicadores estaduais, evolução NOAA-20 com S-NPP tracejado, maiores e menores médias, distribuição municipal, variação 2018→2025, pixels iluminados, ranking com busca (`web/index.html`, `web/js/observatorio.js`).
+- Lente por pixel no explorador: com a camada de pixels ligada, mostra as classes do ano da lente.
 - Explorador geográfico (`web/explorar.html`, `web/js/explorador.js`, `web/css/explorador.css`): mapa por município e por pixel (classes de luz, sem radiância por pixel), gaveta de camadas, cartão municipal, lente de comparação entre dois anos e link compartilhável.
 - Laboratório de análises (`web/laboratorio.html`): até três municípios comparados com o estado; médias, medianas, percentis dos pixels, posição, evolução, distribuição, caixa e tendência de Theil–Sen, com a definição de cada indicador.
 - Observatório ambiental (`web/ambiental.html`): estado de cada camada e de cada licença. Nenhum resultado ambiental é publicado.
@@ -29,7 +30,6 @@ Reconstrução do front-end a partir do protótipo aprovado (`docs/referencia/`)
 
 ### Pendente
 - Observatório ambiental: camadas bloqueadas por licença não verificada (áreas urbanizadas do IBGE, MapBiomas) ou por fonte inacessível (INEA). ICMBio tem licença que proíbe derivados.
-- Lente de comparação por pixel.
 - Relatório de qualidade dos dados (Fase 8).
 - Validação em campo com SQM: protocolo proposto, nenhuma medição feita.
 - Build de produção do Cloudflare sem confirmação.
