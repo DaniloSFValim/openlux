@@ -56,38 +56,12 @@ def _define_valor(pg, sel, valor):
     pg.evaluate("([s, v]) => { const e = document.querySelector(s); e.value = v; e.dispatchEvent(new Event('input', {bubbles: true})); e.dispatchEvent(new Event('change', {bubbles: true})); }", [sel, valor])
 
 
-def test_index_year_slider_changes_year_and_map_colours(server, pg):
-    pg.goto(server + "/index.html")
-    pg.wait_for_selector("#mapa path[data-cd]", state="attached")
-    pg.wait_for_timeout(500)
-    antes = pg.evaluate("Object.fromEntries([...document.querySelectorAll('#mapa path[data-cd]')].map(p => [p.dataset.cd, p.getAttribute('fill')]))")
-    _define_valor(pg, "#ano", "0")
-    pg.wait_for_timeout(300)
-    assert pg.inner_text("#anoNum") == "2018"
-    depois = pg.evaluate("Object.fromEntries([...document.querySelectorAll('#mapa path[data-cd]')].map(p => [p.dataset.cd, p.getAttribute('fill')]))")
-    mudaram = sum(1 for k in antes if antes[k] != depois.get(k))
-    assert mudaram > 0, "trocar o ano deve mudar a cor de pelo menos um município"
-    assert pg.errors == []
-
-
 def test_explorer_year_slider_changes_year(server, pg):
     pg.goto(server + "/explorar.html?y=2025")
     pg.wait_for_selector("#legClasses li", state="attached")
     _define_valor(pg, "#ano", "0")
     pg.wait_for_timeout(300)
     assert pg.inner_text("#anoNum") == "2018"  # sensor padrão NOAA-20 começa em 2018
-    assert pg.errors == []
-
-
-def test_observatorio_year_filter_changes_state_mean(server, pg):
-    pg.goto(server + "/index.html")
-    pg.wait_for_selector("#kpis .kpi", state="attached")
-    pg.wait_for_timeout(300)
-    media = lambda: pg.locator("#kpis .kpi").nth(3).inner_text()
-    m25 = media()
-    pg.select_option("#anoObs", "2018")
-    pg.wait_for_timeout(300)
-    assert media() != m25 and "2018" in media()
     assert pg.errors == []
 
 
@@ -114,4 +88,15 @@ def test_explorer_meets_performance_budget(server, pg):
     assert tempo <= LIMITE_TEMPO_S, f"explorador levou {tempo:.2f} s (limite {LIMITE_TEMPO_S} s)"
     mb = tam[0] / 1e6
     assert mb <= LIMITE_TRANSFERENCIA_MB, f"explorador transferiu {mb:.2f} MB (limite {LIMITE_TRANSFERENCIA_MB} MB)"
+    assert pg.errors == []
+
+
+def test_home_year_slider_changes_class_counts(server, pg):
+    pg.goto(server + "/index.html")
+    pg.wait_for_selector("#classes li", state="attached")
+    antes = pg.locator("#classes").inner_text()
+    _define_valor(pg, "#ano", "0")
+    pg.wait_for_timeout(300)
+    assert pg.inner_text("#anoOut") == "2018"
+    assert pg.locator("#classes").inner_text() != antes
     assert pg.errors == []

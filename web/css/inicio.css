@@ -1,0 +1,22 @@
+/* Página inicial didática (poluição luminosa). Estilos próprios; o restante vem de paginas.css. */
+.inicio { max-width: 920px; margin: 0 auto; padding: 36px 18px 60px; }
+.inicio .kicker { color: var(--luz); font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; }
+.inicio h1 { font-size: clamp(1.9rem, 4.5vw, 2.9rem); line-height: 1.12; margin: .4em 0 .3em; }
+.inicio h2 { font-size: 1.4rem; margin: 46px 0 10px; }
+.inicio h3 { margin: 0 0 6px; font-size: 1.05rem; color: var(--luz); }
+.inicio .lead { color: var(--suave); font-size: 1.08rem; max-width: 720px; }
+.inicio .aviso { border-color: #e0604f; }
+.inicio .grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.inicio .grade b { color: var(--luz); }
+.inicio .botao { display: inline-block; background: var(--luz); color: #151a26; font-weight: 800; border-radius: 12px; padding: 10px 16px; text-decoration: none; }
+.inicio .botao.sec { background: transparent; color: var(--texto); border: 1px solid rgba(255,255,255,.3); font-weight: 600; }
+.inicio .kpis-linha { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+.inicio .controle { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
+.inicio input[type=range] { flex: 1; min-width: 200px; accent-color: var(--luz); }
+.inicio output { color: var(--luz); font-weight: 800; font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.inicio .classes { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px 16px; margin: 14px 0 0; padding: 0; list-style: none; }
+.inicio .classes li { display: flex; gap: 10px; align-items: center; white-space: nowrap; }
+.inicio .classes i { width: 20px; height: 20px; border-radius: 6px; flex: none; }
+.inicio .serie { width: 100%; height: auto; max-height: 260px; }
+.inicio .refs { font-size: .9rem; color: var(--suave); padding-left: 20px; }
+.inicio .refs a { color: var(--luz); }
