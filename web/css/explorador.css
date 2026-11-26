@@ -55,3 +55,27 @@ body.gaveta-fechada .abrir-gaveta { display: block; }
 .lente-divisor { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--luz); z-index: 650; pointer-events: none; }
 .lente-alca { position: absolute; top: 50%; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; background: var(--luz); border: 3px solid #fff; z-index: 660; cursor: ew-resize; pointer-events: auto; }
 .rotulo-lente { position: absolute; top: 90px; font-size: 12px; background: var(--vidro); padding: 4px 8px; border-radius: 8px; z-index: 660; pointer-events: none; }
+
+/* Celular (até 640 px): cabeçalho compacto, menu em uma linha rolável, controles sem sobreposição */
+@media (max-width: 640px) {
+  .topo-exp { flex-direction: column; gap: 8px; padding: 10px 12px; }
+  .topo-exp .titulo h1 { font-size: 1.05rem; margin: 0; }
+  .topo-exp .titulo small { font-size: .68rem; }
+  .explorador .menu-paginas { flex-wrap: nowrap; overflow-x: auto; gap: 14px; font-size: .8rem; margin-top: 6px; padding-bottom: 4px; scrollbar-width: none; }
+  .explorador .menu-paginas::-webkit-scrollbar { display: none; }
+  .legenda-exp { min-width: 0; width: 100%; max-width: 100%; font-size: 11px; padding: 8px 10px; }
+  .legenda-exp ol { gap: 2px; }
+  .nota-leg { display: none; }
+  .abrir-gaveta { top: auto; bottom: 178px; left: 12px; padding: 8px 12px; font-size: .85rem; }
+  .explorador .cartao { top: auto; left: 10px; right: 10px; bottom: 190px; width: auto; max-height: 52vh; }
+  .barra-tempo { bottom: 8px; left: 8px; right: 8px; transform: none; width: auto; max-width: none; padding: 8px 10px; gap: 8px; }
+  .barra-tempo button { padding: 7px 10px; font-size: .85rem; }
+  .barra-tempo input[type=range] { width: 100%; order: 3; }
+  .barra-tempo output { font-size: .95rem; }
+  .pixel-info { font-size: 11px; }
+  .leaflet-control-attribution { font-size: 9px; max-width: calc(100% - 64px); margin-right: 56px; }
+  .leaflet-bottom.leaflet-left, .leaflet-bottom.leaflet-right { bottom: 196px; }
+  .leaflet-bottom.leaflet-left { left: auto; right: 8px; }
+  .leaflet-bottom.leaflet-right { right: 8px; }
+  .gaveta { width: min(92vw, 340px); }
+}

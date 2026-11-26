@@ -19,6 +19,9 @@ MUN_RIO = "3304557"  # Rio de Janeiro (conferido em web/data/indicators_noaa20.j
 
 @pytest.fixture(scope="module")
 def server():
+    if os.environ.get("OPENLUX_URL"):  # modo publicado: testa o site no ar, sem servidor local
+        yield os.environ["OPENLUX_URL"].rstrip("/")
+        return
     class H(http.server.SimpleHTTPRequestHandler):
         def __init__(self, *a, **k):
             super().__init__(*a, directory=str(WEB), **k)

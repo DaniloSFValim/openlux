@@ -50,6 +50,7 @@ Capturas reais do navegador, feitas a partir das páginas publicadas em `web/` (
 | Lente de comparação (2018 × 2025) | ![Lente](docs/screenshots/openlux-2.0/07_explorador_lente.png) |
 | Laboratório de análises | ![Laboratório](docs/screenshots/openlux-2.0/08_laboratorio.png) |
 | Página municipal (Niterói) | ![Município](docs/screenshots/openlux-2.0/09_pagina_municipal_niteroi.png) |
+| Explorador em celular (390 px) | ![Explorador celular](docs/screenshots/openlux-2.0/14_explorador_celular.png) |
 | Relatório municipal em PDF (Niterói) | ![PDF](docs/screenshots/openlux-2.0/13_relatorio_municipal_niteroi.png) |
 | Observatório ambiental | ![Ambiental](docs/screenshots/openlux-2.0/10_observatorio_ambiental.png) |
 | Dados abertos | ![Dados](docs/screenshots/openlux-2.0/11_dados_abertos.png) |
@@ -164,6 +165,19 @@ dados, servidor ou serviço pago.
 
 Os gráficos da interface são SVG próprio, sem biblioteca.
 
+### Estrutura do repositório
+
+| Caminho | Conteúdo |
+|---|---|
+| `src/openlux/` | Módulos Python: leitura dos produtos, máscaras, agregação zonal, estatística temporal, indicadores, geração dos dados web. |
+| `scripts/` | Pontos de entrada: aquisição, execução anual, pipeline dos pixels, catálogo, páginas municipais e PDFs, contagens de pixels, análise de áreas protegidas. |
+| `web/` | Site estático publicado na Cloudflare: páginas, `js/`, `css/`, `data/` (dados publicados), `municipio/` (páginas e PDFs municipais), `vendor/` (bibliotecas com licença). |
+| `tests/` | Testes de processamento, dados e navegação (Playwright). |
+| `docs/` | Decisões, auditorias, protocolo de validação de campo, plano mestre, implantação e referências. |
+| `data/` | Dados brutos e metadados. `data/raw/` não é versionado (licença de terceiros). |
+| `outputs/` | Saídas de referência de execuções versionadas. |
+| `.github/workflows/` | CI: roda os testes em cada push e PR. |
+
 ## 10. Instalação
 
 ```bash
@@ -174,8 +188,33 @@ pip install -e ".[dev]"
 
 Python 3.10 ou superior (testado em 3.13). O teste da interface exige
 `pip install -e ".[web-tests]"` e um Chromium (variável `OPENLUX_CHROMIUM` se não for o do
-Playwright). Para testar o site publicado: `OPENLUX_URL=https://openlux.labdados.org python -m pytest tests/test_web_smoke.py`
-(confere também que os arquivos publicados são idênticos aos do repositório).
+Playwright). Para testar o site publicado: `OPENLUX_URL=https://openlux.labdados.org python -m pytest tests/test_deploy_publicado.py tests/test_web_paginas.py tests/test_web_explorador.py tests/test_web_acessibilidade.py`
+(o primeiro confere que cada arquivo publicado é idêntico ao do repositório).
+
+### Execução
+
+Para visualizar o site localmente, sem processar nenhum dado:
+
+```bash
+cd web && python -m http.server 8765
+```
+
+Depois, abra `http://127.0.0.1:8765/index.html`. Para regerar as páginas e os relatórios municipais a partir dos dados publicados e da malha do IBGE em `data/raw/ibge/`:
+
+```bash
+python scripts/build_web_municipios.py
+python scripts/build_web_pixel_stats.py
+python scripts/build_catalogo.py
+```
+
+### Testes
+
+```bash
+pip install -e ".[dev,web-tests]"
+pytest -q tests
+```
+
+Os testes de navegador usam Chromium. Defina `OPENLUX_CHROMIUM` com o caminho do executável, se ele não for o do Playwright. O CI roda a mesma suíte. O teste do site publicado só roda com `OPENLUX_URL` definido; sem ela, ele aparece como pulado.
 
 ## 11. Reprodução
 
@@ -267,8 +306,19 @@ DOI da versão 0.1.0: https://doi.org/10.5281/zenodo.24510755. Os metadados de c
 Danilo Valim. ORCID: [https://orcid.org/0009-0009-7250-6151](https://orcid.org/0009-0009-7250-6151). Nenhuma afiliação
 institucional foi declarada nos metadados.
 
+### Licença
+
+- **Código:** MIT (arquivo `LICENSE`).
+- **Dados derivados publicados:** CC BY 4.0, confirmada pelo autor em 2026-11-25 (`web/data/downloads/catalogo.json`).
+- **Dados de terceiros:** cada arquivo registra sua licença de origem no catálogo e em `docs/LICENSING.md`. Os dados brutos da NASA não são redistribuídos aqui; a licença de origem da malha e do Censo está no catálogo.
+
 ## 18. DOI
 
 Versão 0.1.0: [10.5281/zenodo.24510755](https://doi.org/10.5281/zenodo.24510755). Concept DOI do projeto (resolve sempre para a
 versão mais recente): [10.5281/zenodo.24510754](https://doi.org/10.5281/zenodo.24510754). Um DOI identifica a versão
 arquivada e não comprova avaliação científica nem validação independente do software.
+
+### Publicações
+
+- Versão 0.1.0 publicada no Zenodo: [10.5281/zenodo.24510755](https://doi.org/10.5281/zenodo.24510755). Concept DOI: [10.5281/zenodo.24510754](https://doi.org/10.5281/zenodo.24510754).
+- OpenLux 2.0 ainda não tem nova versão publicada. Quando tiver, a publicação segue `docs/DEPLOYMENT.md`, e `CITATION.cff` e `.zenodo.json` são atualizados antes.
