@@ -2,10 +2,7 @@
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;background:radial-gradient(120% 90% at 60% 30%,var(--azul),var(--noite) 70%);color:var(--texto);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;overflow:hidden}
   .palco{position:absolute;inset:0;display:grid;grid-template-columns:1fr;place-items:center}
-  svg#mapa{width:min(94vw,1100px);height:auto;max-height:82vh;margin-top:-4vh;filter:drop-shadow(0 0 40px rgba(255,209,102,.12))}
-  svg#mapa path{stroke:rgba(255,255,255,.18);stroke-width:.6;transition:fill .9s ease, opacity .6s ease, stroke .2s;cursor:pointer}
-  svg#mapa path:hover{stroke:#fff;stroke-width:1.4}
-  svg#mapa path.sel{stroke:var(--luz);stroke-width:2.4}
+  #mapa{position:absolute;inset:0;z-index:0;background:transparent;font-family:inherit}
   .nasce path{opacity:0;animation:nascer .9s ease forwards}
   @keyframes nascer{to{opacity:1}}
   .topo{position:absolute;top:22px;left:28px;right:28px;display:flex;justify-content:space-between;align-items:flex-start;gap:20px;pointer-events:none}
@@ -46,8 +43,6 @@
   @media (max-width:760px){.cartao{top:auto;bottom:210px;right:12px;left:12px;width:auto}.ano{bottom:220px}.comando{flex-wrap:wrap;bottom:12px}}
 
 /* camadas e controles acrescentados à reconstrução */
-.mapa-lente{position:absolute;left:50%;transform:translateX(-50%);width:min(94vw,1100px);height:auto;max-height:82vh;margin-top:-4vh;pointer-events:none}
-.mapa-lente path{stroke:rgba(255,255,255,.18);stroke-width:.6}
 .controles-base{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;background:var(--vidro);padding:10px 14px;border-radius:14px;max-width:94vw}
 .controles-base button{background:var(--luz);color:#151a26;border:0;border-radius:10px;padding:9px 14px;font:inherit;font-weight:700;cursor:pointer}
 .controles-base button.sec{background:transparent;color:var(--texto);border:1px solid rgba(255,255,255,.25)}

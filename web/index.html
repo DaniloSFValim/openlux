@@ -6,6 +6,7 @@
 <title>Observatório da luz noturna — OpenLux</title>
 <meta name="description" content="Luz noturna vista do espaço nos 92 municípios do Rio de Janeiro, de 2018 a 2025 (NOAA-20), com série do S-NPP desde 2012. Estimativa por sensoriamento remoto, não medição do brilho do céu.">
 <link rel="icon" href="data:,">
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
 <link rel="stylesheet" href="css/prototipo.css">
 <link rel="stylesheet" href="css/paginas.css">
 </head>
@@ -13,7 +14,7 @@
 
 <section class="heroi" aria-label="Mapa dos municípios">
   <div class="palco">
-    <svg id="mapa" viewBox="0 0 1100 760" role="img" aria-label="Mapa dos 92 municípios do Rio de Janeiro, colorido pela luz do ano escolhido"></svg>
+    <div id="mapa" role="application" aria-label="Mapa interativo dos 92 municípios do Rio de Janeiro, colorido pela luz do ano escolhido"></div>
     <div class="lente" id="lente" aria-hidden="true"></div>
   </div>
 
@@ -130,6 +131,7 @@
   <p>Dados reais do OpenLux: NASA Black Marble (VJ146A4 NOAA-20; VNP46A4 S-NPP). Autor: Danilo Valim · ORCID <a href="https://orcid.org/0009-0009-7250-6151" rel="noopener">0009-0009-7250-6151</a> · DOI <a href="https://doi.org/10.5281/zenodo.24510755" rel="noopener">10.5281/zenodo.24510755</a> · <a href="metodologia.html">Metodologia</a> · <a href="dados.html">Dados abertos</a> · <a href="municipios.html">Municípios</a></p>
 </footer>
 
+<script src="vendor/leaflet/leaflet.js"></script>
 <script src="js/comum.js"></script>
 <script src="js/prototipo.js"></script>
 <script src="js/observatorio.js"></script>
