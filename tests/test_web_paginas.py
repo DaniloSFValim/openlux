@@ -120,9 +120,9 @@ def test_dados_download_link_serves_the_file(server, pg):
 def test_ambiental_publishes_no_results_and_no_unreviewed_file(server, pg):
     pg.goto(server + "/ambiental.html")
     texto = pg.inner_text("main")
-    assert "Publicada agora: a camada de áreas urbanizadas" in texto
-    assert "Análise exploratória" in texto and "não publicada" in texto
-    assert "não publicada" in texto
+    assert "Publicadas agora: áreas urbanizadas de 2019 e a análise exploratória" in texto
+    assert "Unidades de conservação e radiância (2025)" in texto
+    assert "Nomes de UCs não são publicados" in texto
     assert not (WEB / "data/ambiental/uc_municipios.json").exists()
     assert "uc_municipios" not in pg.content()
     assert pg.errors == []

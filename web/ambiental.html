@@ -24,7 +24,7 @@
 
 <main>
   <h1>Observatório ambiental</h1>
-  <p>Este módulo vai cruzar a radiância noturna com dados ambientais públicos. <strong>Publicada agora: a camada de áreas urbanizadas de 2019 (derivados, CC BY 4.0).</strong> As camadas abaixo mostram o que está verificado, o que está bloqueado e por quê.</p>
+  <p>Este módulo vai cruzar a radiância noturna com dados ambientais públicos. <strong>Publicadas agora: áreas urbanizadas de 2019 e a análise exploratória de unidades de conservação (2025).</strong> As camadas abaixo mostram o que está verificado, o que está bloqueado e por quê.</p>
 
   <div class="aviso">Análise espacial exploratória. A radiância é estimada por satélite. Nenhuma relação entre luz e fauna, flora ou saúde humana é afirmada aqui: não há estudo específico que sustente essa conclusão.</div>
 
@@ -33,7 +33,7 @@
     <table class="tab">
       <thead><tr><th>Camada</th><th>Situação</th><th>Fonte e licença</th><th>Bloqueio ou observação</th></tr></thead>
       <tbody>
-        <tr><td>Unidades de conservação (CNUC)</td><td><span class="status bloqueado">não publicada</span></td><td>MMA, CNUC 2025-08. CC BY 4.0, conferida na página do conjunto.</td><td>Análise exploratória feita, mas não publicada: aguarda revisão do autor antes de qualquer divulgação.</td></tr>
+        <tr><td>Unidades de conservação (CNUC)</td><td><span class="status publicado">publicada (análise exploratória)</span></td><td>MMA, CNUC 2025-08. CC BY 4.0.</td><td>Associação espacial, não causa. Publicada a tabela por município. Nomes de UCs não são publicados: a codificação do arquivo está corrompida.</td></tr>
         <tr><td>Áreas urbanizadas (IBGE, 2019)</td><td><span class="status publicado">publicada (derivados)</span></td><td>IBGE, Áreas Urbanizadas do Brasil 2019. CC BY 4.0 com atribuição ao IBGE, pela base legal da IN nº 47/2025 (INDA). Registro em <code>docs/LICENSING.md</code>.</td><td>Publicados: fração urbana por município e camada simplificada para mapa. Os polígonos originais não são publicados.</td></tr>
         <tr><td>Uso e cobertura do solo (MapBiomas)</td><td><span class="status bloqueado">bloqueada</span></td><td>MapBiomas. Termos inconsistentes entre páginas: CC BY-SA em algumas e CC BY em outras.</td><td>Se for CC BY-SA, os derivados teriam licença de compartilhamento igual, em conflito com a licença dos dados do projeto. Decisão do autor.</td></tr>
         <tr><td>Unidades de conservação (ICMBio)</td><td><span class="status bloqueado">bloqueada</span></td><td>ICMBio. CC BY-ND 3.0.</td><td>A licença proíbe derivados. Por isso não é usada.</td></tr>
@@ -53,15 +53,30 @@
   </div>
   <script src="js/ambiental.js"></script>
 
-  <h2>O que falta para publicar</h2>
+  <h2>Unidades de conservação e radiância (2025): análise exploratória</h2>
+  <div class="bloco">
+    <p>Em 2025, a fração da área municipal coberta por unidades de conservação tem associação positiva com a radiância média municipal (Spearman ρ = 0,32; p = 0,002; 92 municípios).</p>
+    <div class="tabela-wrap"><table class="tab">
+      <thead><tr><th>Medida</th><th>Valor</th></tr></thead>
+      <tbody>
+        <tr><td>Radiância média dos pixels dentro das UCs (n = 56.560)</td><td>2,14 nW·cm⁻²·sr⁻¹</td></tr>
+        <tr><td>Radiância média dos pixels fora das UCs (n = 162.447)</td><td>4,56 nW·cm⁻²·sr⁻¹</td></tr>
+        <tr><td>Mediana dentro e fora</td><td>0 nos dois casos: a maioria dos pixels é escura</td></tr>
+      </tbody>
+    </table></div>
+    <p class="aviso">Limites: a associação pode refletir urbanização (a análise não a controla com a camada urbana de 2019), não é causa e não mede impacto sobre fauna, flora ou saúde humana.</p>
+    <p><a href="data/downloads/openlux_uc_fracao_municipio_2025.csv" download>Tabela por município (CSV)</a> · <a href="dados.html">Catálogo com licença e SHA-256</a></p>
+  </div>
+
+  <h2>O que ainda está em aberto</h2>
   <div class="bloco">
     <ol>
-      <li>Conferir no portal do IBGE a licença das áreas urbanizadas.</li>
       <li>Decidir sobre o MapBiomas, sabendo que a versão CC BY-SA exige licença de compartilhamento igual para os derivados.</li>
-      <li>Indicar outra fonte oficial de unidades de conservação com licença que permita derivados.</li>
-      <li>Revisar a análise exploratória de áreas protegidas antes de publicar qualquer resultado.</li>
+      <li>Controlar a urbanização na análise de UCs, usando a camada urbana de 2019 já publicada.</li>
+      <li>Conferir no site oficial do CNUC os nomes das UCs, que hoje não são publicados.</li>
+      <li>Incluir hidrografia e áreas costeiras, quando houver fonte com licença verificada.</li>
     </ol>
-    <p class="suave">Cada camada publicada terá fonte, ano, escala e licença registrados, conforme o catálogo em <a href="dados.html">Dados abertos</a>.</p>
+    <p class="suave">A camada do ICMBio não entra: a licença CC BY-ND proíbe derivados. O INEA segue sem conexão. Cada camada publicada tem fonte, ano, escala e licença registrados em <a href="dados.html">Dados abertos</a>.</p>
   </div>
 </main>
 </body>

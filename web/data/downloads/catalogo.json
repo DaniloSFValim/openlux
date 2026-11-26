@@ -222,6 +222,20 @@
       "execucao": null
     },
     {
+      "arquivo": "data/downloads/openlux_uc_fracao_municipio_2025.csv",
+      "bytes": 5061,
+      "sha256": "444e100926cd854685b3a4c2c040facdadd85e301cfb67943b9366d52f3a6049",
+      "licenca": "CC-BY-4.0",
+      "titulo": "Fração da área municipal em unidades de conservação e radiância média 2025 (análise exploratória)",
+      "tipo": "CSV",
+      "fonte": "MMA, CNUC shp_cnuc_2025_08 (CC BY 4.0); IBGE, Malha Municipal Digital 2024; NASA Black Marble VJ146A4 (NOAA-20). Gerado por scripts/analise_areas_protegidas.py",
+      "unidade": "km² e fração adimensional; radiância em nW·cm⁻²·sr⁻¹",
+      "periodo": "2025",
+      "sistema_de_referencia": "SIRGAS 2000 (EPSG:4674)",
+      "situacao": "publicado",
+      "execucao": null
+    },
+    {
       "arquivo": "data/downloads/openlux_limites_municipais_rj.gpkg",
       "bytes": 466944,
       "sha256": "9e873c607103f06b10f0d0fc9001d8c6eb6ce8c124f89157d6fa3abc0facec83",
