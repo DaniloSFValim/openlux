@@ -33,6 +33,12 @@ Formato: versões em ordem cronológica inversa. Datas no formato AAAA-MM-DD.
 - Quantis P75, P90 e P95 dos pixels publicados em `web/data/downloads/` e listados no catálogo.
 - Turf carregado sob demanda pela ferramenta "Desenhar uma área": a visita comum ao mapa não baixa mais o bundle de ~530 KB.
 
+### Adicionado (Fases 7, 11 e 12)
+- Observatório ambiental (`web/ambiental.html`): análise exploratória de áreas protegidas (CNUC 2025_08, CC BY 4.0) com a radiância NOAA-20 de 2025. Associação, não causa.
+- Explorador com a identidade escura do Observatório; menu com Laboratório e Ambiental em todas as páginas.
+- 13 capturas reais em `docs/screenshots/openlux-2.0/` e galeria no README.
+- Workflow `.github/workflows/testes.yml` (pytest + Chromium) e processo de deploy documentado em `docs/DEPLOYMENT.md`.
+
 ### Removido (Fase D)
 - `web/js/inicio.js` e `tests/test_web_inicio.py`: substituídos pelo Observatório.
 

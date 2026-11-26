@@ -35,6 +35,37 @@ proveniência (versões, parâmetros, hashes de entradas e saídas, versão do c
 determinística. Os valores são *estimativas baseadas em sensoriamento remoto* da radiância
 noturna de superfície, **não medições do brilho do céu**.
 
+### Telas do OpenLux 2.0
+
+Capturas feitas no navegador a partir da aplicação (`docs/screenshots/openlux-2.0/`). Não são simulações.
+
+| Tela | Arquivo |
+|---|---|
+| Observatório (página inicial) | ![Observatório](docs/screenshots/openlux-2.0/01_homepage_desktop.png) |
+| Observatório, celular | ![Observatório celular](docs/screenshots/openlux-2.0/02_homepage_mobile.png) |
+| Explorador estadual | ![Explorador](docs/screenshots/openlux-2.0/03_explorador_estadual.png) |
+| Mapa de pixels (zoom no Rio) | ![Pixels](docs/screenshots/openlux-2.0/04_mapa_pixels_zoom.png) |
+| Gaveta de camadas | ![Gaveta](docs/screenshots/openlux-2.0/05_gaveta_camadas_aberta.png) |
+| Cartão municipal | ![Cartão](docs/screenshots/openlux-2.0/06_cartao_municipal.png) |
+| Comparação temporal | ![Comparação](docs/screenshots/openlux-2.0/07_comparacao_temporal.png) |
+| Laboratório estatístico | ![Laboratório](docs/screenshots/openlux-2.0/08_laboratorio_estatistico.png) |
+| Comparação entre municípios | ![Municípios](docs/screenshots/openlux-2.0/09_comparacao_municipios.png) |
+| Observatório ambiental | ![Ambiental](docs/screenshots/openlux-2.0/10_observatorio_ambiental.png) |
+| Dados abertos | ![Dados](docs/screenshots/openlux-2.0/11_dados_abertos.png) |
+| Metodologia | ![Metodologia](docs/screenshots/openlux-2.0/12_metodologia.png) |
+| Mapa em celular | ![Celular](docs/screenshots/openlux-2.0/14_mapa_celular.png) |
+
+**Não incluída:** o relatório municipal em PDF (item 13 do prompt). Ele ainda não existe no produto, e não há captura simulada.
+
+### O que o 2.0 acrescenta
+
+- **Observatório:** indicadores estaduais, evolução anual NOAA-20 com S-NPP, mapa dos 92 municípios, rankings e variação 2018→2025.
+- **Explorador:** mapa de pixels, camadas, cartão municipal e animação, com o sensor escolhido pela URL.
+- **Comparação:** dois anos lado a lado, controle deslizante, diferença absoluta e variação percentual.
+- **Laboratório:** até três municípios, percentis entre municípios, distribuição estadual e tendências com p-valor.
+- **Observatório ambiental:** análise exploratória de áreas protegidas (CNUC) com a radiância NOAA-20 de 2025. É associação espacial, não causa, e não controla a urbanização.
+- **Dados abertos:** catálogo com SHA-256 de cada arquivo, GeoPackage dos limites municipais e percentis P75, P90 e P95.
+
 ## 3. Pergunta de pesquisa
 
 > Como a estimativa de poluição luminosa baseada em sensoriamento remoto (radiância noturna
@@ -160,6 +191,10 @@ python scripts/run_sectors.py
 python scripts/validate_aggregation.py
 python scripts/build_web_data.py
 python scripts/build_web_pixels.py
+python scripts/build_web_data_noaa20.py
+python scripts/build_catalogo.py
+python scripts/run_percentiles.py
+CNUC_DIR=<pasta do shp_cnuc_2025_08 extraído> SHAPE_ENCODING=ISO-8859-1 python scripts/analise_areas_protegidas.py
 python -m http.server -d web 8000
 ```
 
