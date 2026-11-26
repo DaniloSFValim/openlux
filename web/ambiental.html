@@ -33,7 +33,7 @@
     <table class="tab">
       <thead><tr><th>Camada</th><th>Situação</th><th>Fonte e licença</th><th>Bloqueio ou observação</th></tr></thead>
       <tbody>
-        <tr><td>Unidades de conservação (CNUC)</td><td><span class="status publicado">publicada (análise exploratória)</span></td><td>MMA, CNUC 2025-08. CC BY 4.0.</td><td>Associação espacial, não causa. Publicada a tabela por município. Nomes de UCs não são publicados: a codificação do arquivo está corrompida.</td></tr>
+        <tr><td>Unidades de conservação (CNUC)</td><td><span class="status publicado">publicada (análise exploratória)</span></td><td>MMA, CNUC 2025-08. CC BY 4.0.</td><td>Associação espacial, não causa. Controlada pela urbanização no nível municipal: a associação positiva não se sustenta. Nomes de UCs não são publicados.</td></tr>
         <tr><td>Áreas urbanizadas (IBGE, 2019)</td><td><span class="status publicado">publicada (derivados)</span></td><td>IBGE, Áreas Urbanizadas do Brasil 2019. CC BY 4.0 com atribuição ao IBGE, pela base legal da IN nº 47/2025 (INDA). Registro em <code>docs/LICENSING.md</code>.</td><td>Publicados: fração urbana por município e camada simplificada para mapa. Os polígonos originais não são publicados.</td></tr>
         <tr><td>Uso e cobertura do solo (MapBiomas)</td><td><span class="status bloqueado">bloqueada</span></td><td>MapBiomas. Termos inconsistentes entre páginas: CC BY-SA em algumas e CC BY em outras.</td><td>Se for CC BY-SA, os derivados teriam licença de compartilhamento igual, em conflito com a licença dos dados do projeto. Decisão do autor.</td></tr>
         <tr><td>Unidades de conservação (ICMBio)</td><td><span class="status bloqueado">bloqueada</span></td><td>ICMBio. CC BY-ND 3.0.</td><td>A licença proíbe derivados. Por isso não é usada.</td></tr>
@@ -55,24 +55,26 @@
 
   <h2>Unidades de conservação e radiância (2025): análise exploratória</h2>
   <div class="bloco">
-    <p>Em 2025, a fração da área municipal coberta por unidades de conservação tem associação positiva com a radiância média municipal (Spearman ρ = 0,32; p = 0,002; 92 municípios).</p>
+    <p>Sem controle, a fração da área municipal em unidades de conservação tem correlação positiva com a radiância média de 2025 (Spearman ρ = 0,32; p = 0,002; 92 municípios). <strong>Essa associação não se sustenta depois do controle pela urbanização.</strong></p>
     <div class="tabela-wrap"><table class="tab">
       <thead><tr><th>Medida</th><th>Valor</th></tr></thead>
       <tbody>
-        <tr><td>Radiância média dos pixels dentro das UCs (n = 56.560)</td><td>2,14 nW·cm⁻²·sr⁻¹</td></tr>
-        <tr><td>Radiância média dos pixels fora das UCs (n = 162.447)</td><td>4,56 nW·cm⁻²·sr⁻¹</td></tr>
-        <tr><td>Mediana dentro e fora</td><td>0 nos dois casos: a maioria dos pixels é escura</td></tr>
+        <tr><td>Radiância média por município e fração urbana (2019): ρ de Spearman</td><td>0,97</td></tr>
+        <tr><td>Fração em UC e fração urbana: ρ de Spearman</td><td>0,39</td></tr>
+        <tr><td>Fração em UC e radiância, controlando pela fração urbana (ρ parcial)</td><td>−0,26 (p ≈ 0,02, permutação)</td></tr>
+        <tr><td>Igual, controlando também pela área municipal</td><td>−0,23</td></tr>
       </tbody>
     </table></div>
-    <p class="aviso">Limites: a associação pode refletir urbanização (a análise não a controla com a camada urbana de 2019), não é causa e não mede impacto sobre fauna, flora ou saúde humana.</p>
-    <p><a href="data/downloads/openlux_uc_fracao_municipio_2025.csv" download>Tabela por município (CSV)</a> · <a href="dados.html">Catálogo com licença e SHA-256</a></p>
+    <p>Leitura: a associação positiva vem da urbanização. Controlando por ela, os municípios com mais área em UC são <strong>mais escuros do que o esperado</strong> para o seu grau de urbanização. Esta é uma associação entre municípios, não causa, e não mede impacto sobre fauna, flora ou saúde humana.</p>
+    <p class="aviso">Limites: a fração urbana é de 2019 e a radiância, de 2025. O controle é feito no nível municipal; o controle no nível dos pixels depende dos polígonos do CNUC, que não estão neste ambiente.</p>
+    <p><a href="data/downloads/openlux_uc_fracao_municipio_2025.csv" download>Tabela por município (CSV)</a> · <a href="data/downloads/openlux_area_urbana_municipio_2019.csv" download>Fração urbana (CSV)</a> · <a href="dados.html">Catálogo com licença e SHA-256</a></p>
   </div>
 
   <h2>O que ainda está em aberto</h2>
   <div class="bloco">
     <ol>
       <li>Decidir sobre o MapBiomas, sabendo que a versão CC BY-SA exige licença de compartilhamento igual para os derivados.</li>
-      <li>Controlar a urbanização na análise de UCs, usando a camada urbana de 2019 já publicada.</li>
+      <li>Repetir o controle de urbanização no nível dos pixels, com os polígonos do CNUC.</li>
       <li>Conferir no site oficial do CNUC os nomes das UCs, que hoje não são publicados.</li>
       <li>Incluir hidrografia e áreas costeiras, quando houver fonte com licença verificada.</li>
     </ol>

@@ -16,7 +16,8 @@ import pytest
 
 playwright = pytest.importorskip("playwright.sync_api")
 
-WEB = Path(__file__).resolve().parent.parent / "web"
+ROOT = Path(__file__).resolve().parent.parent
+WEB = ROOT / "web"
 RIO, NITEROI, CACHOEIRAS = "3304557", "3303302", "3300803"
 
 
@@ -271,4 +272,16 @@ def test_urbanized_areas_derivatives_are_consistent(server, pg):
         assert "IBGE" in itens[arq]["fonte"]
     pg.goto(server + "/ambiental.html")
     pg.wait_for_selector("#mapaUrb svg path", state="attached")
+    assert pg.errors == []
+
+
+def test_uc_analysis_page_matches_urbanization_controlled_result(server, pg):
+    """Números publicados da análise de UCs conferem com o resultado publicado do controle de urbanização."""
+    r = json.loads((WEB / "data/downloads/openlux_uc_controle_urbanizacao_2025.json").read_text(encoding="utf-8"))
+    pt = lambda v: f"{v:.2f}".replace(".", ",").replace("-", "−")
+    pg.goto(server + "/ambiental.html")
+    texto = pg.inner_text("main")
+    assert pt(r["parcial_controle_urbana"]) in texto
+    assert pt(r["rho_urbana_x_radiancia"]) in texto
+    assert "não se sustenta depois do controle pela urbanização" in texto
     assert pg.errors == []

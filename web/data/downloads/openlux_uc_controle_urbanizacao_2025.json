@@ -1,0 +1,11 @@
+{
+  "n_municipios": 92,
+  "rho_uc_x_radiancia": 0.3167,
+  "p_uc_x_radiancia": 0.0021,
+  "rho_urbana_x_radiancia": 0.9654,
+  "rho_uc_x_urbana": 0.3931,
+  "parcial_controle_urbana": -0.262,
+  "p_permutacao_parcial": 0.0162,
+  "parcial_controle_urbana_e_area": -0.2299,
+  "nota": "associação entre municípios, exploratória, não causal; urbana de 2019 e radiância de 2025"
+}

@@ -36,3 +36,14 @@ Script: `scripts/analise_areas_protegidas.py`. Saídas em `outputs/ambiental/` (
 - Revisão do responsável sobre o método e os resultados.
 - Controle da urbanização, que depende da licença das áreas urbanizadas do IBGE.
 - Conferência dos nomes das UCs no site oficial do CNUC.
+
+## Atualização: controle de urbanização (municipal)
+
+Feito com `scripts/analise_controle_urbanizacao.py` (resultado publicado em `web/data/downloads/openlux_uc_controle_urbanizacao_2025.json`).
+
+- Sem controle: ρ = 0.32 (p = 0.002).
+- Fração urbana (2019) x radiância (2025): ρ = 0.97. Fração em UC x fração urbana: ρ = 0.39.
+- Controlando pela fração urbana: ρ parcial = -0.26 (p ≈ 0.016, permutação).
+- Controlando também pela área municipal: ρ parcial = -0.23.
+
+**Conclusão corrigida:** a associação positiva inicial se deve à urbanização. Ajustada, a associação é negativa: municípios com mais área em UC são mais escuros do que o esperado para o seu grau de urbanização. Continua exploratória e não causal. O controle no nível dos pixels depende dos polígonos do CNUC, que não estão neste ambiente.

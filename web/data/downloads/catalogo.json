@@ -236,6 +236,20 @@
       "execucao": null
     },
     {
+      "arquivo": "data/downloads/openlux_uc_controle_urbanizacao_2025.json",
+      "bytes": 376,
+      "sha256": "b80fa61d6a53f91630aa658027e984d85157ff24c0f2cacbf341455089d4a602",
+      "licenca": "CC-BY-4.0",
+      "titulo": "Controle de urbanização na associação entre unidades de conservação e radiância (2025): correlações de Spearman e parciais",
+      "tipo": "JSON",
+      "fonte": "MMA, CNUC 2025-08 (CC BY 4.0); IBGE, Áreas Urbanizadas 2019 e Malha 2024; NASA VJ146A4. Gerado por scripts/analise_controle_urbanizacao.py",
+      "unidade": "coeficientes de correlação (adimensional)",
+      "periodo": "2019 (urbana) e 2025 (radiância)",
+      "sistema_de_referencia": "não se aplica (tabela)",
+      "situacao": "publicado",
+      "execucao": null
+    },
+    {
       "arquivo": "data/downloads/openlux_limites_municipais_rj.gpkg",
       "bytes": 466944,
       "sha256": "9e873c607103f06b10f0d0fc9001d8c6eb6ce8c124f89157d6fa3abc0facec83",
