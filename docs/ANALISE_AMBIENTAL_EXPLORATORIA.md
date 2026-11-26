@@ -47,3 +47,12 @@ Feito com `scripts/analise_controle_urbanizacao.py` (resultado publicado em `web
 - Controlando também pela área municipal: ρ parcial = -0.23.
 
 **Conclusão corrigida:** a associação positiva inicial se deve à urbanização. Ajustada, a associação é negativa: municípios com mais área em UC são mais escuros do que o esperado para o seu grau de urbanização. Continua exploratória e não causal. O controle no nível dos pixels depende dos polígonos do CNUC, que não estão neste ambiente.
+
+## Atualização: controle no nível dos pixels (2025)
+
+Feito com `scripts/analise_controle_urbanizacao_pixels.py` (resultado em `web/data/downloads/openlux_uc_controle_urbanizacao_pixels_2025.json`). Usa a radiância NOAA-20 de 2025 (qualidade 0, terra, dentro do estado), o CNUC 2025-08 e as Áreas Urbanizadas 2019, classificando cada pixel pelo centro.
+
+- Dentro de áreas urbanizadas: mediana de 19,2 nW·cm⁻²·sr⁻¹ dentro de UCs (n = 1.883) e 38,9 fora (n = 12.699).
+- Fora de áreas urbanizadas: medianas 0 nos dois casos; médias 1,36 e 1,32.
+
+Não se publicam p-valores: pixels são espacialmente dependentes, e com amostras desse tamanho qualquer teste fica distorcido. O resultado é descritivo e não causal: dentro de áreas urbanizadas, os pixels em UC são mais escuros do que os de fora.

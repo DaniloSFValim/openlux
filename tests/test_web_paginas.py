@@ -285,3 +285,15 @@ def test_uc_analysis_page_matches_urbanization_controlled_result(server, pg):
     assert pt(r["rho_urbana_x_radiancia"]) in texto
     assert "não se sustenta depois do controle pela urbanização" in texto
     assert pg.errors == []
+
+
+def test_pixel_level_uc_result_matches_published_json(server, pg):
+    """Números publicados no nível dos pixels conferem com o JSON publicado."""
+    d = json.loads((WEB / "data/downloads/openlux_uc_controle_urbanizacao_pixels_2025.json").read_text(encoding="utf-8"))
+    pt1 = lambda v: f"{v:.1f}".replace(".", ",")
+    pg.goto(server + "/ambiental.html")
+    texto = pg.inner_text("main")
+    assert pt1(d["estratos"]["urbano_dentro_uc"]["mediana"]) in texto
+    assert pt1(d["estratos"]["urbano_fora_uc"]["mediana"]) in texto
+    assert "Não são publicados p-valores" in texto
+    assert pg.errors == []
