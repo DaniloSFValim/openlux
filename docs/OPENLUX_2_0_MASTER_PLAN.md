@@ -332,7 +332,8 @@ Fontes lidas por um subagente de leitura web (texto relatado, não conferido lin
 |---|---|---|
 | LAADS, alerta 199913 | "Cessation of S-NPP data to users on November 02, 2026"; cessação às 13:00 UTC de 2026-11-02 (dia 306); campo *Start Date* da página diz 2026-11-01 13:00 (divergência não explicada); arquivo histórico **continua disponível**; migração para NOAA-20 e NOAA-21; mapeia VNP46A4 → VJ146A4 (NOAA-20) e VJ246A4 (NOAA-21) | Lido |
 | NOAA NESDIS (publicado 2026-08-03) | Fim da entrega de produtos científicos do S-NPP às 13:00 UTC de 2026-11-02; "Permanent"; a página **não** diz se o arquivo histórico permanece | Lido |
-| NOAA, atualizações #3 (2026-10-30) e #4 (2026-11-02) | Títulos sugerem horário revisado para 15:40 UTC de 2026-11-02 | **Não lido**. Confirmar antes de citar o horário |
+| NOAA, atualização #3 (2026-10-30 14:00 UTC) | "delivery ... will cease on November 02, 2026 15:40 UTC". Horário revisado de 13:00 para **15:40 UTC** | Lido (links reais da página de aviso, não os de tentativa) |
+| NOAA, atualização #4 (2026-11-02 18:00 UTC) | Cessação "took effect today at 15:40 UTC"; desligamento do HRD no mesmo horário; descida orbital a partir de 1º/12/2026 até reentrada prevista por volta de 12/12/2026 | Lido. Não menciona arquivo histórico |
 | Earthdata (alerta de 1º/11/2026) | HTTP 403 | Não lido |
 
 Consequências para o projeto:
@@ -341,7 +342,7 @@ Consequências para o projeto:
 3. NOAA-21 (VJ246A4) não está nos dados locais e não foi avaliado. Usá-lo exige análise de comparabilidade, incluindo o viés de 2021 entre S-NPP e NOAA-20 registrado no LAADS. Decisão de escopo pendente do responsável.
 4. Alertas de NOAA-20 (VJ146) **não verificados** nesta revisão.
 
-Pendências deste item: confirmar o horário nas atualizações #3 e #4 da NOAA; ler o alerta 199913 diretamente; verificar alertas do NOAA-20; decidir sobre o NOAA-21.
+Pendências deste item: (horário confirmado em 15:40 UTC pelas atualizações #3 e #4; o aviso original de 13:00 UTC foi superado); ler o alerta 199913 diretamente; verificar alertas do NOAA-20; decidir sobre o NOAA-21.
 
 ## 13. Alertas LAADS do NOAA-20 (VJ146), verificados em 2026-11-26
 
