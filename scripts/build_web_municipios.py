@@ -78,37 +78,6 @@ def contagens_pixels(malha, grade, ano):
     return out, grade["classes"]["labels"], grade["classes"]["first_code"]
 
 
-def coords_svg(geom, x, y):
-    """Caminho SVG de um polígono/multipolígono em lon/lat, projeção equirretangular com cos(lat)."""
-    polys = [geom] if geom.geom_type == "Polygon" else list(geom.geoms)
-    d = []
-    for p in polys:
-        for ring in [p.exterior] + list(p.interiors):
-            pts = list(ring.coords)
-            d.append("M" + "L".join(f"{x(px):.1f},{y(py):.1f}" for px, py in pts) + "Z")
-    return "".join(d)
-
-
-def mapa_svg(malha, cd, W=420, H=380):
-    b = malha.total_bounds
-    k = np.cos(np.radians((b[1] + b[3]) / 2))
-    minx, maxx, miny, maxy = b
-    esc = (W - 10) / ((maxx - minx) * k)
-    x = lambda lon: 5 + (lon - minx) * k * esc
-    y = lambda lat: 5 + (maxy - lat) * esc
-    paths = []
-    alvo = None
-    for _, r in malha.iterrows():
-        if str(r["CD_MUN"]) == cd:
-            alvo = coords_svg(r.geometry, x, y)
-        else:
-            paths.append(coords_svg(r.geometry, x, y))
-    hh = int((maxy - miny) * esc + 10)
-    return (f'<svg viewBox="0 0 {W} {hh}" role="img" aria-label="Mapa do município destacado no Rio de Janeiro">'
-            f'<path d="{"".join(paths)}" fill="#1b2540" stroke="rgba(255,255,255,.2)" stroke-width=".6"/>'
-            f'<path d="{alvo}" fill="#ffd166" fill-opacity=".9" stroke="#fff" stroke-width="1.2"/></svg>')
-
-
 def serie_svg(vals_n, anos_n, vals_s, anos_s, W=640, H=240):
     m = {"l": 52, "r": 12, "t": 12, "b": 30}
     todos = [v for v in vals_n + vals_s if v is not None]
@@ -168,7 +137,7 @@ CSS_PAG = """
   .tabela-wrap{overflow-x:auto}
   dl.def{display:grid;grid-template-columns:minmax(120px,200px) 1fr;gap:6px 14px;font-size:.92rem}
   dl.def dt{color:#9fb3cf}dl.def dd{margin:0}
-  .mapa svg{width:min(100%,420px);height:auto;display:block;margin:0 auto}
+  .mapa > svg{width:min(100%,420px);height:auto;display:block;margin:0 auto}
   .grafico{width:100%;height:auto;display:block}.grafico text{fill:#9fb3cf;font-size:11px}
   .menu-paginas{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-size:.9rem}
   .menu-paginas a{color:#9fb3cf;text-decoration:none;padding:4px 0}
@@ -196,7 +165,7 @@ def fontes_html(N):
     return "".join(itens)
 
 
-def pagina_html(d, N, malha, geo_svg):
+def pagina_html(d, N, malha):
     cd, nome, ano = d["cd"], d["nome"], d["ano"]
     mal = malha.set_index(malha["CD_MUN"].astype(str)).loc[cd]
     area = float(mal["AREA_KM2"])
@@ -216,8 +185,8 @@ def pagina_html(d, N, malha, geo_svg):
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{html.escape(nome)} — OpenLux</title>
 <meta name="description" content="Luz noturna estimada por satélite em {html.escape(nome)}: indicadores, série 2018–2025, comparação com o estado, ranking e distribuição de pixels. Estimativa por sensoriamento remoto.">
-<link rel="icon" href="data:,"><link rel="stylesheet" href="../css/prototipo.css"><link rel="stylesheet" href="../css/paginas.css">
-<style>{CSS_PAG}</style></head>
+<link rel="icon" href="data:,"><link rel="stylesheet" href="../vendor/leaflet/leaflet.css"><link rel="stylesheet" href="../css/prototipo.css"><link rel="stylesheet" href="../css/paginas.css">
+<style>{CSS_PAG}.mapa-mun{{height:420px;background:transparent}}</style></head>
 <body class="pagina">
 {cabecalho("../")}
 <main>
@@ -236,7 +205,7 @@ def pagina_html(d, N, malha, geo_svg):
 </dl></div>
 
 <h2>Mapa</h2>
-<div class="bloco mapa">{geo_svg}<p class="suave">Município em amarelo, demais municípios do estado em cinza. Limites do IBGE (malha 2024).</p></div>
+<div class="bloco mapa"><div id="mapa-mun" class="mapa-mun" data-cd="{cd}" role="application" aria-label="Mapa interativo: {html.escape(nome)} destacado e municípios vizinhos"></div><p class="suave">Município em amarelo. Passe o cursor para ver os nomes e clique em um vizinho para abrir a página dele. Limites do IBGE (malha 2024).</p></div>
 
 <h2>Indicadores de {ano}</h2>
 <div class="bloco tabela-wrap"><table class="tab">
@@ -280,6 +249,8 @@ def pagina_html(d, N, malha, geo_svg):
 </dl></div>
 </main>
 <footer class="suave" style="max-width:1080px;margin:0 auto;padding:0 16px 32px">Estimativa por sensoriamento remoto. Autor: Danilo Valim · ORCID 0009-0009-7250-6151 · DOI 10.5281/zenodo.24510755</footer>
+<script src="../vendor/leaflet/leaflet.js"></script>
+<script src="../js/municipio-mapa.js"></script>
 </body></html>
 """
     return html_out
@@ -407,8 +378,7 @@ def main():
         d = dados_municipio(cd, N, S, perc, contagens, rotulos, primeira, ano)
         s = slug(d["nome"])
         nomes.append((d["nome"], s))
-        geo = mapa_svg(malha_desenho, cd)
-        (OUT / f"{s}.html").write_text(pagina_html(d, N, malha, geo), encoding="utf-8")
+        (OUT / f"{s}.html").write_text(pagina_html(d, N, malha), encoding="utf-8")
         pdf(d, N, malha_desenho, OUT / f"{s}.pdf")
     (WEB / "municipios.html").write_text(indice_html(sorted(nomes)), encoding="utf-8")
     print(f"OK: {len(nomes)} páginas e relatórios em {OUT}")

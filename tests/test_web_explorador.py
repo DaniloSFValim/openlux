@@ -56,24 +56,6 @@ def _abre_gaveta(pg):
         pg.wait_for_function("document.getElementById('gaveta').classList.contains('aberta')")
 
 
-def test_index_renders_92_municipalities_and_default_year(server, browser_page):
-    pg = browser_page
-    pg.goto(server + "/index.html")
-    pg.wait_for_selector("#mapa path[data-cd]")
-    assert pg.locator("#mapa path[data-cd]").count() == 92
-    assert pg.inner_text("#anoNum") == "2025"
-    assert pg.errors == []
-
-
-def test_index_card_opens_from_url_and_shows_ranking(server, browser_page):
-    pg = browser_page
-    pg.goto(server + f"/index.html?s=noaa20&y=2025&m={MUN_RIO}")
-    pg.wait_for_function("document.getElementById('cartao').classList.contains('on')")
-    assert pg.inner_text("#cNome") == "Rio de Janeiro"
-    assert pg.inner_text("#cPos").endswith("de 92")
-    assert pg.errors == []
-
-
 def test_explorer_loads_with_drawer_closed_and_legend(server, browser_page):
     pg = browser_page
     pg.goto(server + "/explorar.html")
@@ -171,4 +153,13 @@ def test_pixel_lens_shows_second_year_pixels(server, browser_page):
     pg.wait_for_function("document.querySelectorAll('img.pixel-canvas').length >= 2", timeout=20000)
     srcs = pg.eval_on_selector_all("img.pixel-canvas", "els => els.map(e => e.src)")
     assert len(set(srcs)) == 2, "ano da lente deve ter pixels diferentes do ano atual"
+    assert pg.errors == []
+
+
+def test_home_classes_count_all_92_municipalities(server, browser_page):
+    pg = browser_page
+    pg.goto(server + "/index.html")
+    pg.wait_for_selector("#classes li", state="attached")
+    contagens = [int(x) for x in pg.locator("#classes strong").all_inner_texts()]
+    assert len(contagens) == 6 and sum(contagens) == 92
     assert pg.errors == []

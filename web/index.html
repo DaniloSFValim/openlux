@@ -4,136 +4,92 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Observatório da luz noturna — OpenLux</title>
-<meta name="description" content="Luz noturna vista do espaço nos 92 municípios do Rio de Janeiro, de 2018 a 2025 (NOAA-20), com série do S-NPP desde 2012. Estimativa por sensoriamento remoto, não medição do brilho do céu.">
+<meta name="description" content="Poluição luminosa no Rio de Janeiro: o que é, como um satélite estima a luz emitida nos 92 municípios de 2018 a 2025 (NOAA-20) e o que essa estimativa não mede.">
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
 <link rel="stylesheet" href="css/prototipo.css">
 <link rel="stylesheet" href="css/paginas.css">
+<link rel="stylesheet" href="css/inicio.css">
 </head>
 <body class="pagina">
+<header class="cabec">
+  <div class="marca">OpenLux · Observatório</div>
+  <nav class="menu-paginas" aria-label="Áreas do OpenLux">
+    <a href="index.html" aria-current="page">Observatório</a>
+    <a href="explorar.html">Explorador</a>
+    <a href="laboratorio.html">Laboratório</a>
+    <a href="ambiental.html">Observatório ambiental</a>
+    <a href="dados.html">Dados abertos</a>
+    <a href="metodologia.html">Metodologia</a>
+  </nav>
+</header>
 
-<section class="heroi" aria-label="Mapa dos municípios">
-  <div class="palco">
-    <div id="mapa" role="application" aria-label="Mapa interativo dos 92 municípios do Rio de Janeiro, colorido pela luz do ano escolhido"></div>
-    <div class="lente" id="lente" aria-hidden="true"></div>
+<main class="inicio">
+  <div class="kicker">Poluição luminosa · Rio de Janeiro</div>
+  <h1>Poluição luminosa: a luz artificial que sobe para o céu</h1>
+  <p class="lead">Esta página explica o que é poluição luminosa e mostra como um satélite estima a luz emitida pelos 92 municípios do estado. Também diz com clareza o que o satélite <strong>não</strong> mede.</p>
+
+  <div class="bloco aviso">
+    <h3>O que medimos e o que não medimos</h3>
+    <p>O satélite mede a <strong>radiância</strong> da luz que sai da superfície, em nW·cm⁻²·sr⁻¹, em cada pixel de cerca de 460 m. Isso é uma <strong>estimativa de poluição luminosa baseada em sensoriamento remoto</strong>. Não é o brilho do céu que você vê do quintal, e não prova efeito sobre saúde, fauna ou flora.</p>
+    <p class="kpis-linha"><a class="botao" href="explorar.html">Ver o mapa no explorador</a> <a class="botao sec" href="metodologia.html">Ler a metodologia</a></p>
   </div>
 
-  <div class="topo">
-    <div class="titulo"><small>OpenLux · Rio de Janeiro</small><h1>Quanta luz tem o seu município?</h1>
-      <nav class="menu-paginas" aria-label="Áreas do OpenLux">
-        <a href="index.html" aria-current="page">Observatório</a>
-        <a href="explorar.html">Explorador</a>
-        <a href="laboratorio.html">Laboratório</a>
-        <a href="ambiental.html">Observatório ambiental</a>
-        <a href="dados.html">Dados abertos</a>
-        <a href="metodologia.html">Metodologia</a>
-      </nav>
-    </div>
-    <div class="legenda">
-      <div>Luz média vista do espaço (nW·cm⁻²·sr⁻¹)</div>
-      <div class="barra" id="barra"></div>
-      <div class="rotulos"><span>menos</span><span>mais</span></div>
-    </div>
+  <h2>1. O que é poluição luminosa</h2>
+  <p>É o uso de luz artificial que é excessiva, mal direcionada ou desnecessária. Quando a luz vai para o céu, em vez de iluminar onde se precisa, ela se espalha pela atmosfera e clareia a noite. Esse clareamento é chamado de <strong>brilho do céu</strong> (skyglow).</p>
+
+  <h2>2. Três formas de poluição luminosa</h2>
+  <div class="grade">
+    <div class="bloco"><b>Brilho do céu</b><p>Luz que sobe e se espalha pelo ar, clareando o céu sobre cidades. É a forma que mais afeta a observação astronômica.</p></div>
+    <div class="bloco"><b>Luz intrusiva</b><p>Luz que entra onde não deveria: janelas, quartos, jardins vizinhos ou áreas naturais.</p></div>
+    <div class="bloco"><b>Ofuscamento</b><p>Luz forte e direta que incomoda a visão, como lâmpadas expostas ou letreiros muito intensos.</p></div>
   </div>
 
-  <div class="ano" aria-live="polite">
-    <div class="num" id="anoNum">2025</div>
-    <div class="aviso" id="avisoRuido" hidden></div>
+  <h2>3. O que o satélite vê</h2>
+  <p>O sensor VIIRS, a bordo do NOAA-20, registra a luz que sai para o espaço. Esse valor cresce com a quantidade de luz emitida pela superfície, por isso mostra onde a luz artificial está concentrada. Ele <strong>não</strong> separa brilho do céu de luz intrusiva nem mede quanto dessa luz chega ao observador.</p>
+
+  <h2>4. Veja a distribuição nos 92 municípios</h2>
+  <p class="suave">Escolha o ano. Cada município entra na classe da sua luz média. As contagens são calculadas dos dados publicados.</p>
+  <div class="bloco">
+    <div class="controle"><label for="ano">Ano</label><input type="range" id="ano" min="0" max="7" value="7"><output id="anoOut" for="ano">2025</output></div>
+    <ul class="classes" id="classes"></ul>
   </div>
 
-  <div class="cartao" id="cartao" role="dialog" aria-live="polite" aria-labelledby="cNome">
-    <button class="fechar" id="fechar" aria-label="Fechar">×</button>
-    <h2 id="cNome"></h2>
-    <div class="sub" id="cHab"></div>
-    <div class="lbl">Luz média na área · <span id="cAno"></span></div>
-    <div class="big"><span id="cMedia">—</span> <span class="unid">nW·cm⁻²·sr⁻¹</span></div>
-    <div class="lbl">Posição entre os 92 municípios</div>
-    <div class="pos" id="cPos"></div>
-    <svg id="cSerie" viewBox="0 0 300 90" preserveAspectRatio="none" aria-hidden="true"></svg>
-    <div class="acoes">
-      <a id="cExplorar" href="explorar.html">Abrir no explorador</a>
-      <button id="cCompartilhar">Copiar link</button>
-    </div>
-    <p class="estimativa">Estimativa de poluição luminosa baseada em sensoriamento remoto. Não é medição do brilho do céu.</p>
+  <h2>5. Como a média estadual mudou</h2>
+  <p class="suave">Média simples dos 92 municípios por ano. Uma alta indica mais luz emitida em média, não necessariamente mais brilho do céu.</p>
+  <div class="bloco">
+    <svg class="serie" id="serie" viewBox="0 0 640 240" role="img" aria-label="Média estadual da luz de 2018 a 2025"></svg>
+    <div class="controle"><label for="ano3">Ano</label><input type="range" id="ano3" min="0" max="7" value="7"><output id="ano3Out" for="ano3">2025</output></div>
   </div>
 
-  <div class="controles-base">
-    <button id="play" aria-pressed="false">▶ Viajar no tempo</button>
-    <input type="range" id="ano" min="0" value="0" aria-label="Ano">
-    <button class="sec" id="lenteBtn" aria-pressed="false">Lente</button>
-    <label class="sensor">Sensor
-      <select id="sensor">
-        <option value="noaa20">NOAA-20 (2018–2025)</option>
-        <option value="snpp">S-NPP (2012–2025)</option>
-      </select>
-    </label>
+  <h2>6. Como reduzir a poluição luminosa</h2>
+  <div class="grade">
+    <div class="bloco"><b>Direcionar</b><p>Usar luminárias que apontam para baixo, sem emissão para cima.</p></div>
+    <div class="bloco"><b>Dimensionar</b><p>Usar só a intensidade necessária para a tarefa.</p></div>
+    <div class="bloco"><b>Escolher a cor</b><p>Preferir luz com menos componente azul, quando adequado ao uso.</p></div>
   </div>
-</section>
+  <p class="suave">Práticas gerais de iluminação. O OpenLux não avalia o efeito de cada medida.</p>
 
-<main class="observatorio">
-  <section aria-labelledby="h-kpi">
-    <h2 id="h-kpi">Indicadores estaduais</h2>
-    <div class="controles">
-      <label>Ano de referência <select id="anoObs"></select></label>
-      <p class="nota-metodo" id="notaKpi">Médias estaduais são médias simples das médias dos 92 municípios, não médias ponderadas por área.</p>
-    </div>
-    <div class="kpis" id="kpis"></div>
-  </section>
+  <h2>Limites desta estimativa</h2>
+  <div class="bloco">
+    <p>• A radiância é uma estimativa orbital, não medição de campo.</p>
+    <p>• O sensor tem sensibilidade menor para luz azul, e LEDs brancos podem ser subestimados.</p>
+    <p>• Não há validação em campo ainda. O protocolo está em preparação.</p>
+    <p>• Diferenças pequenas entre anos podem ser ruído do sensor, e não mudança real.</p>
+  </div>
 
-  <section aria-labelledby="h-evo">
-    <h2 id="h-evo">Evolução temporal</h2>
-    <div class="bloco">
-      <svg class="grafico" id="grafEvo" viewBox="0 0 640 260" role="img" aria-labelledby="h-evo"></svg>
-      <div class="legenda-linha"><span style="--c:#ffd166">NOAA-20 (primário, 2018–2025)</span><span style="--c:#9fb3cf">S-NPP (continuidade, 2012–2025, tracejado)</span></div>
-      <p class="nota-metodo">O S-NPP tem ruído em áreas escuras a partir de 2022: não leia a diferença desse período como mudança real.</p>
-    </div>
-  </section>
-
-  <section aria-labelledby="h-mm">
-    <h2 id="h-mm">Maiores e menores valores</h2>
-    <div class="duas-colunas">
-      <div class="bloco"><h3>Maiores médias</h3><ol class="lista-mun" id="maiores"></ol></div>
-      <div class="bloco"><h3>Menores médias</h3><ol class="lista-mun" id="menores"></ol></div>
-    </div>
-  </section>
-
-  <section aria-labelledby="h-dist">
-    <h2 id="h-dist">Distribuição municipal</h2>
-    <div class="bloco">
-      <svg class="grafico" id="grafDist" viewBox="0 0 640 220" role="img" aria-labelledby="h-dist"></svg>
-      <p class="nota-metodo">Número de municípios em cada faixa de média no ano de referência (faixas de largura dobrada, em nW·cm⁻²·sr⁻¹).</p>
-    </div>
-  </section>
-
-  <section aria-labelledby="h-comp">
-    <h2 id="h-comp">Variação entre 2018 e 2025</h2>
-    <div class="bloco" id="comparacao"></div>
-  </section>
-
-  <section aria-labelledby="h-terr">
-    <h2 id="h-terr">Indicador territorial: pixels iluminados</h2>
-    <div class="bloco">
-      <p>Fração dos pixels válidos de cada município com radiância acima de 0,5 nW·cm⁻²·sr⁻¹, no ano de referência. Mediana estadual: <strong id="terrMed">—</strong>.</p>
-      <p class="nota-metodo">Limitação: a fração depende do limiar escolhido e do ruído de fundo do sensor. Não mede consumo de energia.</p>
-    </div>
-  </section>
-
-  <section aria-labelledby="h-rank">
-    <h2 id="h-rank">Ranking dos municípios</h2>
-    <div class="bloco">
-      <label class="campo-busca">Buscar município <input type="text" id="busca" placeholder="Ex.: Niterói"></label>
-      <div class="tabela-wrap"><table class="tab" id="tabRank"><thead><tr><th>Posição</th><th>Município</th><th>Média (nW·cm⁻²·sr⁻¹)</th><th></th></tr></thead><tbody id="corpoRank"></tbody></table></div>
-    </div>
-  </section>
+  <h2>Referências</h2>
+  <ol class="refs">
+    <li>Falchi et al. (2016). DOI <a href="https://doi.org/10.1126/sciadv.1600377" rel="noopener">10.1126/sciadv.1600377</a></li>
+    <li>Levin et al. (2020). DOI <a href="https://doi.org/10.1016/j.rse.2019.111443" rel="noopener">10.1016/j.rse.2019.111443</a></li>
+    <li>Román et al. (2018). DOI <a href="https://doi.org/10.1016/j.rse.2018.03.017" rel="noopener">10.1016/j.rse.2018.03.017</a></li>
+  </ol>
+  <p class="suave">Lista completa e conferências de DOI em <code>docs/REFERENCES.md</code>.</p>
 </main>
 
 <footer class="rodape-pag">
   <p>Dados reais do OpenLux: NASA Black Marble (VJ146A4 NOAA-20; VNP46A4 S-NPP). Autor: Danilo Valim · ORCID <a href="https://orcid.org/0009-0009-7250-6151" rel="noopener">0009-0009-7250-6151</a> · DOI <a href="https://doi.org/10.5281/zenodo.24510755" rel="noopener">10.5281/zenodo.24510755</a> · <a href="metodologia.html">Metodologia</a> · <a href="dados.html">Dados abertos</a> · <a href="municipios.html">Municípios</a></p>
 </footer>
 
-<script src="vendor/leaflet/leaflet.js"></script>
-<script src="js/comum.js"></script>
-<script src="js/prototipo.js"></script>
-<script src="js/observatorio.js"></script>
+<script src="js/inicio.js"></script>
 </body>
 </html>
