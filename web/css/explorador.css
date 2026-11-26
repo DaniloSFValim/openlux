@@ -29,7 +29,7 @@ body.explorador { overflow: hidden; background: var(--noite); }
 .aviso-exp { background: rgba(255,209,102,.12); border: 1px solid rgba(255,209,102,.4); border-radius: 10px; padding: 8px 10px; font-size: 12px; margin-top: 8px; }
 .btn-exp { display: block; width: 100%; margin: 8px 0; padding: 9px 12px; background: var(--luz); color: #151a26; border: 0; border-radius: 10px; font: inherit; font-weight: 700; cursor: pointer; }
 .btn-exp.sec { background: transparent; color: var(--texto); border: 1px solid rgba(255,255,255,.25); }
-.abrir-gaveta { position: absolute; top: 110px; left: 14px; z-index: 700; background: var(--luz); color: #151a26; border: 0; border-radius: 10px; padding: 9px 14px; font: inherit; font-weight: 700; cursor: pointer; display: none; }
+.abrir-gaveta { position: absolute; top: 150px; left: 14px; z-index: 700; background: var(--luz); color: #151a26; border: 0; border-radius: 10px; padding: 9px 14px; font: inherit; font-weight: 700; cursor: pointer; display: none; }
 body.gaveta-fechada .abrir-gaveta { display: block; }
 
 /* cartão municipal */

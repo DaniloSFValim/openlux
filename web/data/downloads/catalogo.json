@@ -81,8 +81,8 @@
     },
     {
       "arquivo": "data/municipios.geojson",
-      "bytes": 373617,
-      "sha256": "9dc86ceb7fea6aa4fd079030d82e19cd5d21acbd7a94d48b22b0e3ee7859ab4f",
+      "bytes": 375350,
+      "sha256": "f2ec89f0ba87d16075e014fc41bc5cf135ca3ed9b26b555f8e67b36005cd7b6b",
       "licenca": "CC-BY-4.0",
       "titulo": "Limites dos 92 municípios (GeoJSON)",
       "tipo": "GeoJSON",

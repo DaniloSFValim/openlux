@@ -149,3 +149,13 @@ def test_explorer_sensor_switch_keeps_lens_active(server, browser_page):
     assert pg.is_checked("#lenteOn")
     assert "lente=2018" in pg.url
     assert pg.errors == []
+
+
+def test_card_area_is_the_official_ibge_value(server, browser_page):
+    """A área do cartão deve ser a da malha IBGE (AREA_KM2), igual à página municipal e ao PDF."""
+    pg = browser_page
+    pg.goto(server + "/explorar.html?y=2025&m=3304557&lat=-22.6&lng=-43.1&z=9")
+    pg.wait_for_function("document.getElementById('cartao').classList.contains('on')")
+    pg.wait_for_function("document.getElementById('cPopArea').textContent.includes('km²')")
+    assert "1.200,3 km²" in pg.inner_text("#cPopArea")
+    assert pg.errors == []

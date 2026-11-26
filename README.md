@@ -37,25 +37,25 @@ noturna de superfície, **não medições do brilho do céu**.
 
 ### Telas do OpenLux 2.0
 
-Capturas feitas no navegador a partir da aplicação (`docs/screenshots/openlux-2.0/`). Não são simulações.
+Capturas reais do navegador, feitas a partir das páginas publicadas em `web/` (`docs/screenshots/openlux-2.0/`). Não são simulações.
 
 | Tela | Arquivo |
 |---|---|
-| Observatório (página inicial) | ![Observatório](docs/screenshots/openlux-2.0/01_homepage_desktop.png) |
-| Observatório, celular | ![Observatório celular](docs/screenshots/openlux-2.0/02_homepage_mobile.png) |
+| Observatório (página inicial) | ![Observatório](docs/screenshots/openlux-2.0/01_observatorio_desktop.png) |
+| Observatório, celular | ![Observatório celular](docs/screenshots/openlux-2.0/02_observatorio_celular.png) |
 | Explorador estadual | ![Explorador](docs/screenshots/openlux-2.0/03_explorador_estadual.png) |
-| Mapa de pixels (zoom no Rio) | ![Pixels](docs/screenshots/openlux-2.0/04_mapa_pixels_zoom.png) |
-| Gaveta de camadas | ![Gaveta](docs/screenshots/openlux-2.0/05_gaveta_camadas_aberta.png) |
-| Cartão municipal | ![Cartão](docs/screenshots/openlux-2.0/06_cartao_municipal.png) |
-| Comparação temporal | ![Comparação](docs/screenshots/openlux-2.0/07_comparacao_temporal.png) |
-| Laboratório estatístico | ![Laboratório](docs/screenshots/openlux-2.0/08_laboratorio_estatistico.png) |
-| Comparação entre municípios | ![Municípios](docs/screenshots/openlux-2.0/09_comparacao_municipios.png) |
+| Mapa de pixels (zoom no Rio) | ![Pixels](docs/screenshots/openlux-2.0/04_explorador_pixels_rio.png) |
+| Gaveta de camadas | ![Gaveta](docs/screenshots/openlux-2.0/05_explorador_gaveta.png) |
+| Cartão municipal | ![Cartão](docs/screenshots/openlux-2.0/06_explorador_cartao_municipal.png) |
+| Lente de comparação (2018 × 2025) | ![Lente](docs/screenshots/openlux-2.0/07_explorador_lente.png) |
+| Laboratório de análises | ![Laboratório](docs/screenshots/openlux-2.0/08_laboratorio.png) |
+| Página municipal (Niterói) | ![Município](docs/screenshots/openlux-2.0/09_pagina_municipal_niteroi.png) |
+| Relatório municipal em PDF (Niterói) | ![PDF](docs/screenshots/openlux-2.0/13_relatorio_municipal_niteroi.png) |
 | Observatório ambiental | ![Ambiental](docs/screenshots/openlux-2.0/10_observatorio_ambiental.png) |
 | Dados abertos | ![Dados](docs/screenshots/openlux-2.0/11_dados_abertos.png) |
 | Metodologia | ![Metodologia](docs/screenshots/openlux-2.0/12_metodologia.png) |
-| Mapa em celular | ![Celular](docs/screenshots/openlux-2.0/14_mapa_celular.png) |
 
-**Não incluída:** o relatório municipal em PDF (item 13 do prompt). Ele ainda não existe no produto, e não há captura simulada.
+As capturas antigas, de uma versão anterior da interface, foram removidas.
 
 ### O que o 2.0 acrescenta
 

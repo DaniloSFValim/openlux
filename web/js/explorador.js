@@ -57,13 +57,14 @@
 
     // áreas (km²) e densidade (2022)
     const area = {};
-    geo.features.forEach((f) => { area[f.properties.CD_MUN] = T.area(f) / 1e6; });
+    geo.features.forEach((f) => { area[f.properties.CD_MUN] = f.properties.AREA_KM2 != null ? f.properties.AREA_KM2 : T.area(f) / 1e6; }); // área oficial IBGE (malha 2024)
     const densidade = {};
     codigos.forEach((cd) => { const p = D.municipios[cd].population; densidade[cd] = p != null && area[cd] ? p / area[cd] : null; });
 
     // mapa
-    const map = L.map('mapa', { zoomControl: true, attributionControl: true, minZoom: 8, maxZoom: 14 });
-    map.attributionControl.setPrefix(false).addAttribution('Dados: NASA Black Marble (VIIRS) · IBGE Malha 2024 e Censo 2022 · CNUC/MMA');
+    const map = L.map('mapa', { zoomControl: false, attributionControl: true, minZoom: 8, maxZoom: 14 });
+    L.control.zoom({ position: 'bottomleft' }).addTo(map);
+    map.attributionControl.setPrefix(false).addAttribution('Dados: NASA Black Marble (VIIRS) · IBGE Malha 2024 e Censo 2022');
     const pInfo = $('pixelInfo');
     map.createPane('lentePane'); map.getPane('lentePane').style.zIndex = 450; map.getPane('lentePane').style.pointerEvents = 'none';
     map.createPane('pixelPane'); map.getPane('pixelPane').style.zIndex = 380;
