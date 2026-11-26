@@ -156,3 +156,49 @@ def test_no_horizontal_scroll_at_phone_width(server, pg, pagina):
     # rolagem programática pode existir com overflow hidden; o que importa ao usuário é overflow-x oculto
     # ou nenhuma rolagem efetiva
     assert estilo == "hidden" or pg.evaluate("window.scrollX") == 0, (pagina, estilo)
+
+
+def test_observatorio_kpis_match_published_data(server, pg):
+    N = _indicadores()
+    pg.goto(server + "/index.html")
+    pg.wait_for_selector("#kpis .kpi", state="attached")
+    pg.wait_for_timeout(500)
+    kpis = pg.locator("#kpis .kpi").all_inner_texts()
+    assert len(kpis) == 6
+    assert any(k.split("\n")[1] == "92" for k in kpis if "MUNIC" in k.upper())
+    medias25 = [v["mean"][-1] for v in N["municipios"].values() if v["mean"][-1] is not None]
+    media_estado = sum(medias25) / len(medias25)
+    assert any(_fmt2(media_estado) in k for k in kpis), kpis
+    assert pg.errors == []
+
+
+def test_observatorio_ranking_search_and_explorer_links(server, pg):
+    pg.goto(server + "/index.html")
+    pg.wait_for_selector("#corpoRank tr", state="attached")
+    assert pg.locator("#corpoRank tr").count() == 92
+    pg.fill("#busca", "niter")
+    pg.wait_for_timeout(200)
+    assert pg.locator("#corpoRank tr").count() == 1
+    assert "Niterói" in pg.locator("#corpoRank tr").first.inner_text()
+    pg.fill("#busca", "")
+    pg.wait_for_timeout(200)
+    href = pg.locator("#corpoRank tr").nth(0).locator("a").get_attribute("href")
+    assert href.startswith("explorar.html?s=noaa20&y=2025&m=")
+    assert pg.errors == []
+
+
+def test_observatorio_map_opens_card_with_link_to_explorer(server, pg):
+    pg.goto(server + "/index.html")
+    pg.wait_for_selector("#mapa path[data-cd]", state="attached")
+    pg.evaluate("document.querySelector('#mapa path[data-cd=\"3304557\"]').dispatchEvent(new MouseEvent('click', {bubbles: true}))")
+    pg.wait_for_function("document.getElementById('cartao').classList.contains('on')")
+    assert pg.inner_text("#cNome") == "Rio de Janeiro"
+    assert pg.get_attribute("#cExplorar", "href") == "explorar.html?s=noaa20&y=2025&m=3304557"
+    assert pg.errors == []
+
+
+def test_observatorio_states_limits_of_the_indicators(server, pg):
+    pg.goto(server + "/index.html")
+    texto = pg.inner_text("main")
+    assert "Não mede consumo de energia" in texto
+    assert "não sustentam tendência" in texto or "tendência" in texto

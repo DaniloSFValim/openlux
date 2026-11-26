@@ -3,70 +3,135 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Quanta luz tem o seu município? — OpenLux</title>
-<meta name="description" content="Luz noturna vista do espaço nos 92 municípios do Rio de Janeiro, de 2018 a 2025 (NOAA-20). Estimativa por sensoriamento remoto, não medição do brilho do céu.">
+<title>Observatório da luz noturna — OpenLux</title>
+<meta name="description" content="Luz noturna vista do espaço nos 92 municípios do Rio de Janeiro, de 2018 a 2025 (NOAA-20), com série do S-NPP desde 2012. Estimativa por sensoriamento remoto, não medição do brilho do céu.">
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="css/prototipo.css">
 <link rel="stylesheet" href="css/paginas.css">
 </head>
-<body>
+<body class="pagina">
 
-<div class="palco">
-  <svg id="mapa" viewBox="0 0 1100 760" role="img" aria-label="Mapa dos 92 municípios do Rio de Janeiro, colorido pela luz do ano escolhido"></svg>
-  <div class="lente" id="lente" aria-hidden="true"></div>
-</div>
-
-<div class="topo">
-  <div class="titulo"><small>OpenLux · Rio de Janeiro</small><h1>Quanta luz tem o seu município?</h1>
-  <nav class="menu-paginas" aria-label="Áreas do OpenLux">
-      <a href="index.html" aria-current="page">Observatório</a>
-      <a href="explorar.html">Explorador</a>
-      <a href="laboratorio.html">Laboratório</a>
-      <a href="ambiental.html">Observatório ambiental</a>
-      <a href="dados.html">Dados abertos</a>
-      <a href="metodologia.html">Metodologia</a>
-    </nav></div>
-  <div class="legenda">
-    <div>Luz média vista do espaço (nW·cm⁻²·sr⁻¹)</div>
-    <div class="barra" id="barra"></div>
-    <div class="rotulos"><span>menos</span><span>mais</span></div>
+<section class="heroi" aria-label="Mapa dos municípios">
+  <div class="palco">
+    <svg id="mapa" viewBox="0 0 1100 760" role="img" aria-label="Mapa dos 92 municípios do Rio de Janeiro, colorido pela luz do ano escolhido"></svg>
+    <div class="lente" id="lente" aria-hidden="true"></div>
   </div>
-</div>
 
-<div class="ano" aria-live="polite">
-  <div class="num" id="anoNum">2025</div>
-  <div class="aviso" id="avisoRuido" hidden></div>
-</div>
-
-<div class="cartao" id="cartao" role="dialog" aria-live="polite" aria-labelledby="cNome">
-  <button class="fechar" id="fechar" aria-label="Fechar">×</button>
-  <h2 id="cNome"></h2>
-  <div class="sub" id="cHab"></div>
-  <div class="lbl">Luz média na área · <span id="cAno"></span></div>
-  <div class="big"><span id="cMedia">—</span> <span class="unid">nW·cm⁻²·sr⁻¹</span></div>
-  <div class="lbl">Posição entre os 92 municípios</div>
-  <div class="pos" id="cPos"></div>
-  <svg id="cSerie" viewBox="0 0 300 90" preserveAspectRatio="none" aria-hidden="true"></svg>
-  <div class="acoes">
-    <button id="cCompartilhar">Copiar link</button>
+  <div class="topo">
+    <div class="titulo"><small>OpenLux · Rio de Janeiro</small><h1>Quanta luz tem o seu município?</h1>
+      <nav class="menu-paginas" aria-label="Áreas do OpenLux">
+        <a href="index.html" aria-current="page">Observatório</a>
+        <a href="explorar.html">Explorador</a>
+        <a href="laboratorio.html">Laboratório</a>
+        <a href="ambiental.html">Observatório ambiental</a>
+        <a href="dados.html">Dados abertos</a>
+        <a href="metodologia.html">Metodologia</a>
+      </nav>
+    </div>
+    <div class="legenda">
+      <div>Luz média vista do espaço (nW·cm⁻²·sr⁻¹)</div>
+      <div class="barra" id="barra"></div>
+      <div class="rotulos"><span>menos</span><span>mais</span></div>
+    </div>
   </div>
-  <p class="estimativa">Estimativa por sensoriamento remoto. Não é medição do brilho do céu.</p>
-</div>
 
-<div class="controles-base">
-  <button id="play" aria-pressed="false">▶ Viajar no tempo</button>
-  <input type="range" id="ano" min="0" value="0" aria-label="Ano">
-  <button class="sec" id="lenteBtn" aria-pressed="false">Lente</button>
-  <label class="sensor">Sensor
-    <select id="sensor">
-      <option value="noaa20">NOAA-20 (2018–2025)</option>
-      <option value="snpp">S-NPP (2012–2025)</option>
-    </select>
-  </label>
-</div>
+  <div class="ano" aria-live="polite">
+    <div class="num" id="anoNum">2025</div>
+    <div class="aviso" id="avisoRuido" hidden></div>
+  </div>
 
-<p class="rodape-prot">Protótipo de visualização. Dados reais do OpenLux (NOAA-20 e S-NPP, NASA Black Marble) · autor Danilo Valim · ORCID <a href="https://orcid.org/0009-0009-7250-6151" rel="noopener">0009-0009-7250-6151</a> · DOI <a href="https://doi.org/10.5281/zenodo.24510755" rel="noopener">10.5281/zenodo.24510755</a></p>
+  <div class="cartao" id="cartao" role="dialog" aria-live="polite" aria-labelledby="cNome">
+    <button class="fechar" id="fechar" aria-label="Fechar">×</button>
+    <h2 id="cNome"></h2>
+    <div class="sub" id="cHab"></div>
+    <div class="lbl">Luz média na área · <span id="cAno"></span></div>
+    <div class="big"><span id="cMedia">—</span> <span class="unid">nW·cm⁻²·sr⁻¹</span></div>
+    <div class="lbl">Posição entre os 92 municípios</div>
+    <div class="pos" id="cPos"></div>
+    <svg id="cSerie" viewBox="0 0 300 90" preserveAspectRatio="none" aria-hidden="true"></svg>
+    <div class="acoes">
+      <a id="cExplorar" href="explorar.html">Abrir no explorador</a>
+      <button id="cCompartilhar">Copiar link</button>
+    </div>
+    <p class="estimativa">Estimativa de poluição luminosa baseada em sensoriamento remoto. Não é medição do brilho do céu.</p>
+  </div>
 
+  <div class="controles-base">
+    <button id="play" aria-pressed="false">▶ Viajar no tempo</button>
+    <input type="range" id="ano" min="0" value="0" aria-label="Ano">
+    <button class="sec" id="lenteBtn" aria-pressed="false">Lente</button>
+    <label class="sensor">Sensor
+      <select id="sensor">
+        <option value="noaa20">NOAA-20 (2018–2025)</option>
+        <option value="snpp">S-NPP (2012–2025)</option>
+      </select>
+    </label>
+  </div>
+</section>
+
+<main class="observatorio">
+  <section aria-labelledby="h-kpi">
+    <h2 id="h-kpi">Indicadores estaduais</h2>
+    <div class="controles">
+      <label>Ano de referência <select id="anoObs"></select></label>
+      <p class="nota-metodo" id="notaKpi">Médias estaduais são médias simples das médias dos 92 municípios, não médias ponderadas por área.</p>
+    </div>
+    <div class="kpis" id="kpis"></div>
+  </section>
+
+  <section aria-labelledby="h-evo">
+    <h2 id="h-evo">Evolução temporal</h2>
+    <div class="bloco">
+      <svg class="grafico" id="grafEvo" viewBox="0 0 640 260" role="img" aria-labelledby="h-evo"></svg>
+      <div class="legenda-linha"><span style="--c:#ffd166">NOAA-20 (primário, 2018–2025)</span><span style="--c:#9fb3cf">S-NPP (continuidade, 2012–2025, tracejado)</span></div>
+      <p class="nota-metodo">O S-NPP tem ruído em áreas escuras a partir de 2022: não leia a diferença desse período como mudança real.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-mm">
+    <h2 id="h-mm">Maiores e menores valores</h2>
+    <div class="duas-colunas">
+      <div class="bloco"><h3>Maiores médias</h3><ol class="lista-mun" id="maiores"></ol></div>
+      <div class="bloco"><h3>Menores médias</h3><ol class="lista-mun" id="menores"></ol></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-dist">
+    <h2 id="h-dist">Distribuição municipal</h2>
+    <div class="bloco">
+      <svg class="grafico" id="grafDist" viewBox="0 0 640 220" role="img" aria-labelledby="h-dist"></svg>
+      <p class="nota-metodo">Número de municípios em cada faixa de média no ano de referência (faixas de largura dobrada, em nW·cm⁻²·sr⁻¹).</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-comp">
+    <h2 id="h-comp">Variação entre 2018 e 2025</h2>
+    <div class="bloco" id="comparacao"></div>
+  </section>
+
+  <section aria-labelledby="h-terr">
+    <h2 id="h-terr">Indicador territorial: pixels iluminados</h2>
+    <div class="bloco">
+      <p>Fração dos pixels válidos de cada município com radiância acima de 0,5 nW·cm⁻²·sr⁻¹, no ano de referência. Mediana estadual: <strong id="terrMed">—</strong>.</p>
+      <p class="nota-metodo">Limitação: a fração depende do limiar escolhido e do ruído de fundo do sensor. Não mede consumo de energia.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-rank">
+    <h2 id="h-rank">Ranking dos municípios</h2>
+    <div class="bloco">
+      <label class="campo-busca">Buscar município <input type="text" id="busca" placeholder="Ex.: Niterói"></label>
+      <div class="tabela-wrap"><table class="tab" id="tabRank"><thead><tr><th>Posição</th><th>Município</th><th>Média (nW·cm⁻²·sr⁻¹)</th><th></th></tr></thead><tbody id="corpoRank"></tbody></table></div>
+    </div>
+  </section>
+</main>
+
+<footer class="rodape-pag">
+  <p>Dados reais do OpenLux: NASA Black Marble (VJ146A4 NOAA-20; VNP46A4 S-NPP). Autor: Danilo Valim · ORCID <a href="https://orcid.org/0009-0009-7250-6151" rel="noopener">0009-0009-7250-6151</a> · DOI <a href="https://doi.org/10.5281/zenodo.24510755" rel="noopener">10.5281/zenodo.24510755</a> · <a href="metodologia.html">Metodologia</a> · <a href="dados.html">Dados abertos</a></p>
+</footer>
+
+<script src="js/comum.js"></script>
 <script src="js/prototipo.js"></script>
+<script src="js/observatorio.js"></script>
 </body>
 </html>

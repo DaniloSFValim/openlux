@@ -124,6 +124,7 @@
         selecionado = cd;
         atualizarCartao(cd);
         $('cartao').classList.add('on');
+        $('cExplorar').href = `explorar.html?s=${sk}&y=${anos[ano]}&m=${cd}`;
         const u = new URL(location.href); u.search = `?s=${sk}&y=${anos[ano]}&m=${cd}`;
         history.replaceState(null, '', u.search);
       }

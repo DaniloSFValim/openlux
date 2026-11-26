@@ -37,7 +37,7 @@ def test_versions_are_consistent_everywhere():
 
 def test_no_unsupported_superlatives():
     banned = re.compile(r"revolucion|inédit|inedit|pioneir", re.I)
-    for f in ["README.md", "METHODOLOGY.md", "docs/DECISIONS.md", "docs/LICENSING.md", "web/index.html", "web/js/app.js"]:
+    for f in ["README.md", "METHODOLOGY.md", "docs/DECISIONS.md", "docs/LICENSING.md", "web/index.html", "web/js/prototipo.js", "web/js/observatorio.js", "web/js/explorador.js", "web/js/laboratorio.js", "web/js/dados.js"]:
         assert not banned.search((ROOT / f).read_text(encoding="utf-8")), f
 
 
