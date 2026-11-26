@@ -14,8 +14,8 @@ def test_noaa20_file_covers_the_92_municipalities_and_its_own_period():
     assert "NOAA-20" in NOA["meta"]["sensor"]
 
 
-def test_noaa20_population_weighted_values_are_complete_for_all_municipalities():
-    faltam = [m["name"] for m in NOA["municipios"].values() if all(v is None for v in m["exposure"]["pop_radiance"])]
+def test_noaa20_does_not_publish_the_exposure_block():
+    faltam = [m["name"] for m in NOA["municipios"].values() if "exposure" in m]
     assert faltam == []
 
 

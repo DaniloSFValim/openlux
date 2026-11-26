@@ -1,143 +1,225 @@
-/* OpenLux — laboratório de análises (municipal).
-   Lê indicators_noaa20.json e indicators.json. Todas as estatísticas são calculadas aqui:
-   - média, mediana e fração iluminada: campos anuais publicados pelo pipeline;
-   - posição e percentil: ordenação dos 92 municípios no ano escolhido (percentil = % de municípios com valor menor ou igual);
-   - quartis e mínimo/máximo do estado: sobre a média de cada município (cada município pesa igual);
-   - tendência (Theil–Sen) e p-valor (Kendall): campos publicados em trends[janela completa]. */
+/* Laboratório de análises: compara até três municípios com o estado.
+   Lê indicators_noaa20.json (ou indicators.json) e openlux_percentis_pixels_<sensor>.csv. */
 (function () {
   'use strict';
+  const C = window.OpenLuxComum;
   const $ = (id) => document.getElementById(id);
-  const nf = (d) => new Intl.NumberFormat('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
-  const fmt = (v, d = 2) => (v == null || !isFinite(v) ? '—' : nf(d).format(v));
-  const fmtSinal = (v, d = 3) => (v == null || !isFinite(v) ? '—' : (v > 0 ? '+' : '') + nf(d).format(v));
-  const fmtPct = (v) => (v == null || !isFinite(v) ? '—' : (v > 0 ? '+' : '') + nf(1).format(v) + ' %');
-  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const getJSON = (u) => fetch(u).then((r) => { if (!r.ok) throw new Error(u + ' ' + r.status); return r.json(); });
+  const NS = 'http://www.w3.org/2000/svg';
+  const CORES = ['#ffd166', '#e0604f', '#7fd1ff'];
+  const PADRAO = ['3304557', '3303302', '3300100']; // Rio de Janeiro, Niterói, Angra dos Reis
   const params = new URLSearchParams(location.search);
+  const sensor = params.get('s') === 'snpp' ? 'snpp' : 'noaa20';
 
-  // quantil com interpolação linear (mesma regra do explorador)
-  function quantil(arr, p) {
-    const a = arr.filter((v) => v != null && isFinite(v)).sort((x, y) => x - y);
-    if (!a.length) return NaN;
-    const i = (a.length - 1) * p, lo = Math.floor(i), hi = Math.ceil(i);
-    return a[lo] + (a[hi] - a[lo]) * (i - lo);
+  function el(tag, attrs, parent, texto) {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (texto != null) n.textContent = texto;
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+  function hel(tag, parent, texto) {
+    const n = document.createElement(tag);
+    if (texto != null) n.textContent = texto;
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+  function parseCsv(txt) {
+    const linhas = txt.trim().split(/\r?\n/);
+    const cab = linhas.shift().split(',');
+    const out = {};
+    linhas.forEach((l) => {
+      const v = l.split(','), o = {};
+      cab.forEach((c, i) => (o[c] = v[i]));
+      (out[o.CD_MUN] = out[o.CD_MUN] || {})[o.year] = { q75: +o.q75_radiance, q90: +o.q90_radiance, q95: +o.q95_radiance };
+    });
+    return out;
   }
 
-  Promise.all([getJSON('data/indicators_noaa20.json'), getJSON('data/indicators.json')]).then(([N, S]) => {
-    const D = { noaa20: N, snpp: S };
-    const sk0 = params.get('s') === 'snpp' ? 'snpp' : 'noaa20';
-    const codigos = Object.keys(N.municipios).sort((a, b) => N.municipios[a].name.localeCompare(N.municipios[b].name, 'pt-BR'));
-    const nomes = (cd) => N.municipios[cd].name;
+  function parseLinhas(txt) {
+    const l = txt.trim().split(/\r?\n/), cab = l.shift().split(',');
+    return l.map((x) => { const v = x.split(','), o = {}; cab.forEach((c, i) => (o[c] = v[i])); return o; });
+  }
+  Promise.all([C.indicadores(sensor), C.texto('data/downloads/openlux_percentis_pixels_' + sensor + '.csv'), C.json('data/municipios.geojson'),
+    sensor === 'noaa20' ? C.texto('data/downloads/openlux_pixels_municipio_noaa20.csv') : Promise.resolve(''),
+    sensor === 'noaa20' ? C.texto('data/downloads/openlux_tendencia_pixels_noaa20_2018_2025.csv') : Promise.resolve('')])
+    .then(([D, csv, geo, pixCsv, tendCsv]) => {
+      const PIX = {}, TEND = {};
+      if (pixCsv) parseLinhas(pixCsv).forEach((r) => { (PIX[r.CD_MUN] = PIX[r.CD_MUN] || {})[r.year] = r; });
+      if (tendCsv) parseLinhas(tendCsv).forEach((r) => { TEND[r.CD_MUN] = r; });
+      iniciar(D, parseCsv(csv), PIX, TEND); desenhaDiferencas(D, geo);
+    })
+    .catch((e) => { console.error(e); C.erro($('erro'), 'Não foi possível carregar os dados publicados. Recarregue a página.'); });
 
-    $('sensor').value = sk0;
-    const valor = (sk, cd, y, campo = 'mean') => {
-      const d = D[sk], i = d.meta.years.indexOf(y);
-      const v = d.municipios[cd] && i >= 0 ? d.municipios[cd][campo][i] : null;
-      return v == null || !isFinite(v) ? null : v;
+
+  // Mapa de diferenças 2018→2025 (variação percentual da média municipal, já publicada em trends)
+  function desenhaDiferencas(D, geo) {
+    const cores = ['#b5483f', '#e0604f', '#8a7fd6', '#4f86c6', '#9fd3ff'];
+    const rotulos = ['queda acima de 20 %', 'queda de 0 a 20 %', 'alta de 0 a 20 %', 'alta de 20 a 50 %', 'alta acima de 50 %'];
+    const cinza = '#3c4660';
+    let minx = 1e9, maxx = -1e9, miny = 1e9, maxy = -1e9;
+    const walk = (c, fn) => (typeof c[0] === 'number' ? fn(c) : c.forEach((x) => walk(x, fn)));
+    geo.features.forEach((f) => walk(f.geometry.coordinates, (p) => { minx = Math.min(minx, p[0]); maxx = Math.max(maxx, p[0]); miny = Math.min(miny, p[1]); maxy = Math.max(maxy, p[1]); }));
+    const k = Math.cos(((miny + maxy) / 2) * Math.PI / 180), W = 460, esc = (W - 10) / ((maxx - minx) * k), H = Math.ceil((maxy - miny) * esc) + 10;
+    const X = (lon) => 5 + (lon - minx) * k * esc, Y = (lat) => 5 + (maxy - lat) * esc;
+    const caminho = (g) => {
+      const polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
+      return polys.map((rings) => rings.map((ring) => ring.map((p, i) => (i ? 'L' : 'M') + X(p[0]).toFixed(1) + ',' + Y(p[1]).toFixed(1)).join('') + 'Z').join('')).join('');
     };
-    const janelaCompleta = (sk) => { const ks = Object.keys(D[sk].meta.windows).sort(); return ks[ks.length - 1]; };
+    const box = $('mapaDif'); box.innerHTML = '';
+    const svgEl = document.createElementNS(NS, 'svg');
+    svgEl.setAttribute('viewBox', `0 0 ${W} ${H}`); svgEl.setAttribute('role', 'img');
+    svgEl.setAttribute('aria-label', 'Mapa dos municípios colorido pela variação percentual da média entre 2018 e 2025');
+    box.appendChild(svgEl);
+    const contagem = [0, 0, 0, 0, 0];
+    geo.features.forEach((f) => {
+      const cd = f.properties.CD_MUN, t = D.municipios[cd] && D.municipios[cd].trends['2018_2025'];
+      const pct = t && t.change_pct;
+      let cor = cinza, cls = -1;
+      if (pct != null && isFinite(pct)) {
+        cls = pct < -20 ? 0 : pct < 0 ? 1 : pct < 20 ? 2 : pct < 50 ? 3 : 4;
+        cor = cores[cls]; contagem[cls]++;
+      }
+      const p = document.createElementNS(NS, 'path');
+      p.setAttribute('d', caminho(f.geometry)); p.setAttribute('fill', cor);
+      if (t && t.p_value < 0.05) p.setAttribute('stroke', '#fff');
+      const tt = document.createElementNS(NS, 'title');
+      tt.textContent = f.properties.NM_MUN + (pct != null ? ': ' + C.fmt(pct, 1) + ' %' : ': não calculado');
+      p.appendChild(tt); svgEl.appendChild(p);
+    });
+    const leg = $('legDif'); leg.innerHTML = '';
+    rotulos.forEach((r, i) => { const sp = document.createElement('span'); sp.textContent = r + ' (' + contagem[i] + ')'; sp.style.setProperty('--c', cores[i]); leg.appendChild(sp); });
+    const sn = document.createElement('span'); sn.textContent = 'sem cálculo (' + (92 - contagem.reduce((a, c) => a + c, 0)) + ')'; sn.style.setProperty('--c', cinza); leg.appendChild(sn);
+    $('resumoDif').textContent = 'Municípios com cálculo: ' + contagem.reduce((a, c) => a + c, 0) + ' de 92. Com p < 0,05 (contorno branco): ' + geo.features.filter((f) => { const t = D.municipios[f.properties.CD_MUN] && D.municipios[f.properties.CD_MUN].trends['2018_2025']; return t && t.p_value < 0.05; }).length + '.';
+  }
 
-    function montarSeletores(sk) {
-      const anos = D[sk].meta.years;
-      const ano = $('ano');
-      const padrao = Number(params.get('y'));
-      ano.innerHTML = anos.map((y) => `<option value="${y}">${y}</option>`).join('');
-      ano.value = anos.includes(padrao) ? padrao : anos[anos.length - 1];
-      ['mun-1', 'mun-2', 'mun-3'].forEach((id, k) => {
-        const sel = $(id);
-        const pre = (params.get('m') || '').split(',')[k] || (k === 0 ? '3304557' : '');   // Rio de Janeiro por padrão
-        sel.innerHTML = (k === 0 ? '' : '<option value="">— nenhum —</option>') + codigos.map((c) => `<option value="${c}">${esc(nomes(c))}</option>`).join('');
-        sel.value = codigos.includes(pre) ? pre : '';
+  function iniciar(D, PERC, PIX, TEND) {
+    const anos = D.meta.years;
+    const codigos = Object.keys(D.municipios).sort((a, b) => D.municipios[a].name.localeCompare(D.municipios[b].name, 'pt-BR'));
+    const nomeDe = (c) => D.municipios[c].name;
+    const sel = [0, 1, 2].map((i) => {
+      const s = $('m' + (i + 1));
+      codigos.forEach((c) => s.appendChild(new Option(nomeDe(c), c)));
+      return s;
+    });
+    const pedidos = (params.get('m') || '').split(',').filter((c) => D.municipios[c]);
+    PADRAO.forEach((p, i) => (sel[i].value = pedidos[i] || p));
+    const anoSel = $('ano');
+    anos.forEach((y) => anoSel.appendChild(new Option(String(y), String(y))));
+    anoSel.value = String(params.get('y') && anos.includes(+params.get('y')) ? params.get('y') : anos[anos.length - 1]);
+    $('sensor').value = sensor;
+    $('notaSensor').textContent = sensor === 'snpp'
+      ? 'S-NPP: a partir de 2022 há mais ruído em áreas escuras. Não leia diferenças desse período como mudança real.'
+      : 'NOAA-20: sensor primário desta análise. Dados de 2018 a 2025.';
+
+    const media = (c, a) => D.municipios[c].mean[anos.indexOf(a)];
+    const mediana = (c, a) => D.municipios[c].median[anos.indexOf(a)];
+    const medias = (a) => codigos.map((c) => media(c, a)).filter((v) => v != null && isFinite(v));
+    const ordenadas = (a) => medias(a).slice().sort((x, y) => x - y);
+
+    function render() {
+      const ids = sel.map((s) => s.value);
+      const ano = +anoSel.value;
+      const ord = ordenadas(ano);
+      const cores = ids.map((c, i) => CORES[i]);
+      // tabela
+      const cab = $('cabTab'); cab.innerHTML = '';
+      hel('th', cab, 'Indicador');
+      ids.forEach((c) => hel('th', cab, nomeDe(c)));
+      hel('th', cab, 'Estado (92 municípios)');
+      const linhas = [];
+      const pct = (c, k) => { const p = PERC[c] && PERC[c][ano]; return p ? p[k] : null; };
+      const pos = (c) => { const v = media(c, ano); const mais = medias(ano).filter((x) => x > v).length; return v == null ? '—' : (mais + 1) + 'º de ' + ord.length; };
+      const estMedian = C.quantil(ord, 0.5);
+      linhas.push(['Radiância média (nW·cm⁻²·sr⁻¹)', ids.map((c) => C.fmt(media(c, ano), 2)), C.fmt(ord.reduce((a, b) => a + b, 0) / ord.length, 2)]);
+      linhas.push(['Mediana dos pixels (nW·cm⁻²·sr⁻¹)', ids.map((c) => C.fmt(mediana(c, ano), 2)), C.fmt(estMedian, 2)]);
+      linhas.push(['Percentil 75 dos pixels', ids.map((c) => C.fmt(pct(c, 'q75'), 2)), '—']);
+      linhas.push(['Percentil 90 dos pixels', ids.map((c) => C.fmt(pct(c, 'q90'), 2)), '—']);
+      linhas.push(['Percentil 95 dos pixels', ids.map((c) => C.fmt(pct(c, 'q95'), 2)), '—']);
+      linhas.push(['Posição entre os 92 municípios (1º = maior média)', ids.map(pos), '—']);
+      if (Object.keys(PIX).length) {
+        const sh = (cds, minC) => { let acima = 0, val = 0; cds.forEach((c) => { const r = PIX[c] && PIX[c][ano]; if (!r) return; val += +r.pix_validos; for (let k = minC; k <= 7; k++) acima += +r['pix_classe_' + k]; }); return val ? 100 * acima / val : null; };
+        [[2, 4], [8, 5], [30, 6], [100, 7]].forEach(([lim, minC]) => linhas.push(['Pixels válidos com radiância ≥ ' + lim + ' nW·cm⁻²·sr⁻¹ (%)', ids.map((c) => C.fmt(sh([c], minC), 1)), C.fmt(sh(codigos, minC), 1)]));
+      }
+      linhas.push(['População (Censo 2022)', ids.map((c) => (D.municipios[c].population != null ? C.nf(0).format(D.municipios[c].population) : '—')), '—']);
+      const tb = $('corpoTab'); tb.innerHTML = '';
+      linhas.forEach(([rot, vals, est]) => {
+        const tr = hel('tr', tb);
+        hel('td', tr, rot);
+        vals.forEach((v) => hel('td', tr, v));
+        hel('td', tr, est);
+      });
+      // evolução
+      const g = $('grafEvo'); g.innerHTML = '';
+      const W = 640, H = 260, m = { l: 52, r: 12, t: 12, b: 30 };
+      const todosV = [];
+      ids.forEach((c) => D.municipios[c].mean.forEach((v) => v != null && todosV.push(v)));
+      const max = Math.max(...todosV, 1e-9);
+      const x = (i) => m.l + (i / (anos.length - 1)) * (W - m.l - m.r);
+      const y = (v) => H - m.b - (v / max) * (H - m.t - m.b);
+      [0, 0.5, 1].forEach((f) => { const v = max * f; el('line', { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), stroke: 'rgba(255,255,255,.08)' }, g); el('text', { x: 6, y: y(v) + 4 }, g, C.fmt(v, 1)); });
+      anos.forEach((a, i) => { if (i % 2 === 0 || i === anos.length - 1) el('text', { x: i === anos.length - 1 ? x(i) - 34 : x(i) - 10, y: H - 8 }, g, String(a)); });
+      ids.forEach((c, k) => {
+        const pts = D.municipios[c].mean.map((v, i) => (v == null ? null : x(i) + ',' + y(v))).filter(Boolean).join(' ');
+        el('polyline', { points: pts, fill: 'none', stroke: CORES[k], 'stroke-width': 2.2 }, g);
+      });
+      const leg = $('legEvo'); leg.innerHTML = '';
+      ids.forEach((c, k) => { const s = hel('span', leg, nomeDe(c)); s.style.setProperty('--c', CORES[k]); });
+      // distribuição
+      const d = $('grafDist'); d.innerHTML = '';
+      const edges = [0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024];
+      const cont = edges.slice(0, -1).map(() => 0);
+      medias(ano).forEach((v) => { let i = 0; while (i < cont.length - 1 && v >= edges[i + 1]) i++; cont[i]++; });
+      const maxC = Math.max(...cont, 1), bw = (W - 60) / cont.length;
+      cont.forEach((n, i) => {
+        const h = ((H - 40) * n) / maxC;
+        el('rect', { x: 50 + i * bw + 2, y: H - 24 - h, width: bw - 4, height: h, fill: 'rgba(255,209,102,.35)' }, d);
+        el('text', { x: 50 + i * bw, y: H - 8 }, d, edges[i] + '–' + edges[i + 1]);
+        if (n) el('text', { x: 50 + i * bw + bw / 2 - 4, y: H - 28 - h }, d, String(n));
+      });
+      ids.forEach((c, k) => {
+        const v = media(c, ano); if (v == null) return;
+        const i = Math.max(0, edges.findIndex((e, j) => v >= e && v < edges[j + 1]));
+        const xm = 50 + i * bw + bw / 2;
+        el('line', { x1: xm, x2: xm, y1: 10, y2: H - 24, stroke: CORES[k], 'stroke-width': 2, 'stroke-dasharray': '4 3' }, d);
+      });
+      // caixa (boxplot)
+      const b = $('grafBox'); b.innerHTML = '';
+      const q = [0, 0.25, 0.5, 0.75, 1].map((p) => C.quantil(ord, p));
+      const sx = (v) => 40 + (v / (q[4] || 1)) * 560;
+      el('line', { x1: sx(q[0]), x2: sx(q[4]), y1: 50, y2: 50, stroke: 'rgba(255,255,255,.4)' }, b);
+      el('rect', { x: sx(q[1]), y: 36, width: Math.max(1, sx(q[3]) - sx(q[1])), height: 28, fill: 'rgba(255,209,102,.18)', stroke: '#ffd166' }, b);
+      el('line', { x1: sx(q[2]), x2: sx(q[2]), y1: 36, y2: 64, stroke: '#ffd166', 'stroke-width': 2 }, b);
+      ids.forEach((c, k) => { const v = media(c, ano); if (v != null) el('circle', { cx: sx(v), cy: 50, r: 5, fill: CORES[k] }, b); });
+      el('text', { x: 40, y: 92 }, b, 'mín ' + C.fmt(q[0], 2) + ' · mediana ' + C.fmt(q[2], 2) + ' · máx ' + C.fmt(q[4], 2));
+      $('resumoBox').textContent = 'Estado (92 municípios, ' + ano + '): 1º quartil ' + C.fmt(q[1], 2) + ', mediana ' + C.fmt(q[2], 2) + ', 3º quartil ' + C.fmt(q[3], 2) + ' nW·cm⁻²·sr⁻¹.';
+      // tendência
+      const ct = $('cabTrend'); ct.innerHTML = '';
+      ['Município', 'Inclinação (nW·cm⁻²·sr⁻¹ por ano)', 'p-valor', 'Anos válidos', 'Variação 2018→2025 (%)', 'Pixels com aumento significativo (%)', 'Pixels com redução significativa (%)', 'Leitura'].forEach((t) => hel('th', ct, t));
+      const ctb = $('corpoTrend'); ctb.innerHTML = '';
+      ids.forEach((c) => {
+        const t = D.municipios[c].trends['2018_2025'];
+        const tr = hel('tr', ctb);
+        hel('td', tr, nomeDe(c));
+        hel('td', tr, t ? C.fmt(t.slope, 3) : '—');
+        hel('td', tr, t ? C.fmt(t.p_value, 3) : '—');
+        hel('td', tr, t ? String(t.n_years) : '—');
+        hel('td', tr, t ? C.fmt(t.change_pct, 1) : '—');
+        const tp = TEND[c]; const tot = tp ? ['pix_nao_testado', 'pix_sem_mudanca_significativa', 'pix_aumento_significativo', 'pix_reducao_significativa'].reduce((a, k) => a + +tp[k], 0) : 0;
+        hel('td', tr, tp ? C.fmt(100 * +tp.pix_aumento_significativo / tot, 1) : '—');
+        hel('td', tr, tp ? C.fmt(100 * +tp.pix_reducao_significativa / tot, 1) : '—');
+        hel('td', tr, !t ? '—' : t.p_value < 0.05 ? (t.slope > 0 ? 'tendência de alta (p < 0,05)' : 'tendência de queda (p < 0,05)') : 'sem tendência estatisticamente sustentada (p ≥ 0,05)');
       });
     }
 
-    function selecionados() {
-      return ['mun-1', 'mun-2', 'mun-3'].map((id) => $(id).value).filter((c, i, arr) => c && arr.indexOf(c) === i);
-    }
-
-    function atualizar() {
-      const sk = $('sensor').value, Y = Number($('ano').value);
-      const janela = janelaCompleta(sk);
-      $('aviso-sensor').hidden = sk !== 'snpp';
-      $('aviso-sensor').textContent = sk === 'snpp'
-        ? 'S-NPP: a partir de 2022 há piso de ruído em áreas escuras. Valores desses anos não devem ser lidos como mudança real de iluminação.'
-        : '';
-      $('ano-comp').textContent = Y; $('ano-dist').textContent = Y;
-      const sel = selecionados();
-      const anos = D[sk].meta.years;
-
-      // valores do estado e posições no ano escolhido
-      const medias = codigos.map((c) => valor(sk, c, Y)).filter((v) => v != null);
-      const meanEstado = medias.reduce((a, b) => a + b, 0) / medias.length;
-      const q25 = quantil(medias, 0.25), q50 = quantil(medias, 0.5), q75 = quantil(medias, 0.75);
-      const ordem = codigos.filter((c) => valor(sk, c, Y) != null).sort((a, b) => valor(sk, b, Y) - valor(sk, a, Y));
-      const posicao = (cd) => ordem.indexOf(cd) + 1;
-      const percentil = (cd) => Math.round(100 * medias.filter((v) => v <= valor(sk, cd, Y)).length / medias.length);
-
-      // tabela comparativa
-      const cab = '<tr><th scope="col">Município</th><th scope="col">Média</th><th scope="col">Mediana dos pixels</th><th scope="col">Fração ≥ 0,5</th><th scope="col">Posição (1 = maior)</th><th scope="col">Percentil</th><th scope="col">Tendência (Theil–Sen)</th><th scope="col">p (Kendall)</th><th scope="col">Variação % (janela ' + janela + ')</th></tr>';
-      const linhas = sel.map((cd) => {
-        const tr = (D[sk].municipios[cd].trends || {})[janela] || {};
-        return `<tr><th scope="row">${esc(nomes(cd))}</th><td>${fmt(valor(sk, cd, Y), 3)}</td><td>${fmt(valor(sk, cd, Y, 'median'), 3)}</td><td>${fmt(valor(sk, cd, Y, 'lit'), 3)}</td><td>${posicao(cd)}º de ${ordem.length}</td><td>${percentil(cd)}</td><td>${fmtSinal(tr.slope, 3)}</td><td>${fmt(tr.p_value, 3)}</td><td>${fmtPct(tr.change_pct)}</td></tr>`;
-      }).join('');
-      const estado = `<tr class="estado"><th scope="row">Estado (92 municípios)</th><td>${fmt(meanEstado, 3)}</td><td>${fmt(q50, 3)} (mediana dos municípios)</td><td>—</td><td>—</td><td>P25 ${fmt(q25, 3)} · P75 ${fmt(q75, 3)}</td><td>—</td><td>—</td><td>—</td></tr>`;
-      $('tabela-comp').innerHTML = `<table><caption>Ano ${Y}, ${esc(D[sk] === N ? 'NOAA-20' : 'S-NPP')}. Média, mediana e fração em nW·cm⁻²·sr⁻¹ (fração adimensional).</caption><thead>${cab}</thead><tbody>${linhas || '<tr><td colspan="9">Escolha pelo menos um município.</td></tr>'}${estado}</tbody></table>`;
-
-      // evolução: municípios escolhidos e média estadual tracejada
-      const estadoAnual = anos.map((y) => { const xs = codigos.map((c) => valor(sk, c, y)).filter((v) => v != null); return xs.reduce((a, b) => a + b, 0) / xs.length; });
-      const series = sel.map((cd, k) => ({ valores: anos.map((y) => valor(sk, cd, y)), classe: ['serie-noaa', 'serie-snpp', 'serie-cor3'][k] || 'serie-noaa' }));
-      series.push({ valores: estadoAnual, classe: 'serie-estado', tracejado: true });
-      window.OpenLuxGraficos.linhas($('grafico-evolucao'), anos, series, { rotulo: 'Evolução anual dos municípios escolhidos e da média estadual' });
-
-      // distribuição: histograma e caixa com os municípios escolhidos
-      const lo = Math.min(...medias), hi = Math.max(...medias);
-      window.OpenLuxGraficos.histograma($('grafico-distribuicao'), medias, lo, hi, { rotulo: 'Histograma da distribuição municipal' });
-      caixa($('grafico-distribuicao'), medias, sel.map((cd) => valor(sk, cd, Y)), lo, hi);
-
-      // tendências: significativas (p < 0,05), ordenadas pela inclinação
-      const tend = codigos.map((c) => { const t = (D[sk].municipios[c].trends || {})[janela]; return t && t.p_value != null && t.p_value < 0.05 ? { c, s: t.slope, p: t.p_value } : null; }).filter(Boolean);
-      tend.sort((a, b) => b.s - a.s);
-      const sub = tend.filter((r) => r.s > 0).slice(0, 10), que = tend.filter((r) => r.s < 0).slice(-10).reverse();
-      const lista = (ul, arr) => { ul.innerHTML = ''; arr.forEach((r) => { const li = document.createElement('li'); li.innerHTML = `<a href="explorar.html?m=${encodeURIComponent(r.c)}&s=${sk}&l=mun&y=${Y}">${esc(nomes(r.c))}</a> <span class="valor">${fmtSinal(r.s, 3)} por ano · p = ${fmt(r.p, 3)}</span>`; ul.appendChild(li); }); if (!arr.length) ul.innerHTML = '<li>Nenhum município neste grupo.</li>'; };
-      lista($('tend-subidas'), sub); lista($('tend-quedas'), que);
-      $('tend-resumo').textContent = `${tend.length} de ${codigos.length} municípios com tendência significativa (p < 0,05) na janela ${janela}. Os demais não mostram tendência distinguível de zero nessa série.`;
-
-      // URL compartilhável com o estado do laboratório
+    [...sel, anoSel].forEach((s) => s.addEventListener('change', () => {
       const u = new URL(location.href);
-      u.search = `?s=${sk}&y=${Y}&m=${sel.join(',')}`;
+      u.search = `?s=${sensor}&y=${anoSel.value}&m=${sel.map((s2) => s2.value).join(',')}`;
       history.replaceState(null, '', u.search);
-    }
-
-    // caixa horizontal: P25–P75, mediana, mínimo e máximo do estado; pontos dourados = municípios escolhidos
-    function caixa(container, vals, marcados, lo, hi) {
-      const W = 760, H = 110, pad = { l: 40, r: 16 };
-      const x = (v) => pad.l + ((v - lo) / (hi - lo)) * (W - pad.l - pad.r);
-      const NS = 'http://www.w3.org/2000/svg';
-      const svg = document.createElementNS(NS, 'svg');
-      svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('width', '100%'); svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', 'Caixa da distribuição municipal');
-      const add = (tag, attrs) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); svg.appendChild(n); return n; };
-      const q1 = quantil(vals, 0.25), md = quantil(vals, 0.5), q3 = quantil(vals, 0.75);
-      const mn = Math.min(...vals), mx = Math.max(...vals), yc = 40;
-      add('line', { x1: x(mn), x2: x(q1), y1: yc, y2: yc, class: 'grade' });
-      add('line', { x1: x(q3), x2: x(mx), y1: yc, y2: yc, class: 'grade' });
-      add('rect', { x: x(q1), y: yc - 14, width: x(q3) - x(q1), height: 28, class: 'caixa-box' });
-      add('line', { x1: x(md), x2: x(md), y1: yc - 14, y2: yc + 14, class: 'serie-noaa' });
-      marcados.filter((v) => v != null).forEach((v) => add('circle', { cx: x(v), cy: yc + 34, r: 5, class: 'serie-noaa-p' }));
-      const t = document.createElementNS(NS, 'text'); t.setAttribute('x', pad.l); t.setAttribute('y', H - 6); t.setAttribute('class', 'eixo'); t.textContent = `${fmt(lo, 2)} a ${fmt(hi, 2)} nW·cm⁻²·sr⁻¹`; svg.appendChild(t);
-      const holder = document.createElement('div'); holder.className = 'caixa-holder';
-      holder.appendChild(svg);
-      container.appendChild(holder);
-    }
-
-    ['sensor'].forEach((id) => $(id).addEventListener('change', () => { montarSeletores($('sensor').value); atualizar(); }));
-    ['ano', 'mun-1', 'mun-2', 'mun-3'].forEach((id) => $(id).addEventListener('change', atualizar));
-    montarSeletores(sk0);
-    atualizar();
-  }).catch((e) => {
-    console.error(e);
-    const aviso = document.createElement('p');
-    aviso.className = 'erro'; aviso.setAttribute('role', 'alert');
-    aviso.textContent = 'Não foi possível carregar os dados publicados. Tente recarregar a página.';
-    document.querySelector('main').prepend(aviso);
-  });
+      render();
+    }));
+    $('sensor').addEventListener('change', (e) => {
+      const u = new URL(location.href); u.searchParams.set('s', e.target.value); location.assign(u.href);
+    });
+    render();
+  }
 })();

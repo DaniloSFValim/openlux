@@ -4,101 +4,156 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Laboratório de análises — OpenLux</title>
-<meta name="description" content="Compare até três municípios do Rio de Janeiro, veja a distribuição estadual e as tendências de luz noturna estimada por sensoriamento remoto. Estatísticas calculadas a partir dos dados publicados.">
+<meta name="description" content="Compare até três municípios do Rio de Janeiro: médias, medianas, percentis de pixels, posição no estado, evolução anual, distribuição e tendências, com a definição de cada indicador.">
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/observatorio.css">
+<link rel="stylesheet" href="css/prototipo.css">
+<link rel="stylesheet" href="css/paginas.css">
 </head>
-<body class="observatorio">
-<a class="skip" href="#conteudo">Ir para o conteúdo</a>
-
-<header class="topo">
-  <div class="wrap topo-linha">
-    <a class="marca" href="index.html" aria-label="OpenLux, página inicial">OpenLux</a>
-    <nav aria-label="Áreas do site">
-      <a href="index.html">Observatório</a>
-      <a href="explorar.html">Explorador</a>
-      <a href="laboratorio.html" aria-current="page">Laboratório</a><a href="ambiental.html">Ambiental</a>
-      <a href="dados.html">Dados abertos</a>
-      <a href="sobre.html">Metodologia</a>
-    </nav>
-  </div>
+<body class="pagina">
+<header class="cabec">
+  <div class="marca">OpenLux · Laboratório de análises</div>
+  <nav class="menu-paginas" aria-label="Áreas do OpenLux">
+    <a href="index.html">Observatório</a>
+    <a href="explorar.html">Explorador</a>
+    <a href="laboratorio.html" aria-current="page">Laboratório</a>
+    <a href="ambiental.html">Observatório ambiental</a>
+    <a href="dados.html">Dados abertos</a>
+    <a href="metodologia.html">Metodologia</a>
+  </nav>
 </header>
 
-<main id="conteudo">
-  <section class="abertura wrap" aria-labelledby="titulo">
-    <p class="kicker">Laboratório de análises</p>
-    <h1 id="titulo">Compare municípios e acompanhe tendências</h1>
-    <p class="lede">Escolha até três municípios e um ano. Os cálculos usam os mesmos arquivos publicados no observatório. <strong>É uma estimativa de poluição luminosa baseada em sensoriamento remoto, não uma medição do brilho do céu.</strong> Os resultados são exploratórios e não estão validados.</p>
-  </section>
+<main>
+  <h1>Laboratório de análises municipais</h1>
+  <p class="suave">Compare até três municípios com o estado. Todos os valores vêm dos dados publicados do OpenLux. Estimativa por sensoriamento remoto; não é medição do brilho do céu.</p>
+  <p class="aviso" id="erro" hidden></p>
 
-  <section class="wrap bloco" aria-labelledby="escolha-titulo">
-    <h2 id="escolha-titulo">Escolha</h2>
+  <section class="bloco" aria-labelledby="h-controles">
+    <h2 id="h-controles">Escolha</h2>
     <div class="controles">
+      <label>Município 1 <select id="m1"></select></label>
+      <label>Município 2 <select id="m2"></select></label>
+      <label>Município 3 <select id="m3"></select></label>
       <label>Sensor
         <select id="sensor">
-          <option value="noaa20">NOAA-20 (2018–2025)</option>
-          <option value="snpp">S-NPP (2012–2025)</option>
+          <option value="noaa20">NOAA-20 (2018–2025), primário</option>
+          <option value="snpp">S-NPP (2012–2025), continuidade</option>
         </select>
       </label>
-      <label>Ano
-        <select id="ano"></select>
-      </label>
-      <label>Município 1
-        <select class="mun" id="mun-1"></select>
-      </label>
-      <label>Município 2 <span class="opcional">(opcional)</span>
-        <select class="mun" id="mun-2"></select>
-      </label>
-      <label>Município 3 <span class="opcional">(opcional)</span>
-        <select class="mun" id="mun-3"></select>
-      </label>
+      <label>Ano de referência <select id="ano"></select></label>
     </div>
-    <p id="aviso-sensor" class="nota" hidden></p>
+    <p class="nota-metodo" id="notaSensor"></p>
   </section>
 
-  <section class="wrap bloco" aria-labelledby="comp-titulo">
-    <h2 id="comp-titulo">Comparação com o estado, <span id="ano-comp"></span></h2>
-    <p class="muted">Estatísticas do estado são calculadas sobre os 92 municípios (cada município pesa igual). Percentis são percentis entre municípios, não percentis de pixels: os percentis de pixels (P75, P90, P95) ainda não foram calculados.</p>
-    <div class="tabela-apoio" id="tabela-comp"></div>
-  </section>
-
-  <section class="wrap bloco" aria-labelledby="evo-titulo">
-    <h2 id="evo-titulo">Evolução anual</h2>
-    <p class="muted">Linhas: municípios escolhidos. Tracejado: média estadual. Os anos a partir de 2022 têm piso de ruído do S-NPP; com o NOAA-20 o aviso não se aplica, mas a comparação entre sensores não é feita aqui.</p>
-    <div id="grafico-evolucao" class="grafico" role="img" aria-label="Gráfico de evolução anual dos municípios escolhidos"></div>
-  </section>
-
-  <section class="wrap bloco" aria-labelledby="dist-titulo">
-    <h2 id="dist-titulo">Distribuição estadual, <span id="ano-dist"></span></h2>
-    <p class="muted">Histograma e caixa dos valores médios dos 92 municípios. Os pontos dourados marcam os municípios escolhidos. Caixa: 25º, 50º (mediana) e 75º percentis; traços: mínimo e máximo.</p>
-    <div id="grafico-distribuicao" class="grafico" role="img" aria-label="Histograma e caixa da distribuição municipal"></div>
-  </section>
-
-  <section class="wrap bloco" aria-labelledby="tend-titulo">
-    <h2 id="tend-titulo">Tendências, 2018–2025</h2>
-    <p class="muted">Inclinação de Theil–Sen (nW·cm⁻²·sr⁻¹ por ano) e p-valor de Kendall, do pipeline. Só são destacadas tendências com p &lt; 0,05. Não são causas, e a série curta (8 anos) tem pouco poder.</p>
-    <div class="duas-colunas">
-      <div>
-        <h3>Aumentos significativos</h3>
-        <ol class="ranking" id="tend-subidas"></ol>
-      </div>
-      <div>
-        <h3>Reduções significativas</h3>
-        <ol class="ranking" id="tend-quedas"></ol>
-      </div>
+  <section aria-labelledby="h-tab">
+    <h2 id="h-tab">Comparação</h2>
+    <div class="tabelaWrap tabela-wrap">
+      <table class="tab" id="tab">
+        <caption class="nota-metodo" style="text-align:left;caption-side:top">Valores no ano de referência, salvo indicação. A coluna “Estado” resume os 92 municípios (média simples entre municípios, não é média ponderada por área).</caption>
+        <thead><tr id="cabTab"></tr></thead>
+        <tbody id="corpoTab"></tbody>
+      </table>
     </div>
-    <p class="nota" id="tend-resumo"></p>
+  </section>
+
+  <section aria-labelledby="h-evo">
+    <h2 id="h-evo">Evolução anual da radiância média</h2>
+    <div class="bloco">
+      <svg class="grafico" id="grafEvo" viewBox="0 0 640 260" role="img" aria-labelledby="h-evo"></svg>
+      <div class="legenda-linha" id="legEvo"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-dist">
+    <h2 id="h-dist">Distribuição entre os 92 municípios</h2>
+    <div class="bloco">
+      <svg class="grafico" id="grafDist" viewBox="0 0 640 260" role="img" aria-labelledby="h-dist"></svg>
+      <p class="nota-metodo">Histograma das médias municipais no ano de referência, em faixas de largura dobrada (0–1, 1–2, 2–4 … nW·cm⁻²·sr⁻¹). Linhas marcam os três municípios escolhidos.</p>
+      <svg class="grafico" id="grafBox" viewBox="0 0 640 110" role="img" aria-label="Caixa com a distribuição das médias municipais"></svg>
+      <p class="nota-metodo" id="resumoBox"></p>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-mapa">
+    <h2 id="h-mapa">Mapa de diferenças: variação 2018 → 2025</h2>
+    <div class="bloco">
+      <div class="mapa-dif" id="mapaDif"></div>
+      <div class="legenda-linha" id="legDif"></div>
+      <p class="nota-metodo" id="resumoDif"></p>
+      <p class="nota-metodo">Cor = variação percentual da média municipal (100 × (média 2025 − média 2018) ÷ média 2018). Contorno branco = tendência sustentada (p &lt; 0,05). Cinza = variação não calculada (média de 2018 abaixo de 0,401 nW·cm⁻²·sr⁻¹, piso do pipeline). Variação de dois anos não é tendência.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-trend">
+    <h2 id="h-trend">Tendência 2018–2025</h2>
+    <div class="bloco">
+      <p class="nota-metodo">Inclinação de Theil–Sen (mediana das inclinações entre pares de anos) e teste de Kendall para o p-valor. Só se afirma tendência quando p &lt; 0,05. Com p ≥ 0,05 a série não permite distinguir tendência de variação natural nos dados.</p>
+      <div class="tabelaWrap tabela-wrap"><table class="tab" id="tabTrend"><thead><tr id="cabTrend"></tr></thead><tbody id="corpoTrend"></tbody></table></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-def">
+    <h2 id="h-def">Definição dos indicadores</h2>
+    <div class="bloco">
+      <h3>Média municipal</h3>
+      <dl class="def">
+        <dt>Definição</dt><dd>Radiância média dos pixels válidos do município, no ano.</dd>
+        <dt>Fórmula</dt><dd>Média dos valores de radiância dos pixels válidos dentro da área municipal.</dd>
+        <dt>Unidade</dt><dd>nW·cm⁻²·sr⁻¹</dd>
+        <dt>Fonte</dt><dd>NASA Black Marble, VNP46A4 (S-NPP) e VJ146A4 (NOAA-20), coleção 2.</dd>
+        <dt>Período</dt><dd>S-NPP 2012–2025; NOAA-20 2018–2025.</dd>
+        <dt>Limitações</dt><dd>Radiância do sensor orbital, não brilho do céu. Pixels de contorno podem misturar áreas urbanas e rurais.</dd>
+        <dt>Interpretação</dt><dd>Compara a luz emitida para cima entre municípios no mesmo ano e sensor. Não mede consumo de energia nem eficiência.</dd>
+      </dl>
+      <h3>Mediana municipal</h3>
+      <dl class="def">
+        <dt>Definição</dt><dd>Valor central dos pixels válidos do município, no ano.</dd>
+        <dt>Unidade</dt><dd>nW·cm⁻²·sr⁻¹</dd>
+        <dt>Interpretação</dt><dd>Quando é zero ou muito baixa, a maior parte do município tem pouca luz detectada; a média pode ser dominada por poucos pixels claros.</dd>
+      </dl>
+      <h3>Percentis P75, P90 e P95 dos pixels</h3>
+      <dl class="def">
+        <dt>Definição</dt><dd>Valor abaixo do qual estão 75%, 90% ou 95% dos pixels válidos do município, no ano.</dd>
+        <dt>Cálculo</dt><dd>Quantil inferior ponderado pela cobertura de cada pixel, com a mesma regra usada para a mediana.</dd>
+        <dt>Fonte</dt><dd>Arquivos <code>openlux_percentis_pixels_*.csv</code> em Dados abertos.</dd>
+        <dt>Interpretação</dt><dd>P95 alto indica áreas municipais muito iluminadas; P75 baixo indica predominância de pixels escuros.</dd>
+      </dl>
+      <h3>Posição entre municípios</h3>
+      <dl class="def">
+        <dt>Definição</dt><dd>Ordem do município entre os 92 pela média no ano (1º = maior média).</dd>
+        <dt>Limitações</dt><dd>Posição não mede a distância entre municípios; use junto com a média.</dd>
+      </dl>
+      <h3>Inclinação e p-valor da tendência</h3>
+      <dl class="def">
+        <dt>Definição</dt><dd>Inclinação de Theil–Sen da média anual, em nW·cm⁻²·sr⁻¹ por ano, e p-valor do teste de Kendall.</dd>
+        <dt>Critério</dt><dd>Mínimo de 8 anos válidos. Janela 2018–2025 com NOAA-20.</dd>
+        <dt>Interpretação</dt><dd>Só afirme tendência com p &lt; 0,05 e com consistência entre sensores (ver Metodologia).</dd>
+      </dl>
+      <h3>Pixels acima de um limiar</h3>
+      <dl class="def">
+        <dt>Definição</dt><dd>Porcentagem dos pixels válidos do município cuja classe de luz é igual ou superior ao limiar (classes de 2 a 7).</dd>
+        <dt>Fórmula</dt><dd>100 × pixels com classe ≥ limiar ÷ pixels válidos. Contagem pelo centro do pixel dentro do polígono municipal.</dd>
+        <dt>Unidade</dt><dd>% dos pixels válidos</dd>
+        <dt>Fonte</dt><dd>Grade NOAA-20 (VJ146A4) publicada; contagens em <code>openlux_pixels_municipio_noaa20.csv</code>.</dd>
+        <dt>Período</dt><dd>2018–2025 (NOAA-20).</dd>
+        <dt>Limitações</dt><dd>Mostra classes de luz, não valores de radiância. O limiar é uma classe fixa da legenda.</dd>
+        <dt>Interpretação</dt><dd>Compara a proporção de área municipal com luz detectada acima de cada limiar. Não é medida de consumo nem de exposição de pessoas.</dd>
+      </dl>
+      <h3>Tendência por pixel 2018 → 2025</h3>
+      <dl class="def">
+        <dt>Definição</dt><dd>Porcentagem dos pixels válidos do município com aumento ou redução significativa da radiância entre 2018 e 2025 (teste de Theil–Sen com Kendall por pixel, mínimo de 8 anos válidos, FDR de 5 %).</dd>
+        <dt>Fonte</dt><dd><code>openlux_tendencia_pixels_noaa20_2018_2025.csv</code>, derivado da grade de mudança publicada.</dd>
+        <dt>Limitações</dt><dd>As contagens usam o centro do pixel; o indicador municipal de tendência pondera pela cobertura. Por isso os valores podem diferir ligeiramente. Dependência espacial entre pixels não é corrigida.</dd>
+        <dt>Interpretação</dt><dd>Mostra onde a mudança é detectada, não sua causa. Pixels com ruído de fundo do sensor podem aparecer como aumento.</dd>
+      </dl>
+      <h3>Variação percentual 2018 → 2025</h3>
+      <dl class="def">
+        <dt>Fórmula</dt><dd>100 × (média 2025 − média 2018) ÷ média 2018. Calculada só se a média de 2018 for ≥ 0,401 nW·cm⁻²·sr⁻¹ (piso do pipeline).</dd>
+        <dt>Limitações</dt><dd>Depende de dois anos; não é tendência. Para municípios com média baixa a variação percentual pode ser instável.</dd>
+      </dl>
+    </div>
   </section>
 </main>
-
-<footer class="rodape">
-  <div class="wrap">
-    <p class="small">Autor: Danilo Valim · ORCID <a href="https://orcid.org/0009-0009-7250-6151" rel="noopener">0009-0009-7250-6151</a> · DOI <a href="https://doi.org/10.5281/zenodo.24510755" rel="noopener">10.5281/zenodo.24510755</a></p>
-  </div>
-</footer>
-
-<script src="js/graficos-svg.js"></script>
+<script src="js/comum.js"></script>
 <script src="js/laboratorio.js"></script>
 </body>
 </html>

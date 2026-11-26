@@ -30,7 +30,7 @@ npx wrangler versions upload --dry-run   # idem (comando padrão das branches de
 
 O `wrangler.jsonc` na raiz declara o Worker de arquivos estáticos (`name: openlux`, `assets.directory: ./web`).
 Com ele, os dois comandos passam, e o `_headers` é honrado: `npx wrangler dev` serviu a pasta com todos os cabeçalhos
-definidos, e `OPENLUX_URL=http://127.0.0.1:8788 python -m pytest tests/test_web_smoke.py` passou (10 testes).
+definidos, e `OPENLUX_URL=http://127.0.0.1:8788 python -m pytest tests/test_web_smoke.py` passou (10 testes). Esse teste foi removido na reconstrução; a verificação equivalente é `tests/test_deploy_publicado.py`.
 
 **Resultado na Cloudflare (2026-11-23).** Antes do `wrangler.jsonc`, o check falhava cedo, sem mensagem: era o erro documentado
 pela Cloudflare ("Missing Wrangler configuration file / Missing entry-point", na página *Troubleshooting builds*). Depois de adicioná-lo, o build
@@ -49,7 +49,7 @@ Cloudflare criaria um Worker novo em vez de atualizar o atual.
 ## 2. Verificação pós-implantação
 
 ```bash
-OPENLUX_URL=https://openlux.labdados.org python -m pytest tests/test_web_smoke.py
+OPENLUX_URL=https://openlux.labdados.org python -m pytest tests/test_deploy_publicado.py
 ```
 
 (Se o Chromium do Playwright não estiver instalado, defina `OPENLUX_CHROMIUM` com o caminho de um.)
@@ -109,9 +109,27 @@ A publicação é feita pela Cloudflare a partir da branch `main`. Antes de merg
 2. **Build de prévia:** o check `Workers Builds: openlux` precisa estar verde no PR. A prévia aparece como comentário do bot da Cloudflare, com URL própria do commit.
 3. **Verificação de arquivos:** `python scripts/build_catalogo.py` regenera `web/data/downloads/catalogo.json`, e `pytest tests/test_catalogo.py` confere os hashes e tamanhos contra os arquivos publicados.
 4. **Verificação dos dados:** o NOAA-20 precisa ter `code_dirty: false` em `web/data/indicators_noaa20.json` (rodar a partir de commit limpo).
-5. **Testes de navegação e responsividade:** `tests/test_web_smoke.py`, `test_web_observatorio.py`, `test_web_comparar.py`, `test_web_laboratorio.py` e `test_web_ambiental.py` abrem as páginas no Chromium, conferem erros de console, contagens e ausência de rolagem horizontal em 390 px.
+5. **Testes de navegação, acessibilidade e links:** `tests/test_web_paginas.py`, `tests/test_web_explorador.py` e `tests/test_web_municipios.py` abrem as páginas no Chromium e conferem valores contra os dados publicados. `tests/test_web_acessibilidade.py` confere idioma, nomes de botões e campos, texto alternativo. `tests/test_web_links.py` confere que todo link interno aponta para um arquivo existente. Responsividade: `tests/test_web_paginas.py` confere rolagem horizontal em 390 px.
 6. **Merge:** só depois de os checks passarem no head do PR. O merge usa o `expectedHeadSha` para não mergear um commit que não foi verificado.
+
+**Verificação do site publicado:** com `OPENLUX_URL` definido, `tests/test_deploy_publicado.py` compara o SHA-256 de cada arquivo de `web/` com o que o servidor entrega (em HTML, descontando as injeções da Cloudflare). Um arquivo diferente aparece como falha com o nome dele. Os demais testes de navegação também aceitam `OPENLUX_URL`. Exemplo: `OPENLUX_URL=https://openlux.labdados.org pytest tests/test_deploy_publicado.py`. Enquanto a branch não é publicada, o preview do branch mostra a versão do último commit implantado, e o teste aponta os arquivos alterados que ainda não estão no ar.
 
 **Verificação depois do deploy:** a Cloudflare pode servir uma cópia em cache. Para confirmar a publicação de `main`, conferir `https://openlux.labdados.org/index.html` em janela anônima e comparar o título da página com o do commit.
 
 **Não verificado daqui:** o log do build de produção de `main` (o painel da Cloudflare não é acessível pela sessão). Quando esse log estiver disponível, anotar aqui o commit publicado.
+
+## 8. Revisão da configuração (2026-11-26)
+
+**Conferido no repositório:**
+- `wrangler.jsonc`: Worker estático `openlux`, pasta `./web`, sem código de servidor, sem `vars`, `routes` nem `env`. Nenhum segredo está versionado (varredura de padrões de chaves e tokens nos arquivos rastreados: nada encontrado).
+- `web/_headers`: CSP com `script-src 'self'` (sem script inline), `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy` e `Permissions-Policy`. Todas as páginas publicadas passam no teste de script inline (`tests/test_web_links.py`).
+- Não há `web/_redirects`. Não há variáveis de ambiente nem chaves no repositório.
+- Arquivos internos: `web/` não contém código Python, dados brutos, `.h5`, `.shp`, logs nem arquivos temporários.
+
+**Observado no ar:** `https://…/index.html` responde 307 com destino `/`, no preview e na produção. É o comportamento de URLs limpas da Cloudflare, e não quebra nenhum link interno (o teste `tests/test_web_links.py` confere todos).
+
+**Não verificado (exige acesso ao painel da Cloudflare):**
+- Log do build de produção de `main`.
+- Regras de cache e de redirecionamento configuradas no painel, fora do repositório.
+- Variáveis de ambiente e configurações do painel, e DNS (não alterados, conforme o prompt).
+- Política de acesso do domínio `openlux.labdados.org`.

@@ -3,87 +3,57 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Observatório ambiental: luz noturna e áreas protegidas — OpenLux</title>
-<meta name="description" content="Análise exploratória: fração da área de cada município em unidades de conservação e radiância noturna estimada por satélite em 2025. Associação espacial, não causa.">
+<title>Observatório ambiental — OpenLux</title>
+<meta name="description" content="Estado do módulo de cruzamento espacial com dados ambientais públicos: camadas, fontes, licenças e o que ainda não foi publicado.">
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/observatorio.css">
+<link rel="stylesheet" href="css/prototipo.css">
+<link rel="stylesheet" href="css/paginas.css">
 </head>
-<body class="observatorio">
-<a class="skip" href="#conteudo">Ir para o conteúdo</a>
-
-<header class="topo">
-  <div class="wrap topo-linha">
-    <a class="marca" href="index.html" aria-label="OpenLux, página inicial">OpenLux</a>
-    <nav aria-label="Áreas do site">
-      <a href="index.html">Observatório</a>
-      <a href="explorar.html">Explorador</a>
-      <a href="laboratorio.html">Laboratório</a>
-      <a href="ambiental.html" aria-current="page">Ambiental</a>
-      <a href="dados.html">Dados abertos</a>
-      <a href="sobre.html">Metodologia</a>
-    </nav>
-  </div>
+<body class="pagina">
+<header class="cabec">
+  <div class="marca">OpenLux · Observatório ambiental</div>
+  <nav class="menu-paginas" aria-label="Áreas do OpenLux">
+    <a href="index.html">Observatório</a>
+    <a href="explorar.html">Explorador</a>
+    <a href="laboratorio.html">Laboratório</a>
+    <a href="ambiental.html" aria-current="page">Observatório ambiental</a>
+    <a href="dados.html">Dados abertos</a>
+    <a href="metodologia.html">Metodologia</a>
+  </nav>
 </header>
 
-<main id="conteudo">
-  <section class="abertura wrap" aria-labelledby="titulo">
-    <p class="kicker">Observatório ambiental · análise exploratória</p>
-    <h1 id="titulo">Luz noturna e áreas protegidas</h1>
-    <p class="lede"><strong>Esta é uma associação espacial exploratória, não uma causa.</strong> Mostra como a luz noturna estimada por satélite se distribui em relação às unidades de conservação do CNUC. Não mede impacto em fauna, flora ou saúde, e não controla a urbanização, que não está validada aqui.</p>
-  </section>
+<main>
+  <h1>Observatório ambiental</h1>
+  <p>Este módulo vai cruzar a radiância noturna com dados ambientais públicos. <strong>Ainda não há resultados publicados.</strong> As camadas abaixo mostram o que está verificado, o que está bloqueado e por quê.</p>
 
-  <section class="wrap bloco" aria-labelledby="ind-titulo">
-    <h2 id="ind-titulo">Indicadores</h2>
-    <dl class="kpis">
-      <div><dt>Unidades de conservação que tocam o estado</dt><dd id="k-ucs">—</dd></div>
-      <div><dt>Associação (Spearman) entre área em UC e radiância, 2025</dt><dd id="k-rho">—</dd></div>
-      <div><dt>Radiância média dentro das UCs (pixels)</dt><dd id="k-dentro">—</dd></div>
-      <div><dt>Radiância média fora das UCs (pixels)</dt><dd id="k-fora">—</dd></div>
-    </dl>
-    <p class="nota">Radiância em nW·cm⁻²·sr⁻¹, de superfície, do NOAA-20 de 2025 (qualidade 0). A mediana é zero nos dois casos, o que significa que pelo menos metade dos pixels válidos tem radiância zero: por isso a média é usada para comparar.</p>
-  </section>
+  <div class="aviso">Análise espacial exploratória. A radiância é estimada por satélite. Nenhuma relação entre luz e fauna, flora ou saúde humana é afirmada aqui: não há estudo específico que sustente essa conclusão.</div>
 
-  <section class="wrap bloco" aria-labelledby="disp-titulo">
-    <h2 id="disp-titulo">Fração em UC × radiância média, 92 municípios</h2>
-    <p class="muted">Cada ponto é um município. A associação é positiva, mas não controla a urbanização: a camada de áreas urbanizadas do IBGE não tem licença verificada.</p>
-    <div id="grafico-dispersao" class="grafico" role="img" aria-label="Dispersão entre fração em UC e radiância média municipal"></div>
-  </section>
-
-  <section class="wrap bloco" aria-labelledby="tab-titulo">
-    <h2 id="tab-titulo">Municípios com maior e menor fração em UC</h2>
-    <div class="duas-colunas">
-      <div>
-        <h3>Maior fração em UC</h3>
-        <ol class="ranking" id="maiores-uc"></ol>
-      </div>
-      <div>
-        <h3>Menor fração em UC</h3>
-        <ol class="ranking" id="menores-uc"></ol>
-      </div>
-    </div>
-    <p class="nota">Paracambi aparece com 99,9 % porque a APA do Rio Guandu cobre quase todo o município. Os polígonos das UCs se sobrepõem; a fração usa a união, sem dupla contagem.</p>
-  </section>
-
-  <section class="wrap bloco sobre-dado" aria-labelledby="fontes-titulo">
-    <h2 id="fontes-titulo">Fontes, licenças e método</h2>
-    <ul>
-      <li><strong>Unidades de conservação:</strong> CNUC (MMA), versão shp_cnuc_2025_08, licença Creative Commons Atribuição (CC BY 4.0). <a href="https://dados.mma.gov.br/dataset/unidadesdeconservacao" rel="noopener">Conjunto no portal de dados abertos do MMA</a>.</li>
-      <li><strong>Radiância:</strong> NASA Black Marble VJ146A4 v2.0 (NOAA-20), 2025. DOI <a href="https://doi.org/10.5067/VIIRS/VJ146A4.002" rel="noopener">10.5067/VIIRS/VJ146A4.002</a>.</li>
-      <li><strong>Método:</strong> fração = área do município coberta por UCs (união dos polígonos) / área do município, em projeção de áreas iguais. Associação por Spearman entre essa fração e a radiância média municipal de 2025.</li>
-      <li><strong>Limites:</strong> não há controle de urbanização, altitude nem bioma. Os nomes do CNUC têm codificação danificada e não são exibidos.</li>
-    </ul>
-    <p><a href="data/ambiental/uc_municipios.json">Dados desta página (JSON)</a> · <a href="sobre.html">Metodologia completa</a></p>
-  </section>
-</main>
-
-<footer class="rodape">
-  <div class="wrap">
-    <p class="small">Autor: Danilo Valim · ORCID <a href="https://orcid.org/0009-0009-7250-6151" rel="noopener">0009-0009-7250-6151</a> · DOI <a href="https://doi.org/10.5281/zenodo.24510755" rel="noopener">10.5281/zenodo.24510755</a></p>
+  <h2>Camadas</h2>
+  <div class="bloco tabela-wrap">
+    <table class="tab">
+      <thead><tr><th>Camada</th><th>Situação</th><th>Fonte e licença</th><th>Bloqueio ou observação</th></tr></thead>
+      <tbody>
+        <tr><td>Unidades de conservação (CNUC)</td><td><span class="status bloqueado">não publicada</span></td><td>MMA, CNUC 2025-08. CC BY 4.0, conferida na página do conjunto.</td><td>Análise exploratória feita, mas não publicada: aguarda revisão do autor antes de qualquer divulgação.</td></tr>
+        <tr><td>Áreas urbanizadas (IBGE, 2019)</td><td><span class="status bloqueado">bloqueada</span></td><td>IBGE. Licença não verificada.</td><td>O termo de uso não foi localizado; o portal recusou acesso automatizado. Precisa de conferência no portal do IBGE.</td></tr>
+        <tr><td>Uso e cobertura do solo (MapBiomas)</td><td><span class="status bloqueado">bloqueada</span></td><td>MapBiomas. Termos inconsistentes entre páginas: CC BY-SA em algumas e CC BY em outras.</td><td>Se for CC BY-SA, os derivados teriam licença de compartilhamento igual, em conflito com a licença dos dados do projeto. Decisão do autor.</td></tr>
+        <tr><td>Unidades de conservação (ICMBio)</td><td><span class="status bloqueado">bloqueada</span></td><td>ICMBio. CC BY-ND 3.0.</td><td>A licença proíbe derivados. Por isso não é usada.</td></tr>
+        <tr><td>Unidades estaduais (INEA)</td><td><span class="status bloqueado">bloqueada</span></td><td>INEA.</td><td>Os endereços testados não tiveram conexão. Nova tentativa agendada.</td></tr>
+        <tr><td>Hidrografia e corpos d'água</td><td><span class="status nao-iniciado">não iniciada</span></td><td>Sem fonte verificada.</td><td>—</td></tr>
+        <tr><td>Áreas costeiras</td><td><span class="status nao-iniciado">não iniciada</span></td><td>Sem fonte verificada.</td><td>—</td></tr>
+      </tbody>
+    </table>
   </div>
-</footer>
 
-<script src="js/graficos-svg.js"></script>
-<script src="js/ambiental.js"></script>
+  <h2>O que falta para publicar</h2>
+  <div class="bloco">
+    <ol>
+      <li>Conferir no portal do IBGE a licença das áreas urbanizadas.</li>
+      <li>Decidir sobre o MapBiomas, sabendo que a versão CC BY-SA exige licença de compartilhamento igual para os derivados.</li>
+      <li>Indicar outra fonte oficial de unidades de conservação com licença que permita derivados.</li>
+      <li>Revisar a análise exploratória de áreas protegidas antes de publicar qualquer resultado.</li>
+    </ol>
+    <p class="suave">Cada camada publicada terá fonte, ano, escala e licença registrados, conforme o catálogo em <a href="dados.html">Dados abertos</a>.</p>
+  </div>
+</main>
 </body>
 </html>

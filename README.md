@@ -37,33 +37,35 @@ noturna de superfície, **não medições do brilho do céu**.
 
 ### Telas do OpenLux 2.0
 
-Capturas feitas no navegador a partir da aplicação (`docs/screenshots/openlux-2.0/`). Não são simulações.
+Capturas reais do navegador, feitas a partir das páginas publicadas em `web/` (`docs/screenshots/openlux-2.0/`). Não são simulações.
 
 | Tela | Arquivo |
 |---|---|
-| Observatório (página inicial) | ![Observatório](docs/screenshots/openlux-2.0/01_homepage_desktop.png) |
-| Observatório, celular | ![Observatório celular](docs/screenshots/openlux-2.0/02_homepage_mobile.png) |
+| Observatório (página inicial) | ![Observatório](docs/screenshots/openlux-2.0/01_observatorio_desktop.png) |
+| Observatório, celular | ![Observatório celular](docs/screenshots/openlux-2.0/02_observatorio_celular.png) |
 | Explorador estadual | ![Explorador](docs/screenshots/openlux-2.0/03_explorador_estadual.png) |
-| Mapa de pixels (zoom no Rio) | ![Pixels](docs/screenshots/openlux-2.0/04_mapa_pixels_zoom.png) |
-| Gaveta de camadas | ![Gaveta](docs/screenshots/openlux-2.0/05_gaveta_camadas_aberta.png) |
-| Cartão municipal | ![Cartão](docs/screenshots/openlux-2.0/06_cartao_municipal.png) |
-| Comparação temporal | ![Comparação](docs/screenshots/openlux-2.0/07_comparacao_temporal.png) |
-| Laboratório estatístico | ![Laboratório](docs/screenshots/openlux-2.0/08_laboratorio_estatistico.png) |
-| Comparação entre municípios | ![Municípios](docs/screenshots/openlux-2.0/09_comparacao_municipios.png) |
+| Mapa de pixels (zoom no Rio) | ![Pixels](docs/screenshots/openlux-2.0/04_explorador_pixels_rio.png) |
+| Gaveta de camadas | ![Gaveta](docs/screenshots/openlux-2.0/05_explorador_gaveta.png) |
+| Cartão municipal | ![Cartão](docs/screenshots/openlux-2.0/06_explorador_cartao_municipal.png) |
+| Lente de comparação (2018 × 2025) | ![Lente](docs/screenshots/openlux-2.0/07_explorador_lente.png) |
+| Laboratório de análises | ![Laboratório](docs/screenshots/openlux-2.0/08_laboratorio.png) |
+| Página municipal (Niterói) | ![Município](docs/screenshots/openlux-2.0/09_pagina_municipal_niteroi.png) |
+| Explorador em celular (390 px) | ![Explorador celular](docs/screenshots/openlux-2.0/14_explorador_celular.png) |
+| Relatório municipal em PDF (Niterói) | ![PDF](docs/screenshots/openlux-2.0/13_relatorio_municipal_niteroi.png) |
 | Observatório ambiental | ![Ambiental](docs/screenshots/openlux-2.0/10_observatorio_ambiental.png) |
 | Dados abertos | ![Dados](docs/screenshots/openlux-2.0/11_dados_abertos.png) |
 | Metodologia | ![Metodologia](docs/screenshots/openlux-2.0/12_metodologia.png) |
-| Mapa em celular | ![Celular](docs/screenshots/openlux-2.0/14_mapa_celular.png) |
 
-**Não incluída:** o relatório municipal em PDF (item 13 do prompt). Ele ainda não existe no produto, e não há captura simulada.
+As capturas antigas, de uma versão anterior da interface, foram removidas.
 
 ### O que o 2.0 acrescenta
 
 - **Observatório:** indicadores estaduais, evolução anual NOAA-20 com S-NPP, mapa dos 92 municípios, rankings e variação 2018→2025.
 - **Explorador:** mapa de pixels, camadas, cartão municipal e animação, com o sensor escolhido pela URL.
-- **Comparação:** dois anos lado a lado, controle deslizante, diferença absoluta e variação percentual.
+- **Lente de comparação (explorador):** dois anos lado a lado, com controle deslizante e parâmetros na URL.
 - **Laboratório:** até três municípios, percentis entre municípios, distribuição estadual e tendências com p-valor.
-- **Observatório ambiental:** análise exploratória de áreas protegidas (CNUC) com a radiância NOAA-20 de 2025. É associação espacial, não causa, e não controla a urbanização.
+- **Observatório ambiental:** mostra o estado de cada camada e licença. A análise exploratória de áreas protegidas foi feita, mas **não está publicada**: aguarda revisão, e é associação espacial, não causa.
+- **Municípios:** página individual dos 92 municípios e relatório em PDF, gerados a partir dos dados publicados.
 - **Dados abertos:** catálogo com SHA-256 de cada arquivo, GeoPackage dos limites municipais e percentis P75, P90 e P95.
 
 ## 3. Pergunta de pesquisa
@@ -163,6 +165,19 @@ dados, servidor ou serviço pago.
 
 Os gráficos da interface são SVG próprio, sem biblioteca.
 
+### Estrutura do repositório
+
+| Caminho | Conteúdo |
+|---|---|
+| `src/openlux/` | Módulos Python: leitura dos produtos, máscaras, agregação zonal, estatística temporal, indicadores, geração dos dados web. |
+| `scripts/` | Pontos de entrada: aquisição, execução anual, pipeline dos pixels, catálogo, páginas municipais e PDFs, contagens de pixels, análise de áreas protegidas. |
+| `web/` | Site estático publicado na Cloudflare: páginas, `js/`, `css/`, `data/` (dados publicados), `municipio/` (páginas e PDFs municipais), `vendor/` (bibliotecas com licença). |
+| `tests/` | Testes de processamento, dados e navegação (Playwright). |
+| `docs/` | Decisões, auditorias, protocolo de validação de campo, plano mestre, implantação e referências. |
+| `data/` | Dados brutos e metadados. `data/raw/` não é versionado (licença de terceiros). |
+| `outputs/` | Saídas de referência de execuções versionadas. |
+| `.github/workflows/` | CI: roda os testes em cada push e PR. |
+
 ## 10. Instalação
 
 ```bash
@@ -173,8 +188,33 @@ pip install -e ".[dev]"
 
 Python 3.10 ou superior (testado em 3.13). O teste da interface exige
 `pip install -e ".[web-tests]"` e um Chromium (variável `OPENLUX_CHROMIUM` se não for o do
-Playwright). Para testar o site publicado: `OPENLUX_URL=https://openlux.labdados.org python -m pytest tests/test_web_smoke.py`
-(confere também que os arquivos publicados são idênticos aos do repositório).
+Playwright). Para testar o site publicado: `OPENLUX_URL=https://openlux.labdados.org python -m pytest tests/test_deploy_publicado.py tests/test_web_paginas.py tests/test_web_explorador.py tests/test_web_acessibilidade.py`
+(o primeiro confere que cada arquivo publicado é idêntico ao do repositório).
+
+### Execução
+
+Para visualizar o site localmente, sem processar nenhum dado:
+
+```bash
+cd web && python -m http.server 8765
+```
+
+Depois, abra `http://127.0.0.1:8765/index.html`. Para regerar as páginas e os relatórios municipais a partir dos dados publicados e da malha do IBGE em `data/raw/ibge/`:
+
+```bash
+python scripts/build_web_municipios.py
+python scripts/build_web_pixel_stats.py
+python scripts/build_catalogo.py
+```
+
+### Testes
+
+```bash
+pip install -e ".[dev,web-tests]"
+pytest -q tests
+```
+
+Os testes de navegador usam Chromium. Defina `OPENLUX_CHROMIUM` com o caminho do executável, se ele não for o do Playwright. O CI roda a mesma suíte. O teste do site publicado só roda com `OPENLUX_URL` definido; sem ela, ele aparece como pulado.
 
 ## 11. Reprodução
 
@@ -266,8 +306,19 @@ DOI da versão 0.1.0: https://doi.org/10.5281/zenodo.24510755. Os metadados de c
 Danilo Valim. ORCID: [https://orcid.org/0009-0009-7250-6151](https://orcid.org/0009-0009-7250-6151). Nenhuma afiliação
 institucional foi declarada nos metadados.
 
+### Licença
+
+- **Código:** MIT (arquivo `LICENSE`).
+- **Dados derivados publicados:** CC BY 4.0, confirmada pelo autor em 2026-11-25 (`web/data/downloads/catalogo.json`).
+- **Dados de terceiros:** cada arquivo registra sua licença de origem no catálogo e em `docs/LICENSING.md`. Os dados brutos da NASA não são redistribuídos aqui; a licença de origem da malha e do Censo está no catálogo.
+
 ## 18. DOI
 
 Versão 0.1.0: [10.5281/zenodo.24510755](https://doi.org/10.5281/zenodo.24510755). Concept DOI do projeto (resolve sempre para a
 versão mais recente): [10.5281/zenodo.24510754](https://doi.org/10.5281/zenodo.24510754). Um DOI identifica a versão
 arquivada e não comprova avaliação científica nem validação independente do software.
+
+### Publicações
+
+- Versão 0.1.0 publicada no Zenodo: [10.5281/zenodo.24510755](https://doi.org/10.5281/zenodo.24510755). Concept DOI: [10.5281/zenodo.24510754](https://doi.org/10.5281/zenodo.24510754).
+- OpenLux 2.0 ainda não tem nova versão publicada. Quando tiver, a publicação segue `docs/DEPLOYMENT.md`, e `CITATION.cff` e `.zenodo.json` são atualizados antes.

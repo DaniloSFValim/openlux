@@ -1,0 +1,81 @@
+/* Explorador: mapa em tela cheia (Leaflet) com o visual do protótipo. */
+body.explorador { overflow: hidden; background: var(--noite); }
+#mapa { position: absolute; inset: 0; background: radial-gradient(120% 90% at 60% 30%, var(--azul), var(--noite) 70%); }
+.leaflet-container { font: inherit; background: transparent; }
+.leaflet-control-zoom a { background: var(--vidro); color: var(--texto); border-color: rgba(255,255,255,.18); }
+.leaflet-control-attribution { background: rgba(6,10,22,.6) !important; color: var(--suave) !important; }
+.leaflet-control-attribution a { color: var(--luz) !important; }
+.pixel-canvas { image-rendering: pixelated; }
+.mun-path { transition: fill-opacity .25s ease; }
+
+/* topo e legenda */
+.topo-exp { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; gap: 16px; padding: 16px 20px; pointer-events: none; z-index: 500; }
+.topo-exp .titulo, .topo-exp .legenda-exp { pointer-events: auto; }
+.topo-exp h1 { font-size: 1.2rem; margin: 2px 0 0; }
+.legenda-exp { background: var(--vidro); backdrop-filter: blur(10px); border-radius: 14px; padding: 12px 14px; min-width: 230px; font-size: 12px; color: var(--suave); }
+.legenda-exp ol { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 4px; }
+.legenda-exp li { display: flex; align-items: center; gap: 8px; }
+.legenda-exp .sw { width: 16px; height: 12px; border-radius: 3px; flex: 0 0 auto; }
+.nota-leg { margin-top: 8px; font-size: 11px; color: var(--suave); }
+
+/* gaveta de camadas */
+.gaveta { position: absolute; top: 0; left: 0; bottom: 0; width: min(88vw, 320px); background: var(--vidro); backdrop-filter: blur(12px); padding: 18px; overflow-y: auto; transform: translateX(-105%); transition: transform .35s ease; z-index: 800; box-shadow: 0 0 40px rgba(0,0,0,.5); }
+.gaveta.aberta { transform: none; }
+.gaveta h2 { font-size: .95rem; margin: 14px 0 8px; color: var(--luz); }
+.gaveta label { display: flex; gap: 8px; align-items: center; font-size: 13px; margin: 6px 0; color: var(--texto); }
+.gaveta .campo { display: block; }
+.gaveta select { width: 100%; background: #0b1220; color: var(--texto); border: 1px solid rgba(255,255,255,.2); border-radius: 8px; padding: 7px; margin-top: 4px; }
+.nota-camadas { font-size: 11.5px; color: var(--suave); line-height: 1.4; }
+.aviso-exp { background: rgba(255,209,102,.12); border: 1px solid rgba(255,209,102,.4); border-radius: 10px; padding: 8px 10px; font-size: 12px; margin-top: 8px; }
+.btn-exp { display: block; width: 100%; margin: 8px 0; padding: 9px 12px; background: var(--luz); color: #151a26; border: 0; border-radius: 10px; font: inherit; font-weight: 700; cursor: pointer; }
+.btn-exp.sec { background: transparent; color: var(--texto); border: 1px solid rgba(255,255,255,.25); }
+.abrir-gaveta { position: absolute; top: 150px; left: 14px; z-index: 700; background: var(--luz); color: #151a26; border: 0; border-radius: 10px; padding: 9px 14px; font: inherit; font-weight: 700; cursor: pointer; display: none; }
+body.gaveta-fechada .abrir-gaveta { display: block; }
+
+/* cartão municipal */
+.explorador .cartao { top: 110px; right: 20px; max-height: calc(100vh - 210px); overflow-y: auto; z-index: 900; }
+.cartao .linha-dados { font-size: .9rem; color: var(--texto); margin: 2px 0 10px; }
+.cartao .distrib { list-style: none; margin: 4px 0 10px; padding: 0; display: grid; gap: 4px; font-size: 12px; }
+.cartao .distrib li { display: grid; grid-template-columns: 14px 1fr auto; gap: 6px; align-items: center; }
+.cartao .distrib .sw { width: 14px; height: 10px; border-radius: 2px; }
+.cartao .fechar { position: absolute; top: 12px; right: 14px; }
+.cartao .sub { position: relative; }
+.cartao > .fechar { position: absolute; }
+.cartao #cSerie { width: 100%; height: 80px; }
+
+/* barra de tempo */
+.barra-tempo { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; background: var(--vidro); backdrop-filter: blur(10px); padding: 10px 14px; border-radius: 14px; max-width: 94vw; z-index: 600; }
+.barra-tempo button { background: var(--luz); color: #151a26; border: 0; border-radius: 10px; padding: 9px 14px; font: inherit; font-weight: 700; cursor: pointer; }
+.barra-tempo input[type=range] { width: min(40vw, 360px); accent-color: var(--luz); }
+.barra-tempo output { font-weight: 800; font-variant-numeric: tabular-nums; min-width: 4ch; color: var(--luz); }
+.pixel-info { font-size: 12px; color: var(--suave); flex-basis: 100%; text-align: center; }
+
+/* lente */
+.lente-pane { pointer-events: none; }
+.lente-divisor { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--luz); z-index: 650; pointer-events: none; }
+.lente-alca { position: absolute; top: 50%; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; background: var(--luz); border: 3px solid #fff; z-index: 660; cursor: ew-resize; pointer-events: auto; }
+.rotulo-lente { position: absolute; top: 90px; font-size: 12px; background: var(--vidro); padding: 4px 8px; border-radius: 8px; z-index: 660; pointer-events: none; }
+
+/* Celular (até 640 px): cabeçalho compacto, menu em uma linha rolável, controles sem sobreposição */
+@media (max-width: 640px) {
+  .topo-exp { flex-direction: column; gap: 8px; padding: 10px 12px; }
+  .topo-exp .titulo h1 { font-size: 1.05rem; margin: 0; }
+  .topo-exp .titulo small { font-size: .68rem; }
+  .explorador .menu-paginas { flex-wrap: nowrap; overflow-x: auto; gap: 14px; font-size: .8rem; margin-top: 6px; padding-bottom: 4px; scrollbar-width: none; }
+  .explorador .menu-paginas::-webkit-scrollbar { display: none; }
+  .legenda-exp { min-width: 0; width: 100%; max-width: 100%; font-size: 11px; padding: 8px 10px; }
+  .legenda-exp ol { gap: 2px; }
+  .nota-leg { display: none; }
+  .abrir-gaveta { top: auto; bottom: 178px; left: 12px; padding: 8px 12px; font-size: .85rem; }
+  .explorador .cartao { top: auto; left: 10px; right: 10px; bottom: 190px; width: auto; max-height: 52vh; }
+  .barra-tempo { bottom: 8px; left: 8px; right: 8px; transform: none; width: auto; max-width: none; padding: 8px 10px; gap: 8px; }
+  .barra-tempo button { padding: 7px 10px; font-size: .85rem; }
+  .barra-tempo input[type=range] { width: 100%; order: 3; }
+  .barra-tempo output { font-size: .95rem; }
+  .pixel-info { font-size: 11px; }
+  .leaflet-control-attribution { font-size: 9px; max-width: calc(100% - 64px); margin-right: 56px; }
+  .leaflet-bottom.leaflet-left, .leaflet-bottom.leaflet-right { bottom: 196px; }
+  .leaflet-bottom.leaflet-left { left: auto; right: 8px; }
+  .leaflet-bottom.leaflet-right { right: 8px; }
+  .gaveta { width: min(92vw, 340px); }
+}

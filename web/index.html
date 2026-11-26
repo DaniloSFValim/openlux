@@ -3,133 +3,135 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Observatório de luz noturna do Rio de Janeiro — OpenLux</title>
-<meta name="description" content="Luz noturna vista pelo satélite nos 92 municípios do Estado do Rio de Janeiro. Indicadores estaduais, evolução de 2018 a 2025 (NOAA-20) e comparação com o S-NPP. Estimativa por sensoriamento remoto, não medição do brilho do céu.">
-<meta property="og:title" content="OpenLux: observatório de luz noturna do Rio de Janeiro">
-<meta property="og:description" content="Luz noturna vista pelo satélite nos 92 municípios do RJ. Estimativa, não medição do céu.">
-<meta property="og:type" content="website">
+<title>Observatório da luz noturna — OpenLux</title>
+<meta name="description" content="Luz noturna vista do espaço nos 92 municípios do Rio de Janeiro, de 2018 a 2025 (NOAA-20), com série do S-NPP desde 2012. Estimativa por sensoriamento remoto, não medição do brilho do céu.">
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/observatorio.css">
+<link rel="stylesheet" href="css/prototipo.css">
+<link rel="stylesheet" href="css/paginas.css">
 </head>
-<body class="observatorio">
-<a class="skip" href="#conteudo">Ir para o conteúdo</a>
+<body class="pagina">
 
-<header class="topo">
-  <div class="wrap topo-linha">
-    <a class="marca" href="index.html" aria-label="OpenLux, página inicial">OpenLux</a>
-    <nav aria-label="Áreas do site">
-      <a href="index.html" aria-current="page">Observatório</a>
-      <a href="explorar.html">Explorador</a>
-      <a href="laboratorio.html">Laboratório</a><a href="ambiental.html">Ambiental</a>
-      <a href="roteiros.html">Roteiros</a>
-      <a href="dados.html">Dados abertos</a>
-      <a href="sobre.html">Metodologia</a>
-    </nav>
+<section class="heroi" aria-label="Mapa dos municípios">
+  <div class="palco">
+    <svg id="mapa" viewBox="0 0 1100 760" role="img" aria-label="Mapa dos 92 municípios do Rio de Janeiro, colorido pela luz do ano escolhido"></svg>
+    <div class="lente" id="lente" aria-hidden="true"></div>
   </div>
-</header>
 
-<main id="conteudo">
+  <div class="topo">
+    <div class="titulo"><small>OpenLux · Rio de Janeiro</small><h1>Quanta luz tem o seu município?</h1>
+      <nav class="menu-paginas" aria-label="Áreas do OpenLux">
+        <a href="index.html" aria-current="page">Observatório</a>
+        <a href="explorar.html">Explorador</a>
+        <a href="laboratorio.html">Laboratório</a>
+        <a href="ambiental.html">Observatório ambiental</a>
+        <a href="dados.html">Dados abertos</a>
+        <a href="metodologia.html">Metodologia</a>
+      </nav>
+    </div>
+    <div class="legenda">
+      <div>Luz média vista do espaço (nW·cm⁻²·sr⁻¹)</div>
+      <div class="barra" id="barra"></div>
+      <div class="rotulos"><span>menos</span><span>mais</span></div>
+    </div>
+  </div>
 
-  <section class="abertura wrap" aria-labelledby="titulo">
-    <p class="kicker">Observatório de luminosidade noturna · Estado do Rio de Janeiro</p>
-    <h1 id="titulo">Quanta luz noturna tem o Rio de Janeiro, município a município?</h1>
-    <p class="lede">Luz vista do espaço pelo sensor VIIRS, em 92 municípios, de 2018 a 2025. <strong>É uma estimativa de poluição luminosa baseada em sensoriamento remoto, não uma medição do brilho do céu.</strong></p>
+  <div class="ano" aria-live="polite">
+    <div class="num" id="anoNum">2025</div>
+    <div class="aviso" id="avisoRuido" hidden></div>
+  </div>
+
+  <div class="cartao" id="cartao" role="dialog" aria-live="polite" aria-labelledby="cNome">
+    <button class="fechar" id="fechar" aria-label="Fechar">×</button>
+    <h2 id="cNome"></h2>
+    <div class="sub" id="cHab"></div>
+    <div class="lbl">Luz média na área · <span id="cAno"></span></div>
+    <div class="big"><span id="cMedia">—</span> <span class="unid">nW·cm⁻²·sr⁻¹</span></div>
+    <div class="lbl">Posição entre os 92 municípios</div>
+    <div class="pos" id="cPos"></div>
+    <svg id="cSerie" viewBox="0 0 300 90" preserveAspectRatio="none" aria-hidden="true"></svg>
     <div class="acoes">
-      <a class="botao" href="explorar.html?l=mun&amp;s=noaa20&amp;y=2025">Abrir o explorador</a>
-      <a class="botao secundario" href="#ranking">Ver ranking</a>
+      <a id="cExplorar" href="explorar.html">Abrir no explorador</a>
+      <button id="cCompartilhar">Copiar link</button>
+    </div>
+    <p class="estimativa">Estimativa de poluição luminosa baseada em sensoriamento remoto. Não é medição do brilho do céu.</p>
+  </div>
+
+  <div class="controles-base">
+    <button id="play" aria-pressed="false">▶ Viajar no tempo</button>
+    <input type="range" id="ano" min="0" value="0" aria-label="Ano">
+    <button class="sec" id="lenteBtn" aria-pressed="false">Lente</button>
+    <label class="sensor">Sensor
+      <select id="sensor">
+        <option value="noaa20">NOAA-20 (2018–2025)</option>
+        <option value="snpp">S-NPP (2012–2025)</option>
+      </select>
+    </label>
+  </div>
+</section>
+
+<main class="observatorio">
+  <section aria-labelledby="h-kpi">
+    <h2 id="h-kpi">Indicadores estaduais</h2>
+    <div class="controles">
+      <label>Ano de referência <select id="anoObs"></select></label>
+      <p class="nota-metodo" id="notaKpi">Médias estaduais são médias simples das médias dos 92 municípios, não médias ponderadas por área.</p>
+    </div>
+    <div class="kpis" id="kpis"></div>
+  </section>
+
+  <section aria-labelledby="h-evo">
+    <h2 id="h-evo">Evolução temporal</h2>
+    <div class="bloco">
+      <svg class="grafico" id="grafEvo" viewBox="0 0 640 260" role="img" aria-labelledby="h-evo"></svg>
+      <div class="legenda-linha"><span style="--c:#ffd166">NOAA-20 (primário, 2018–2025)</span><span style="--c:#9fb3cf">S-NPP (continuidade, 2012–2025, tracejado)</span></div>
+      <p class="nota-metodo">O S-NPP tem ruído em áreas escuras a partir de 2022: não leia a diferença desse período como mudança real.</p>
     </div>
   </section>
 
-  <section class="wrap indicadores" aria-labelledby="ind-titulo">
-    <h2 id="ind-titulo">Indicadores do estado</h2>
-    <dl class="kpis" id="kpis">
-      <div><dt>Municípios</dt><dd id="k-mun">—</dd></div>
-      <div><dt>Período (sensor primário)</dt><dd id="k-periodo">—</dd></div>
-      <div><dt>Sensores</dt><dd>NOAA-20 (análise) · S-NPP (continuidade)</dd></div>
-      <div><dt>Radiância média estadual, <span id="k-ano">2025</span></dt><dd id="k-media">—</dd></div>
-      <div><dt>Variação da média, 2018 → 2025</dt><dd id="k-var">—</dd></div>
-    </dl>
-    <p class="nota">Radiância média estadual = média simples dos 92 municípios (cada município pesa igual). Unidade: nW·cm⁻²·sr⁻¹. Não é a média ponderada por área.</p>
-  </section>
-
-  <section class="wrap bloco" aria-labelledby="evo-titulo">
-    <h2 id="evo-titulo">Evolução anual da radiância média estadual</h2>
-    <p class="muted">Linha dourada: NOAA-20 (sensor primário, 2018–2025). Linha tracejada: S-NPP (continuidade) para os mesmos anos. Os dois sensores mostram o mesmo aumento em áreas escuras a partir de 2022, ainda não separado de um artefato comum; não leia essa parte como mudança real de iluminação.</p>
-    <div id="grafico-evolucao" class="grafico" role="img" aria-label="Gráfico da evolução anual da radiância média estadual"></div>
-    <div id="tabela-evolucao" class="tabela-apoio"></div>
-  </section>
-
-  <section class="wrap bloco" aria-labelledby="mapa-titulo">
-    <h2 id="mapa-titulo">Mapa dos 92 municípios, <span id="mapa-ano">2025</span></h2>
-    <p class="muted">Cores em classes fixas, iguais em todos os anos (quintis dos valores 2018–2025 dos 92 municípios). Toque ou clique em um município para abrir o cartão no explorador.</p>
-    <div id="mapa-destaque" class="mapa-destaque"></div>
-    <ol class="legenda-classes" id="legenda-classes"></ol>
-  </section>
-
-  <section class="wrap bloco" aria-labelledby="ranking">
-    <h2 id="ranking">Maiores e menores valores, <span id="rank-ano">2025</span></h2>
+  <section aria-labelledby="h-mm">
+    <h2 id="h-mm">Maiores e menores valores</h2>
     <div class="duas-colunas">
-      <div>
-        <h3>Maiores</h3>
-        <ol class="ranking" id="ranking-maiores"></ol>
-      </div>
-      <div>
-        <h3>Menores</h3>
-        <ol class="ranking" id="ranking-menores"></ol>
-      </div>
+      <div class="bloco"><h3>Maiores médias</h3><ol class="lista-mun" id="maiores"></ol></div>
+      <div class="bloco"><h3>Menores médias</h3><ol class="lista-mun" id="menores"></ol></div>
     </div>
   </section>
 
-  <section class="wrap bloco" aria-labelledby="dist-titulo">
-    <h2 id="dist-titulo">Distribuição municipal, <span id="dist-ano">2025</span></h2>
-    <p class="muted">Quantos municípios caem em cada faixa de radiância média anual.</p>
-    <div id="grafico-distribuicao" class="grafico" role="img" aria-label="Histograma da distribuição municipal"></div>
-  </section>
-
-  <section class="wrap bloco" aria-labelledby="var-titulo">
-    <h2 id="var-titulo">Variação entre 2018 e 2025</h2>
-    <p class="muted">Variação percentual da radiância média de cada município. Só entram municípios com linha de base (2018) acima do piso declarado em <code>meta.change_floor_nw_cm2_sr</code>, para não criar razões de valores muito pequenos.</p>
-    <div class="duas-colunas">
-      <div>
-        <h3>Maiores aumentos</h3>
-        <ol class="ranking" id="var-subidas"></ol>
-      </div>
-      <div>
-        <h3>Maiores reduções</h3>
-        <ol class="ranking" id="var-quedas"></ol>
-      </div>
+  <section aria-labelledby="h-dist">
+    <h2 id="h-dist">Distribuição municipal</h2>
+    <div class="bloco">
+      <svg class="grafico" id="grafDist" viewBox="0 0 640 220" role="img" aria-labelledby="h-dist"></svg>
+      <p class="nota-metodo">Número de municípios em cada faixa de média no ano de referência (faixas de largura dobrada, em nW·cm⁻²·sr⁻¹).</p>
     </div>
   </section>
 
-  <section class="wrap bloco" id="busca-bloco" aria-labelledby="busca-titulo">
-    <h2 id="busca-titulo">Procurar um município</h2>
-    <label class="campo" for="mun-escolha">Município</label>
-    <select id="mun-escolha"><option value="">Escolha um município…</option></select>
-    <p class="ajuda">Abre o cartão do município no explorador, com a série anual e a comparação com o estado.</p>
-    <p><a href="comparar.html">Comparar dois anos, lado a lado →</a></p>
+  <section aria-labelledby="h-comp">
+    <h2 id="h-comp">Variação entre 2018 e 2025</h2>
+    <div class="bloco" id="comparacao"></div>
   </section>
 
-  <section class="wrap bloco sobre-dado" aria-labelledby="sobre-titulo">
-    <h2 id="sobre-titulo">O que este observatório não é</h2>
-    <ul>
-      <li>Não mede o brilho do céu: mede a radiância que o satélite registra na superfície, em quadrados de cerca de 460 m.</li>
-      <li>Não está validado em campo. Os resultados são exploratórios.</li>
-      <li>Não atribui efeitos à saúde, à fauna ou à flora: correlações espaciais não são causas.</li>
-    </ul>
-    <p><a href="sobre.html">Metodologia completa, limitações e fontes</a> · <a href="dados.html">Dados abertos</a></p>
+  <section aria-labelledby="h-terr">
+    <h2 id="h-terr">Indicador territorial: pixels iluminados</h2>
+    <div class="bloco">
+      <p>Fração dos pixels válidos de cada município com radiância acima de 0,5 nW·cm⁻²·sr⁻¹, no ano de referência. Mediana estadual: <strong id="terrMed">—</strong>.</p>
+      <p class="nota-metodo">Limitação: a fração depende do limiar escolhido e do ruído de fundo do sensor. Não mede consumo de energia.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-rank">
+    <h2 id="h-rank">Ranking dos municípios</h2>
+    <div class="bloco">
+      <label class="campo-busca">Buscar município <input type="text" id="busca" placeholder="Ex.: Niterói"></label>
+      <div class="tabela-wrap"><table class="tab" id="tabRank"><thead><tr><th>Posição</th><th>Município</th><th>Média (nW·cm⁻²·sr⁻¹)</th><th></th></tr></thead><tbody id="corpoRank"></tbody></table></div>
+    </div>
   </section>
 </main>
 
-<footer class="rodape">
-  <div class="wrap">
-    <p id="atualizacao"></p>
-    <p class="small">Autor: Danilo Valim · ORCID <a href="https://orcid.org/0009-0009-7250-6151" rel="noopener">0009-0009-7250-6151</a> · Código MIT · DOI <a href="https://doi.org/10.5281/zenodo.24510755" rel="noopener">10.5281/zenodo.24510755</a></p>
-  </div>
+<footer class="rodape-pag">
+  <p>Dados reais do OpenLux: NASA Black Marble (VJ146A4 NOAA-20; VNP46A4 S-NPP). Autor: Danilo Valim · ORCID <a href="https://orcid.org/0009-0009-7250-6151" rel="noopener">0009-0009-7250-6151</a> · DOI <a href="https://doi.org/10.5281/zenodo.24510755" rel="noopener">10.5281/zenodo.24510755</a> · <a href="metodologia.html">Metodologia</a> · <a href="dados.html">Dados abertos</a> · <a href="municipios.html">Municípios</a></p>
 </footer>
 
-<script src="js/mapa-svg.js"></script>
-<script src="js/graficos-svg.js"></script>
+<script src="js/comum.js"></script>
+<script src="js/prototipo.js"></script>
 <script src="js/observatorio.js"></script>
 </body>
 </html>

@@ -92,12 +92,14 @@ def test_sources_have_required_fields_and_no_unknown_license_is_hidden():
         assert s["url"].startswith("https://")
 
 
-def test_simplified_geojson_keeps_only_code_and_name():
+def test_simplified_geojson_keeps_code_name_and_official_area():
     g = gpd.GeoDataFrame({"CD_MUN": ["1"], "NM_MUN": ["A"], "AREA_KM2": [1.0]},
                          geometry=[box(0, 0, 1, 1)], crs="EPSG:4674")
     fc = simplify_geojson(g, tolerance=0.001, ndigits=4)
     assert fc["type"] == "FeatureCollection" and len(fc["features"]) == 1
-    assert fc["features"][0]["properties"] == {"CD_MUN": "1", "NM_MUN": "A"}
+    assert fc["features"][0]["properties"] == {"CD_MUN": "1", "NM_MUN": "A", "AREA_KM2": 1.0}
+    sem_area = simplify_geojson(g.drop(columns="AREA_KM2"), tolerance=0.001, ndigits=4)
+    assert sem_area["features"][0]["properties"] == {"CD_MUN": "1", "NM_MUN": "A"}
 
 
 def test_sensor_comparison_is_attached_per_municipality_and_summary_is_strict_json():
@@ -128,9 +130,8 @@ def test_exposure_and_pixel_trend_are_aligned_and_strict_json():
            "parameters": {"trend_windows": {"w1": [2012, 2013]}, "change_floor_nw_cm2_sr": {"w1": 0.4}}, "outputs": {}}
     d = build_indicators(annual=_annual(), trends=_trends(), qa=pd.DataFrame({"year": [2012]}), sensitivity={},
                          sensor_comparison={}, run_record=rec, sectors=sec, pixel_shares=px)
-    e1, e2 = d["municipios"]["1"]["exposure"], d["municipios"]["2"]["exposure"]
-    assert e1["pop_radiance"] == [10.0, 11.0, 12.0] and e1["pop_valid"] == 0.97
-    assert e2["pop_radiance"] == [5.0, None, 6.0] and e2["urban"] == [None, None, None]   # ano ausente -> null
+    # o bloco exposure nao e publicado (licencas pendentes): nenhum municipio o contem
+    assert all("exposure" not in m for m in d["municipios"].values())
     assert d["municipios"]["1"]["pixel_trend"]["w1"] == {"up": 0.3, "down": 0.1, "n_px": 50.0}
     assert d["municipios"]["2"]["pixel_trend"]["w1"]["up"] is None
     json.dumps(d, allow_nan=False)

@@ -79,7 +79,7 @@ def _clean(x, nd=6):
 
 
 def simplify_geojson(gdf, *, tolerance=0.001, ndigits=4) -> dict:
-    """GeoJSON simplificado (so para exibicao) com apenas CD_MUN e NM_MUN."""
+    """GeoJSON simplificado (so para exibicao): CD_MUN, NM_MUN e, quando existir, AREA_KM2 (IBGE)."""
     feats = []
     for _, r in gdf.iterrows():
         geom = r.geometry.simplify(tolerance, preserve_topology=True)
@@ -89,8 +89,10 @@ def simplify_geojson(gdf, *, tolerance=0.001, ndigits=4) -> dict:
             return [rnd(i) for i in c] if isinstance(c[0], (list, tuple)) else \
                 [round(v, ndigits) for v in c]
         m = {"type": m["type"], "coordinates": rnd(m["coordinates"])}
-        feats.append({"type": "Feature", "properties": {"CD_MUN": str(r.CD_MUN), "NM_MUN": r.NM_MUN},
-                      "geometry": m})
+        props = {"CD_MUN": str(r.CD_MUN), "NM_MUN": r.NM_MUN}
+        if "AREA_KM2" in gdf.columns:  # area oficial do IBGE (malha 2024), usada no explorador e nas paginas municipais
+            props["AREA_KM2"] = float(r.AREA_KM2)
+        feats.append({"type": "Feature", "properties": props, "geometry": m})
     return {"type": "FeatureCollection", "features": feats}
 
 
@@ -125,17 +127,9 @@ def build_indicators(*, annual, trends, qa, sensitivity, sensor_comparison, run_
                 slope_snpp=_clean(r["slope_a"]), p_snpp=_clean(r["p_a"]), slope_noaa20=_clean(r["slope_b"]),
                 p_noaa20=_clean(r["p_b"]), change_snpp=_clean(r.get("change_a")),
                 change_noaa20=_clean(r.get("change_b")), ratio_noaa20_over_snpp=_clean(r["mean_ratio_b_over_a"], 4))
-    if sectors is not None:  # indicadores por setor censitario (S-NPP), populacao FIXA do Censo 2022
-        for cd, g in sectors.groupby("CD_MUN", sort=True):
-            g = g.sort_values("year").set_index("year").reindex(years)
-            muni[str(cd)]["exposure"] = dict(
-                pop_radiance=[_clean(v, 3) for v in g["pop_weighted_radiance"]],
-                pop_lit=[_clean(v, 4) for v in g["pop_lit_fraction"]],
-                urban=[_clean(v, 3) for v in g["mean_urban"]],
-                rural=[_clean(v, 3) for v in g["mean_rural"]],
-                lit_urban=[_clean(v, 4) for v in g["frac_lit_urban"]],
-                lit_rural=[_clean(v, 4) for v in g["frac_lit_rural"]],
-                pop_valid=_clean(g["pop_valid_fraction"].min(), 4))
+    # Bloco 'exposure' (setores censitarios e classificacao urbano/rural) NAO e publicado: a licenca da malha
+    # de setores e a classificacao urbano/rural do IBGE nao estao verificadas (ver docs/LICENSING.md). O argumento
+    # 'sectors' e aceito por compatibilidade e ignorado.
     if pixel_shares is not None:  # participacao de pixels iluminados com mudanca significativa (FDR)
         for wname, df in pixel_shares.items():
             for _, r in df.iterrows():

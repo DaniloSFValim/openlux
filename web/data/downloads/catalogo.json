@@ -45,8 +45,8 @@
     },
     {
       "arquivo": "data/indicators.json",
-      "bytes": 187046,
-      "sha256": "514b885693dbb96e0a1e5827d64a6d8072162c6f65e6d1d1684ae49cc0be1ae9",
+      "bytes": 128959,
+      "sha256": "d18840aab45fd117c55e4f84009dbafe2d4207e1b590611e82acf6a4f5819821",
       "licenca": "CC-BY-4.0",
       "titulo": "Indicadores municipais, S-NPP (JSON)",
       "tipo": "JSON",
@@ -63,8 +63,8 @@
     },
     {
       "arquivo": "data/indicators_noaa20.json",
-      "bytes": 124705,
-      "sha256": "cdeac9e558dfb38ce989a6abd52f48882b4c3ff34c6eb929a4dd07e7263fd460",
+      "bytes": 87100,
+      "sha256": "0ab2dd92face5f17da80db249b7c571e786d35210a134e789b0ab11465f704f4",
       "licenca": "CC-BY-4.0",
       "titulo": "Indicadores municipais, NOAA-20 (JSON)",
       "tipo": "JSON",
@@ -81,8 +81,8 @@
     },
     {
       "arquivo": "data/municipios.geojson",
-      "bytes": 373617,
-      "sha256": "9dc86ceb7fea6aa4fd079030d82e19cd5d21acbd7a94d48b22b0e3ee7859ab4f",
+      "bytes": 375350,
+      "sha256": "f2ec89f0ba87d16075e014fc41bc5cf135ca3ed9b26b555f8e67b36005cd7b6b",
       "licenca": "CC-BY-4.0",
       "titulo": "Limites dos 92 municípios (GeoJSON)",
       "tipo": "GeoJSON",
@@ -164,6 +164,34 @@
         "commit": "73800641547155f890075137ede5abdf523e59b2",
         "codigo_com_alteracoes_nao_commitadas": false
       }
+    },
+    {
+      "arquivo": "data/downloads/openlux_pixels_municipio_noaa20.csv",
+      "bytes": 31484,
+      "sha256": "b32048cdc59ae84401fd9845b75d99c9acaf7d58413951297b3a5c45af109d25",
+      "licenca": "CC-BY-4.0",
+      "titulo": "Contagem de pixels por classe de luz e município (NOAA-20, 2018–2025)",
+      "tipo": "CSV",
+      "fonte": "NASA Black Marble VJ146A4 v2.0 (DOI 10.5067/VIIRS/VJ146A4.002); malha IBGE 2024; gerado por scripts/build_web_pixel_stats.py",
+      "unidade": "contagem de pixels (classes 2 a 7 de luz; sem valor de radiância)",
+      "periodo": "2018–2025",
+      "sistema_de_referencia": "não se aplica (tabela); contagem pelo centro do pixel dentro do polígono",
+      "situacao": "publicado",
+      "execucao": null
+    },
+    {
+      "arquivo": "data/downloads/openlux_tendencia_pixels_noaa20_2018_2025.csv",
+      "bytes": 2245,
+      "sha256": "dd147a30cd6cfa9cf266aa4764cef6f7ca4643d6b18a92d0fa55c85a9fa54ac6",
+      "licenca": "CC-BY-4.0",
+      "titulo": "Contagem de pixels com aumento ou redução significativa por município (NOAA-20, 2018–2025)",
+      "tipo": "CSV",
+      "fonte": "NASA Black Marble VJ146A4 v2.0; grade de mudança publicada; gerado por scripts/build_web_pixel_stats.py",
+      "unidade": "contagem de pixels",
+      "periodo": "2018–2025",
+      "sistema_de_referencia": "não se aplica (tabela); contagem pelo centro do pixel",
+      "situacao": "publicado",
+      "execucao": null
     },
     {
       "arquivo": "data/downloads/openlux_limites_municipais_rj.gpkg",
