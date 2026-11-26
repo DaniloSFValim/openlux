@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorador — OpenLux</title>
+<meta name="description" content="Explorador cartográfico da luz noturna estimada por satélite nos 92 municípios do Rio de Janeiro: mapa por ano, pixels VIIRS, camadas, cartão municipal, comparação entre anos e links compartilháveis.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="css/prototipo.css">
+<link rel="stylesheet" href="css/explorador.css">
+</head>
+<body class="explorador">
+
+<div id="mapa" role="application" aria-label="Mapa do Rio de Janeiro: luz noturna por município e por pixel"></div>
+
+<header class="topo-exp">
+  <div class="titulo"><small>OpenLux · Explorador</small><h1>Explorador da luz noturna</h1></div>
+  <div class="legenda-exp" aria-label="Legenda do mapa">
+    <div id="legTitulo">Luz média por município (nW·cm⁻²·sr⁻¹)</div>
+    <ol id="legClasses"></ol>
+    <div class="nota-leg" id="legNota"></div>
+  </div>
+</header>
+
+<aside class="gaveta" id="gaveta" aria-label="Camadas e opções">
+  <h2>Camadas</h2>
+  <label><input type="checkbox" id="lyMunicipios" checked> Limites municipais (92)</label>
+  <label><input type="checkbox" id="lyEstado" checked> Limite estadual</label>
+  <label><input type="checkbox" id="lyRadiancia" checked> Radiância por município</label>
+  <label><input type="checkbox" id="lyPixels"> Pixels VIIRS (classe de luz)</label>
+  <label><input type="checkbox" id="lyDensidade"> Densidade demográfica (2022)</label>
+  <p class="nota-camadas">Não aparecem aqui camadas sem base pública verificada e publicada: áreas urbanizadas (licença não verificada), hidrografia e áreas costeiras. Unidades de conservação ainda não estão publicadas no site.</p>
+
+  <h2>Sensor e modo</h2>
+  <label class="campo">Sensor
+    <select id="sensor">
+      <option value="noaa20">NOAA-20 (2018–2025), primário</option>
+      <option value="snpp">S-NPP (2012–2025), continuidade</option>
+    </select>
+  </label>
+  <div class="aviso-exp" id="avisoSensor" hidden></div>
+
+  <h2>Comparar dois anos</h2>
+  <label><input type="checkbox" id="lenteOn"> Ativar lente</label>
+  <label class="campo">Ano da lente <select id="anoLente"></select></label>
+  <p class="nota-camadas" id="notaLente"></p>
+
+  <h2>Compartilhar</h2>
+  <button class="btn-exp" id="btnLink">Copiar link desta visualização</button>
+  <p class="nota-camadas" id="notaLink" role="status"></p>
+  <button class="btn-exp sec" id="fecharGaveta">Fechar</button>
+</aside>
+<button class="abrir-gaveta" id="abrirGaveta" aria-expanded="false" aria-controls="gaveta">Camadas e opções</button>
+
+<section class="cartao" id="cartao" role="dialog" aria-live="polite" aria-labelledby="cNome">
+  <button class="fechar" id="fechar" aria-label="Fechar">×</button>
+  <h2 id="cNome"></h2>
+  <div class="sub" id="cLocal"></div>
+  <div class="lbl">População (Censo 2022) · área</div>
+  <div class="linha-dados" id="cPopArea"></div>
+  <div class="lbl">Luz média · <span id="cAno"></span></div>
+  <div class="big"><span id="cMedia">—</span> <span class="unid">nW·cm⁻²·sr⁻¹</span></div>
+  <div class="linha-dados" id="cMedMedia"></div>
+  <div class="lbl">Percentis dos pixels válidos</div>
+  <div class="linha-dados" id="cPerc"></div>
+  <div class="lbl">Posição entre os 92 municípios</div>
+  <div class="pos" id="cPos"></div>
+  <div class="lbl">Evolução anual</div>
+  <svg id="cSerie" viewBox="0 0 300 90" preserveAspectRatio="none" aria-label="Série anual da luz média"></svg>
+  <div class="lbl">Distribuição dos pixels no município</div>
+  <ol class="distrib" id="cDistrib"></ol>
+  <p class="estimativa">Estimativa por sensoriamento remoto. Não é medição do brilho do céu. Para cada pixel, o site mostra a classe de luz; o valor de radiância e a qualidade do pixel não são publicados.</p>
+</section>
+
+<footer class="barra-tempo" aria-label="Linha do tempo">
+  <button id="play" aria-pressed="false">▶ Viajar no tempo</button>
+  <input type="range" id="ano" min="0" value="0" aria-label="Ano">
+  <output id="anoNum" for="ano">2025</output>
+  <div class="pixel-info" id="pixelInfo" aria-live="polite">Passe o cursor sobre o mapa para ver a classe do pixel.</div>
+</footer>
+
+<script src="vendor/leaflet/leaflet.js"></script>
+<script src="vendor/openlux-draw/openlux-turf.min.js"></script>
+<script src="js/explorador.js"></script>
+</body>
+</html>
