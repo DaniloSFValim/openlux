@@ -128,6 +128,23 @@
         <dt>Critério</dt><dd>Mínimo de 8 anos válidos. Janela 2018–2025 com NOAA-20.</dd>
         <dt>Interpretação</dt><dd>Só afirme tendência com p &lt; 0,05 e com consistência entre sensores (ver Metodologia).</dd>
       </dl>
+      <h3>Pixels acima de um limiar</h3>
+      <dl class="def">
+        <dt>Definição</dt><dd>Porcentagem dos pixels válidos do município cuja classe de luz é igual ou superior ao limiar (classes de 2 a 7).</dd>
+        <dt>Fórmula</dt><dd>100 × pixels com classe ≥ limiar ÷ pixels válidos. Contagem pelo centro do pixel dentro do polígono municipal.</dd>
+        <dt>Unidade</dt><dd>% dos pixels válidos</dd>
+        <dt>Fonte</dt><dd>Grade NOAA-20 (VJ146A4) publicada; contagens em <code>openlux_pixels_municipio_noaa20.csv</code>.</dd>
+        <dt>Período</dt><dd>2018–2025 (NOAA-20).</dd>
+        <dt>Limitações</dt><dd>Mostra classes de luz, não valores de radiância. O limiar é uma classe fixa da legenda.</dd>
+        <dt>Interpretação</dt><dd>Compara a proporção de área municipal com luz detectada acima de cada limiar. Não é medida de consumo nem de exposição de pessoas.</dd>
+      </dl>
+      <h3>Tendência por pixel 2018 → 2025</h3>
+      <dl class="def">
+        <dt>Definição</dt><dd>Porcentagem dos pixels válidos do município com aumento ou redução significativa da radiância entre 2018 e 2025 (teste de Theil–Sen com Kendall por pixel, mínimo de 8 anos válidos, FDR de 5 %).</dd>
+        <dt>Fonte</dt><dd><code>openlux_tendencia_pixels_noaa20_2018_2025.csv</code>, derivado da grade de mudança publicada.</dd>
+        <dt>Limitações</dt><dd>As contagens usam o centro do pixel; o indicador municipal de tendência pondera pela cobertura. Por isso os valores podem diferir ligeiramente. Dependência espacial entre pixels não é corrigida.</dd>
+        <dt>Interpretação</dt><dd>Mostra onde a mudança é detectada, não sua causa. Pixels com ruído de fundo do sensor podem aparecer como aumento.</dd>
+      </dl>
       <h3>Variação percentual 2018 → 2025</h3>
       <dl class="def">
         <dt>Fórmula</dt><dd>100 × (média 2025 − média 2018) ÷ média 2018. Calculada só se a média de 2018 for ≥ 0,401 nW·cm⁻²·sr⁻¹ (piso do pipeline).</dd>

@@ -35,8 +35,19 @@
     return out;
   }
 
-  Promise.all([C.indicadores(sensor), C.texto('data/downloads/openlux_percentis_pixels_' + sensor + '.csv'), C.json('data/municipios.geojson')])
-    .then(([D, csv, geo]) => { iniciar(D, parseCsv(csv)); desenhaDiferencas(D, geo); })
+  function parseLinhas(txt) {
+    const l = txt.trim().split(/\r?\n/), cab = l.shift().split(',');
+    return l.map((x) => { const v = x.split(','), o = {}; cab.forEach((c, i) => (o[c] = v[i])); return o; });
+  }
+  Promise.all([C.indicadores(sensor), C.texto('data/downloads/openlux_percentis_pixels_' + sensor + '.csv'), C.json('data/municipios.geojson'),
+    sensor === 'noaa20' ? C.texto('data/downloads/openlux_pixels_municipio_noaa20.csv') : Promise.resolve(''),
+    sensor === 'noaa20' ? C.texto('data/downloads/openlux_tendencia_pixels_noaa20_2018_2025.csv') : Promise.resolve('')])
+    .then(([D, csv, geo, pixCsv, tendCsv]) => {
+      const PIX = {}, TEND = {};
+      if (pixCsv) parseLinhas(pixCsv).forEach((r) => { (PIX[r.CD_MUN] = PIX[r.CD_MUN] || {})[r.year] = r; });
+      if (tendCsv) parseLinhas(tendCsv).forEach((r) => { TEND[r.CD_MUN] = r; });
+      iniciar(D, parseCsv(csv), PIX, TEND); desenhaDiferencas(D, geo);
+    })
     .catch((e) => { console.error(e); C.erro($('erro'), 'Não foi possível carregar os dados publicados. Recarregue a página.'); });
 
 
@@ -81,7 +92,7 @@
     $('resumoDif').textContent = 'Municípios com cálculo: ' + contagem.reduce((a, c) => a + c, 0) + ' de 92. Com p < 0,05 (contorno branco): ' + geo.features.filter((f) => { const t = D.municipios[f.properties.CD_MUN] && D.municipios[f.properties.CD_MUN].trends['2018_2025']; return t && t.p_value < 0.05; }).length + '.';
   }
 
-  function iniciar(D, PERC) {
+  function iniciar(D, PERC, PIX, TEND) {
     const anos = D.meta.years;
     const codigos = Object.keys(D.municipios).sort((a, b) => D.municipios[a].name.localeCompare(D.municipios[b].name, 'pt-BR'));
     const nomeDe = (c) => D.municipios[c].name;
@@ -125,6 +136,10 @@
       linhas.push(['Percentil 90 dos pixels', ids.map((c) => C.fmt(pct(c, 'q90'), 2)), '—']);
       linhas.push(['Percentil 95 dos pixels', ids.map((c) => C.fmt(pct(c, 'q95'), 2)), '—']);
       linhas.push(['Posição entre os 92 municípios (1º = maior média)', ids.map(pos), '—']);
+      if (Object.keys(PIX).length) {
+        const sh = (cds, minC) => { let acima = 0, val = 0; cds.forEach((c) => { const r = PIX[c] && PIX[c][ano]; if (!r) return; val += +r.pix_validos; for (let k = minC; k <= 7; k++) acima += +r['pix_classe_' + k]; }); return val ? 100 * acima / val : null; };
+        [[2, 4], [8, 5], [30, 6], [100, 7]].forEach(([lim, minC]) => linhas.push(['Pixels válidos com radiância ≥ ' + lim + ' nW·cm⁻²·sr⁻¹ (%)', ids.map((c) => C.fmt(sh([c], minC), 1)), C.fmt(sh(codigos, minC), 1)]));
+      }
       linhas.push(['População (Censo 2022)', ids.map((c) => (D.municipios[c].population != null ? C.nf(0).format(D.municipios[c].population) : '—')), '—']);
       const tb = $('corpoTab'); tb.innerHTML = '';
       linhas.forEach(([rot, vals, est]) => {
@@ -179,7 +194,7 @@
       $('resumoBox').textContent = 'Estado (92 municípios, ' + ano + '): 1º quartil ' + C.fmt(q[1], 2) + ', mediana ' + C.fmt(q[2], 2) + ', 3º quartil ' + C.fmt(q[3], 2) + ' nW·cm⁻²·sr⁻¹.';
       // tendência
       const ct = $('cabTrend'); ct.innerHTML = '';
-      ['Município', 'Inclinação (nW·cm⁻²·sr⁻¹ por ano)', 'p-valor', 'Anos válidos', 'Variação 2018→2025 (%)', 'Leitura'].forEach((t) => hel('th', ct, t));
+      ['Município', 'Inclinação (nW·cm⁻²·sr⁻¹ por ano)', 'p-valor', 'Anos válidos', 'Variação 2018→2025 (%)', 'Pixels com aumento significativo (%)', 'Pixels com redução significativa (%)', 'Leitura'].forEach((t) => hel('th', ct, t));
       const ctb = $('corpoTrend'); ctb.innerHTML = '';
       ids.forEach((c) => {
         const t = D.municipios[c].trends['2018_2025'];
@@ -189,6 +204,9 @@
         hel('td', tr, t ? C.fmt(t.p_value, 3) : '—');
         hel('td', tr, t ? String(t.n_years) : '—');
         hel('td', tr, t ? C.fmt(t.change_pct, 1) : '—');
+        const tp = TEND[c]; const tot = tp ? ['pix_nao_testado', 'pix_sem_mudanca_significativa', 'pix_aumento_significativo', 'pix_reducao_significativa'].reduce((a, k) => a + +tp[k], 0) : 0;
+        hel('td', tr, tp ? C.fmt(100 * +tp.pix_aumento_significativo / tot, 1) : '—');
+        hel('td', tr, tp ? C.fmt(100 * +tp.pix_reducao_significativa / tot, 1) : '—');
         hel('td', tr, !t ? '—' : t.p_value < 0.05 ? (t.slope > 0 ? 'tendência de alta (p < 0,05)' : 'tendência de queda (p < 0,05)') : 'sem tendência estatisticamente sustentada (p ≥ 0,05)');
       });
     }

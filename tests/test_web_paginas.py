@@ -219,3 +219,24 @@ def test_laboratorio_difference_map_counts_match_published_trends(server, pg):
     texto = pg.inner_text("#resumoDif")
     assert f"Municípios com cálculo: {len(calc)} de 92" in texto
     assert pg.errors == []
+
+
+def test_laboratorio_pixel_shares_and_trends_match_published_csv(server, pg):
+    """Pixels acima de limiares e tendência por pixel: valores exibidos conferem com os CSVs publicados."""
+    import csv
+    cad = list(csv.DictReader((WEB / "data/downloads/openlux_pixels_municipio_noaa20.csv").open(encoding="utf-8")))
+    row = [r for r in cad if r["CD_MUN"] == RIO and r["year"] == "2025"][0]
+    val = int(row["pix_validos"])
+    acima2 = sum(int(row[f"pix_classe_{k}"]) for k in range(4, 8))
+    fmt1 = lambda v: f"{v:.1f}".replace(".", ",")
+    esperado = fmt1(100 * acima2 / val)
+    pg.goto(server + "/laboratorio.html?y=2025")
+    pg.wait_for_selector("#corpoTab tr", state="attached")
+    pg.wait_for_timeout(600)
+    linha = [pg.locator("#corpoTab tr").nth(i).inner_text() for i in range(pg.locator("#corpoTab tr").count())]
+    alvo = [l for l in linha if "≥ 2 nW" in l][0]
+    assert alvo.split("\t")[1] == esperado, (alvo, esperado)
+    tend = [r for r in csv.DictReader((WEB / "data/downloads/openlux_tendencia_pixels_noaa20_2018_2025.csv").open(encoding="utf-8")) if r["CD_MUN"] == RIO][0]
+    tot = sum(int(tend[k]) for k in tend if k != "CD_MUN")
+    assert pg.locator("#corpoTrend tr").nth(0).inner_text().split("\t")[5] == fmt1(100 * int(tend["pix_aumento_significativo"]) / tot)
+    assert pg.errors == []

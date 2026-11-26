@@ -19,6 +19,7 @@ Reconstrução do front-end a partir do protótipo aprovado (`docs/referencia/`)
 - Testes de navegador em `tests/test_web_explorador.py`, `tests/test_web_paginas.py` e `tests/test_web_municipios.py`.
 
 ### Alterado
+- Laboratório: percentual de pixels acima de 2, 8, 30 e 100 nW·cm⁻²·sr⁻¹ e tendência por pixel 2018–2025 (contagens em `openlux_pixels_municipio_noaa20.csv` e `openlux_tendencia_pixels_noaa20_2018_2025.csv`, gerados por `scripts/build_web_pixel_stats.py`).
 - Pixels regerados a partir de commit limpo (`db2676b`): os 25 arquivos `.bin` têm SHA-256 idêntico ao anterior; só os metadados mudaram.
 - Explorador: a área do cartão usa a área oficial do IBGE (`AREA_KM2`), e não a área geodésica calculada.
 - Troca de sensor no explorador mantém ano e lente.

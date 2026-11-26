@@ -166,6 +166,34 @@
       }
     },
     {
+      "arquivo": "data/downloads/openlux_pixels_municipio_noaa20.csv",
+      "bytes": 31484,
+      "sha256": "b32048cdc59ae84401fd9845b75d99c9acaf7d58413951297b3a5c45af109d25",
+      "licenca": "CC-BY-4.0",
+      "titulo": "Contagem de pixels por classe de luz e município (NOAA-20, 2018–2025)",
+      "tipo": "CSV",
+      "fonte": "NASA Black Marble VJ146A4 v2.0 (DOI 10.5067/VIIRS/VJ146A4.002); malha IBGE 2024; gerado por scripts/build_web_pixel_stats.py",
+      "unidade": "contagem de pixels (classes 2 a 7 de luz; sem valor de radiância)",
+      "periodo": "2018–2025",
+      "sistema_de_referencia": "não se aplica (tabela); contagem pelo centro do pixel dentro do polígono",
+      "situacao": "publicado",
+      "execucao": null
+    },
+    {
+      "arquivo": "data/downloads/openlux_tendencia_pixels_noaa20_2018_2025.csv",
+      "bytes": 2245,
+      "sha256": "dd147a30cd6cfa9cf266aa4764cef6f7ca4643d6b18a92d0fa55c85a9fa54ac6",
+      "licenca": "CC-BY-4.0",
+      "titulo": "Contagem de pixels com aumento ou redução significativa por município (NOAA-20, 2018–2025)",
+      "tipo": "CSV",
+      "fonte": "NASA Black Marble VJ146A4 v2.0; grade de mudança publicada; gerado por scripts/build_web_pixel_stats.py",
+      "unidade": "contagem de pixels",
+      "periodo": "2018–2025",
+      "sistema_de_referencia": "não se aplica (tabela); contagem pelo centro do pixel",
+      "situacao": "publicado",
+      "execucao": null
+    },
+    {
       "arquivo": "data/downloads/openlux_limites_municipais_rj.gpkg",
       "bytes": 466944,
       "sha256": "9e873c607103f06b10f0d0fc9001d8c6eb6ce8c124f89157d6fa3abc0facec83",
