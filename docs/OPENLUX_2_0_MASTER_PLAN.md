@@ -3,7 +3,7 @@
 Arquivo central de acompanhamento. Atualizar a cada fase concluída. Antes de cada sessão, ler este
 arquivo, `CHANGELOG.md` e `docs/DECISIONS.md` e continuar a partir da última tarefa concluída.
 
-Data de referência deste diagnóstico: 2026-11-25. Branch de trabalho: `claude/happy-goodall-c12zd5`,
+Atualizado em 2026-11-26 (revisão de pendências: ver seção 11). Data de referência do diagnóstico: 2026-11-25. Branch de trabalho: `claude/happy-goodall-c12zd5`,
 sincronizada com `main` em `9e8f11b` (PR #26 mergeado).
 
 ## 1. Objetivo
@@ -86,7 +86,7 @@ Estados: NÃO INICIADO · EM ANDAMENTO · CONCLUÍDO · BLOQUEADO · VALIDAR CIE
 | Remover `web/data/downloads/revisao_noaa20/` da pasta pública (P1) | CONCLUÍDO. Movido para `data/revisao/noaa20/` com `git mv`. Teste de guarda em `tests/test_web_noaa20.py` |
 | Atualizar `docs/DECISIONS.md` §15 com addendum (K1) | CONCLUÍDO. Addendum §15.1 |
 | Atualizar `docs/AUDITORIA_2_0.md`: A2 e A7 (K2, K3) | CONCLUÍDO |
-| Verificar o build de produção a partir de `main` (P2) | BLOQUEADO. Sem acesso ao log do Cloudflare nesta sessão; pendência 3 do responsável |
+| Verificar o build de produção a partir de `main` (P2) | CONCLUÍDO (2026-11-26). O conteúdo publicado confere com o repositório: `tests/test_deploy_publicado.py` com `OPENLUX_URL=https://openlux.labdados.org`, 252 passam. O log do Cloudflare continua sem acesso; a verificação foi feita pelo conteúdo |
 | Gerar lock file de dependências Python (P5) | CONCLUÍDO. `requirements-lock.txt` (104 pacotes, ambiente de referência, Python 3.13.18) |
 | Fixar versões mínimas em `pyproject.toml` (P5) | CONCLUÍDO. Mínimos = versões aprovadas na suíte |
 
@@ -94,14 +94,14 @@ Estados: NÃO INICIADO · EM ANDAMENTO · CONCLUÍDO · BLOQUEADO · VALIDAR CIE
 
 | Tarefa | Estado |
 |---|---|
-| Confirmar unidades, máscaras e camadas do VJ146A4 e VNP46A4 no guia oficial | BLOQUEADO (guia em PDF retornou 403 ao acesso automatizado) |
-| Verificar a nota da NASA sobre v1.0 do S-NPP (alerta 171686) | BLOQUEADO (a página do alerta não abriu; o índice mostra o título, sem escopo) |
-| Investigar a degradação do DNB do S-NPP descrita nas notas da v2.0 | VALIDAR CIENTIFICAMENTE |
-| Verificar se os valores VIIRS podem exceder 6553,5 nW·cm⁻²·sr⁻¹ (mudança para ponto flutuante na v2.0) e se o pipeline trata isso | NÃO INICIADO |
-| Confirmar SIRGAS 2000 como referência e medir a diferença para WGS84 (hoje é premissa, DECISIONS §1) | NÃO INICIADO |
-| Revisar agregação municipal (interseção de pixels com a malha) | NÃO INICIADO (há testes de agregação; revisão ainda não feita nesta fase) |
-| Reprodutibilidade: executar o pipeline a partir de `data/raw/` e comparar hashes do Apêndice C | NÃO INICIADO |
-| Percentis P75/P90/P95 e área acima de limiares | BLOQUEADO (exige aprovação prévia dos novos arquivos, pedido ao responsável) |
+| Confirmar unidades, máscaras e camadas do VJ146A4 e VNP46A4 no guia oficial | CONCLUÍDO (2026-11-26) pelo *Black Marble User Guide (Collection 2.0)*, out/2024, enviado pelo responsável. Confirmado: unidade nW·cm⁻²·sr⁻¹ (Tabela 11); camadas `AllAngle_Composite_Snow_Free`, `_Num`, `_Quality`, `_Std`, `Land_Water_Mask`, `DNB_Platform` (Tabela 11); fill −999,9 em float32 (Tabelas 5, 8, 11); Quality 00 = boa (>3 observações), 01 = ruim (≤3), 02 = preenchida, 255 = fill (Tabela 12); Land_Water_Mask: códigos 0, 1 e 5 do código (`DEFAULT_LAND_CODES`) correspondem a terra/deserto, terra e costeiro (bits 1–3 da Tabela 6, citada pelo guia) |
+| Verificar a nota da NASA sobre v1.0 do S-NPP (alerta 171686) | BLOQUEADO. O guia (out/2024) não trata do alerta nem das notas da v2.0 de 2025 |
+| Investigar a degradação do DNB do S-NPP descrita nas notas da v2.0 | VALIDAR CIENTIFICAMENTE. O guia (out/2024) não descreve a degradação |
+| Verificar se os valores VIIRS podem exceder 6553,5 nW·cm⁻²·sr⁻¹ (mudança para ponto flutuante na v2.0) e se o pipeline trata isso | CONCLUÍDO (2026-11-26). Arquivos verificados (um por sensor): VJ146A4 e VNP46A4 têm radiância em float32, `_FillValue` −999,9 e `scale_factor` 1; `src/openlux/io.py` lê em float32 sem limite de 16 bits. Não há truncamento. Amostra: máximo 2280,98 no tile h13v11 do NOAA-20 (apenas um tile verificado) |
+| Confirmar SIRGAS 2000 como referência e medir a diferença para WGS84 (hoje é premissa, DECISIONS §1) | CONCLUÍDO PARCIAL (2026-11-26). O registro do EPSG para EPSG:4674→4326 (pyproj 3.8.0) tem uma única operação: “SIRGAS 2000 to WGS 84 (1)”, tipo noop, com acurácia declarada de 1,0 m e sem grade. Logo, a diferença é uma premissa com incerteza declarada de até 1 m, não uma medição. Medir com grade oficial exigiria fonte verificada (não feito) |
+| Revisar agregação municipal (interseção de pixels com a malha) | CONCLUÍDO (2026-11-26, revisão por leitura de `src/openlux/zonal.py`). Pesos = cobertura exactextract; pixels inválidos saem do numerador e do denominador; a área dos pixels é indexada pela linha correta (`cell // ncols`); CRS dos polígonos é verificado. Suíte completa: 448 passam, 2 pulados |
+| Reprodutibilidade: executar o pipeline a partir de `data/raw/` e comparar hashes do Apêndice C | PARCIAL. NOAA-20 reproduzido em 2026-11-26 (ver Fase D/catálogo). S-NPP e o Apêndice C não verificados nesta revisão (pipeline completo sobre 7 GB não rodado) |
+| Percentis P75/P90/P95 e área acima de limiares | CONCLUÍDO para os percentis (publicados, ver “Pendências aprovadas”). Área acima de limiares: ver a linha de Fase D (`frac_above`) |
 
 ### Fase D — Nova interface
 
@@ -115,7 +115,7 @@ Atualizado em 2026-11-26. A interface anterior foi removida (commit `7d31fb0`) e
 | Lente de comparação entre dois anos (9.6) | CONCLUÍDO no explorador (`explorar.html`, parâmetros `lente` e `lx`). Troca de sensor mantém a lente. Lente por pixel: com a camada de pixels ligada, a esquerda mostra as classes do ano da lente. A página `comparar.html` foi removida. |
 | Laboratório de análises (10.1 e 10.3, municipal): até três municípios, médias, medianas, percentis dos pixels, posição, evolução, distribuição, caixa, tendência com definição de cada indicador | CONCLUÍDO (`web/laboratorio.html`). Testes: `tests/test_web_paginas.py`. Mapa de diferenças municipal 2018→2025 concluído. Tendência por pixel (contagem de pixels com aumento ou redução significativa) e percentual de pixels acima de limiares concluídos, NOAA-20, com definição de cada indicador (`scripts/build_web_pixel_stats.py`). Comparação entre municípios por pixel: os três municípios escolhidos mostram esses percentuais lado a lado. |
 | Observatório ambiental (Fase 7) | PARCIAL. `web/ambiental.html` mostra o estado de cada camada e licença. Nenhum resultado é publicado. Camadas bloqueadas (ver Fase 7). |
-| Dados abertos (Fase 8) | CONCLUÍDO nesta parte: catálogo com SHA-256, licença, citação, níveis de dados (`web/dados.html`). Relatórios de qualidade: NÃO INICIADO. |
+| Dados abertos (Fase 8) | CONCLUÍDO nesta parte: catálogo com SHA-256, licença, citação, níveis de dados (`web/dados.html`). Relatórios de qualidade: CONCLUÍDO (2026-11-26, `scripts/build_relatorio_qualidade.py` → `web/qualidade.html`, 11/11 verificações passam, linkado em `dados.html`). |
 | Metodologia (Fase 10) | CONCLUÍDO nesta parte (`web/metodologia.html`): produtos, máscaras, agregação, limitações, o que não mede. Validação em campo: NÃO REALIZADA (protocolo proposto). |
 | Páginas municipais (Fase 9) | CONCLUÍDO para os 92 municípios (`web/municipio/`, `web/municipios.html`), gerado por `scripts/build_web_municipios.py`. |
 
@@ -147,7 +147,7 @@ Decisões do responsável necessárias: (1) confirmar a licença das áreas urba
 | SIRGAS 2000 nos produtos geográficos | NÃO MEDIDO | A medição com pyproj deu 0 m, mas a transformação usada é nula (sem grade de correção), então o número não vale. A diferença entre os datums não foi quantificada; a frase "poucos metros" continua sem verificação |
 | Dicionário de dados linkado | CONCLUÍDO |
 | Turf (~530 KB) carregado só quando o leitor usa "Desenhar uma área" (auditoria A9) | CONCLUÍDO. Visita comum ao mapa: zero requisições ao Turf; verificado no Chromium |
-| Saturação de `pop_lit` (0,96–1,00) (auditoria A5) | DOCUMENTADO. Não usar como manchete (já registrado na auditoria) | Link em `web/dados.html`. Relatórios de qualidade publicados: NÃO INICIADO |
+| Saturação de `pop_lit` (0,96–1,00) (auditoria A5) | DOCUMENTADO. Não usar como manchete (já registrado na auditoria) | Link em `web/dados.html`. Relatórios de qualidade publicados: CONCLUÍDO (`web/qualidade.html`) |
 
 ### Fase 7: análise exploratória de áreas protegidas (2026-11-26)
 
@@ -214,9 +214,9 @@ Fontes lidas por busca e pelo agente de leitura web (2026-11-25):
 | Início da série: VJ146A4 em 2018-01-01; VNP46A4 em 2012-01-01 | **Confirmado** (fim da série não encontrado) | mesmas páginas |
 | Versão 2.0 (DOI .002) usada pelo projeto | **Confirmado** nas páginas dos produtos | mesmas páginas; "NPP and JPSS1 VIIRS data 2.0 (ArchiveSet 5200)" |
 | Ponto flutuante na v2.0; valores podem exceder 6553,5 nW·cm⁻²·sr⁻¹ | **Confirmado** (nota de mudanças) | páginas dos produtos |
-| Degradação do DNB do S-NPP após o lançamento; NOAA-20 estável; correção espectral aplicada ao S-NPP na v2.0 | **Confirmado** como declaração da NASA; método e coeficientes **não encontrados** | página do VNP46A4, item 4 de mudanças |
-| Unidade nW·cm⁻²·sr⁻¹ | **Não confirmado** em documento oficial. Só aparece em pôster da NASA | pendente do guia PDF |
-| Nomes de camadas (`AllAngle_Composite_Snow_Free`), códigos de máscara de terra/água, códigos de qualidade do produto anual | **Não confirmados** | o guia PDF (Collection 2.0) retornou 403 |
+| Degradação do DNB do S-NPP após o lançamento; NOAA-20 estável; correção espectral aplicada ao S-NPP na v2.0 | **Confirmado** como declaração da NASA (página do VNP46A4); método e coeficientes **não encontrados** no guia | página do VNP46A4, item 4 de mudanças |
+| Unidade nW·cm⁻²·sr⁻¹ | **Confirmado** no guia Collection 2.0 (Tabela 11) | guia PDF (out/2024) |
+| Nomes de camadas (`AllAngle_Composite_Snow_Free`), códigos de máscara de terra/água, códigos de qualidade do produto anual | **Confirmados** no guia Collection 2.0 (Tabelas 11, 12 e 6) | guia PDF (out/2024) |
 | Alerta 171686 (produção do S-NPP v1.0 encerrada em 31/01/2025) se aplica à v2.0? | **Não resolvido**. A página do alerta não abriu; o índice mostra títulos de alertas v2.0 em 2025 | https://ladsweb.modaps.eosdis.nasa.gov/alerts-and-issues/171686 |
 
 Consequência: as unidades, as máscaras e as camadas usadas pelo pipeline **não podem ser declaradas
@@ -260,6 +260,9 @@ Nenhum script ou dado foi descartado nesta fase.
 | Data | Comando | Resultado |
 |---|---|---|
 | 2026-11-25 | `OPENLUX_CHROMIUM=/opt/pw-browsers/chromium python3 -m pytest -q tests` (branch com o PR #26 mergeado) | 226 passam, 1 pulado (teste remoto, exige `OPENLUX_URL`) |
+| 2026-11-26 | `OPENLUX_CHROMIUM=/opt/pw-browsers/chromium pytest -q tests` (revisão de pendências) | 448 passam, 2 pulados |
+| 2026-11-26 | `OPENLUX_URL=https://openlux.labdados.org pytest tests/test_deploy_publicado.py` | 252 passam |
+| 2026-11-26 | `python scripts/build_relatorio_qualidade.py` | 11/11 verificações passam |
 | 2026-11-25 | Sonda de produção `curl https://openlux.labdados.org/...` | `/data/indicators_noaa20.json`: 404 (ver P2) |
 | 2026-11-25 | Fase B: `pytest -q tests` após mover a pasta de revisão, atualizar pyproject e criar o lock | 227 passam, 1 pulado (o pulado é o teste remoto) |
 | 2026-11-25 | Prévia Cloudflare do commit `19afcc7` | Build e deploy com sucesso; `/explorar` 200, `indicators_noaa20.json` 200, `pixels/noaa20/2025.bin` 200 |
@@ -291,3 +294,71 @@ Fase A: concluída e mergeada (PR #27). Fase B: concluída, com a exceção do b
 
 1. Fase C: bloqueada no guia oficial da NASA (pendência 1) e na fonte INEA (nova tentativa agendada para 2026-11-26 01:58 UTC).
 2. Enquanto isso, itens de Fase C que não dependem do guia: confirmar SIRGAS 2000 e medir a diferença para WGS84; revisar a agregação municipal; reproduzir o pipeline a partir de `data/raw/` e comparar com os hashes do Apêndice C de METHODOLOGY.
+
+## 11. Revisão de pendências (2026-11-26)
+
+Itens que estavam NÃO INICIADOS e não dependem de terceiros, executados nesta revisão:
+
+| Item | Estado | Evidência |
+|---|---|---|
+| Deploy (P2) | CONCLUÍDO | Conteúdo publicado confere com o repositório (252 testes) |
+| Valores acima de 6553,5 | CONCLUÍDO | float32 em ambos os sensores, sem truncamento |
+| SIRGAS 2000 vs WGS84 | CONCLUÍDO PARCIAL | Operação EPSG única, noop, acurácia 1,0 m; sem grade medida |
+| Revisão da agregação municipal | CONCLUÍDO | Leitura de `zonal.py`; testes passam |
+| Relatórios de qualidade | CONCLUÍDO | `web/qualidade.html` regenerado, 11/11 |
+| Reprodutibilidade completa | PARCIAL | Só NOAA-20 verificado; S-NPP e Apêndice C pendentes |
+
+Itens que continuam pendentes e dependem de você ou de terceiros:
+
+1. Guia oficial da NASA (unidades, máscaras, camadas): BLOQUEADO.
+2. Alerta 171686 e degradação do DNB do S-NPP: BLOQUEADO / VALIDAR CIENTIFICAMENTE.
+3. Grade oficial SIRGAS 2000 → WGS84 para medir a diferença: sem fonte verificada.
+4. Proteção da branch principal: exige administrador.
+5. Tag `v0.1.0`: push recusado com 403.
+6. Fase 7: **conflitos de decisão** entre este plano e o histórico da conversa. (a) Áreas urbanizadas do IBGE: plano diz BLOQUEADO por licença não verificada; o histórico registra publicação como derivados com base na IN 47/2025. (b) MapBiomas: plano registra autorização do Brasil (CC BY 4.0); o histórico registra recomendação de exclusão. (c) UCs do CNUC: plano diz não publicadas; o histórico registra publicação. Precisa de decisão sua antes de qualquer alteração pública.
+7. INEA: data da nova tentativa registrada de forma divergente (2026-11-26 01:58 UTC aqui; 2026-11-27 02:00 UTC no histórico). Confirmar.
+8. Camadas GIS para download além dos limites municipais: NÃO INICIADO.
+9. Zenodo e nova versão (Fase 13): só após conclusão do 2.0, com publicação manual.
+
+### Registro de 2026-11-26: guia oficial
+
+O responsável enviou o *Black Marble User Guide (Collection 2.0)*, datado de out/2024. Confirmado: unidades, nomes de camadas, fill values, códigos de qualidade (Tabela 12) e códigos de Land_Water_Mask (via Tabela 6). Não confirmado pelo guia: degradação do DNB do S-NPP e alerta 171686 (ambos de 2025, posteriores ao guia). Esses dois itens continuam abertos.
+
+## 12. Encerramento da distribuição do S-NPP (verificado em 2026-11-26)
+
+Fontes lidas por um subagente de leitura web (texto relatado, não conferido linha a linha pelo responsável):
+
+| Fonte | Conteúdo | Situação |
+|---|---|---|
+| LAADS, alerta 199913 | "Cessation of S-NPP data to users on November 02, 2026"; cessação às 13:00 UTC de 2026-11-02 (dia 306); campo *Start Date* da página diz 2026-11-01 13:00 (divergência não explicada); arquivo histórico **continua disponível**; migração para NOAA-20 e NOAA-21; mapeia VNP46A4 → VJ146A4 (NOAA-20) e VJ246A4 (NOAA-21) | Lido |
+| NOAA NESDIS (publicado 2026-08-03) | Fim da entrega de produtos científicos do S-NPP às 13:00 UTC de 2026-11-02; "Permanent"; a página **não** diz se o arquivo histórico permanece | Lido |
+| NOAA, atualização #3 (2026-10-30 14:00 UTC) | "delivery ... will cease on November 02, 2026 15:40 UTC". Horário revisado de 13:00 para **15:40 UTC** | Lido (links reais da página de aviso, não os de tentativa) |
+| NOAA, atualização #4 (2026-11-02 18:00 UTC) | Cessação "took effect today at 15:40 UTC"; desligamento do HRD no mesmo horário; descida orbital a partir de 1º/12/2026 até reentrada prevista por volta de 12/12/2026 | Lido. Não menciona arquivo histórico |
+| Earthdata (alerta de 1º/11/2026) | HTTP 403 | Não lido |
+
+Consequências para o projeto:
+1. A série S-NPP de 2012 a 2025 usada no site permanece reproduzível a partir de `data/raw/` (cópia local) com os hashes registrados. A nova distribuição não altera o que já foi processado.
+2. O site ainda não diz que a distribuição do S-NPP foi encerrada. Isso deve entrar após confirmação da data e do horário nas atualizações da NOAA.
+3. NOAA-21 (VJ246A4) não está nos dados locais e não foi avaliado. Usá-lo exige análise de comparabilidade, incluindo o viés de 2021 entre S-NPP e NOAA-20 registrado no LAADS. Decisão de escopo pendente do responsável.
+4. Alertas de NOAA-20 (VJ146) **não verificados** nesta revisão.
+
+Pendências deste item: (horário confirmado em 15:40 UTC pelas atualizações #3 e #4; o aviso original de 13:00 UTC foi superado); ler o alerta 199913 diretamente; verificar alertas do NOAA-20; decidir sobre o NOAA-21.
+
+## 13. Alertas LAADS do NOAA-20 (VJ146), verificados em 2026-11-26
+
+Lista de alertas do LAADS (397 entradas) lida sem filtro, porque a busca por JavaScript não rodou na leitura automatizada. Páginas individuais lidas (texto relatado por subagente de leitura web; não conferido linha a linha pelo responsável):
+
+| Alerta | Tema | Efeito declarado sobre VJ146A4 / dados locais |
+|---|---|---|
+| 199977 (2024-04-11) | Manobra de rephasing do NOAA-20, 20/03 a 06/04/2024 | Dados L1 do período ficam em arquivo de teste não público; processamento de produtos de terra suspenso no período; NRT interrompido de 20/03 a 04/04; reprocessamento a partir de 25/03/2024 com aviso de que os dados podem ainda ser afetados. **Afeta o ano de 2024 da série NOAA-20; efeito não quantificado** |
+| 199940 (2025-04-29) | Soft release da v2.0 das composições lunares BRDF anuais e mensais (SNPP e NOAA-20) | Inclui VJ146A3 e VJ146A4 como soft release: download só por URL direta, sem busca no LAADS nem no Earthdata. A página diz "Yearly" no título, mas descreve VJ146A4 como "Daily Moonlight-adjusted". **Inconsistência na própria página; confirmar o identificador antes de citar** |
+| 199948 (2025-01-09) | Soft release de produtos de luz noturna (SNPP e NOAA-20) | VJ146A1 e VJ146A2 em soft release. Confirma a mudança do DNB para ponto flutuante na v2.0 (já usada no plano). Diz que o DNB do SNPP degradou e que NOAA-20 e NOAA-21 são estáveis |
+| 199944 (2025-02-27) | Produtos de terra v2.0 (ponteiro para o LP DAAC) | Não cita VJ146 |
+| 200110 (2020-11-09) | Exclusão acidental de L1 C2 do JPSS-1 no arquivo 5200 | Dados recuperados ou reprocessados segundo a página. Não cita VJ146 |
+
+Consequências:
+1. **Ano de 2024 (NOAA-20):** o período do rephasing (20/03 a 06/04/2024) precisa de avaliação científica antes de a série anual ser tratada como definitiva. Sugestão: comparar a contagem de observações válidas e a radiância por município nesse período com os meses vizinhos. **Não publicar conclusão sem essa análise.**
+2. **Soft release:** o VJ146A4 e os demais produtos v2.0 usados não aparecem na busca do LAADS. Isso afeta a citação e a verificação de proveniência. Os hashes locais e os metadados de download continuam sendo a prova de origem.
+3. **Discrepância do identificador:** antes de citar o VJ146A4 como "anual", confirmar com o LP DAAC ou com a documentação do produto.
+
+**Não consegui confirmar:** as atualizações #3 e #4 da NOAA (HTTP 404 e 403) e a página da Earthdata (HTTP 403). O horário de cessação do S-NPP continua não confirmado.
