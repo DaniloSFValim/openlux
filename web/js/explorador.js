@@ -64,6 +64,9 @@
     // mapa
     const map = L.map('mapa', { zoomControl: false, attributionControl: true, minZoom: 8, maxZoom: 14 });
     L.control.zoom({ position: 'bottomleft' }).addTo(map);
+    // mapa-base sob demanda (desligado por padrão; ver docs/DEPLOYMENT.md e a política de ladrilhos do OSM)
+    const camadaBase = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 14, attribution: '© OpenStreetMap contributors' });
+    $('lyBase').addEventListener('change', (e) => { if (e.target.checked) camadaBase.addTo(map); else map.removeLayer(camadaBase); });
     map.attributionControl.setPrefix(false).addAttribution('Dados: NASA Black Marble (VIIRS) · IBGE Malha 2024 e Censo 2022');
     const pInfo = $('pixelInfo');
     map.createPane('lentePane'); map.getPane('lentePane').style.zIndex = 450; map.getPane('lentePane').style.pointerEvents = 'none';
