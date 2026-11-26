@@ -1,5 +1,6 @@
-/* fundo cobre a página inteira (prototipo.css fixa altura em 100%) */
-html:has(body.pagina) { height: auto; background: var(--noite); }
+/* prototipo.css define html,body com overflow: hidden (tela cheia do protótipo). Páginas de texto e análise precisam rolar. */
+html:has(body.pagina), body.pagina { height: auto; overflow: visible; }
+html:has(body.pagina) { background: var(--noite); }
 /* Páginas de análise (Laboratório, Observatório ambiental, Dados abertos, Metodologia). */
 body.pagina { margin: 0; height: auto; min-height: 100vh; background: radial-gradient(120% 90% at 60% 0%, var(--azul), var(--noite) 60%); color: var(--texto); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.5; }
 .pagina main { max-width: 1080px; margin: 0 auto; padding: 24px 16px 64px; }
@@ -65,3 +66,7 @@ html:has(#cartao), body:has(#cartao) { overflow-x: hidden; }
 .mapa-dif path { stroke: rgba(255,255,255,.15); stroke-width: .5; }
 
 .mapa-urb svg { width: min(100%, 640px); height: auto; display: block; margin: 0 auto; }
+
+/* textos longos (nomes de arquivo) quebram linha em telas estreitas */
+.pagina code { overflow-wrap: anywhere; word-break: break-word; }
+dl.def dd, dl.def dt { min-width: 0; overflow-wrap: anywhere; }

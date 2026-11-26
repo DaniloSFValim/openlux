@@ -297,3 +297,14 @@ def test_pixel_level_uc_result_matches_published_json(server, pg):
     assert pt1(d["estratos"]["urbano_fora_uc"]["mediana"]) in texto
     assert "Não são publicados p-valores" in texto
     assert pg.errors == []
+
+
+@pytest.mark.parametrize("pagina", ["ambiental.html", "laboratorio.html", "dados.html", "metodologia.html", "index.html"])
+def test_user_can_scroll_with_mouse_wheel(server, pg, pagina):
+    """prototipo.css bloqueava a rolagem (overflow hidden); a roda do mouse precisa mover a página."""
+    pg.goto(server + "/" + pagina, wait_until="domcontentloaded")
+    pg.wait_for_timeout(800)
+    pg.mouse.move(640, 400)
+    pg.mouse.wheel(0, 1200)
+    pg.wait_for_timeout(600)
+    assert pg.evaluate("window.scrollY") > 0, pagina
