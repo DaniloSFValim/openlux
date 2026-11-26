@@ -134,3 +134,18 @@ def test_explorer_share_button_copies_link(server, browser_page):
     pg.click("#btnLink")
     pg.wait_for_function("document.getElementById('notaLink').textContent === 'Link copiado.'")
     assert pg.errors == []
+
+
+def test_explorer_sensor_switch_keeps_lens_active(server, browser_page):
+    """Trocar o sensor recarrega a página; a lente ligada e o ano da lente devem continuar."""
+    pg = browser_page
+    pg.goto(server + "/explorar.html?y=2025&lente=2018&lx=0.5&lat=-22.3&lng=-42.7&z=9")
+    pg.wait_for_selector(".lente-divisor")
+    _abre_gaveta(pg)
+    pg.select_option("#sensor", "snpp")
+    pg.wait_for_url("**s=snpp**")
+    pg.wait_for_selector(".lente-divisor")
+    _abre_gaveta(pg)
+    assert pg.is_checked("#lenteOn")
+    assert "lente=2018" in pg.url
+    assert pg.errors == []

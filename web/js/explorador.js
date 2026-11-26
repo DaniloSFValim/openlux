@@ -316,14 +316,14 @@
 
     // sensor, lente, tempo
     $('sensor').value = sk;
-    $('sensor').addEventListener('change', (e) => { const u = new URL(location.href); u.searchParams.set('s', e.target.value); u.searchParams.delete('y'); u.searchParams.delete('lente'); location.assign(u.href); });
+    $('sensor').addEventListener('change', (e) => { const u = new URL(location.href); u.searchParams.set('s', e.target.value); location.assign(u.href); }); // mantém ano, lente e posição da lente;
     const sel = $('anoLente'); sel.innerHTML = anos.map((y) => `<option value="${y}">${y}</option>`).join('');
     $('lenteOn').checked = params.has('lente');
     if (params.has('lente') && anos.includes(Number(params.get('lente')))) anoL = Number(params.get('lente'));
     else anoL = anos[0];
     sel.value = anoL;
     if (params.has('lx')) cursorX = Number(params.get('lx')) || .5;
-    lenteOn = $('lenteOn').checked;
+    lenteOn = $('lenteOn').checked;  // lente ativa também quando o ano da lente não existe no sensor (cai para o primeiro ano)
     $('lenteOn').addEventListener('change', (e) => { lenteOn = e.target.checked; if (lenteOn && anoL == null) anoL = anos[0]; repintar(); });
     sel.addEventListener('change', (e) => { anoL = Number(e.target.value); repintar(); });
     $('ano').max = anos.length - 1;
