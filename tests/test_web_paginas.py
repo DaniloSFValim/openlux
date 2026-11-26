@@ -182,7 +182,7 @@ def test_observatorio_ranking_search_and_explorer_links(server, pg):
     assert "Niterói" in pg.locator("#corpoRank tr").first.inner_text()
     pg.fill("#busca", "")
     pg.wait_for_timeout(200)
-    href = pg.locator("#corpoRank tr").nth(0).locator("a").get_attribute("href")
+    href = pg.locator("#corpoRank tr").nth(0).locator("a", has_text="explorar").get_attribute("href")
     assert href.startswith("explorar.html?s=noaa20&y=2025&m=")
     assert pg.errors == []
 

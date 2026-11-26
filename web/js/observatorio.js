@@ -20,6 +20,8 @@
     return n;
   }
   const media = (v) => v.filter((x) => x != null && isFinite(x));
+  // mesma regra de scripts/build_web_municipios.py::slug
+  const slug = (n) => n.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
   Promise.all([C.indicadores('noaa20'), C.indicadores('snpp')])
     .then(([N, S]) => iniciar(N, S))
@@ -84,8 +86,9 @@
     }
     function item(lista, c, v) {
       const li = hel('li', lista);
-      const a = hel('a', li, nome(c), { href: 'explorar.html?s=noaa20&y=' + anoSel.value + '&m=' + c });
-      hel('span', li, ' · ' + C.fmt(v, 2), { class: 'suave' });
+      hel('a', li, nome(c), { href: 'municipio/' + slug(nome(c)) + '.html' });
+      hel('span', li, ' · ' + C.fmt(v, 2) + ' · ', { class: 'suave' });
+      hel('a', li, 'explorar', { href: 'explorar.html?s=noaa20&y=' + anoSel.value + '&m=' + c });
     }
 
     function distribuicao(a) {
@@ -132,6 +135,8 @@
         hel('td', tr, n);
         hel('td', tr, C.fmt(N.municipios[c].mean[anos.indexOf(+a)], 2));
         const td = hel('td', tr);
+        hel('a', td, 'página', { href: 'municipio/' + slug(n) + '.html' });
+        hel('span', td, ' · ', { class: 'suave' });
         hel('a', td, 'explorar', { href: 'explorar.html?s=noaa20&y=' + a + '&m=' + c });
       });
     }
