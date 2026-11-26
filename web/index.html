@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quanta luz tem o seu município? — OpenLux</title>
+<meta name="description" content="Luz noturna vista do espaço nos 92 municípios do Rio de Janeiro, de 2018 a 2025 (NOAA-20). Estimativa por sensoriamento remoto, não medição do brilho do céu.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/prototipo.css">
+</head>
+<body>
+
+<div class="palco">
+  <svg id="mapa" viewBox="0 0 1100 760" role="img" aria-label="Mapa dos 92 municípios do Rio de Janeiro, colorido pela luz do ano escolhido"></svg>
+  <div class="lente" id="lente" aria-hidden="true"></div>
+</div>
+
+<div class="topo">
+  <div class="titulo"><small>OpenLux · Rio de Janeiro</small><h1>Quanta luz tem o seu município?</h1></div>
+  <div class="legenda">
+    <div>Luz média vista do espaço (nW·cm⁻²·sr⁻¹)</div>
+    <div class="barra" id="barra"></div>
+    <div class="rotulos"><span>menos</span><span>mais</span></div>
+  </div>
+</div>
+
+<div class="ano" aria-live="polite">
+  <div class="num" id="anoNum">2025</div>
+  <div class="aviso" id="avisoRuido" hidden></div>
+</div>
+
+<div class="cartao" id="cartao" role="dialog" aria-live="polite" aria-labelledby="cNome">
+  <button class="fechar" id="fechar" aria-label="Fechar">×</button>
+  <h2 id="cNome"></h2>
+  <div class="sub" id="cHab"></div>
+  <div class="lbl">Luz média na área · <span id="cAno"></span></div>
+  <div class="big"><span id="cMedia">—</span> <span class="unid">nW·cm⁻²·sr⁻¹</span></div>
+  <div class="lbl">Posição entre os 92 municípios</div>
+  <div class="pos" id="cPos"></div>
+  <svg id="cSerie" viewBox="0 0 300 90" preserveAspectRatio="none" aria-hidden="true"></svg>
+  <div class="acoes">
+    <button id="cCompartilhar">Copiar link</button>
+  </div>
+  <p class="estimativa">Estimativa por sensoriamento remoto. Não é medição do brilho do céu.</p>
+</div>
+
+<div class="controles-base">
+  <button id="play" aria-pressed="false">▶ Viajar no tempo</button>
+  <input type="range" id="ano" min="0" value="0" aria-label="Ano">
+  <button class="sec" id="lenteBtn" aria-pressed="false">Lente</button>
+  <label class="sensor">Sensor
+    <select id="sensor">
+      <option value="noaa20">NOAA-20 (2018–2025)</option>
+      <option value="snpp">S-NPP (2012–2025)</option>
+    </select>
+  </label>
+</div>
+
+<p class="rodape-prot">Protótipo de visualização. Dados reais do OpenLux (NOAA-20 e S-NPP, NASA Black Marble) · autor Danilo Valim · ORCID <a href="https://orcid.org/0009-0009-7250-6151" rel="noopener">0009-0009-7250-6151</a> · DOI <a href="https://doi.org/10.5281/zenodo.24510755" rel="noopener">10.5281/zenodo.24510755</a></p>
+
+<script src="js/prototipo.js"></script>
+</body>
+</html>
