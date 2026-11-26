@@ -17,6 +17,22 @@ Formato: versões em ordem cronológica inversa. Datas no formato AAAA-MM-DD.
 - `web/js/graficos-svg.js`: gráficos SVG próprios compartilhados pelo Observatório e pelo laboratório.
 - Testes `tests/test_web_laboratorio.py`.
 
+### Adicionado (Fase 8, dados abertos)
+- `web/data/downloads/catalogo.json` (gerado por `scripts/build_catalogo.py`): inventário dos 7 arquivos publicados, com SHA-256, tamanho, unidade, período, sistema de referência, licença e registro de execução.
+- `web/data/downloads/openlux_limites_municipais_rj.gpkg`: limites dos 92 municípios em GeoPackage (EPSG:4326 declarado).
+- Página de dados mostra o catálogo; licença corrigida (confirmada em 2026-11-25).
+- Testes `tests/test_catalogo.py`.
+
+### Adicionado (pendências aprovadas, 2026-11-26)
+- CSV do NOAA-20 publicados em `web/data/downloads/` e listados no catálogo.
+- Quantis P75, P90 e P95 dos pixels válidos por município e ano (`percentile_table`, `scripts/run_percentiles.py`), calculados e aguardando revisão antes de publicação.
+- Dicionário de dados linkado na página de dados.
+- Reprodução do NOAA-20 a partir de commit limpo: saídas anuais idênticas byte a byte; registro com `code_dirty: false`.
+
+### Alterado (aprovações de 2026-11-26)
+- Quantis P75, P90 e P95 dos pixels publicados em `web/data/downloads/` e listados no catálogo.
+- Turf carregado sob demanda pela ferramenta "Desenhar uma área": a visita comum ao mapa não baixa mais o bundle de ~530 KB.
+
 ### Removido (Fase D)
 - `web/js/inicio.js` e `tests/test_web_inicio.py`: substituídos pelo Observatório.
 

@@ -117,6 +117,70 @@ Estados: NÃO INICIADO · EM ANDAMENTO · CONCLUÍDO · BLOQUEADO · VALIDAR CIE
 | Dados abertos (renovação) | NÃO INICIADO |
 | Metodologia (renovação) | NÃO INICIADO |
 
+### Fase 7 (prompt) — Observatório ambiental
+
+| Tarefa | Estado | Evidência / bloqueio |
+|---|---|---|
+| Áreas urbanizadas (IBGE 2019) para radiância urbana × rural | BLOQUEADO | Arquivo acessível (`AreasUrbanizadas2019_Brasil.zip`, 38 MB, `geoftp.ibge.gov.br`). Licença **não verificada**: a busca não achou termo de uso para os dados; o portal do IBGE recusa acesso automatizado (403). Precisa de conferência pelo responsável no portal, como foi feito para o SIDRA |
+| Unidades de conservação (ICMBio / CNUC) | BLOQUEADO | ICMBio: licença CC BY-ND 3.0, que proíbe derivados (DECISIONS §2). CNUC: caminho de download não localizado |
+| Uso e cobertura do solo (MapBiomas) | BLOQUEADO | Termos inconsistentes entre páginas: CC BY-SA em umas e CC BY em outras. Se CC BY-SA, os derivados teriam licença de compartilhamento igual, em conflito com a CC BY 4.0 dos dados derivados do projeto. Decisão do responsável |
+| Hidrografia, corpos d'água, áreas costeiras | NÃO INICIADO | Sem fonte verificada |
+| INEA (unidades estaduais) | BLOQUEADO | Três hosts sem conexão (HTTP 000); nova tentativa agendada |
+| Módulo na página (exploratório, sem atribuição de efeitos) | NÃO INICIADO | Depende das camadas acima |
+
+Decisões do responsável necessárias: (1) confirmar a licença das áreas urbanizadas do IBGE no portal;
+(2) decidir se o MapBiomas entra, sabendo que a versão CC BY-SA pode exigir mudar a licença dos dados derivados;
+(3) indicar outra fonte oficial de unidades de conservação com licença que permita derivados.
+
+### Fase 8 (prompt) — Dados abertos
+
+| Tarefa | Estado | Evidência |
+|---|---|---|
+| Catálogo de arquivos com SHA-256, tamanho, unidade, período, sistema de referência e licença | CONCLUÍDO (7 arquivos) | `scripts/build_catalogo.py` → `web/data/downloads/catalogo.json`; testes em `tests/test_catalogo.py` (hashes recalculados sobre os arquivos) |
+| GeoPackage dos 92 limites municipais | CONCLUÍDO | `web/data/downloads/openlux_limites_municipais_rj.gpkg` (92 feições, EPSG:4326 declarado) |
+| Página de dados lista o catálogo | CONCLUÍDO | `web/dados.html` + `web/js/dados.js` |
+| Licença corrigida na página de dados (estava "proposta") | CONCLUÍDO | confirmada pelo autor em 2026-11-25 |
+| CSV do NOAA-20 (série e resumo) | PUBLICADO (aprovado pelo responsável) | `web/data/downloads/openlux_municipios_noaa20_*.csv`, no catálogo |
+| Reprodutibilidade do NOAA-20 | CONCLUÍDO (2026-11-26) | Rerodado a partir de commit limpo (`7380064`): as saídas anuais saem byte a byte iguais às anteriores; `indicators_noaa20.json` tem o mesmo conteúdo fora de `meta.run`. Registro agora com `code_dirty: false` |
+| SIRGAS 2000 nos produtos geográficos | NÃO MEDIDO | A medição com pyproj deu 0 m, mas a transformação usada é nula (sem grade de correção), então o número não vale. A diferença entre os datums não foi quantificada; a frase "poucos metros" continua sem verificação |
+| Dicionário de dados linkado | CONCLUÍDO |
+| Turf (~530 KB) carregado só quando o leitor usa "Desenhar uma área" (auditoria A9) | CONCLUÍDO. Visita comum ao mapa: zero requisições ao Turf; verificado no Chromium |
+| Saturação de `pop_lit` (0,96–1,00) (auditoria A5) | DOCUMENTADO. Não usar como manchete (já registrado na auditoria) | Link em `web/dados.html`. Relatórios de qualidade publicados: NÃO INICIADO |
+
+### Fase 7: análise exploratória de áreas protegidas (2026-11-26)
+
+| Item | Resultado |
+|---|---|
+| Fonte | CNUC (MMA), `shp_cnuc_2025_08.zip`, CC BY (licença lida na página do conjunto); 3122 feições, 508 UCs tocam o estado |
+| Script | `scripts/analise_areas_protegidas.py` → `outputs/ambiental/` (NÃO publicado, aguarda revisão) |
+| Fração da área municipal em UC x radiância média 2025 (NOAA-20, 92 municípios) | rho de Spearman = 0,32 (p = 0,002). Associação exploratória, não causal |
+| Área do município x radiância | rho = -0,43. Área do município não explica a fração em UC (rho = 0,02) |
+| Radiância dos pixels dentro x fora das UCs (2025, qualidade 0, dentro do estado) | média 2,14 dentro e 4,56 fora (nW·cm⁻²·sr⁻¹). Mediana 0 nos dois casos: a maioria dos pixels é escura |
+| Limitação principal | Urbanização não controlada: a camada de áreas urbanizadas do IBGE está bloqueada por licença. A associação pode refletir urbanização |
+| Paracambi (99,9 % em UC) | Resolvido. Soma das áreas das UCs = 259,9 km² vs área municipal de 190,9 km²: sobreposição real (APA do Rio Guandu cobre 189,7 km² do município). A análise usa a união, sem dupla contagem; 99,9 % está correto |
+| Qualidade dos dados | Nomes das UCs no `.dbf` com codificação danificada. Correção parcial em `outputs/ambiental/cnuc_2025_08_atributos_corrigidos.csv` (ex.: "ÃREA DE PROTEÃÃO" continua). Não usar nomes até conferir no site oficial do CNUC. A análise usou só geometria e códigos |
+
+Para publicar, é preciso revisão do responsável e controle da urbanização (depende da licença do IBGE).
+
+### Verificação de licenças para a Fase 7 (2026-11-26)
+
+| Fonte | Evidência | Situação |
+|---|---|---|
+| MapBiomas, coleção Brasil | Print de [brasil.mapbiomas.org](https://brasil.mapbiomas.org/) (rodapé): "Os dados do MapBiomas são de uso público, aberto e gratuito mediante referência. CC BY 4.0" | VERIFICADA para a coleção do Brasil (CC BY 4.0, compatível com a licença dos derivados). Ressalva: [MapBiomas Amazônia](https://amazonia.mapbiomas.org/terms-of-use/) diz CC BY-SA. Não usar a coleção Amazônia sem nova verificação |
+| IBGE, áreas urbanizadas 2019 | [Termo de Uso do Portal do IBGE](https://www.ibge.gov.br/) (versão 1, 11/03/2024): trata de privacidade, cookies e sigilo estatístico, sem licença de dados geocientíficos. [Nota técnica (liv101973)](https://biblioteca.ibge.gov.br/visualizacao/livros/liv101973_notas_tecnicas.pdf) lida localmente: única menção é "© IBGE. 2022", sem licença | NÃO VERIFICADA. Só copyright. Precisa de licença do produto na página do IBGE ou permissão escrita |
+| CNUC (MMA) | [Conjunto Unidades de Conservação, dados.mma.gov.br](https://dados.mma.gov.br/dataset/unidadesdeconservacao): seção "Licença" = "Creative Commons Atribuição" (link para opendefinition cc-by). Lido em 2026-11-26 | VERIFICADA (CC BY). Metadados do SNIRH retornaram 403 e não foram lidos |
+| INDE / visualizador | [visualizador.inde.gov.br](https://visualizador.inde.gov.br/). Busca não achou termo de uso dos dados | NÃO VERIFICADA. Visualizador não serve como fonte de dados |
+| ICMBio | CC BY-ND 3.0 (DECISIONS §2) | Proíbe derivados |
+
+Fase 7: MapBiomas Brasil autorizado pelo responsável (CC BY 4.0) e UCs do CNUC verificadas (CC BY). Áreas urbanizadas do IBGE seguem bloqueadas por falta de licença. Próximo passo: baixar o polígono mais recente do CNUC e a cobertura do MapBiomas Brasil para o RJ.
+
+### Pendências aprovadas (2026-11-26)
+
+| Tarefa | Estado | Evidência |
+|---|---|---|
+| Quantis P75, P90 e P95 dos pixels válidos, por município e ano | PUBLICADO (aprovado em 2026-11-26): `web/data/downloads/openlux_percentis_pixels_{snpp,noaa20}.csv` | `src/openlux/pipeline.py::percentile_table`, `zonal.py` (quantil inferior ponderado pela cobertura, mesma regra da mediana). `scripts/run_percentiles.py` → `outputs/percentiles/annual_percentiles_{snpp,noaa20}.csv` (1288 e 736 linhas). Checagens: P75 ≤ P90 ≤ P95 e dentro do intervalo dos pixels válidos. Não publicado |
+| Testes dos quantis | CONCLUÍDO | Valores calculados à mão em `tests/test_zonal.py` |
+
 ### Fase E — Recursos avançados
 
 Comparação temporal, comparação municipal (até três), relatórios PDF, URLs compartilháveis (parcial:

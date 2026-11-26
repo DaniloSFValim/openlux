@@ -1,0 +1,197 @@
+{
+  "versao_software": "0.1.0",
+  "licenca_dos_dados_derivados": {
+    "id": "CC-BY-4.0",
+    "url": "https://creativecommons.org/licenses/by/4.0/",
+    "status": "confirmada pelo autor em 2026-11-25"
+  },
+  "nota": "Os hashes são calculados sobre os arquivos publicados. 'codigo_com_alteracoes_nao_commitadas: true' indica que o pipeline rodou com alterações não commitadas: a reprodução exata depende de rerodar a partir de um commit limpo.",
+  "arquivos": [
+    {
+      "arquivo": "data/downloads/openlux_municipios_snpp_serie.csv",
+      "bytes": 90631,
+      "sha256": "fda426add6a69b80d20d1b72e2b3080f751f1e5a13c70fcff7b04e3a4c734a52",
+      "licenca": "CC-BY-4.0",
+      "titulo": "Série anual por município (S-NPP)",
+      "tipo": "CSV",
+      "fonte": "NASA Black Marble VNP46A4 v2.0 (DOI 10.5067/VIIRS/VNP46A4.002)",
+      "unidade": "nW·cm⁻²·sr⁻¹ (radiância média); fração adimensional",
+      "periodo": "2012–2025",
+      "sistema_de_referencia": "não se aplica (tabela)",
+      "situacao": "publicado",
+      "execucao": {
+        "processado_utc": "2026-11-19T18:32:48Z",
+        "commit": "2889bb9d49d70f8ceed3df7a1df6e1ca686a221e",
+        "codigo_com_alteracoes_nao_commitadas": false
+      }
+    },
+    {
+      "arquivo": "data/downloads/openlux_municipios_snpp_resumo.csv",
+      "bytes": 7940,
+      "sha256": "f689018b2f68aa93490edde65a025b280336de4c06a5acfb2004102777d0e2f7",
+      "licenca": "CC-BY-4.0",
+      "titulo": "Resumo por município (S-NPP): população 2022, intensidade por habitante e tendências",
+      "tipo": "CSV",
+      "fonte": "NASA Black Marble VNP46A4; IBGE Censo 2022 (SIDRA 4709, v93)",
+      "unidade": "mW·sr⁻¹ por habitante; nW·cm⁻²·sr⁻¹ por ano; p-valor adimensional",
+      "periodo": "2012–2025 (janelas 2012–2021 e 2012–2025)",
+      "sistema_de_referencia": "não se aplica (tabela)",
+      "situacao": "publicado",
+      "execucao": {
+        "processado_utc": "2026-11-19T18:32:48Z",
+        "commit": "2889bb9d49d70f8ceed3df7a1df6e1ca686a221e",
+        "codigo_com_alteracoes_nao_commitadas": false
+      }
+    },
+    {
+      "arquivo": "data/indicators.json",
+      "bytes": 187046,
+      "sha256": "514b885693dbb96e0a1e5827d64a6d8072162c6f65e6d1d1684ae49cc0be1ae9",
+      "licenca": "CC-BY-4.0",
+      "titulo": "Indicadores municipais, S-NPP (JSON)",
+      "tipo": "JSON",
+      "fonte": "NASA Black Marble VNP46A4 v2.0; IBGE",
+      "unidade": "nW·cm⁻²·sr⁻¹",
+      "periodo": "2012–2025",
+      "sistema_de_referencia": "não se aplica (JSON)",
+      "situacao": "publicado",
+      "execucao": {
+        "processado_utc": "2026-11-19T18:32:48Z",
+        "commit": "2889bb9d49d70f8ceed3df7a1df6e1ca686a221e",
+        "codigo_com_alteracoes_nao_commitadas": false
+      }
+    },
+    {
+      "arquivo": "data/indicators_noaa20.json",
+      "bytes": 124705,
+      "sha256": "cdeac9e558dfb38ce989a6abd52f48882b4c3ff34c6eb929a4dd07e7263fd460",
+      "licenca": "CC-BY-4.0",
+      "titulo": "Indicadores municipais, NOAA-20 (JSON)",
+      "tipo": "JSON",
+      "fonte": "NASA Black Marble VJ146A4 v2.0 (DOI 10.5067/VIIRS/VJ146A4.002); IBGE",
+      "unidade": "nW·cm⁻²·sr⁻¹",
+      "periodo": "2018–2025",
+      "sistema_de_referencia": "não se aplica (JSON)",
+      "situacao": "publicado",
+      "execucao": {
+        "processado_utc": "2026-11-25T23:57:53Z",
+        "commit": "73800641547155f890075137ede5abdf523e59b2",
+        "codigo_com_alteracoes_nao_commitadas": false
+      }
+    },
+    {
+      "arquivo": "data/municipios.geojson",
+      "bytes": 373617,
+      "sha256": "9dc86ceb7fea6aa4fd079030d82e19cd5d21acbd7a94d48b22b0e3ee7859ab4f",
+      "licenca": "CC-BY-4.0",
+      "titulo": "Limites dos 92 municípios (GeoJSON)",
+      "tipo": "GeoJSON",
+      "fonte": "IBGE, Malha Municipal Digital 2024 (RJ)",
+      "unidade": "graus decimais",
+      "periodo": "malha 2024",
+      "sistema_de_referencia": "WGS 84 (EPSG:4326) por convenção do GeoJSON (RFC 7946); o SIRGAS 2000 difere por poucos metros",
+      "situacao": "publicado",
+      "execucao": null
+    },
+    {
+      "arquivo": "data/downloads/openlux_municipios_noaa20_serie.csv",
+      "bytes": 51704,
+      "sha256": "e137c5c6ab933bcfeaef893a9f69cb37e13c94ff05c66dddb1584900f3d4f16b",
+      "licenca": "CC-BY-4.0",
+      "titulo": "Série anual por município (NOAA-20, sensor primário)",
+      "tipo": "CSV",
+      "fonte": "NASA Black Marble VJ146A4 v2.0 (DOI 10.5067/VIIRS/VJ146A4.002)",
+      "unidade": "nW·cm⁻²·sr⁻¹ (radiância média); fração adimensional",
+      "periodo": "2018–2025",
+      "sistema_de_referencia": "não se aplica (tabela)",
+      "situacao": "publicado",
+      "execucao": {
+        "processado_utc": "2026-11-25T23:57:53Z",
+        "commit": "73800641547155f890075137ede5abdf523e59b2",
+        "codigo_com_alteracoes_nao_commitadas": false
+      }
+    },
+    {
+      "arquivo": "data/downloads/openlux_municipios_noaa20_resumo.csv",
+      "bytes": 5625,
+      "sha256": "766045be6ab24a3b36820250ad631dcfa095dffa5bcd3c02eea7ebeac0c2bda9",
+      "licenca": "CC-BY-4.0",
+      "titulo": "Resumo por município (NOAA-20): tendência 2018–2025 e variação",
+      "tipo": "CSV",
+      "fonte": "NASA Black Marble VJ146A4 v2.0; IBGE",
+      "unidade": "nW·cm⁻²·sr⁻¹ por ano; p-valor adimensional; variação em %",
+      "periodo": "2018–2025",
+      "sistema_de_referencia": "não se aplica (tabela)",
+      "situacao": "publicado",
+      "execucao": {
+        "processado_utc": "2026-11-25T23:57:53Z",
+        "commit": "73800641547155f890075137ede5abdf523e59b2",
+        "codigo_com_alteracoes_nao_commitadas": false
+      }
+    },
+    {
+      "arquivo": "data/downloads/openlux_percentis_pixels_snpp.csv",
+      "bytes": 54196,
+      "sha256": "0a40e2306b71879381f0b6b1a2a8a6c1ea97ca727f60c36f4e8f9e260a720016",
+      "licenca": "CC-BY-4.0",
+      "titulo": "Percentis P75, P90 e P95 dos pixels por município e ano (SNPP)",
+      "tipo": "CSV",
+      "fonte": "NASA Black Marble VNP46A4",
+      "unidade": "nW·cm⁻²·sr⁻¹ (quantil inferior ponderado pela cobertura dos pixels válidos; qualidade 0; terra)",
+      "periodo": "2012–2025",
+      "sistema_de_referencia": "não se aplica (tabela)",
+      "situacao": "publicado",
+      "execucao": {
+        "processado_utc": "2026-11-19T18:32:48Z",
+        "commit": "2889bb9d49d70f8ceed3df7a1df6e1ca686a221e",
+        "codigo_com_alteracoes_nao_commitadas": false
+      }
+    },
+    {
+      "arquivo": "data/downloads/openlux_percentis_pixels_noaa20.csv",
+      "bytes": 30533,
+      "sha256": "a6c216ea590828f7b74edb3b0f0e67b94332fc9ba73141c84c4a11dcc9eba8e0",
+      "licenca": "CC-BY-4.0",
+      "titulo": "Percentis P75, P90 e P95 dos pixels por município e ano (NOAA-20)",
+      "tipo": "CSV",
+      "fonte": "NASA Black Marble VJ146A4",
+      "unidade": "nW·cm⁻²·sr⁻¹ (quantil inferior ponderado pela cobertura dos pixels válidos; qualidade 0; terra)",
+      "periodo": "2018–2025",
+      "sistema_de_referencia": "não se aplica (tabela)",
+      "situacao": "publicado",
+      "execucao": {
+        "processado_utc": "2026-11-25T23:57:53Z",
+        "commit": "73800641547155f890075137ede5abdf523e59b2",
+        "codigo_com_alteracoes_nao_commitadas": false
+      }
+    },
+    {
+      "arquivo": "data/downloads/openlux_limites_municipais_rj.gpkg",
+      "bytes": 466944,
+      "sha256": "9e873c607103f06b10f0d0fc9001d8c6eb6ce8c124f89157d6fa3abc0facec83",
+      "licenca": "CC-BY-4.0",
+      "titulo": "Limites dos 92 municípios (GeoPackage, camada 'municipios')",
+      "tipo": "GeoPackage",
+      "fonte": "IBGE, Malha Municipal Digital 2024 (RJ), convertida de municipios.geojson",
+      "unidade": "graus decimais",
+      "periodo": "malha 2024",
+      "sistema_de_referencia": "EPSG:4326 declarado no arquivo",
+      "situacao": "publicado",
+      "execucao": null
+    },
+    {
+      "arquivo": "data/downloads/metadata.json",
+      "bytes": 2659,
+      "sha256": "5e6edea2c0b1f188f7fa6a801b12581979780bfda8c3e05c7152116a55e2252a",
+      "licenca": "CC-BY-4.0",
+      "titulo": "Metadados dos arquivos S-NPP (licença, citação, ressalvas)",
+      "tipo": "JSON",
+      "fonte": "OpenLux",
+      "unidade": "não se aplica",
+      "periodo": "2012–2025",
+      "sistema_de_referencia": "não se aplica",
+      "situacao": "publicado",
+      "execucao": null
+    }
+  ]
+}

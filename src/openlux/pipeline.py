@@ -276,3 +276,17 @@ def compare_municipal_series(ta: pd.DataFrame, tb: pd.DataFrame, id_col: str, *,
         summ["median_change_a"] = float(df.change_a[okc].median()) if okc.any() else None
         summ["median_change_b"] = float(df.change_b[okc].median()) if okc.any() else None
     return df, summ
+
+
+def percentile_table(files, polygons, id_col, cfg: Config = MAIN, quantiles=(0.75, 0.9, 0.95)) -> pd.DataFrame:
+    """Quantis ponderados por cobertura dos pixels validos de cada municipio e ano (configuracao ``cfg``).
+
+    Entrada separada da serie principal: nao altera ``annual_main.csv``. Os quantis sao dos pixels
+    (valores de radiancia), nao dos municipios.
+    """
+    def loader(year):
+        return read_blackmarble(files[year], cfg.layer, n_min=cfg.n_min,
+                                allowed_quality=cfg.allowed_quality)
+    df = annual_table(loader, sorted(files), polygons, id_col=id_col, quantiles=quantiles)
+    cols = [id_col, "year"] + [f"q{round(p * 100)}_radiance" for p in quantiles]
+    return df[cols].sort_values([id_col, "year"], kind="stable").reset_index(drop=True)

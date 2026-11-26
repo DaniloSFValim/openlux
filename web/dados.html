@@ -33,6 +33,12 @@
     <div class="dados-tabela" id="previa"><p class="muted" style="padding:12px">Carregando prévia…</p></div>
   </section>
 
+  <section class="reveal" aria-labelledby="catalogo-titulo">
+    <h2 id="catalogo-titulo">Catálogo dos arquivos publicados</h2>
+    <p class="muted">Lista gerada a partir de <a href="data/downloads/catalogo.json">catalogo.json</a>, com o SHA-256 de cada arquivo calculado sobre o próprio arquivo publicado. Significado de cada coluna e de cada campo: <a href="https://github.com/DaniloSFValim/openlux/blob/main/docs/DICIONARIO_DE_DADOS.md" rel="noopener">dicionário de dados</a>.</p>
+    <div class="dados-tabela" id="catalogo"><p class="muted" style="padding:12px">Carregando catálogo…</p></div>
+  </section>
+
   <section class="reveal">
     <h2>Como citar</h2>
     <p class="cite" id="citacao">Valim, D. (2026). OpenLux: versão 0.1.0 [Software]. Zenodo. https://doi.org/10.5281/zenodo.24510755. Dados de radiância: VIIRS Land SIPS Processing Group, VIIRS/NPP Lunar BRDF-Adjusted Nighttime Lights Yearly L3 Global 15 arc second Linear Lat Lon Grid [Dataset], NASA LAADS DAAC, https://doi.org/10.5067/VIIRS/VNP46A4.002. Malha municipal: IBGE, Malha Municipal Digital 2024 (UF RJ). População: IBGE, Censo Demográfico 2022, SIDRA tabela 4709, variável 93.</p>
@@ -43,7 +49,7 @@
   <section class="reveal acordeao" style="--acento:var(--coral)" aria-labelledby="ressalvas-titulo">
     <h2 id="ressalvas-titulo">Antes de usar</h2>
     <details open><summary>Ressalvas</summary><ul><li>Resultados não validados em campo. Estimativas baseadas em sensoriamento remoto; não são medições do brilho do céu.</li><li>O sensor Suomi NPP (VNP46A4) tem mais ruído em áreas escuras desde 2022. Não interpretar as diferenças entre 2021 e 2022 como mudança real de iluminação sem essa ressalva. A causa não foi separada de um possível artefato do algoritmo.</li><li>A população é a do Censo 2022 em todos os anos (repartição simples). Não é exposição individual.</li><li>Os valores são agregados municipais; não há dados brutos de radiância por pixel neste arquivo.</li></ul></details>
-    <details><summary>Licença</summary><p><strong>CC-BY-4.0</strong> <span class="small">(proposta: a confirmar pelo autor antes da publicação)</span>. Os arquivos reúnem dados da NASA e do IBGE; a licença exige a atribuição indicada na citação.</p></details>
+    <details><summary>Licença</summary><p><strong>CC BY 4.0</strong>, confirmada pelo autor em 2026-11-25. Os arquivos reúnem dados da NASA e do IBGE; a licença exige a atribuição indicada em “Como citar”. O código do projeto é MIT.</p></details>
   </section>
   <p><a href="explorar.html">Voltar ao mapa</a> · <a href="sobre.html">Métodos e limitações</a></p>
 </main>

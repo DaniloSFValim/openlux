@@ -7,7 +7,7 @@
 
   function ativarQuandoPronto() {
     if (inicializado) return;
-    if (!window.OpenLuxMapApi || !window.OpenLuxDraw || typeof L === 'undefined') return;
+    if (!window.OpenLuxMapApi || typeof L === 'undefined') return;   // o Turf carrega sob demanda (ver garantirTurf)
     inicializado = true;
     api = window.OpenLuxMapApi;
     $('desenhar-iniciar').addEventListener('click', iniciar);
@@ -46,7 +46,29 @@
       : 'Continue marcando ou toque em "Concluir área".';
   }
 
+  // Turf (~530 KB) só é baixado quando o leitor usa a ferramenta: a visita comum ao mapa não paga esse custo.
+  var turfCarregando = null;
+  function garantirTurf() {
+    if (window.OpenLuxDraw) return Promise.resolve();
+    if (turfCarregando) return turfCarregando;
+    turfCarregando = new Promise(function (ok, falha) {
+      var sc = document.createElement('script');
+      sc.src = 'vendor/openlux-draw/openlux-turf.min.js';
+      sc.onload = function () { window.OpenLuxDraw ? ok() : falha(new Error('Turf não expôs OpenLuxDraw')); };
+      sc.onerror = function () { turfCarregando = null; falha(new Error('falha ao carregar o Turf')); };
+      document.head.appendChild(sc);
+    });
+    return turfCarregando;
+  }
+
   function iniciar() {
+    if (!window.OpenLuxDraw) {
+      $('desenhar-status').textContent = 'Carregando a ferramenta de área…';
+      garantirTurf().then(iniciar, function () {
+        $('desenhar-status').textContent = 'Não foi possível carregar a ferramenta de área. Tente de novo.';
+      });
+      return;
+    }
     if (!api.viewIsRadiance()) {
       $('desenhar-status').textContent = 'Para contar as faixas de luz, escolha "Radiância por ano" em Mostrar.';
       return;
