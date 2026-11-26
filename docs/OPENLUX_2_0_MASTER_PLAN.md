@@ -157,8 +157,8 @@ Decisões do responsável necessárias: (1) confirmar a licença das áreas urba
 | Área do município x radiância | rho = -0,43. Área do município não explica a fração em UC (rho = 0,02) |
 | Radiância dos pixels dentro x fora das UCs (2025, qualidade 0, dentro do estado) | média 2,14 dentro e 4,56 fora (nW·cm⁻²·sr⁻¹). Mediana 0 nos dois casos: a maioria dos pixels é escura |
 | Limitação principal | Urbanização não controlada: a camada de áreas urbanizadas do IBGE está bloqueada por licença. A associação pode refletir urbanização |
-| Revisão necessária | Paracambi tem 99,9 % da área em UC. Conferir sobreposição de polígonos do CNUC |
-| Qualidade dos dados | Nomes das UCs no `.dbf` têm codificação dupla (ex.: "ÃREA" no lugar de "ÁREA"). Só geometria e códigos foram usados |
+| Paracambi (99,9 % em UC) | Resolvido. Soma das áreas das UCs = 259,9 km² vs área municipal de 190,9 km²: sobreposição real (APA do Rio Guandu cobre 189,7 km² do município). A análise usa a união, sem dupla contagem; 99,9 % está correto |
+| Qualidade dos dados | Nomes das UCs no `.dbf` com codificação danificada. Correção parcial em `outputs/ambiental/cnuc_2025_08_atributos_corrigidos.csv` (ex.: "ÃREA DE PROTEÃÃO" continua). Não usar nomes até conferir no site oficial do CNUC. A análise usou só geometria e códigos |
 
 Para publicar, é preciso revisão do responsável e controle da urbanização (depende da licença do IBGE).
 
