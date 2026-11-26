@@ -29,6 +29,10 @@ Formato: versões em ordem cronológica inversa. Datas no formato AAAA-MM-DD.
 - Dicionário de dados linkado na página de dados.
 - Reprodução do NOAA-20 a partir de commit limpo: saídas anuais idênticas byte a byte; registro com `code_dirty: false`.
 
+### Alterado (aprovações de 2026-11-26)
+- Quantis P75, P90 e P95 dos pixels publicados em `web/data/downloads/` e listados no catálogo.
+- Turf carregado sob demanda pela ferramenta "Desenhar uma área": a visita comum ao mapa não baixa mais o bundle de ~530 KB.
+
 ### Removido (Fase D)
 - `web/js/inicio.js` e `tests/test_web_inicio.py`: substituídos pelo Observatório.
 

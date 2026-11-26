@@ -143,13 +143,15 @@ Decisões do responsável necessárias: (1) confirmar a licença das áreas urba
 | CSV do NOAA-20 (série e resumo) | PUBLICADO (aprovado pelo responsável) | `web/data/downloads/openlux_municipios_noaa20_*.csv`, no catálogo |
 | Reprodutibilidade do NOAA-20 | CONCLUÍDO (2026-11-26) | Rerodado a partir de commit limpo (`7380064`): as saídas anuais saem byte a byte iguais às anteriores; `indicators_noaa20.json` tem o mesmo conteúdo fora de `meta.run`. Registro agora com `code_dirty: false` |
 | SIRGAS 2000 nos produtos geográficos | NÃO MEDIDO | A medição com pyproj deu 0 m, mas a transformação usada é nula (sem grade de correção), então o número não vale. A diferença entre os datums não foi quantificada; a frase "poucos metros" continua sem verificação |
-| Dicionário de dados linkado | CONCLUÍDO | Link em `web/dados.html`. Relatórios de qualidade publicados: NÃO INICIADO |
+| Dicionário de dados linkado | CONCLUÍDO |
+| Turf (~530 KB) carregado só quando o leitor usa "Desenhar uma área" (auditoria A9) | CONCLUÍDO. Visita comum ao mapa: zero requisições ao Turf; verificado no Chromium |
+| Saturação de `pop_lit` (0,96–1,00) (auditoria A5) | DOCUMENTADO. Não usar como manchete (já registrado na auditoria) | Link em `web/dados.html`. Relatórios de qualidade publicados: NÃO INICIADO |
 
 ### Pendências aprovadas (2026-11-26)
 
 | Tarefa | Estado | Evidência |
 |---|---|---|
-| Quantis P75, P90 e P95 dos pixels válidos, por município e ano | CALCULADO, AGUARDA REVISÃO | `src/openlux/pipeline.py::percentile_table`, `zonal.py` (quantil inferior ponderado pela cobertura, mesma regra da mediana). `scripts/run_percentiles.py` → `outputs/percentiles/annual_percentiles_{snpp,noaa20}.csv` (1288 e 736 linhas). Checagens: P75 ≤ P90 ≤ P95 e dentro do intervalo dos pixels válidos. Não publicado |
+| Quantis P75, P90 e P95 dos pixels válidos, por município e ano | PUBLICADO (aprovado em 2026-11-26): `web/data/downloads/openlux_percentis_pixels_{snpp,noaa20}.csv` | `src/openlux/pipeline.py::percentile_table`, `zonal.py` (quantil inferior ponderado pela cobertura, mesma regra da mediana). `scripts/run_percentiles.py` → `outputs/percentiles/annual_percentiles_{snpp,noaa20}.csv` (1288 e 736 linhas). Checagens: P75 ≤ P90 ≤ P95 e dentro do intervalo dos pixels válidos. Não publicado |
 | Testes dos quantis | CONCLUÍDO | Valores calculados à mão em `tests/test_zonal.py` |
 
 ### Fase E — Recursos avançados

@@ -15,12 +15,10 @@ def test_turf_bundle_is_vendored_locally_with_its_license_notice():
     assert "@turf/turf" in texto and "7.4.0" in texto and "MIT" in texto
 
 
-def test_explorer_loads_turf_before_the_drawing_script_and_no_cdn():
-    ordem = [m.group(1) for m in re.finditer(r'<script src="([^"]+)"', EXPLORAR)]
-    assert ordem.index("vendor/openlux-draw/openlux-turf.min.js") < ordem.index("js/desenhar.js")
-    assert ordem.index("js/app.js") < ordem.index("js/desenhar.js")
-    assert not re.search(r"https?://[^\"']*\.js", EXPLORAR), "script externo na página do mapa"
-
+def test_turf_loads_on_demand_not_on_every_map_visit_and_no_cdn():
+    assert "openlux-turf.min.js" not in EXPLORAR                    # não entra na carga comum do mapa
+    assert "vendor/openlux-draw/openlux-turf.min.js" in DESENHAR     # carregado sob demanda
+    assert "cdn" not in DESENHAR.lower()
 
 def test_drawing_panel_has_the_controls_it_needs():
     for id_ in ("desenhar-iniciar", "desenhar-desfazer", "desenhar-concluir", "desenhar-limpar", "desenhar-resultado", "desenhar-status"):

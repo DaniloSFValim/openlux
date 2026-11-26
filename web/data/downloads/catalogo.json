@@ -130,6 +130,42 @@
       }
     },
     {
+      "arquivo": "data/downloads/openlux_percentis_pixels_snpp.csv",
+      "bytes": 54196,
+      "sha256": "0a40e2306b71879381f0b6b1a2a8a6c1ea97ca727f60c36f4e8f9e260a720016",
+      "licenca": "CC-BY-4.0",
+      "titulo": "Percentis P75, P90 e P95 dos pixels por município e ano (SNPP)",
+      "tipo": "CSV",
+      "fonte": "NASA Black Marble VNP46A4",
+      "unidade": "nW·cm⁻²·sr⁻¹ (quantil inferior ponderado pela cobertura dos pixels válidos; qualidade 0; terra)",
+      "periodo": "2012–2025",
+      "sistema_de_referencia": "não se aplica (tabela)",
+      "situacao": "publicado",
+      "execucao": {
+        "processado_utc": "2026-11-19T18:32:48Z",
+        "commit": "2889bb9d49d70f8ceed3df7a1df6e1ca686a221e",
+        "codigo_com_alteracoes_nao_commitadas": false
+      }
+    },
+    {
+      "arquivo": "data/downloads/openlux_percentis_pixels_noaa20.csv",
+      "bytes": 30533,
+      "sha256": "a6c216ea590828f7b74edb3b0f0e67b94332fc9ba73141c84c4a11dcc9eba8e0",
+      "licenca": "CC-BY-4.0",
+      "titulo": "Percentis P75, P90 e P95 dos pixels por município e ano (NOAA-20)",
+      "tipo": "CSV",
+      "fonte": "NASA Black Marble VJ146A4",
+      "unidade": "nW·cm⁻²·sr⁻¹ (quantil inferior ponderado pela cobertura dos pixels válidos; qualidade 0; terra)",
+      "periodo": "2018–2025",
+      "sistema_de_referencia": "não se aplica (tabela)",
+      "situacao": "publicado",
+      "execucao": {
+        "processado_utc": "2026-11-25T23:57:53Z",
+        "commit": "73800641547155f890075137ede5abdf523e59b2",
+        "codigo_com_alteracoes_nao_commitadas": false
+      }
+    },
+    {
       "arquivo": "data/downloads/openlux_limites_municipais_rj.gpkg",
       "bytes": 466944,
       "sha256": "9e873c607103f06b10f0d0fc9001d8c6eb6ce8c124f89157d6fa3abc0facec83",
