@@ -94,9 +94,9 @@ Estados: NÃO INICIADO · EM ANDAMENTO · CONCLUÍDO · BLOQUEADO · VALIDAR CIE
 
 | Tarefa | Estado |
 |---|---|
-| Confirmar unidades, máscaras e camadas do VJ146A4 e VNP46A4 no guia oficial | BLOQUEADO (guia em PDF retornou 403 ao acesso automatizado) |
-| Verificar a nota da NASA sobre v1.0 do S-NPP (alerta 171686) | BLOQUEADO (a página do alerta não abriu; o índice mostra o título, sem escopo) |
-| Investigar a degradação do DNB do S-NPP descrita nas notas da v2.0 | VALIDAR CIENTIFICAMENTE |
+| Confirmar unidades, máscaras e camadas do VJ146A4 e VNP46A4 no guia oficial | CONCLUÍDO (2026-11-26) pelo *Black Marble User Guide (Collection 2.0)*, out/2024, enviado pelo responsável. Confirmado: unidade nW·cm⁻²·sr⁻¹ (Tabela 11); camadas `AllAngle_Composite_Snow_Free`, `_Num`, `_Quality`, `_Std`, `Land_Water_Mask`, `DNB_Platform` (Tabela 11); fill −999,9 em float32 (Tabelas 5, 8, 11); Quality 00 = boa (>3 observações), 01 = ruim (≤3), 02 = preenchida, 255 = fill (Tabela 12); Land_Water_Mask: códigos 0, 1 e 5 do código (`DEFAULT_LAND_CODES`) correspondem a terra/deserto, terra e costeiro (bits 1–3 da Tabela 6, citada pelo guia) |
+| Verificar a nota da NASA sobre v1.0 do S-NPP (alerta 171686) | BLOQUEADO. O guia (out/2024) não trata do alerta nem das notas da v2.0 de 2025 |
+| Investigar a degradação do DNB do S-NPP descrita nas notas da v2.0 | VALIDAR CIENTIFICAMENTE. O guia (out/2024) não descreve a degradação |
 | Verificar se os valores VIIRS podem exceder 6553,5 nW·cm⁻²·sr⁻¹ (mudança para ponto flutuante na v2.0) e se o pipeline trata isso | CONCLUÍDO (2026-11-26). Arquivos verificados (um por sensor): VJ146A4 e VNP46A4 têm radiância em float32, `_FillValue` −999,9 e `scale_factor` 1; `src/openlux/io.py` lê em float32 sem limite de 16 bits. Não há truncamento. Amostra: máximo 2280,98 no tile h13v11 do NOAA-20 (apenas um tile verificado) |
 | Confirmar SIRGAS 2000 como referência e medir a diferença para WGS84 (hoje é premissa, DECISIONS §1) | CONCLUÍDO PARCIAL (2026-11-26). O registro do EPSG para EPSG:4674→4326 (pyproj 3.8.0) tem uma única operação: “SIRGAS 2000 to WGS 84 (1)”, tipo noop, com acurácia declarada de 1,0 m e sem grade. Logo, a diferença é uma premissa com incerteza declarada de até 1 m, não uma medição. Medir com grade oficial exigiria fonte verificada (não feito) |
 | Revisar agregação municipal (interseção de pixels com a malha) | CONCLUÍDO (2026-11-26, revisão por leitura de `src/openlux/zonal.py`). Pesos = cobertura exactextract; pixels inválidos saem do numerador e do denominador; a área dos pixels é indexada pela linha correta (`cell // ncols`); CRS dos polígonos é verificado. Suíte completa: 448 passam, 2 pulados |
@@ -214,9 +214,9 @@ Fontes lidas por busca e pelo agente de leitura web (2026-11-25):
 | Início da série: VJ146A4 em 2018-01-01; VNP46A4 em 2012-01-01 | **Confirmado** (fim da série não encontrado) | mesmas páginas |
 | Versão 2.0 (DOI .002) usada pelo projeto | **Confirmado** nas páginas dos produtos | mesmas páginas; "NPP and JPSS1 VIIRS data 2.0 (ArchiveSet 5200)" |
 | Ponto flutuante na v2.0; valores podem exceder 6553,5 nW·cm⁻²·sr⁻¹ | **Confirmado** (nota de mudanças) | páginas dos produtos |
-| Degradação do DNB do S-NPP após o lançamento; NOAA-20 estável; correção espectral aplicada ao S-NPP na v2.0 | **Confirmado** como declaração da NASA; método e coeficientes **não encontrados** | página do VNP46A4, item 4 de mudanças |
-| Unidade nW·cm⁻²·sr⁻¹ | **Não confirmado** em documento oficial. Só aparece em pôster da NASA | pendente do guia PDF |
-| Nomes de camadas (`AllAngle_Composite_Snow_Free`), códigos de máscara de terra/água, códigos de qualidade do produto anual | **Não confirmados** | o guia PDF (Collection 2.0) retornou 403 |
+| Degradação do DNB do S-NPP após o lançamento; NOAA-20 estável; correção espectral aplicada ao S-NPP na v2.0 | **Confirmado** como declaração da NASA (página do VNP46A4); método e coeficientes **não encontrados** no guia | página do VNP46A4, item 4 de mudanças |
+| Unidade nW·cm⁻²·sr⁻¹ | **Confirmado** no guia Collection 2.0 (Tabela 11) | guia PDF (out/2024) |
+| Nomes de camadas (`AllAngle_Composite_Snow_Free`), códigos de máscara de terra/água, códigos de qualidade do produto anual | **Confirmados** no guia Collection 2.0 (Tabelas 11, 12 e 6) | guia PDF (out/2024) |
 | Alerta 171686 (produção do S-NPP v1.0 encerrada em 31/01/2025) se aplica à v2.0? | **Não resolvido**. A página do alerta não abriu; o índice mostra títulos de alertas v2.0 em 2025 | https://ladsweb.modaps.eosdis.nasa.gov/alerts-and-issues/171686 |
 
 Consequência: as unidades, as máscaras e as camadas usadas pelo pipeline **não podem ser declaradas
@@ -319,3 +319,7 @@ Itens que continuam pendentes e dependem de você ou de terceiros:
 7. INEA: data da nova tentativa registrada de forma divergente (2026-11-26 01:58 UTC aqui; 2026-11-27 02:00 UTC no histórico). Confirmar.
 8. Camadas GIS para download além dos limites municipais: NÃO INICIADO.
 9. Zenodo e nova versão (Fase 13): só após conclusão do 2.0, com publicação manual.
+
+### Registro de 2026-11-26: guia oficial
+
+O responsável enviou o *Black Marble User Guide (Collection 2.0)*, datado de out/2024. Confirmado: unidades, nomes de camadas, fill values, códigos de qualidade (Tabela 12) e códigos de Land_Water_Mask (via Tabela 6). Não confirmado pelo guia: degradação do DNB do S-NPP e alerta 171686 (ambos de 2025, posteriores ao guia). Esses dois itens continuam abertos.
