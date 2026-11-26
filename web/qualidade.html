@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Qualidade dos dados — OpenLux</title>
+<meta name="description" content="Verificações automáticas dos dados publicados: hashes, contagens, grades, páginas e geometrias.">
+<link rel="icon" href="data:,"><link rel="stylesheet" href="css/prototipo.css"><link rel="stylesheet" href="css/paginas.css">
+</head><body class="pagina">
+<header class="cabec"><div class="marca">OpenLux · Qualidade dos dados</div>
+<nav class="menu-paginas" aria-label="Áreas do OpenLux">
+<a href="index.html">Observatório</a><a href="explorar.html">Explorador</a><a href="laboratorio.html">Laboratório</a><a href="ambiental.html">Observatório ambiental</a><a href="dados.html" aria-current="page">Dados abertos</a><a href="metodologia.html">Metodologia</a>
+</nav></header>
+<main>
+<h1>Relatório de qualidade dos dados</h1>
+<p class="suave">Gerado em 2026-11-26 03:15 UTC pelo commit b655e99 com <code>scripts/build_relatorio_qualidade.py</code>. Cada linha é uma verificação feita nesta execução, não um número copiado.</p>
+<p><strong>11 de 11 verificações passaram.</strong></p>
+<div class="bloco tabela-wrap"><table class="tab"><thead><tr><th>Verificação</th><th>Resultado</th><th>Detalhe</th></tr></thead><tbody><tr><td>Catálogo: SHA-256 dos arquivos publicados</td><td class="passou">passou</td><td>13 de 13 arquivos conferem</td></tr><tr><td>indicators_noaa20.json: municípios e anos</td><td class="passou">passou</td><td>92 municípios; anos 2018–2025; código 7380064</td></tr><tr><td>indicators.json: municípios e anos</td><td class="passou">passou</td><td>92 municípios; anos 2012–2025; código 2889bb9</td></tr><tr><td>Pixels noaa20: tamanho das grades</td><td class="passou">passou</td><td>9 arquivos de 626×945 pixels</td></tr><tr><td>Pixels noaa20: SHA-256 registrado em meta.json</td><td class="passou">passou</td><td>todos os anos conferem</td></tr><tr><td>Pixels snpp: tamanho das grades</td><td class="passou">passou</td><td>16 arquivos de 626×945 pixels</td></tr><tr><td>Pixels snpp: SHA-256 registrado em meta.json</td><td class="passou">passou</td><td>todos os anos conferem</td></tr><tr><td>Pixels: execução a partir de árvore limpa</td><td class="passou">passou</td><td>commit 46fdada, dirty=False</td></tr><tr><td>Páginas municipais e PDFs</td><td class="passou">passou</td><td>92 páginas; 92 PDFs; 92 com cabeçalho %PDF-</td></tr><tr><td>Malha IBGE: geometrias válidas</td><td class="passou">passou</td><td>92 de 92</td></tr><tr><td>Malha IBGE: área total conferida com a documentada</td><td class="passou">passou</td><td>soma AREA_KM2 = 43.750.427 km²; documentada = 43.750.425 km²</td></tr></tbody></table></div>
+<h2>Estabilidade e validação</h2>
+<div class="bloco"><p>Os testes de estabilidade da agregação, das máscaras e do sensor (Spearman, diferenças relativas) estão descritos na seção 11 de <code>METHODOLOGY.md</code>. Eles não são validação externa: nenhum resultado foi comparado a valores publicados. A validação em campo não foi realizada.</p></div>
+</main></body></html>

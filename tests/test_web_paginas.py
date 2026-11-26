@@ -243,3 +243,12 @@ def test_laboratorio_pixel_shares_and_trends_match_published_csv(server, pg):
     tot = sum(int(tend[k]) for k in tend if k != "CD_MUN")
     assert pg.locator("#corpoTrend tr").nth(0).inner_text().split("\t")[5] == fmt1(100 * int(tend["pix_aumento_significativo"]) / tot)
     assert pg.errors == []
+
+
+def test_quality_report_has_no_failed_check(server, pg):
+    """Relatório de qualidade gerado por scripts/build_relatorio_qualidade.py: nenhuma verificação pode falhar."""
+    conteudo = (WEB / "qualidade.html").read_text(encoding="utf-8")
+    assert "falhou" not in conteudo
+    assert "verificações passaram" in conteudo
+    pg.goto(server + "/qualidade.html")
+    assert pg.errors == []

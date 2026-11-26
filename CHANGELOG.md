@@ -16,6 +16,8 @@ Reconstrução do front-end a partir do protótipo aprovado (`docs/referencia/`)
 - Metodologia (`web/metodologia.html`): o que o OpenLux mede e não mede, processamento, limitações; validação em campo marcada como não realizada.
 - Páginas municipais e relatórios em PDF para os 92 municípios (`web/municipio/`, `web/municipios.html`), gerados por `scripts/build_web_municipios.py`.
 - Capturas reais das páginas em `docs/screenshots/openlux-2.0/`.
+- Relatório de qualidade (`web/qualidade.html`), gerado por `scripts/build_relatorio_qualidade.py` a partir de verificações feitas em cada execução.
+- Análise exploratória de unidades de conservação documentada em `docs/ANALISE_AMBIENTAL_EXPLORATORIA.md` (não publicada no site).
 - Testes de navegador em `tests/test_web_explorador.py`, `tests/test_web_paginas.py` e `tests/test_web_municipios.py`.
 
 ### Alterado
@@ -32,7 +34,6 @@ Reconstrução do front-end a partir do protótipo aprovado (`docs/referencia/`)
 
 ### Pendente
 - Observatório ambiental: camadas bloqueadas por licença não verificada (áreas urbanizadas do IBGE, MapBiomas) ou por fonte inacessível (INEA). ICMBio tem licença que proíbe derivados.
-- Relatório de qualidade dos dados (Fase 8).
 - Validação em campo com SQM: protocolo proposto, nenhuma medição feita.
 - Build de produção do Cloudflare sem confirmação.
 - Republicar o bloco `exposure` só depois de verificar a licença da malha de setores censitários e o critério urbano/rural do IBGE.

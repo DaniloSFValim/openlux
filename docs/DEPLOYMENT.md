@@ -117,3 +117,19 @@ A publicação é feita pela Cloudflare a partir da branch `main`. Antes de merg
 **Verificação depois do deploy:** a Cloudflare pode servir uma cópia em cache. Para confirmar a publicação de `main`, conferir `https://openlux.labdados.org/index.html` em janela anônima e comparar o título da página com o do commit.
 
 **Não verificado daqui:** o log do build de produção de `main` (o painel da Cloudflare não é acessível pela sessão). Quando esse log estiver disponível, anotar aqui o commit publicado.
+
+## 8. Revisão da configuração (2026-11-26)
+
+**Conferido no repositório:**
+- `wrangler.jsonc`: Worker estático `openlux`, pasta `./web`, sem código de servidor, sem `vars`, `routes` nem `env`. Nenhum segredo está versionado (varredura de padrões de chaves e tokens nos arquivos rastreados: nada encontrado).
+- `web/_headers`: CSP com `script-src 'self'` (sem script inline), `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy` e `Permissions-Policy`. Todas as páginas publicadas passam no teste de script inline (`tests/test_web_links.py`).
+- Não há `web/_redirects`. Não há variáveis de ambiente nem chaves no repositório.
+- Arquivos internos: `web/` não contém código Python, dados brutos, `.h5`, `.shp`, logs nem arquivos temporários.
+
+**Observado no ar:** `https://…/index.html` responde 307 com destino `/`, no preview e na produção. É o comportamento de URLs limpas da Cloudflare, e não quebra nenhum link interno (o teste `tests/test_web_links.py` confere todos).
+
+**Não verificado (exige acesso ao painel da Cloudflare):**
+- Log do build de produção de `main`.
+- Regras de cache e de redirecionamento configuradas no painel, fora do repositório.
+- Variáveis de ambiente e configurações do painel, e DNS (não alterados, conforme o prompt).
+- Política de acesso do domínio `openlux.labdados.org`.
