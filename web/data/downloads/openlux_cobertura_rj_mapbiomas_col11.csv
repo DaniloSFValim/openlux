@@ -1,0 +1,206 @@
+ano,classe_nivel_1,area_ha,fracao_do_estado
+1985,1. Forest,1267052.4,0.2898
+1985,2. Herbaceous and Shrubby Vegetation,264333.6,0.0605
+1985,3. Farming,2579773.5,0.5901
+1985,4. Non vegetated area,151577.3,0.0347
+1985,5. Water,109320.1,0.0250
+1986,1. Forest,1269125.9,0.2903
+1986,2. Herbaceous and Shrubby Vegetation,263741.0,0.0603
+1986,3. Farming,2575372.6,0.5891
+1986,4. Non vegetated area,154781.6,0.0354
+1986,5. Water,109035.7,0.0249
+1987,1. Forest,1267300.5,0.2899
+1987,2. Herbaceous and Shrubby Vegetation,267160.9,0.0611
+1987,3. Farming,2571435.3,0.5882
+1987,4. Non vegetated area,156735.3,0.0358
+1987,5. Water,109424.9,0.0250
+1988,1. Forest,1264851.0,0.2893
+1988,2. Herbaceous and Shrubby Vegetation,245330.4,0.0561
+1988,3. Farming,2592002.5,0.5929
+1988,4. Non vegetated area,158733.7,0.0363
+1988,5. Water,111139.3,0.0254
+1989,1. Forest,1266375.8,0.2897
+1989,2. Herbaceous and Shrubby Vegetation,248510.2,0.0568
+1989,3. Farming,2584665.6,0.5912
+1989,4. Non vegetated area,160886.6,0.0368
+1989,5. Water,111618.6,0.0255
+1990,1. Forest,1267052.8,0.2898
+1990,2. Herbaceous and Shrubby Vegetation,259651.7,0.0594
+1990,3. Farming,2572313.3,0.5884
+1990,4. Non vegetated area,163978.0,0.0375
+1990,5. Water,109061.1,0.0249
+1991,1. Forest,1268634.9,0.2902
+1991,2. Herbaceous and Shrubby Vegetation,262855.0,0.0601
+1991,3. Farming,2563368.9,0.5863
+1991,4. Non vegetated area,165448.2,0.0378
+1991,5. Water,111749.8,0.0256
+1992,1. Forest,1274260.9,0.2915
+1992,2. Herbaceous and Shrubby Vegetation,263049.1,0.0602
+1992,3. Farming,2554095.9,0.5842
+1992,4. Non vegetated area,167830.2,0.0384
+1992,5. Water,112820.7,0.0258
+1993,1. Forest,1275566.3,0.2918
+1993,2. Herbaceous and Shrubby Vegetation,266363.5,0.0609
+1993,3. Farming,2547582.3,0.5827
+1993,4. Non vegetated area,170770.3,0.0391
+1993,5. Water,111774.5,0.0256
+1994,1. Forest,1273126.1,0.2912
+1994,2. Herbaceous and Shrubby Vegetation,269615.4,0.0617
+1994,3. Farming,2542560.3,0.5815
+1994,4. Non vegetated area,176739.4,0.0404
+1994,5. Water,110015.6,0.0252
+1995,1. Forest,1274701.1,0.2916
+1995,2. Herbaceous and Shrubby Vegetation,271613.6,0.0621
+1995,3. Farming,2534550.6,0.5797
+1995,4. Non vegetated area,181932.5,0.0416
+1995,5. Water,109259.0,0.0250
+1996,1. Forest,1274746.1,0.2916
+1996,2. Herbaceous and Shrubby Vegetation,268396.2,0.0614
+1996,3. Farming,2535321.8,0.5799
+1996,4. Non vegetated area,184716.3,0.0422
+1996,5. Water,108876.5,0.0249
+1997,1. Forest,1277734.9,0.2923
+1997,2. Herbaceous and Shrubby Vegetation,266441.9,0.0609
+1997,3. Farming,2531568.9,0.5790
+1997,4. Non vegetated area,186292.9,0.0426
+1997,5. Water,110018.2,0.0252
+1998,1. Forest,1283038.7,0.2935
+1998,2. Herbaceous and Shrubby Vegetation,259552.0,0.0594
+1998,3. Farming,2531104.0,0.5789
+1998,4. Non vegetated area,190484.4,0.0436
+1998,5. Water,107877.8,0.0247
+1999,1. Forest,1283988.8,0.2937
+1999,2. Herbaceous and Shrubby Vegetation,252762.7,0.0578
+1999,3. Farming,2528728.5,0.5784
+1999,4. Non vegetated area,197544.2,0.0452
+1999,5. Water,109032.7,0.0249
+2000,1. Forest,1284453.4,0.2938
+2000,2. Herbaceous and Shrubby Vegetation,257663.0,0.0589
+2000,3. Farming,2525332.7,0.5776
+2000,4. Non vegetated area,204498.8,0.0468
+2000,5. Water,100108.9,0.0229
+2001,1. Forest,1286004.4,0.2941
+2001,2. Herbaceous and Shrubby Vegetation,260080.4,0.0595
+2001,3. Farming,2517013.7,0.5757
+2001,4. Non vegetated area,210859.4,0.0482
+2001,5. Water,98099.0,0.0224
+2002,1. Forest,1286133.2,0.2942
+2002,2. Herbaceous and Shrubby Vegetation,257016.6,0.0588
+2002,3. Farming,2514900.8,0.5752
+2002,4. Non vegetated area,214389.3,0.0490
+2002,5. Water,99616.9,0.0228
+2003,1. Forest,1287063.1,0.2944
+2003,2. Herbaceous and Shrubby Vegetation,257858.6,0.0590
+2003,3. Farming,2509503.8,0.5740
+2003,4. Non vegetated area,216576.1,0.0495
+2003,5. Water,101055.4,0.0231
+2004,1. Forest,1289093.6,0.2948
+2004,2. Herbaceous and Shrubby Vegetation,264723.6,0.0605
+2004,3. Farming,2498556.1,0.5715
+2004,4. Non vegetated area,216237.6,0.0495
+2004,5. Water,103446.0,0.0237
+2005,1. Forest,1291942.4,0.2955
+2005,2. Herbaceous and Shrubby Vegetation,268937.7,0.0615
+2005,3. Farming,2489053.5,0.5693
+2005,4. Non vegetated area,217541.0,0.0498
+2005,5. Water,104582.2,0.0239
+2006,1. Forest,1294770.7,0.2961
+2006,2. Herbaceous and Shrubby Vegetation,268897.8,0.0615
+2006,3. Farming,2484822.4,0.5683
+2006,4. Non vegetated area,220111.9,0.0503
+2006,5. Water,103454.1,0.0237
+2007,1. Forest,1296410.0,0.2965
+2007,2. Herbaceous and Shrubby Vegetation,267037.1,0.0611
+2007,3. Farming,2477241.4,0.5666
+2007,4. Non vegetated area,223690.6,0.0512
+2007,5. Water,107677.8,0.0246
+2008,1. Forest,1301272.5,0.2976
+2008,2. Herbaceous and Shrubby Vegetation,265166.2,0.0607
+2008,3. Farming,2472897.0,0.5656
+2008,4. Non vegetated area,224606.6,0.0514
+2008,5. Water,108114.5,0.0247
+2009,1. Forest,1307609.4,0.2991
+2009,2. Herbaceous and Shrubby Vegetation,256782.3,0.0587
+2009,3. Farming,2469215.8,0.5648
+2009,4. Non vegetated area,226874.0,0.0519
+2009,5. Water,111575.4,0.0255
+2010,1. Forest,1313863.0,0.3005
+2010,2. Herbaceous and Shrubby Vegetation,262301.7,0.0600
+2010,3. Farming,2457649.3,0.5621
+2010,4. Non vegetated area,231853.3,0.0530
+2010,5. Water,106389.6,0.0243
+2011,1. Forest,1318613.5,0.3016
+2011,2. Herbaceous and Shrubby Vegetation,279827.4,0.0640
+2011,3. Farming,2434378.6,0.5568
+2011,4. Non vegetated area,235588.6,0.0539
+2011,5. Water,103648.8,0.0237
+2012,1. Forest,1324764.2,0.3030
+2012,2. Herbaceous and Shrubby Vegetation,290727.6,0.0665
+2012,3. Farming,2415506.6,0.5525
+2012,4. Non vegetated area,238903.3,0.0546
+2012,5. Water,102155.2,0.0234
+2013,1. Forest,1331507.6,0.3045
+2013,2. Herbaceous and Shrubby Vegetation,297081.2,0.0679
+2013,3. Farming,2400444.8,0.5490
+2013,4. Non vegetated area,242309.6,0.0554
+2013,5. Water,100713.7,0.0230
+2014,1. Forest,1335777.8,0.3055
+2014,2. Herbaceous and Shrubby Vegetation,298811.1,0.0683
+2014,3. Farming,2392231.2,0.5472
+2014,4. Non vegetated area,245675.7,0.0562
+2014,5. Water,99561.0,0.0228
+2015,1. Forest,1341364.1,0.3068
+2015,2. Herbaceous and Shrubby Vegetation,281958.1,0.0645
+2015,3. Farming,2403302.1,0.5497
+2015,4. Non vegetated area,248267.6,0.0568
+2015,5. Water,97164.9,0.0222
+2016,1. Forest,1347266.7,0.3082
+2016,2. Herbaceous and Shrubby Vegetation,270619.3,0.0619
+2016,3. Farming,2406825.3,0.5505
+2016,4. Non vegetated area,249637.1,0.0571
+2016,5. Water,97708.4,0.0223
+2017,1. Forest,1349810.7,0.3087
+2017,2. Herbaceous and Shrubby Vegetation,261514.9,0.0598
+2017,3. Farming,2413086.9,0.5519
+2017,4. Non vegetated area,250557.7,0.0573
+2017,5. Water,97086.7,0.0222
+2018,1. Forest,1352597.8,0.3094
+2018,2. Herbaceous and Shrubby Vegetation,253307.1,0.0579
+2018,3. Farming,2415699.4,0.5525
+2018,4. Non vegetated area,250695.4,0.0573
+2018,5. Water,99757.1,0.0228
+2019,1. Forest,1356435.2,0.3103
+2019,2. Herbaceous and Shrubby Vegetation,246938.6,0.0565
+2019,3. Farming,2416690.0,0.5528
+2019,4. Non vegetated area,251849.5,0.0576
+2019,5. Water,100143.6,0.0229
+2020,1. Forest,1358601.6,0.3107
+2020,2. Herbaceous and Shrubby Vegetation,238845.6,0.0546
+2020,3. Farming,2418584.7,0.5532
+2020,4. Non vegetated area,253178.6,0.0579
+2020,5. Water,102846.3,0.0235
+2021,1. Forest,1359759.3,0.3110
+2021,2. Herbaceous and Shrubby Vegetation,232965.8,0.0533
+2021,3. Farming,2420799.8,0.5537
+2021,4. Non vegetated area,255228.5,0.0584
+2021,5. Water,103303.5,0.0236
+2022,1. Forest,1363593.6,0.3119
+2022,2. Herbaceous and Shrubby Vegetation,224283.5,0.0513
+2022,3. Farming,2415999.0,0.5526
+2022,4. Non vegetated area,258149.6,0.0590
+2022,5. Water,110031.1,0.0252
+2023,1. Forest,1367622.0,0.3128
+2023,2. Herbaceous and Shrubby Vegetation,224051.9,0.0512
+2023,3. Farming,2407995.6,0.5508
+2023,4. Non vegetated area,261623.9,0.0598
+2023,5. Water,110763.5,0.0253
+2024,1. Forest,1372143.3,0.3138
+2024,2. Herbaceous and Shrubby Vegetation,217825.3,0.0498
+2024,3. Farming,2407633.3,0.5507
+2024,4. Non vegetated area,265177.0,0.0607
+2024,5. Water,109278.1,0.0250
+2025,1. Forest,1374187.8,0.3143
+2025,2. Herbaceous and Shrubby Vegetation,218361.7,0.0499
+2025,3. Farming,2403277.1,0.5497
+2025,4. Non vegetated area,267703.5,0.0612
+2025,5. Water,108526.8,0.0248

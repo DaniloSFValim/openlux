@@ -107,3 +107,12 @@ Status: **publicada como derivados, sob CC BY 4.0, com atribuição ao IBGE.** D
 - **O que não é publicado:** nomes das UCs. O .dbf do cadastro tem codificação dupla (UTF-8 lido como Latin-1); os nomes só entram depois de conferidos no site oficial do CNUC.
 - **Atribuição obrigatória:** "Unidades de conservação: MMA, CNUC 2025-08, CC BY 4.0. Processamento: OpenLux (scripts/build_uc_poligonos_rj.py)."
 - **Limitação:** a sobreposição com áreas urbanizadas e com a radiância é análise exploratória, não causal (ver docs/ANALISE_AMBIENTAL_EXPLORATORIA.md).
+
+## 9. Cobertura do solo (MapBiomas Brasil, Coleção 11): estatísticas do estado
+
+- **Fonte:** MapBiomas Brasil, Coleção 11 (30 m), tabela COVERAGE_11 do arquivo de estatísticas por estado (brasil.mapbiomas.org/downloads/estatisticas/).
+- **Licença:** o site declara "Os dados do MapBiomas são de uso público, aberto e gratuito mediante referência" e exibe a marca CC BY 4.0. Verificado em 2026-11-27 na página de estatísticas e de códigos de legenda.
+- **O que é publicado:** área em hectares do estado do Rio de Janeiro, por classe de nível 1 e ano (1985–2025). Não é mapa.
+- **O que não é publicado:** mapas GeoTIFF. O site informa que o download de mapas está temporariamente suspenso, e a coleção do Amazonas usa outra licença (CC BY-SA), que não é usada aqui.
+- **Atribuição obrigatória:** "Cobertura do solo: MapBiomas Brasil, Coleção 11, CC BY 4.0 (mediante referência)."
+- **Limitação:** estatística do estado, sem detalhe municipal. Mapa municipal depende da reabertura do download no site do MapBiomas.
