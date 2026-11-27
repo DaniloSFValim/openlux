@@ -58,7 +58,7 @@ def test_pdf_states_area_population_and_generation_data():
     assert "Dados processados em" in texto and "código" in texto
 
 
-def test_observatory_links_resolve_to_municipal_pages():
-    html = (WEB / "js/observatorio.js").read_text(encoding="utf-8")
+def test_interactive_maps_link_to_municipal_pages_that_exist():
+    html = (WEB / "js/laboratorio.js").read_text(encoding="utf-8")
     assert "municipio/' + slug(" in html
     assert (WEB / "municipio" / f"{slug(N['municipios'][NITEROI]['name'])}.html").is_file()
