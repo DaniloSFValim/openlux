@@ -56,36 +56,32 @@
     const cores = ['#b5483f', '#e0604f', '#8a7fd6', '#4f86c6', '#9fd3ff'];
     const rotulos = ['queda acima de 20 %', 'queda de 0 a 20 %', 'alta de 0 a 20 %', 'alta de 20 a 50 %', 'alta acima de 50 %'];
     const cinza = '#3c4660';
-    let minx = 1e9, maxx = -1e9, miny = 1e9, maxy = -1e9;
-    const walk = (c, fn) => (typeof c[0] === 'number' ? fn(c) : c.forEach((x) => walk(x, fn)));
-    geo.features.forEach((f) => walk(f.geometry.coordinates, (p) => { minx = Math.min(minx, p[0]); maxx = Math.max(maxx, p[0]); miny = Math.min(miny, p[1]); maxy = Math.max(maxy, p[1]); }));
-    const k = Math.cos(((miny + maxy) / 2) * Math.PI / 180), W = 460, esc = (W - 10) / ((maxx - minx) * k), H = Math.ceil((maxy - miny) * esc) + 10;
-    const X = (lon) => 5 + (lon - minx) * k * esc, Y = (lat) => 5 + (maxy - lat) * esc;
-    const caminho = (g) => {
-      const polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
-      return polys.map((rings) => rings.map((ring) => ring.map((p, i) => (i ? 'L' : 'M') + X(p[0]).toFixed(1) + ',' + Y(p[1]).toFixed(1)).join('') + 'Z').join('')).join('');
-    };
-    const box = $('mapaDif'); box.innerHTML = '';
-    const svgEl = document.createElementNS(NS, 'svg');
-    svgEl.setAttribute('viewBox', `0 0 ${W} ${H}`); svgEl.setAttribute('role', 'img');
-    svgEl.setAttribute('aria-label', 'Mapa dos municípios colorido pela variação percentual da média entre 2018 e 2025');
-    box.appendChild(svgEl);
+    const slug = (s) => s.normalize('NFKD').replace(/[^\x00-\x7F]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     const contagem = [0, 0, 0, 0, 0];
-    geo.features.forEach((f) => {
-      const cd = f.properties.CD_MUN, t = D.municipios[cd] && D.municipios[cd].trends['2018_2025'];
+    const classeDe = (cd) => {
+      const t = D.municipios[cd] && D.municipios[cd].trends['2018_2025'];
       const pct = t && t.change_pct;
-      let cor = cinza, cls = -1;
-      if (pct != null && isFinite(pct)) {
-        cls = pct < -20 ? 0 : pct < 0 ? 1 : pct < 20 ? 2 : pct < 50 ? 3 : 4;
-        cor = cores[cls]; contagem[cls]++;
-      }
-      const p = document.createElementNS(NS, 'path');
-      p.setAttribute('d', caminho(f.geometry)); p.setAttribute('fill', cor);
-      if (t && t.p_value < 0.05) p.setAttribute('stroke', '#fff');
-      const tt = document.createElementNS(NS, 'title');
-      tt.textContent = f.properties.NM_MUN + (pct != null ? ': ' + C.fmt(pct, 1) + ' %' : ': não calculado');
-      p.appendChild(tt); svgEl.appendChild(p);
-    });
+      if (pct == null || !isFinite(pct)) return { cls: -1, pct, t };
+      return { cls: pct < -20 ? 0 : pct < 0 ? 1 : pct < 20 ? 2 : pct < 50 ? 3 : 4, pct, t };
+    };
+    geo.features.forEach((f) => { const c = classeDe(f.properties.CD_MUN); if (c.cls >= 0) contagem[c.cls]++; });
+    const mapa = L.map('mapaDif', { attributionControl: true, scrollWheelZoom: false, minZoom: 6, maxZoom: 12 });
+    mapa.attributionControl.setPrefix(false).addAttribution('Limites: IBGE, Malha 2024');
+    const camada = L.geoJSON(geo, {
+      style: (f) => {
+        const c = classeDe(f.properties.CD_MUN);
+        const borda = c.t && c.t.p_value < 0.05;
+        return { fillColor: c.cls < 0 ? cinza : cores[c.cls], fillOpacity: 0.92, color: borda ? '#fff' : 'rgba(255,255,255,.15)', weight: borda ? 1.5 : 0.5 };
+      },
+      onEachFeature: (f, layer) => {
+        const cd = f.properties.CD_MUN, nome = f.properties.NM_MUN, c = classeDe(cd);
+        layer.bindTooltip(nome + (c.pct != null ? ': ' + C.fmt(c.pct, 1) + ' %' : ': não calculado'), { sticky: true });
+        layer.on('mouseover', () => layer.setStyle({ weight: 2, color: '#ffffff' }));
+        layer.on('mouseout', () => camada.resetStyle(layer));
+        layer.on('click', () => { location.href = 'municipio/' + slug(nome) + '.html'; });
+      },
+    }).addTo(mapa);
+    mapa.fitBounds(camada.getBounds(), { padding: [10, 10] });
     const leg = $('legDif'); leg.innerHTML = '';
     rotulos.forEach((r, i) => { const sp = document.createElement('span'); sp.textContent = r + ' (' + contagem[i] + ')'; sp.style.setProperty('--c', cores[i]); leg.appendChild(sp); });
     const sn = document.createElement('span'); sn.textContent = 'sem cálculo (' + (92 - contagem.reduce((a, c) => a + c, 0)) + ')'; sn.style.setProperty('--c', cinza); leg.appendChild(sn);
