@@ -8,6 +8,7 @@
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="css/prototipo.css">
 <link rel="stylesheet" href="css/paginas.css">
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
 </head>
 <body class="pagina">
 <header class="cabec">
@@ -26,6 +27,14 @@
   <h1>Dados abertos</h1>
   <p>Estes são os arquivos publicados. Cada um tem o hash SHA-256 calculado sobre o arquivo entregue; para conferir, compare com o valor listado. Arquivos de revisão, intermediários e não aprovados não são publicados aqui.</p>
   <p class="aviso" id="erro" hidden></p>
+
+  <h2>Mapa dos 92 municípios</h2>
+  <div class="bloco">
+    <div id="mapa-estado" class="mapa-estado" data-controle="ano-estado" data-saida="ano-estado-out" data-legenda="legenda-estado" role="application" aria-label="Mapa interativo dos 92 municípios colorido pela luz média do ano escolhido"></div>
+    <div class="controle"><label for="ano-estado">Ano</label><input type="range" id="ano-estado" min="0" max="7" value="7"><output id="ano-estado-out" for="ano-estado">2025</output></div>
+    <div class="legenda-linha" id="legenda-estado"></div>
+    <p class="nota-metodo">Cor = classe da luz média municipal (nW·cm⁻²·sr⁻¹). Passe o cursor para ver o valor; clique para abrir a página do município. Estimativa por sensoriamento remoto, não brilho do céu.</p>
+  </div>
 
   <h2>Como citar</h2>
   <div class="bloco">
@@ -60,7 +69,9 @@
     </dl>
   </div>
 </main>
+<script src="vendor/leaflet/leaflet.js"></script>
 <script src="js/comum.js"></script>
+<script src="js/mapa-estado.js"></script>
 <script src="js/dados.js"></script>
 </body>
 </html>

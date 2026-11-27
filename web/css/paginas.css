@@ -71,3 +71,10 @@ html:has(#cartao), body:has(#cartao) { overflow-x: hidden; }
 /* textos longos (nomes de arquivo) quebram linha em telas estreitas */
 .pagina code { overflow-wrap: anywhere; word-break: break-word; }
 dl.def dd, dl.def dt { min-width: 0; overflow-wrap: anywhere; }
+
+/* mapa de localização nas páginas de texto (metodologia, dados abertos) */
+.mapa-estado { height: 420px; }
+.mapa-estado.leaflet-container { background: transparent; }
+.controle { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
+.controle input[type=range] { flex: 1; min-width: 200px; accent-color: var(--luz); }
+.controle output { color: var(--luz); font-weight: 800; font-variant-numeric: tabular-nums; }
