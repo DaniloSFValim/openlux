@@ -208,17 +208,17 @@
       "execucao": null
     },
     {
-      "arquivo": "data/downloads/openlux_ucs_rj_cnuc_2025_08_sem_nomes.geojson",
-      "bytes": 1982319,
-      "sha256": "53ac8fc442a034429d795ce2414591a1be76600eacb9c69cc40bf67ed57b1a42",
+      "arquivo": "data/downloads/openlux_ucs_rj_cnuc_2025_08.geojson",
+      "bytes": 2013382,
+      "sha256": "484850c90e88476b975fe57f56185333cebe51a9d709b9a18bb2b65f81c32417",
       "licenca": "CC-BY-4.0",
-      "titulo": "Unidades de conservação do Rio de Janeiro (CNUC, 2025-08), sem nomes",
+      "titulo": "Unidades de conservação do Rio de Janeiro (CNUC, 2025-08)",
       "tipo": "GeoJSON",
       "fonte": "MMA, Cadastro Nacional de Unidades de Conservação, conjunto 2025-08 (dados.mma.gov.br). Gerado por scripts/build_uc_poligonos_rj.py",
       "unidade": "graus decimais (simplificação 0,001°)",
       "periodo": "cadastro 2025-08",
       "sistema_de_referencia": "WGS 84 (EPSG:4326; origem SIRGAS 2000, EPSG:4674)",
-      "situacao": "publicado (sem nomes: codificação dupla no dbf do CNUC)",
+      "situacao": "publicado (nomes conferidos no relatório oficial do CNUC, 2026-11-27)",
       "execucao": null
     },
     {

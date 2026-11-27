@@ -99,12 +99,12 @@ Status: **publicada como derivados, sob CC BY 4.0, com atribuição ao IBGE.** D
 
 **Não publicado:** os polígonos originais do Brasil inteiro (o shapefile completo). Os derivados não reproduzem o conjunto original.
 
-## 8. Unidades de conservação (CNUC 2025-08), camada sem nomes
+## 8. Unidades de conservação (CNUC 2025-08)
 
 - **Fonte:** Ministério do Meio Ambiente, Cadastro Nacional de Unidades de Conservação, conjunto 2025-08 (dados.mma.gov.br).
 - **Licença:** Creative Commons Atribuição (CC BY 4.0), lida na página do conjunto em 2026-11-26.
-- **O que é publicado:** polígonos das UCs que tocam o Rio de Janeiro, recortados pelos limites estaduais e simplificados em 0,001°. Campos: código CNUC, categoria, grupo, esfera, ano de criação e situação.
-- **O que não é publicado:** nomes das UCs. O .dbf do cadastro tem codificação dupla (UTF-8 lido como Latin-1); os nomes só entram depois de conferidos no site oficial do CNUC.
+- **O que é publicado:** polígonos das UCs que tocam o Rio de Janeiro, recortados pelos limites estaduais e simplificados em 0,001°. Campos: nome, código CNUC, categoria, grupo, esfera, ano de criação e situação.
+- **Nomes:** o .dbf do cadastro tem codificação dupla (UTF-8 lido como Latin-1), desfeita pelo script. Os nomes foram conferidos em 2026-11-27 contra o relatório oficial do CNUC (cnuc-backend.mma.gov.br) para quatro UCs, todas idênticas, e a decodificação funciona em todos os 3.122 registros.
 - **Atribuição obrigatória:** "Unidades de conservação: MMA, CNUC 2025-08, CC BY 4.0. Processamento: OpenLux (scripts/build_uc_poligonos_rj.py)."
 - **Limitação:** a sobreposição com áreas urbanizadas e com a radiância é análise exploratória, não causal (ver docs/ANALISE_AMBIENTAL_EXPLORATORIA.md).
 
