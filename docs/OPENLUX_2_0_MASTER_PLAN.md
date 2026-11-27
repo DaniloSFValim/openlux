@@ -362,3 +362,45 @@ Consequências:
 3. **Discrepância do identificador:** antes de citar o VJ146A4 como "anual", confirmar com o LP DAAC ou com a documentação do produto.
 
 **Não consegui confirmar:** as atualizações #3 e #4 da NOAA (HTTP 404 e 403) e a página da Earthdata (HTTP 403). O horário de cessação do S-NPP continua não confirmado.
+
+## 14. Estado consolidado (2026-11-27)
+
+Esta seção resume o que está em `main` e o que depende de terceiros ou do responsável. As seções anteriores permanecem como registro histórico.
+
+### Concluído e publicado
+
+| Item | PR | Evidência |
+|---|---|---|
+| Página inicial didática sobre poluição luminosa | #46 | `web/index.html`, `web/css/inicio.css`, `web/js/inicio.js` |
+| Mapa interativo nas 92 páginas municipais | #46 | `scripts/build_web_municipios.py`, `web/js/municipio-mapa.js` |
+| Mapa de áreas urbanizadas (IBGE 2019) interativo | #47 | `web/js/ambiental.js` |
+| Mapa de diferenças do laboratório interativo | #48 | `web/js/laboratorio.js` |
+| Mapa de localização em metodologia e dados abertos | #49 | `web/js/mapa-estado.js` |
+| Textos didáticos (explorador, laboratório, dados, metodologia, qualidade, ambiental) | #50 | HTML das páginas |
+| Unidades de conservação do RJ (CNUC 2025-08), com nomes | #51, #54 | `web/data/downloads/openlux_ucs_rj_cnuc_2025_08.geojson`; nomes conferidos no relatório oficial em 2026-11-27 para 4 UCs |
+| Cobertura do solo do estado (MapBiomas Coleção 11, 1985–2025) | #52 | `web/data/downloads/openlux_cobertura_rj_mapbiomas_col11.csv` |
+| Remoção de `prototipo.js` e `observatorio.js` | #53 | — |
+| Mapa-base OpenStreetMap opcional no explorador | #45 | `web/js/explorador.js` |
+
+### Pendente, com dependência externa ou do responsável
+
+| Item | Estado | O que falta |
+|---|---|---|
+| Hidrografia (corpos d'água) | BLOQUEADO | Fonte com licença clara. A BHO da ANA tem reserva de direitos (© 2015 ANA); os metadados que trariam a licença retornaram 403 ao acesso automatizado. Decisão do responsável sobre OpenStreetMap (ODbL) |
+| Áreas costeiras | NÃO INICIADO | Fonte verificada |
+| Mapa municipal de cobertura do solo (MapBiomas) | BLOQUEADO | Download de GeoTIFF suspenso no site do MapBiomas; o acesso por Google Earth Engine exige conta |
+| ICMBio | EXCLUÍDO | Licença CC BY-ND 3.0 proíbe derivados (DECISIONS §2) |
+| INEA (unidades estaduais) | BLOQUEADO | Hosts sem conexão em 25/11, 26/11 e 27/11; nova tentativa agendada para 28/11/2026, 13:55 UTC |
+| Validação em campo com SQM | NÃO REALIZADA | Protocolo em `docs/FIELD_VALIDATION.md`; nenhuma medição feita. Não declarar validação |
+| Guia oficial NASA (Collection 2.0) | CONCLUÍDO PARCIAL | Unidades, camadas, fill values e códigos de qualidade confirmados (guia de out/2024). Alerta LAADS 171686 e nota sobre degradação do DNB do S-NPP não cobertos pelo guia |
+| Alerta LAADS 199913 (encerramento do S-NPP) | CONCLUÍDO | Cessação às 15:40 UTC de 2026-11-02, confirmada nas atualizações #3 e #4 da NOAA; arquivo histórico disponível segundo o alerta |
+| Proteção da branch `main` | BLOQUEADO | Exige permissão de administrador |
+| Tag `v0.1.0` | BLOQUEADO | Push recusado com 403 nesta sessão |
+| Fase 13 (Zenodo, nova versão) | NÃO INICIADO | Só após conclusão do 2.0; publicação manual pelo responsável |
+
+### Decisões que dependem do responsável
+
+1. Hidrografia: fonte com licença clara, ou OpenStreetMap com licença ODbL para os derivados.
+2. Validação em campo: quem executa as medições e quando.
+3. Zenodo: quando publicar a versão 2.0, e com que metadados.
+4. NOAA-21 (VJ246A4): incluir neste 2.0 ou deixar como proposta futura.
