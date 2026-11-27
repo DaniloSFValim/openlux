@@ -65,7 +65,8 @@ html:has(#cartao), body:has(#cartao) { overflow-x: hidden; }
 .mapa-dif svg { width: min(100%, 460px); height: auto; display: block; margin: 0 auto; }
 .mapa-dif path { stroke: rgba(255,255,255,.15); stroke-width: .5; }
 
-.mapa-urb svg { width: min(100%, 640px); height: auto; display: block; margin: 0 auto; }
+.mapa-urb { height: 460px; }
+.mapa-urb.leaflet-container { background: transparent; }
 
 /* textos longos (nomes de arquivo) quebram linha em telas estreitas */
 .pagina code { overflow-wrap: anywhere; word-break: break-word; }
