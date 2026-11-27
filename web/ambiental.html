@@ -41,13 +41,29 @@
       <tbody>
         <tr><td>Unidades de conservação (CNUC)</td><td><span class="status publicado">publicada (análise exploratória)</span></td><td>MMA, CNUC 2025-08. CC BY 4.0.</td><td>Associação espacial, não causa. Controlada pela urbanização no nível municipal: a associação positiva não se sustenta. Nomes de UCs não são publicados.</td></tr>
         <tr><td>Áreas urbanizadas (IBGE, 2019)</td><td><span class="status publicado">publicada (derivados)</span></td><td>IBGE, Áreas Urbanizadas do Brasil 2019. CC BY 4.0 com atribuição ao IBGE, pela base legal da IN nº 47/2025 (INDA). Registro em <code>docs/LICENSING.md</code>.</td><td>Publicados: fração urbana por município e camada simplificada para mapa. Os polígonos originais não são publicados.</td></tr>
-        <tr><td>Uso e cobertura do solo (MapBiomas)</td><td><span class="status bloqueado">bloqueada</span></td><td>MapBiomas. Termos inconsistentes entre páginas: CC BY-SA em algumas e CC BY em outras.</td><td>Se for CC BY-SA, os derivados teriam licença de compartilhamento igual, em conflito com a licença dos dados do projeto. Decisão do autor.</td></tr>
+        <tr><td>Uso e cobertura do solo (MapBiomas)</td><td><span class="status publicado">estatísticas do estado publicadas</span></td><td>MapBiomas Brasil, Coleção 11 (30 m), uso público, aberto e gratuito mediante referência (CC BY 4.0). Mapa municipal não disponível: o download de GeoTIFF está suspenso no site do MapBiomas.</td></tr>
         <tr><td>Unidades de conservação (ICMBio)</td><td><span class="status bloqueado">bloqueada</span></td><td>ICMBio. CC BY-ND 3.0.</td><td>A licença proíbe derivados. Por isso não é usada.</td></tr>
         <tr><td>Unidades estaduais (INEA)</td><td><span class="status bloqueado">bloqueada</span></td><td>INEA.</td><td>Os endereços testados não tiveram conexão. Nova tentativa agendada.</td></tr>
         <tr><td>Hidrografia e corpos d'água</td><td><span class="status nao-iniciado">não iniciada</span></td><td>Sem fonte verificada.</td><td>—</td></tr>
         <tr><td>Áreas costeiras</td><td><span class="status nao-iniciado">não iniciada</span></td><td>Sem fonte verificada.</td><td>—</td></tr>
       </tbody>
     </table>
+  </div>
+
+  <h2>Cobertura do solo no estado (MapBiomas, 2018 e 2025)</h2>
+  <div class="bloco">
+    <p class="suave">Área do estado do Rio de Janeiro por classe de nível 1, MapBiomas Brasil Coleção 11 (30 m). Estatística do estado inteiro, não de cada município.</p>
+    <table class="tabela-simples">
+      <thead><tr><th>Classe</th><th>2018 (mil ha)</th><th>2018 (%)</th><th>2025 (mil ha)</th><th>2025 (%)</th></tr></thead>
+      <tbody>
+        <tr><td>Floresta</td><td>1.352,6</td><td>30,9</td><td>1.374,2</td><td>31,4</td></tr>
+        <tr><td>Vegetação herbácea e arbustiva</td><td>253,3</td><td>5,8</td><td>218,4</td><td>5,0</td></tr>
+        <tr><td>Agropecuária</td><td>2.415,7</td><td>55,3</td><td>2.403,3</td><td>55,0</td></tr>
+        <tr><td>Área não vegetada</td><td>250,7</td><td>5,7</td><td>267,7</td><td>6,1</td></tr>
+        <tr><td>Água</td><td>99,8</td><td>2,3</td><td>108,5</td><td>2,5</td></tr>
+      </tbody>
+    </table>
+    <p class="suave">Fonte: MapBiomas Brasil, Coleção 11 (estatísticas por estado). Tabela completa, 1985 a 2025: <a href="data/downloads/openlux_cobertura_rj_mapbiomas_col11.csv" download>CSV</a>.</p>
   </div>
 
   <h2>Áreas urbanizadas no estado (2019)</h2>
@@ -82,7 +98,6 @@
   <h2>O que ainda está em aberto</h2>
   <div class="bloco">
     <ol>
-      <li>Decidir sobre o MapBiomas, sabendo que a versão CC BY-SA exige licença de compartilhamento igual para os derivados.</li>
       <li>Repetir o controle de urbanização no nível dos pixels, com os polígonos do CNUC.</li>
       <li>Conferir no site oficial do CNUC os nomes das UCs, que hoje não são publicados.</li>
       <li>Incluir hidrografia e áreas costeiras, quando houver fonte com licença verificada.</li>

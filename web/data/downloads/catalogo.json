@@ -222,6 +222,20 @@
       "execucao": null
     },
     {
+      "arquivo": "data/downloads/openlux_cobertura_rj_mapbiomas_col11.csv",
+      "bytes": 8073,
+      "sha256": "6528ec5d2e87e5bebe78a00d103a8f58c9ad18fd321f440e0abac0e87ba770c1",
+      "licenca": "CC-BY-4.0",
+      "titulo": "Cobertura e uso do solo do estado do Rio de Janeiro (MapBiomas Coleção 11, 1985–2025), por classe de nível 1",
+      "tipo": "CSV",
+      "fonte": "MapBiomas Brasil, Coleção 11, estatísticas por estado (brasil.mapbiomas.org/downloads/estatisticas/). Gerado por scripts/build_mapbiomas_rj.py",
+      "unidade": "hectares e fração do estado",
+      "periodo": "1985–2025",
+      "sistema_de_referencia": "não se aplica (tabela de estatísticas)",
+      "situacao": "publicado (estatística do estado; sem mapa municipal)",
+      "execucao": null
+    },
+    {
       "arquivo": "data/downloads/openlux_areas_urbanizadas_rj_2019.geojson",
       "bytes": 895376,
       "sha256": "b8b47ef46ae7424dd5877e0c10aa74dbaf5ad07749e0a9947a33c5d6b553eed7",
