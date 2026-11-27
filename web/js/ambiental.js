@@ -13,7 +13,8 @@
     fetch('data/downloads/openlux_areas_urbanizadas_rj_2019.geojson').then((r) => r.json()),
     fetch('data/municipios.geojson').then((r) => r.json()),
     fetch('data/downloads/openlux_area_urbana_municipio_2019.csv').then((r) => r.text()),
-  ]).then(([urb, mun, csv]) => {
+    fetch('data/downloads/openlux_ucs_rj_cnuc_2025_08_sem_nomes.geojson').then((r) => r.json()),
+  ]).then(([urb, mun, csv, ucs]) => {
     const fracao = {};
     csv.trim().split('\n').slice(1).forEach((linha) => {
       const c = linha.split(',');
@@ -33,10 +34,21 @@
         layer.on('click', () => { location.href = 'municipio/' + slug(nome) + '.html'; });
       },
     }).addTo(mapa);
-    L.geoJSON(urb, {
+    const camadaUrb = L.geoJSON(urb, {
       interactive: false,
       style: { fillColor: '#ffd166', fillOpacity: 0.85, color: 'none', weight: 0 },
     }).addTo(mapa);
+    // unidades de conservação (CNUC 2025-08, sem nomes): contorno, por baixo das áreas urbanizadas
+    const camadaUc = L.geoJSON(ucs, {
+      style: { fillColor: '#5fb37a', fillOpacity: 0.35, color: '#9fe3b5', weight: 0.8 },
+      onEachFeature: (f, layer) => {
+        const p = f.properties;
+        layer.bindTooltip(`Unidade de conservação<br>${p.categoria} (${p.grupo})<br>Código CNUC ${p.cd_cnuc}`, { sticky: true });
+      },
+    }).addTo(mapa);
+    camadaUc.bringToBack();
+    const chk = document.getElementById('lyUc');
+    if (chk) chk.addEventListener('change', (e) => { if (e.target.checked) camadaUc.addTo(mapa); else mapa.removeLayer(camadaUc); });
     mapa.fitBounds(municipios.getBounds(), { padding: [10, 10] });
     box.dataset.pronto = '1';
   }).catch((e) => {

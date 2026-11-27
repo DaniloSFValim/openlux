@@ -98,3 +98,12 @@ Status: **publicada como derivados, sob CC BY 4.0, com atribuição ao IBGE.** D
 **Publicado:** `openlux_area_urbana_municipio_2019.csv` (fração urbana por município) e `openlux_areas_urbanizadas_rj_2019.geojson` (camada simplificada para mapa). Ambos gerados por `scripts/build_areas_urbanizadas_rj.py`.
 
 **Não publicado:** os polígonos originais do Brasil inteiro (o shapefile completo). Os derivados não reproduzem o conjunto original.
+
+## 8. Unidades de conservação (CNUC 2025-08), camada sem nomes
+
+- **Fonte:** Ministério do Meio Ambiente, Cadastro Nacional de Unidades de Conservação, conjunto 2025-08 (dados.mma.gov.br).
+- **Licença:** Creative Commons Atribuição (CC BY 4.0), lida na página do conjunto em 2026-11-26.
+- **O que é publicado:** polígonos das UCs que tocam o Rio de Janeiro, recortados pelos limites estaduais e simplificados em 0,001°. Campos: código CNUC, categoria, grupo, esfera, ano de criação e situação.
+- **O que não é publicado:** nomes das UCs. O .dbf do cadastro tem codificação dupla (UTF-8 lido como Latin-1); os nomes só entram depois de conferidos no site oficial do CNUC.
+- **Atribuição obrigatória:** "Unidades de conservação: MMA, CNUC 2025-08, CC BY 4.0. Processamento: OpenLux (scripts/build_uc_poligonos_rj.py)."
+- **Limitação:** a sobreposição com áreas urbanizadas e com a radiância é análise exploratória, não causal (ver docs/ANALISE_AMBIENTAL_EXPLORATORIA.md).
